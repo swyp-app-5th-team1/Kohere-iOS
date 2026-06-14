@@ -1,0 +1,4 @@
+interface:
+  display_name: "Planning"
+  short_description: "Clarify requirements before implementation"
+  default_prompt: "Use $planning to clarify requirements and break down the work before implementation."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design System"
+  short_description: "Apply Kohere iOS design-system rules"
+  default_prompt: "Use $design-system to work on Kohere's iOS design system."
