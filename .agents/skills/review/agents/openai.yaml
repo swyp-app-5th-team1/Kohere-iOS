@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review"
+  short_description: "Review Kohere iOS changes for risks"
+  default_prompt: "Use $review to review these Kohere iOS changes."

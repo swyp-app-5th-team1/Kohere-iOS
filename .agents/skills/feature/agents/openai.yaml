@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature"
+  short_description: "Plan or implement Kohere iOS features"
+  default_prompt: "Use $feature to plan or implement this Kohere iOS feature."
