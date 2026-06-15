@@ -1,7 +1,25 @@
 # Design System
 
 이 문서는 Figma 디자인 시스템을 iOS 코드에 옮길 때의 구조 규칙을 정리한다.
-구체적인 토큰 값은 Figma 기준이 확정되거나 구현 단계에서 확인한 뒤 반영한다.
+구체적인 토큰 값은 문서에 전체 목록으로 복사하지 않고, 프로젝트 안의 리소스와 코드에서 관리한다.
+
+## Source Rule
+
+- Figma 화면, 토큰 표, 디자이너가 전달한 명시값만 디자인 시스템의 기준으로 사용한다.
+- 스크린샷이나 토큰 표에 없는 값을 개발자가 임의로 추정해서 넣지 않는다.
+- 필요한 값이 없거나 reference가 비어 있으면 구현하지 않고 사용자에게 요청한다.
+- 실제 색상값, 폰트 수치, shadow 값은 구현 시점에 프로젝트 파일에서 확인한다.
+- 문서는 source of truth가 아니라 구조, 네이밍, 판단 기준을 기록하는 용도로 둔다.
+
+## Code Structure
+
+디자인 시스템 코드는 `docs/architecture.md`의 `Core/DesignSystem` 기준을 따른다.
+
+- 색상, 타이포그래피, shadow 등 앱 디자인 시스템 API는 `Core/DesignSystem`에 둔다.
+- 디자인 시스템 extension은 일반 extension으로 보지 않고 `Core/DesignSystem` 안에 둔다.
+- SwiftUI 색상 접근 형태는 `Color.Kohere.<colorName>`를 기준으로 한다.
+- SwiftUI 타이포그래피 적용 형태는 `Text("Title").kohereTextStyle(.heading1Bold)`를 기준으로 한다.
+- 단순 UI 또는 디자인 시스템 작업만으로 Domain/Data 계층을 만들지 않는다.
 
 ## Color
 
@@ -10,19 +28,22 @@
 - Palette Color는 Figma의 원시 색상 이름과 값을 보존하기 위한 색상이다.
 - Semantic Color는 실제 UI 역할 기준으로 사용하는 색상이다.
 - 초기에는 Palette와 Semantic의 hex 값 중복을 허용한다.
-- SwiftUI에서는 `Color.Kohere.<colorName>` 형태의 extension으로 접근한다.
 - 현재는 Light/Dark 값을 분리하지 않고 Any Appearance 기준으로 정의한다.
 - 다크모드 대응이 필요해지면 Semantic Color Set부터 Light/Dark 값을 확장한다.
+- 컬러 작업 시 `Assets.xcassets`의 Color Set과 `Core/DesignSystem`의 Swift 접근 API를 먼저 확인한다.
+- `Primary` 팔레트는 Color Palette 화면에는 칩이 보이지만, 현재 제공된 Token 화면에는 hex 값이 확인되지 않았으므로 아직 구현하지 않는다.
+- `color-semantic-primary-normal`, `color-semantic-primary-press`는 reference가 `--`로 표시되어 있어 아직 구현하지 않는다.
 
 ## Typography
 
 Typography는 Figma 텍스트 스타일을 기준으로 하나의 스타일 단위로 관리한다.
 
+- 기본 글꼴은 Pretendard JP를 사용한다.
+- 한국어, 영어, 일본어를 지원하는 Pretendard JP를 기준으로 한다.
 - 각 스타일은 font family, size, weight, line height, letter spacing을 함께 가진다.
-- 스타일 이름은 Figma의 typography 이름을 최대한 보존한다.
-- SwiftUI에서는 `KohereTextStyle`과 View modifier를 통해 typography 스타일을 적용한다.
-- 예상 사용 형태는 `Text("Title").kohereTextStyle(.heading1Bold)`이다.
+- 스타일 이름은 Figma의 typography token 이름을 최대한 보존한다.
 - Figma의 line height와 SwiftUI의 line spacing은 1:1 개념이 아니므로 구현 후 실제 화면에서 보정한다.
+- typography 작업 시 `Core/DesignSystem`의 text style 정의를 먼저 확인한다.
 
 ## Spacing and Grid
 
@@ -35,9 +56,9 @@ Spacing과 Grid는 1차 디자인 시스템 범위에서 보류한다.
 
 ## Elevation
 
-Elevation과 Shadow는 추후 구체화한다.
+Elevation과 Shadow는 Figma token 이름을 기준으로 관리한다.
 
 - Figma에는 `shadow-normal-*`, `shadow-spread-*` 계열의 shadow token이 있다.
 - SwiftUI 기본 `.shadow`는 Figma/CSS의 spread 값을 직접 지원하지 않는다.
-- shadow를 시스템화할 때는 Figma token 이름을 보존할지, spread를 어떻게 근사 또는 구현할지 먼저 논의한다.
-- 당장 구현 범위에는 포함하지 않는다.
+- shadow를 시스템화할 때는 Figma token 이름을 보존하고, spread가 필요한 토큰은 구현 전에 근사 방식 또는 별도 구현 방식을 논의한다.
+- shadow 작업 시 `Core/DesignSystem`의 elevation 정의를 먼저 확인한다.

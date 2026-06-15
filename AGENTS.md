@@ -13,7 +13,7 @@ Kohere is an iOS housing curation app for foreigners who need help finding suita
 
 ## Documents
 - `docs/design-system.md`: Figma 디자인 시스템을 iOS 코드 구조로 옮기는 기준.
-- `docs/architecture.md`: iOS 아키텍처와 코드 구조 기준. 아직 미정.
+- `docs/architecture.md`: SwiftUI + TCA 기반 레이어 구조와 코드 배치 기준. 세부 기준은 진행하며 보완.
 - `docs/progress.md`: 현재 상태, 결정 사항, 최근 작업 로그.
 - `docs/planning.md`: 기능 계획, 작업 분해, 미확정 요구사항.
 - `docs/learning.md`: 구현 과정에서 학습할 CS/iOS 개념과 참고 주제.
@@ -29,16 +29,16 @@ Kohere is an iOS housing curation app for foreigners who need help finding suita
 - 검증하지 못한 항목은 최종 응답에서 명확히 말한다.
 
 ## Commit Message
-- 커밋 메시지는 `[type] : 내용` 형식을 사용한다.
+- 커밋 메시지는 `type: 내용` 형식을 사용한다.
 - type 키워드는 영어로 쓰고, 내용은 한국어로 작성한다.
 
 사용 가능한 type:
-- `[feat]`: 새로운 기능 구현
-- `[fix]`: 버그, 오류 해결
-- `[chore]`: 코드 수정, 내부 파일 수정, 애매한 작업 또는 잡일
-- `[add]`: 에셋 추가
-- `[del]`: 쓸모없는 코드 삭제
-- `[design]`: 디자인 관련 수정
-- `[docs]`: README, WIKI, 문서 개정
-- `[refactor]`: 전면 수정 또는 구조 개선
-- `[setting]`: 프로젝트 설정 관련 작업
+- `feat`: 새로운 기능 구현
+- `fix`: 버그, 오류 해결
+- `chore`: 코드 수정, 내부 파일 수정, 애매한 작업 또는 잡일
+- `add`: 에셋 추가
+- `del`: 쓸모없는 코드 삭제
+- `design`: 디자인 관련 수정
+- `docs`: README, WIKI, 문서 개정
+- `refactor`: 전면 수정 또는 구조 개선
+- `setting`: 프로젝트 설정 관련 작업
