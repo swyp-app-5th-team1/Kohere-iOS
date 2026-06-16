@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Tune"
+  short_description: "Tune Kohere UI from provided Figma values"
+  default_prompt: "Use $ui-tune to tune this Kohere UI from the provided Figma values."
