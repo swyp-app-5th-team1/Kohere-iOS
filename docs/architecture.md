@@ -4,6 +4,11 @@
 
 Kohere는 SwiftUI와 TCA를 기반으로 구성한다.
 
+## Naming
+
+폴더명은 기본적으로 단수형을 사용한다.
+예: `Resource`, `Feature`, `Entity`, `UseCase`.
+
 ## Layers
 
 ### App
@@ -64,6 +69,7 @@ Network는 순수 통신과 제네릭 디코딩을 담당한다.
 ### Resource
 
 앱 리소스를 관리한다.
+폴더명은 `Resources`가 아니라 `Resource`를 사용한다.
 
 예:
 - Assets
