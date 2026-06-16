@@ -1,7 +1,15 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ - 한국어 English 日本語" : {
 
+    },
+    "Pretendard JP 연결과 line height를 확인하는 임시 샘플입니다." : {
+
+    },
+    "Typography" : {
+
+    }
   },
   "version" : "1.0"
 }
