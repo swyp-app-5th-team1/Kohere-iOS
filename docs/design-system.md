@@ -15,9 +15,10 @@
 
 디자인 시스템 코드는 `docs/architecture.md`의 `Core/DesignSystem` 기준을 따른다.
 
-- 색상, 타이포그래피, shadow 등 앱 디자인 시스템 API는 `Core/DesignSystem`에 둔다.
+- 타이포그래피, shadow 등 코드 기반 디자인 시스템 API는 `Core/DesignSystem`에 둔다.
+- 색상은 Asset Catalog의 Color Set 이름을 SwiftUI generated asset symbol로 직접 사용한다.
 - 디자인 시스템 extension은 일반 extension으로 보지 않고 `Core/DesignSystem` 안에 둔다.
-- SwiftUI 색상 접근 형태는 `Color.Kohere.<colorName>`를 기준으로 한다.
+- SwiftUI 색상 접근 형태는 `Color.<assetName>`를 기준으로 한다.
 - SwiftUI 타이포그래피 적용 형태는 `Text("Title").kohereTextStyle(.heading1Bold)`를 기준으로 한다.
 - 단순 UI 또는 디자인 시스템 작업만으로 Domain/Data 계층을 만들지 않는다.
 
@@ -27,12 +28,15 @@
 
 - Palette Color는 Figma의 원시 색상 이름과 값을 보존하기 위한 색상이다.
 - Semantic Color는 실제 UI 역할 기준으로 사용하는 색상이다.
+- Color Set 이름은 코드 접근성을 위해 Figma 접두어를 제거한 lowerCamelCase를 사용한다.
+- Palette Color는 `primary50`, `coolNeutral90`처럼 계열과 단계만 남긴다.
+- Semantic Color는 `primaryNormal`, `labelAlternative`, `backgroundNormalNormal`처럼 역할 이름을 사용한다.
 - 초기에는 Palette와 Semantic의 hex 값 중복을 허용한다.
 - 현재는 Light/Dark 값을 분리하지 않고 Any Appearance 기준으로 정의한다.
 - 다크모드 대응이 필요해지면 Semantic Color Set부터 Light/Dark 값을 확장한다.
 - 컬러 작업 시 `Assets.xcassets`의 Color Set과 `Core/DesignSystem`의 Swift 접근 API를 먼저 확인한다.
-- `Primary` 팔레트는 Color Palette 화면에는 칩이 보이지만, 현재 제공된 Token 화면에는 hex 값이 확인되지 않았으므로 아직 구현하지 않는다.
-- `color-semantic-primary-normal`, `color-semantic-primary-press`는 reference가 `--`로 표시되어 있어 아직 구현하지 않는다.
+- `color-global-*` 토큰은 현재 Figma Palette/Token 화면의 구현 대상이 아니므로 제외한다.
+- Semantic Color는 Figma reference가 명시된 값과 사용자가 별도로 제공한 확정값만 구현한다.
 
 ## Typography
 
