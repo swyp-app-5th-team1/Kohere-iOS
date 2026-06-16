@@ -70,9 +70,9 @@ Kohere SwiftUI 화면의 잠재 성능 이슈를 기본적으로 코드 리뷰 �
 
 ## Related Skills
 
-- `$swiftui-performance-audit`: SwiftUI 성능 리뷰를 더 깊게 볼 때
-- `$ios-ettrace-performance`: Simulator ETTrace profiling이 필요할 때
-- `$ios-debugger-agent`: 성능 이슈를 실제 플로우에서 재현해야 할 때
+- `$build-ios-apps:swiftui-performance-audit`: SwiftUI 성능 리뷰를 더 깊게 볼 때
+- `$build-ios-apps:ios-ettrace-performance`: Simulator ETTrace profiling이 필요할 때
+- `$build-ios-apps:ios-debugger-agent`: 성능 이슈를 실제 플로우에서 재현해야 할 때
 - `$flow-check`: 성능 변경 후 기능 플로우가 깨지지 않았는지 확인할 때
 
 ## Report Shape

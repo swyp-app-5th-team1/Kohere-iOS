@@ -7,7 +7,7 @@ description: Use when tuning Kohere SwiftUI UI from user-provided Figma values, 
 
 ## Purpose
 
-Kohere의 SwiftUI UI를 사용자가 제공한 Figma 기준값에 맞춰 조정하고, 필요한 경우 `ios-simulator-browser`로 Preview 또는 Simulator 화면을 확인한다.
+Kohere의 SwiftUI UI를 사용자가 제공한 Figma 기준값에 맞춰 조정하고, 필요한 경우 `$build-ios-apps:ios-simulator-browser`로 Preview 또는 Simulator 화면을 확인한다.
 
 ## Source Of Truth
 
@@ -31,7 +31,7 @@ Figma MCP나 문서에서 임의로 값을 추측하지 않는다. 기준값이 
 1. 대상 화면과 사용자가 제공한 디자인 기준값을 정리한다.
 2. 기존 코드에서 token, asset, helper, 동일 패턴 화면을 확인한다.
 3. 기준값이 충분하면 최소 범위로 UI를 수정한다.
-4. 가능하면 `ios-simulator-browser`로 화면을 확인한다.
+4. 가능하면 `$build-ios-apps:ios-simulator-browser`로 화면을 확인한다.
 5. 값이 부족하거나 디자인 방향 결정이 필요하면 질문한다.
 6. 마지막에 변경/확인, 검증, 미검증을 짧게 보고한다.
 
@@ -46,7 +46,7 @@ Figma MCP나 문서에서 임의로 값을 추측하지 않는다. 기준값이 
 ## Related Skills
 
 - `$design-system`: 앱 내부 디자인 토큰, 색상, 타이포 기준을 확인할 때
-- `$ios-simulator-browser`: Preview 또는 Simulator 화면을 Codex in-app browser에서 보며 확인할 때
+- `$build-ios-apps:ios-simulator-browser`: Preview 또는 Simulator 화면을 Codex in-app browser에서 보며 확인할 때
 - `$flow-check`: UI 수정 후 실제 탭, 네비게이션, 상태 변화까지 검증할 때
 
 ## Report Shape
