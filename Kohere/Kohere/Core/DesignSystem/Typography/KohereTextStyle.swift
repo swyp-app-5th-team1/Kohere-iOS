@@ -52,10 +52,6 @@ enum KohereTextStyle: CaseIterable {
         }
     }
 
-    var fontFamily: String {
-        "Pretendard JP"
-    }
-
     var fontName: String {
         switch self {
         case .display1Bold, .display2Bold, .heading1Bold, .heading2Bold:
