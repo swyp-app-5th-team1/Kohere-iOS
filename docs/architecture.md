@@ -69,7 +69,6 @@ Network는 순수 통신과 제네릭 디코딩을 담당한다.
 ### Resource
 
 앱 리소스를 관리한다.
-폴더명은 `Resources`가 아니라 `Resource`를 사용한다.
 
 예:
 - Assets
