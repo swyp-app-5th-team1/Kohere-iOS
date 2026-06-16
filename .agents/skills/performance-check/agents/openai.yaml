@@ -1,0 +1,4 @@
+interface:
+  display_name: "Performance Check"
+  short_description: "Review Kohere SwiftUI performance"
+  default_prompt: "Use $performance-check to review this Kohere SwiftUI performance concern."
