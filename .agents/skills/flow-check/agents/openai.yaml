@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flow Check"
+  short_description: "Verify Kohere flows on Simulator"
+  default_prompt: "Use $flow-check to verify this Kohere app flow on Simulator."

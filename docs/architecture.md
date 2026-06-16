@@ -4,6 +4,12 @@
 
 Kohere는 SwiftUI와 TCA를 기반으로 구성한다.
 
+## Naming
+
+폴더명은 단수형을 사용한다.
+예: `Resource`, `Feature`, `Entity`, `UseCase`.
+여러 구현 파일을 묶는 category folder도 단수형으로 이름 붙인다.
+
 ## Layers
 
 ### App
@@ -43,9 +49,9 @@ SwiftUI View와 TCA Feature를 기능 단위로 관리한다.
 순수 비즈니스 로직을 담당한다.
 
 구성:
-- `Entities`
-- `UseCases`
-- `Interfaces`
+- `Entity`
+- `UseCase`
+- `Interface`
 
 UseCase는 비즈니스 로직 인터페이스와 구현체를 포함할 수 있다.
 TCA에서 필요한 의존성 등록은 별도 dependency 파일로 관리한다.
@@ -55,7 +61,7 @@ TCA에서 필요한 의존성 등록은 별도 dependency 파일로 관리한다
 외부 데이터 소스, 네트워크 통신, DTO 변환을 담당한다.
 
 구성:
-- `Repositories`
+- `Repository`
 - `Network`
 
 Repository는 DTO 검증, 도메인 에러 매핑, Entity 변환을 담당한다.

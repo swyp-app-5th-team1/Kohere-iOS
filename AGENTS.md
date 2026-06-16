@@ -23,6 +23,9 @@ Kohere is an iOS housing curation app for foreigners who need help finding suita
 - 디자인 시스템 작업은 `$design-system`을 사용한다.
 - 기능 구현 작업은 `$feature`를 사용한다.
 - 변경사항 리뷰는 `$review`를 사용한다.
+- 사용자가 제공한 Figma 기준값으로 UI를 조정하고 화면 확인이 필요하면 `$ui-tune`을 사용한다.
+- 구현된 기능 플로우를 Simulator에서 직접 조작해 검증할 때는 `$flow-check`를 사용한다.
+- SwiftUI 성능 이슈를 코드 리뷰하거나 측정 근거가 필요한 개선을 다룰 때는 `$performance-check`를 사용한다.
 
 ## Verification
 - 코드 변경 후 가능한 가장 좁은 범위의 빌드, 테스트, Preview 확인을 우선한다.
