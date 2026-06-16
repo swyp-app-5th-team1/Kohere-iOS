@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "Name=Facebook.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
