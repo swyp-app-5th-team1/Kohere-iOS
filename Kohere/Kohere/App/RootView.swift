@@ -68,6 +68,7 @@ struct RootView: View {
                 }
                 .tag(AppTab.more)
         }
+        .tint(Color("primary50"))
     }
 
     private func tabIcon(_ tab: AppTab) -> some View {

@@ -7,9 +7,15 @@
 
 import ComposableArchitecture
 import SwiftUI
+import UIKit
 
 @main
 struct KohereApp: App {
+    init() {
+        UITabBar.appearance().tintColor = UIColor(named: "primary50")
+        UITabBar.appearance().unselectedItemTintColor = UIColor(named: "coolNeutral50")
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView(
