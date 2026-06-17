@@ -44,6 +44,59 @@ SwiftUI View와 TCA Feature를 기능 단위로 관리한다.
 
 `<FeatureName>Feature.swift`는 TCA의 State, Action, Reducer body를 포함한다.
 
+## Navigation
+
+앱의 기본 탭 구조는 `RootFeature`와 `RootView`에서 관리한다.
+
+- 탭 선택 상태는 `RootFeature.State.selectedTab`으로 관리한다.
+- 탭은 `AppTab` enum으로 표현한다.
+- 탭 순서는 홈, 커뮤니티, 지도, 채팅, 더보기 순서로 둔다.
+- 탭바는 아이콘만 노출하고 화면 라벨은 표시하지 않는다.
+- 각 탭은 하나의 `FlowView`를 가진다.
+- 각 `FlowView`는 해당 탭의 `NavigationStack`을 담당한다.
+- 각 탭 Feature는 `StackState` 기반 path를 가진다.
+- 각 탭의 push destination은 탭 Feature 내부의 `@Reducer enum Path`에서 관리한다.
+- 루트 화면은 path destination case로 만들지 않는다.
+- 추가 depth 화면은 실제 화면 요구사항이 생길 때 `Path`에 destination Feature case로 추가한다.
+
+예:
+
+```text
+RootView
+└─ TabView
+   ├─ HomeFlowView
+   ├─ CommunityFlowView
+   ├─ MapFlowView
+   ├─ ChatFlowView
+   └─ MoreFlowView
+```
+
+일반 View는 navigation path를 직접 수정하지 않는다.
+사용자 액션은 TCA Action으로 Feature에 전달하고, push/pop 같은 화면 전환 상태 변경은 Feature reducer 또는 Flow 계층에서 처리한다.
+
+탭별 Feature는 다음 형태를 기본 골격으로 사용한다.
+
+```swift
+@Reducer
+struct HomeFeature {
+    @Reducer
+    enum Path {
+        // case detail(DetailFeature)
+    }
+
+    @ObservableState
+    struct State: Equatable {
+        var path = StackState<Path.State>()
+    }
+
+    enum Action {
+        case path(StackActionOf<Path>)
+    }
+}
+
+extension HomeFeature.Path.State: Equatable {}
+```
+
 ### Domain
 
 순수 비즈니스 로직을 담당한다.
