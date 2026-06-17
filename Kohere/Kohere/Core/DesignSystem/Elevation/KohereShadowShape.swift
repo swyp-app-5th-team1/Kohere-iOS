@@ -28,9 +28,9 @@ enum KohereShadowShape {
 }
 
 struct KohereAnyShape: Shape {
-    private let makePath: (CGRect) -> Path
+    private let makePath: @Sendable (CGRect) -> Path
 
-    init<S: Shape>(_ shape: S) {
+    init<S: Shape & Sendable>(_ shape: S) {
         makePath = { rect in
             shape.path(in: rect)
         }
