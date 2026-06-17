@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		778F3DF12FDA7D0D00AFF730 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 778F3DF02FDA7D0D00AFF730 /* .swiftlint.yml */; };
+		778F3DF32FDAA3000AFF730 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 778F3DF42FDAA3000AFF730 /* ComposableArchitecture */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				778F3DF32FDAA3000AFF730 /* ComposableArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,6 +134,7 @@
 			);
 			name = Kohere;
 			packageProductDependencies = (
+				778F3DF42FDAA3000AFF730 /* ComposableArchitecture */,
 			);
 			productName = Kohere;
 			productReference = 9570C29A2FD9DA9D002FA6DE /* Kohere.app */;
@@ -216,6 +219,9 @@
 			);
 			mainGroup = 9570C2912FD9DA9D002FA6DE;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				778F3DF52FDAA3000AFF730 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9570C29B2FD9DA9D002FA6DE /* Products */;
 			projectDirPath = "";
@@ -625,6 +631,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		778F3DF52FDAA3000AFF730 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.26.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		778F3DF42FDAA3000AFF730 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 778F3DF52FDAA3000AFF730 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9570C2922FD9DA9D002FA6DE /* Project object */;
 }
