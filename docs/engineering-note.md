@@ -57,3 +57,19 @@ Kohere는 하위 화면에서도 API 요청과 상태 관리가 발생할 가능
 - 루트 화면은 Path destination case로 만들지 않는다.
 - Path destination case는 루트 위에 push될 화면만 추가한다.
 - 현재는 실제 destination이 없으므로 `Path`는 빈 enum으로 두고, 첫 destination이 생길 때 `case detail(DetailFeature)` 같은 형태로 추가한다.
+
+## 2026-06-18 Liquid Glass Compatibility
+
+### Context
+
+iOS 26 Liquid Glass 기준 UI가 앱에 자동 적용되지 않도록 호환 모드 설정을 검토했다.
+
+### Decision
+
+앱 `Info.plist`에 `UIDesignRequiresCompatibility` 값을 `true`로 추가한다.
+
+### Notes
+
+- 이 값은 iOS 26 Liquid Glass 호환 모드 플래그로 알려져 있어 현재 프로젝트에 적용한다.
+- Apple 공개 문서 기준으로는 장기 지원 정책이나 필수 채택 기한이 명확히 검증되지 않았으므로, 추후 Xcode/iOS SDK 업데이트 시 다시 확인한다.
+- 앱의 디자인 방향은 Liquid Glass 전용 API에 의존하지 않고 기존 Kohere 디자인 시스템 기준을 유지한다.
