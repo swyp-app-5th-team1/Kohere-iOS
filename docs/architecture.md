@@ -29,7 +29,7 @@ Kohere는 SwiftUI와 TCA를 기반으로 구성한다.
 - `Core/Extensions`: Foundation, SwiftUI, UIKit 등 범용 타입 extension.
 
 디자인 시스템을 표현하는 extension은 일반 extension으로 보지 않고 `Core/DesignSystem` 안에 둔다.
-예: `Color.Kohere.*`, `View.kohereTextStyle(_:)`.
+예: `Color.primaryNormal`, `View.kohereTextStyle(_:)`.
 
 특정 화면이나 기능에서만 쓰이는 extension은 Core에 두지 않고 해당 feature 폴더에 둔다.
 
