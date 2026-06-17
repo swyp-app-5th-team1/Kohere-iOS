@@ -92,6 +92,15 @@ struct HomeFeature {
     enum Action {
         case path(StackActionOf<Path>)
     }
+
+    var body: some Reducer<State, Action> {
+        Reduce { _, action in
+            switch action {
+            case .path:
+                return .none
+            }
+        }
+    }
 }
 
 extension HomeFeature.Path.State: Equatable {}
