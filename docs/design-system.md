@@ -64,5 +64,33 @@ Elevation과 Shadow는 Figma token 이름을 기준으로 관리한다.
 
 - Figma에는 `shadow-normal-*`, `shadow-spread-*` 계열의 shadow token이 있다.
 - SwiftUI 기본 `.shadow`는 Figma/CSS의 spread 값을 직접 지원하지 않는다.
-- shadow를 시스템화할 때는 Figma token 이름을 보존하고, spread가 필요한 토큰은 구현 전에 근사 방식 또는 별도 구현 방식을 논의한다.
+- shadow token 하나가 여러 shadow layer를 가질 수 있으므로 layer 배열로 관리한다.
+- shadow의 x, y, blur, spread, color, opacity 값은 Figma/CSS 값을 보존한다.
+- spread 재현을 위해 shadow용 shape를 별도로 그리며, 지원 shape는 `rectangle`, `roundedRectangle`, `circle`, `capsule`을 기준으로 한다.
+- 일반 surface UI는 배경, clip, shadow 순서가 흐트러지지 않도록 `kohereSurface(background:shape:elevation:)`를 우선 사용한다.
+- 이미 모양과 배경이 확정된 UI는 `kohereElevation(_:shape:)`로 shadow만 적용할 수 있다.
 - shadow 작업 시 `Core/DesignSystem`의 elevation 정의를 먼저 확인한다.
+
+사용 예시:
+
+```swift
+VStack(alignment: .leading, spacing: 8) {
+    Text("Title")
+        .kohereTextStyle(.heading2Semibold)
+    Text("Description")
+        .kohereTextStyle(.body2Regular)
+}
+.padding(16)
+.kohereSurface(
+    background: Color.backgroundElevatedNormal,
+    shape: .roundedRectangle(cornerRadius: 16),
+    elevation: .normalSmall
+)
+```
+
+```swift
+Circle()
+    .fill(Color.backgroundElevatedNormal)
+    .frame(width: 56, height: 56)
+    .kohereElevation(.normalSmall, shape: .circle)
+```
