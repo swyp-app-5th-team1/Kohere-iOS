@@ -15,11 +15,3 @@ struct CommunityView: View {
         PlaceholderTabView(title: "커뮤니티")
     }
 }
-
-#Preview {
-    CommunityView(
-        store: Store(initialState: CommunityFeature.State()) {
-            CommunityFeature()
-        }
-    )
-}

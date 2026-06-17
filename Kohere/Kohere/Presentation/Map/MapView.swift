@@ -15,11 +15,3 @@ struct MapView: View {
         PlaceholderTabView(title: "지도")
     }
 }
-
-#Preview {
-    MapView(
-        store: Store(initialState: MapFeature.State()) {
-            MapFeature()
-        }
-    )
-}

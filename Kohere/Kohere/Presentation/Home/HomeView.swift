@@ -15,11 +15,3 @@ struct HomeView: View {
         PlaceholderTabView(title: "홈")
     }
 }
-
-#Preview {
-    HomeView(
-        store: Store(initialState: HomeFeature.State()) {
-            HomeFeature()
-        }
-    )
-}

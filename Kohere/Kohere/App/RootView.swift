@@ -77,11 +77,3 @@ struct RootView: View {
             .accessibilityLabel(tab.accessibilityLabel)
     }
 }
-
-#Preview {
-    RootView(
-        store: Store(initialState: RootFeature.State()) {
-            RootFeature()
-        }
-    )
-}

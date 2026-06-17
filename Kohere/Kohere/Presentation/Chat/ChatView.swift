@@ -15,11 +15,3 @@ struct ChatView: View {
         PlaceholderTabView(title: "채팅")
     }
 }
-
-#Preview {
-    ChatView(
-        store: Store(initialState: ChatFeature.State()) {
-            ChatFeature()
-        }
-    )
-}

@@ -15,11 +15,3 @@ struct MoreView: View {
         PlaceholderTabView(title: "더보기")
     }
 }
-
-#Preview {
-    MoreView(
-        store: Store(initialState: MoreFeature.State()) {
-            MoreFeature()
-        }
-    )
-}

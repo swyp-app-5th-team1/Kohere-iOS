@@ -21,7 +21,3 @@ struct PlaceholderTabView: View {
         }
     }
 }
-
-#Preview {
-    PlaceholderTabView(title: "홈")
-}
