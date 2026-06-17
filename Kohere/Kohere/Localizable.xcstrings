@@ -4,10 +4,16 @@
     "%@ - 한국어 English 日本語" : {
 
     },
-    "Pretendard JP 연결과 line height를 확인하는 임시 샘플입니다." : {
+    "Design System" : {
 
     },
-    "Typography" : {
+    "Elevation" : {
+
+    },
+    "Pretendard JP와 elevation token을 확인하는 임시 샘플입니다." : {
+
+    },
+    "RoundedRectangle / 16" : {
 
     }
   },
