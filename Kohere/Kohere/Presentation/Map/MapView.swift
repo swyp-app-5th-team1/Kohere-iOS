@@ -5,13 +5,10 @@
 //  Created by Codex on 6/18/26.
 //
 
-import ComposableArchitecture
 import NMapsMap
 import SwiftUI
 
 struct MapView: View {
-    let store: StoreOf<MapFeature>
-
     var body: some View {
         NaverMapRepresentable()
             .ignoresSafeArea(edges: .top)
