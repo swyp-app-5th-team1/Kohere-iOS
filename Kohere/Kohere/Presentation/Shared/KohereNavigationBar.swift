@@ -18,7 +18,7 @@ enum NavigationLeft {
 
 enum NavigationCenter {
     case none
-    case text(String, style: KohereTextStyle = .label1Semibold)
+    case text(String, style: KohereTextStyle = .heading3Semibold)
 }
 
 enum NavigationRight {
