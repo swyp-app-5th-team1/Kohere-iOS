@@ -19,7 +19,7 @@ struct MapView: View {
                 store.send(.markerTapped(id))
             }
         )
-            .ignoresSafeArea(edges: .top)
+            .ignoresSafeArea()
     }
 }
 
@@ -95,6 +95,7 @@ private struct NaverMapRepresentable: UIViewRepresentable {
             }
 
             let builder = NMCBuilder<MapClusteringKey>()
+            builder.clusterMarkerUpdater = MapClusterMarkerUpdater()
             builder.leafMarkerUpdater = MapLeafMarkerUpdater(onMarkerTapped: onMarkerTapped)
 
             let clusterer = builder.build()
@@ -102,6 +103,30 @@ private struct NaverMapRepresentable: UIViewRepresentable {
             self.clusterer = clusterer
             return clusterer
         }
+    }
+}
+
+private final class MapClusterMarkerUpdater: NSObject, NMCClusterMarkerUpdater {
+    private let defaultUpdater = NMCDefaultClusterMarkerUpdater()
+
+    func updateClusterMarker(_ info: NMCClusterMarkerInfo, _ marker: NMFMarker) {
+        defaultUpdater.updateClusterMarker(info, marker)
+
+        let isDoubleDigit = info.size >= 10
+        let size = isDoubleDigit ? 48 : 36
+
+        marker.iconImage = isDoubleDigit
+            ? MapMarkerImageFactory.clusterMarkerDouble
+            : MapMarkerImageFactory.clusterMarkerSingle
+        marker.width = CGFloat(size)
+        marker.height = CGFloat(size)
+        marker.anchor = CGPoint(x: 0.5, y: 0.5)
+        marker.captionText = "\(info.size)"
+        marker.captionAligns = [NMFAlignType.center]
+        marker.captionColor = .white
+        marker.captionHaloColor = .clear
+        marker.captionTextSize = 14
+        marker.captionOffset = 0
     }
 }
 
@@ -140,11 +165,29 @@ private final class MapLeafMarkerUpdater: NSObject, NMCLeafMarkerUpdater {
         defaultUpdater.updateLeafMarker(info, marker)
 
         guard let key = info.key as? MapClusteringKey else { return }
+        marker.iconImage = MapMarkerImageFactory.propertyMarker
+        marker.width = 36
+        marker.height = 36
         marker.touchHandler = { [weak self] _ in
             self?.onMarkerTapped(key.id)
             return true
         }
     }
+}
+
+private enum MapMarkerImageFactory {
+    static let propertyMarker = NMFOverlayImage(
+        name: "MapPropertyMarker",
+        reuseIdentifier: "MapPropertyMarker"
+    )
+    static let clusterMarkerSingle = NMFOverlayImage(
+        name: "MapClusterMarkerSingle",
+        reuseIdentifier: "MapClusterMarkerSingle"
+    )
+    static let clusterMarkerDouble = NMFOverlayImage(
+        name: "MapClusterMarkerDouble",
+        reuseIdentifier: "MapClusterMarkerDouble"
+    )
 }
 
 private func makeNaverLatLng(from coordinate: MapCoordinate) -> NMGLatLng {
