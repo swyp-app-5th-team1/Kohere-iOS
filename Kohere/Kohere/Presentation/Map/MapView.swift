@@ -47,36 +47,102 @@ private struct NaverMapRepresentable: UIViewRepresentable {
 
     final class Coordinator {
         private let onMarkerTapped: (String) -> Void
-        private var renderedMarkers: [String: NMFMarker] = [:]
+        private var clusterer: NMCClusterer<MapClusteringKey>?
+        private var renderedItemsByID: [String: MapMarkerItem] = [:]
+        private var clusteringKeysByID: [String: MapClusteringKey] = [:]
 
         init(onMarkerTapped: @escaping (String) -> Void) {
             self.onMarkerTapped = onMarkerTapped
         }
 
         func updateMarkers(_ items: [MapMarkerItem], on mapView: NMFMapView) {
-            let itemIDs = Set(items.map(\.id))
-            let removedIDs = Set(renderedMarkers.keys).subtracting(itemIDs)
+            let clusterer = configuredClusterer(on: mapView)
+            let incomingItemsByID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
+            let incomingIDs = Set(incomingItemsByID.keys)
+            let renderedIDs = Set(renderedItemsByID.keys)
+            let removedIDs = renderedIDs.subtracting(incomingIDs)
+            let changedIDs = incomingIDs.filter { id in
+                renderedItemsByID[id] != incomingItemsByID[id]
+            }
+            let removedOrChangedIDs = removedIDs.union(changedIDs)
+            let removedKeys = removedOrChangedIDs.compactMap { clusteringKeysByID[$0] }
 
-            removedIDs.forEach { id in
-                renderedMarkers[id]?.mapView = nil
-                renderedMarkers[id] = nil
+            if !removedKeys.isEmpty {
+                clusterer.removeAll(removedKeys)
             }
 
-            items.forEach { item in
-                let position = makeNaverLatLng(from: item.coordinate)
-
-                if let marker = renderedMarkers[item.id] {
-                    marker.position = position
-                } else {
-                    let marker = NMFMarker(position: position)
-                    marker.touchHandler = { [weak self] _ in
-                        self?.onMarkerTapped(item.id)
-                        return true
-                    }
-                    marker.mapView = mapView
-                    renderedMarkers[item.id] = marker
-                }
+            removedOrChangedIDs.forEach { id in
+                renderedItemsByID[id] = nil
+                clusteringKeysByID[id] = nil
             }
+
+            let keyTagMap = changedIDs.reduce(into: [MapClusteringKey: NSObject]()) { result, id in
+                guard let item = incomingItemsByID[id] else { return }
+                let key = MapClusteringKey(item: item)
+                result[key] = NSString(string: item.id)
+                renderedItemsByID[id] = item
+                clusteringKeysByID[id] = key
+            }
+
+            if !keyTagMap.isEmpty {
+                clusterer.addAll(keyTagMap)
+            }
+        }
+
+        private func configuredClusterer(on mapView: NMFMapView) -> NMCClusterer<MapClusteringKey> {
+            if let clusterer {
+                return clusterer
+            }
+
+            let builder = NMCBuilder<MapClusteringKey>()
+            builder.leafMarkerUpdater = MapLeafMarkerUpdater(onMarkerTapped: onMarkerTapped)
+
+            let clusterer = builder.build()
+            clusterer.mapView = mapView
+            self.clusterer = clusterer
+            return clusterer
+        }
+    }
+}
+
+private final class MapClusteringKey: NSObject, NMCClusteringKey {
+    let id: String
+    let position: NMGLatLng
+
+    init(item: MapMarkerItem) {
+        id = item.id
+        position = makeNaverLatLng(from: item.coordinate)
+    }
+
+    func copy(with zone: NSZone? = nil) -> Any {
+        self
+    }
+
+    override func isEqual(_ object: Any?) -> Bool {
+        guard let other = object as? MapClusteringKey else { return false }
+        return id == other.id
+    }
+
+    override var hash: Int {
+        id.hashValue
+    }
+}
+
+private final class MapLeafMarkerUpdater: NSObject, NMCLeafMarkerUpdater {
+    private let defaultUpdater = NMCDefaultLeafMarkerUpdater()
+    private let onMarkerTapped: (String) -> Void
+
+    init(onMarkerTapped: @escaping (String) -> Void) {
+        self.onMarkerTapped = onMarkerTapped
+    }
+
+    func updateLeafMarker(_ info: NMCLeafMarkerInfo, _ marker: NMFMarker) {
+        defaultUpdater.updateLeafMarker(info, marker)
+
+        guard let key = info.key as? MapClusteringKey else { return }
+        marker.touchHandler = { [weak self] _ in
+            self?.onMarkerTapped(key.id)
+            return true
         }
     }
 }
