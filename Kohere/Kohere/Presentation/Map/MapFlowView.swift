@@ -18,7 +18,7 @@ struct MapFlowView: View {
                 action: \.path
             )
         ) {
-            MapView()
+            MapView(store: store)
         } destination: { _ in
             EmptyView()
         }
