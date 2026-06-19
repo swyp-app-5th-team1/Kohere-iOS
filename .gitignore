@@ -52,6 +52,7 @@ fastlane/test_output/
 .env
 .env.*
 !.env.example
+Kohere/Config/Secrets.xcconfig
 
 # Personal notes
 docs/private/
