@@ -33,8 +33,11 @@ struct LoginView: View {
                     bottomSheetView(currentSheet)
                         .background(.white)
                         .clipShape(
-                            RoundedRectangle(
-                                cornerRadius: 26,
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 26,
+                                bottomLeadingRadius: 0,
+                                bottomTrailingRadius: 0,
+                                topTrailingRadius: 26,
                                 style: .continuous
                             )
                         )
