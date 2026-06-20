@@ -1,13 +1,13 @@
 //
-//  PrivacyTermsDetailView.swift
+//  MarketingTermsDetailView.swift
 //  Kohere
 //
-//  Created by mandoo on 6/19/26.
+//  Created by Codex on 6/21/26.
 //
 
 import SwiftUI
 
-struct PrivacyTermsDetailView: View {
+struct MarketingTermsDetailView: View {
     
     // MARK: - Properties
     
@@ -17,7 +17,7 @@ struct PrivacyTermsDetailView: View {
     
     var body: some View {
         TermsDetailView(
-            kind: .privacy,
+            kind: .marketing,
             onAgreeTapped: onAgreeTapped
         )
     }
