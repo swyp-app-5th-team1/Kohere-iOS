@@ -11,18 +11,22 @@ struct TermsAgreementBottomSheet: View {
     
     // MARK: - Properties
     
-    @Binding var isServiceTermsAgreed: Bool
-    @Binding var isPrivacyTermsAgreed: Bool
-    @Binding var isMarketingCommunicationsAgreed: Bool
+    let isServiceTermsAgreed: Bool
+    let isPrivacyTermsAgreed: Bool
+    let isMarketingCommunicationsAgreed: Bool
     
     private var isRequiredTermsAgreed: Bool {
         isServiceTermsAgreed && isPrivacyTermsAgreed
     }
-    
-    private var isEveryTermAgreed: Bool {
-        isRequiredTermsAgreed && isMarketingCommunicationsAgreed
+    private var isAllTermsAgreed: Bool {
+        isServiceTermsAgreed && isPrivacyTermsAgreed && isMarketingCommunicationsAgreed
     }
+    
     let onTermsDetailTapped: (TermsDetailKind) -> Void
+    let onServiceTermsAgreementTapped: () -> Void
+    let onPrivacyTermsAgreementTapped: () -> Void
+    let onMarketingCommunicationsAgreementTapped: () -> Void
+    let onAllTermsAgreementTapped: () -> Void
     let onStartTapped: () -> Void
     
     // MARK: - Body
@@ -35,7 +39,7 @@ struct TermsAgreementBottomSheet: View {
                 .padding(.top, 12)
             
             VStack(alignment: .leading) {
-                Text("We've kept only the essentials\nrequired to use Kohere.")
+                Text("Review and agree to the terms\nto get started")
                     .kohereTextStyle(.heading2Bold)
                     .foregroundColor(.neutral80)
                     .multilineTextAlignment(.leading)
@@ -52,15 +56,15 @@ struct TermsAgreementBottomSheet: View {
                 
                 HStack(spacing: 12) {
                     Button {
-                        toggleAllTerms()
+                        onAllTermsAgreementTapped()
                     } label: {
                         Image(.checkThick24)
                             .renderingMode(.template)
-                            .foregroundColor(isEveryTermAgreed ? .statusInfo : .labelAssistive)
+                            .foregroundColor(isAllTermsAgreed ? .statusInfo : .labelAssistive)
                             .frame(width: 24, height: 24)
                     }
                     
-                    Text("Agree to All Required Terms")
+                    Text("Agree to All Terms")
                         .kohereTextStyle(.label1Semibold)
                         .foregroundColor(.neutral80)
                 }
@@ -73,7 +77,7 @@ struct TermsAgreementBottomSheet: View {
                 
                 HStack(spacing: 12) {
                     Button {
-                        isServiceTermsAgreed.toggle()
+                        onServiceTermsAgreementTapped()
                     } label: {
                         Image(.checkThick16)
                             .renderingMode(.template)
@@ -101,7 +105,7 @@ struct TermsAgreementBottomSheet: View {
                 
                 HStack(spacing: 12) {
                     Button {
-                        isPrivacyTermsAgreed.toggle()
+                        onPrivacyTermsAgreementTapped()
                     } label: {
                         Image(.checkThick16)
                             .renderingMode(.template)
@@ -128,7 +132,7 @@ struct TermsAgreementBottomSheet: View {
                 
                 HStack(spacing: 12) {
                     Button {
-                        isMarketingCommunicationsAgreed.toggle()
+                        onMarketingCommunicationsAgreementTapped()
                     } label: {
                         Image(.checkThick16)
                             .renderingMode(.template)
@@ -178,14 +182,5 @@ struct TermsAgreementBottomSheet: View {
             .padding(.bottom, 32)
         }
         .presentationDragIndicator(.hidden)
-    }
-    
-    // MARK: - Method
-    
-    private func toggleAllTerms() {
-        let targetState = !isEveryTermAgreed
-        isServiceTermsAgreed = targetState
-        isPrivacyTermsAgreed = targetState
-        isMarketingCommunicationsAgreed = targetState
     }
 }

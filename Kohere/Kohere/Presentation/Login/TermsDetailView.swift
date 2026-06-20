@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum TermsDetailKind: String, Identifiable {
+enum TermsDetailKind: String, Equatable, Identifiable {
     case service
     case privacy
     case marketing

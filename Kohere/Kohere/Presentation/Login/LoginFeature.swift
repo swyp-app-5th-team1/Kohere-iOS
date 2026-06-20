@@ -24,6 +24,18 @@ struct LoginFeature {
         var isLoginRequesting = false
         var authInfo: Auth?
         var currentSheet: LoginSheet?
+        var isServiceTermsAgreed = true
+        var isPrivacyTermsAgreed = true
+        var isMarketingCommunicationsAgreed = false
+        var selectedTermsDetail: TermsDetailKind?
+        
+        var isRequiredTermsAgreed: Bool {
+            isServiceTermsAgreed && isPrivacyTermsAgreed
+        }
+        
+        var isAllTermsAgreed: Bool {
+            isServiceTermsAgreed && isPrivacyTermsAgreed && isMarketingCommunicationsAgreed
+        }
     }
     
     // MARK: - Action
@@ -36,6 +48,14 @@ struct LoginFeature {
         
         case notificationSheetDismissed
         case termsAgreementCompleted
+        
+        case serviceTermsAgreementToggled
+        case privacyTermsAgreementToggled
+        case marketingCommunicationsAgreementToggled
+        case allTermsAgreementToggled
+        
+        case termsDetailTapped(TermsDetailKind)
+        case termsDetailAgreementTapped(TermsDetailKind)
         
         case setSheet(LoginSheet?)
     }
@@ -74,8 +94,44 @@ struct LoginFeature {
                 return .none
                 
             case .termsAgreementCompleted:
+                guard state.isRequiredTermsAgreed else { return .none }
                 state.currentSheet = nil
                 // TODO: 온보딩 또는 홈으로 전환하는 네비게이션 로직 구현
+                return .none
+                
+            case .serviceTermsAgreementToggled:
+                state.isServiceTermsAgreed.toggle()
+                return .none
+                
+            case .privacyTermsAgreementToggled:
+                state.isPrivacyTermsAgreed.toggle()
+                return .none
+                
+            case .marketingCommunicationsAgreementToggled:
+                state.isMarketingCommunicationsAgreed.toggle()
+                return .none
+                
+            case .allTermsAgreementToggled:
+                let targetState = !state.isAllTermsAgreed
+                state.isServiceTermsAgreed = targetState
+                state.isPrivacyTermsAgreed = targetState
+                state.isMarketingCommunicationsAgreed = targetState
+                return .none
+                
+            case let .termsDetailTapped(detail):
+                state.selectedTermsDetail = detail
+                return .none
+                
+            case let .termsDetailAgreementTapped(detail):
+                switch detail {
+                case .service:
+                    state.isServiceTermsAgreed = true
+                case .privacy:
+                    state.isPrivacyTermsAgreed = true
+                case .marketing:
+                    state.isMarketingCommunicationsAgreed = true
+                }
+                state.selectedTermsDetail = nil
                 return .none
                 
             case let .setSheet(step):

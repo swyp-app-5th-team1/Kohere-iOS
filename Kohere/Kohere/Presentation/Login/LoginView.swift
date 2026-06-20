@@ -13,10 +13,6 @@ struct LoginView: View {
     // MARK: - Property
     
     @Bindable var store: StoreOf<LoginFeature>
-    @State private var isServiceTermsAgreed: Bool = false
-    @State private var isPrivacyTermsAgreed: Bool = false
-    @State private var isMarketingCommunicationsAgreed: Bool = false
-    @State private var selectedTermsDetail: TermsDetailKind?
     
     // MARK: - Body
     
@@ -50,7 +46,7 @@ struct LoginView: View {
                 .transition(.move(edge: .bottom))
             }
             
-            if let selectedTermsDetail {
+            if let selectedTermsDetail = store.selectedTermsDetail {
                 termsDetailView(selectedTermsDetail)
                     .ignoresSafeArea()
                     .transition(.move(edge: .trailing))
@@ -58,7 +54,7 @@ struct LoginView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: store.currentSheet)
-        .animation(.easeInOut(duration: 0.25), value: selectedTermsDetail)
+        .animation(.easeInOut(duration: 0.25), value: store.selectedTermsDetail)
     }
 }
 
@@ -162,11 +158,23 @@ extension LoginView {
             
         case .termsAgreement:
             TermsAgreementBottomSheet(
-                isServiceTermsAgreed: $isServiceTermsAgreed,
-                isPrivacyTermsAgreed: $isPrivacyTermsAgreed,
-                isMarketingCommunicationsAgreed: $isMarketingCommunicationsAgreed,
+                isServiceTermsAgreed: store.isServiceTermsAgreed,
+                isPrivacyTermsAgreed: store.isPrivacyTermsAgreed,
+                isMarketingCommunicationsAgreed: store.isMarketingCommunicationsAgreed,
                 onTermsDetailTapped: { detail in
-                    selectedTermsDetail = detail
+                    store.send(.termsDetailTapped(detail))
+                },
+                onServiceTermsAgreementTapped: {
+                    store.send(.serviceTermsAgreementToggled)
+                },
+                onPrivacyTermsAgreementTapped: {
+                    store.send(.privacyTermsAgreementToggled)
+                },
+                onMarketingCommunicationsAgreementTapped: {
+                    store.send(.marketingCommunicationsAgreementToggled)
+                },
+                onAllTermsAgreementTapped: {
+                    store.send(.allTermsAgreementToggled)
                 },
                 onStartTapped: {
                     store.send(.termsAgreementCompleted)
@@ -181,18 +189,15 @@ extension LoginView {
         switch detail {
         case .service:
             ServiceTermsDetailView {
-                isServiceTermsAgreed = true
-                selectedTermsDetail = nil
+                store.send(.termsDetailAgreementTapped(.service))
             }
         case .privacy:
             PrivacyTermsDetailView {
-                isPrivacyTermsAgreed = true
-                selectedTermsDetail = nil
+                store.send(.termsDetailAgreementTapped(.privacy))
             }
         case .marketing:
             MarketingTermsDetailView {
-                isMarketingCommunicationsAgreed = true
-                selectedTermsDetail = nil
+                store.send(.termsDetailAgreementTapped(.marketing))
             }
         }
     }
