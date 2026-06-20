@@ -57,7 +57,9 @@ private struct NaverMapRepresentable: UIViewRepresentable {
 
         func updateMarkers(_ items: [MapMarkerItem], on mapView: NMFMapView) {
             let clusterer = configuredClusterer(on: mapView)
-            let incomingItemsByID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
+            let incomingItemsByID = items.reduce(into: [String: MapMarkerItem]()) { result, item in
+                result[item.id] = item
+            }
             let incomingIDs = Set(incomingItemsByID.keys)
             let renderedIDs = Set(renderedItemsByID.keys)
             let removedIDs = renderedIDs.subtracting(incomingIDs)
