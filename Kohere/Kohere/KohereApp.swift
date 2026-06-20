@@ -26,8 +26,15 @@ struct KohereApp: App {
     }
 
     private func configureTabBarAppearance() {
-        let selectedColor = UIColor(named: "primary50")
-        let normalColor = UIColor(named: "coolNeutral50")
+        let selectedColor = UIColor(named: "primary50") ?? fallbackTabBarColor(
+            name: "primary50",
+            color: .systemBlue
+        )
+        let normalColor = UIColor(named: "coolNeutral50") ?? fallbackTabBarColor(
+            name: "coolNeutral50",
+            color: .secondaryLabel
+        )
+
         let appearance = UITabBarAppearance()
 
         appearance.configureWithTransparentBackground()
@@ -62,10 +69,15 @@ struct KohereApp: App {
 
     private func configureTabBarItemAppearance(
         _ appearance: UITabBarItemAppearance,
-        selectedColor: UIColor?,
-        normalColor: UIColor?
+        selectedColor: UIColor,
+        normalColor: UIColor
     ) {
         appearance.selected.iconColor = selectedColor
         appearance.normal.iconColor = normalColor
+    }
+
+    private func fallbackTabBarColor(name: String, color: UIColor) -> UIColor {
+        assertionFailure("\(name) color is missing from the asset catalog.")
+        return color
     }
 }
