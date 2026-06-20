@@ -13,6 +13,10 @@ struct LoginView: View {
     // MARK: - Property
     
     @Bindable var store: StoreOf<LoginFeature>
+    @State private var isServiceTermsAgreed: Bool = false
+    @State private var isPrivacyTermsAgreed: Bool = false
+    @State private var isMarketingCommunicationsAgreed: Bool = false
+    @State private var selectedTermsDetail: TermsDetailKind?
     
     // MARK: - Body
     
@@ -45,8 +49,16 @@ struct LoginView: View {
                 .ignoresSafeArea(edges: .bottom)
                 .transition(.move(edge: .bottom))
             }
+            
+            if let selectedTermsDetail {
+                termsDetailView(selectedTermsDetail)
+                    .ignoresSafeArea()
+                    .transition(.move(edge: .trailing))
+                    .zIndex(1)
+            }
         }
         .animation(.easeInOut(duration: 0.25), value: store.currentSheet)
+        .animation(.easeInOut(duration: 0.25), value: selectedTermsDetail)
     }
 }
 
@@ -146,15 +158,42 @@ extension LoginView {
                     store.send(.notificationSheetDismissed)
                 }
             )
-            .frame(height: 418)
+            .frame(height: 434)
             
         case .termsAgreement:
             TermsAgreementBottomSheet(
+                isServiceTermsAgreed: $isServiceTermsAgreed,
+                isPrivacyTermsAgreed: $isPrivacyTermsAgreed,
+                isMarketingCommunicationsAgreed: $isMarketingCommunicationsAgreed,
+                onTermsDetailTapped: { detail in
+                    selectedTermsDetail = detail
+                },
                 onStartTapped: {
                     store.send(.termsAgreementCompleted)
                 }
             )
-            .frame(height: 374)
+            .frame(height: 418)
+        }
+    }
+    
+    @ViewBuilder
+    private func termsDetailView(_ detail: TermsDetailKind) -> some View {
+        switch detail {
+        case .service:
+            ServiceTermsDetailView {
+                isServiceTermsAgreed = true
+                selectedTermsDetail = nil
+            }
+        case .privacy:
+            PrivacyTermsDetailView {
+                isPrivacyTermsAgreed = true
+                selectedTermsDetail = nil
+            }
+        case .marketing:
+            MarketingTermsDetailView {
+                isMarketingCommunicationsAgreed = true
+                selectedTermsDetail = nil
+            }
         }
     }
 }
