@@ -8,8 +8,8 @@
 import Foundation
 
 struct DropdownMenuOption: Identifiable, Hashable {
-	let id = UUID().uuidString
 	let option: String
+    var id: String { option }
 }
 
 extension DropdownMenuOption {
