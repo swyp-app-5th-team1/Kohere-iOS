@@ -17,12 +17,14 @@
 
 ## Feature Candidates
 
-- 미정.
+- 탭별 실제 첫 화면 구현.
+- 첫 push depth 화면을 구현하면서 TCA `StackState` destination case 예시 작성.
 
 ## Open Questions
 
-- 미정.
+- 각 탭 루트 화면의 실제 UI와 초기 데이터 요구사항.
+- 첫 상세 화면에서 destination State에 어떤 데이터만 넘길지에 대한 기준.
 
 ## Backlog
 
-- 미정.
+- 딥링크, 푸시 알림, 로그인 전환 등 전역 이동 정책이 필요해질 때 Root/Flow navigation 정책 확장.

@@ -12,9 +12,9 @@ struct ContentView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Typography")
+                    Text("Design System")
                         .kohereTextStyle(.display1Bold)
-                    Text("Pretendard JP 연결과 line height를 확인하는 임시 샘플입니다.")
+                    Text("Pretendard JP와 elevation token을 확인하는 임시 샘플입니다.")
                         .kohereTextStyle(.body2Regular)
                 }
 
@@ -48,9 +48,12 @@ struct ContentView: View {
                         ("Caption2-semibold", .caption2Semibold)
                     ]
                 )
+
+                elevationSection()
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
+            .background(Color.backgroundNormalAlternative)
         }
     }
 
@@ -68,6 +71,34 @@ struct ContentView: View {
                         .kohereTextStyle(item.1)
                 }
             }
+        }
+    }
+
+    private func elevationSection() -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Elevation")
+                .kohereTextStyle(.label1Semibold)
+
+            VStack(spacing: 20) {
+                ForEach(KohereElevation.allCases, id: \.self) { elevation in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(elevation.tokenName)
+                            .kohereTextStyle(.label2Semibold)
+                            .foregroundStyle(Color.labelNormal)
+                        Text("RoundedRectangle / 16")
+                            .kohereTextStyle(.caption2Regular)
+                            .foregroundStyle(Color.labelAlternative)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
+                    .padding(16)
+                    .kohereSurface(
+                        background: Color.backgroundElevatedNormal,
+                        shape: .roundedRectangle(cornerRadius: 16),
+                        elevation: elevation
+                    )
+                }
+            }
+            .padding(.vertical, 12)
         }
     }
 }
