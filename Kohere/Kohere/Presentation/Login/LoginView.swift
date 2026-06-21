@@ -33,8 +33,11 @@ struct LoginView: View {
                     bottomSheetView(currentSheet)
                         .background(.white)
                         .clipShape(
-                            RoundedRectangle(
-                                cornerRadius: 26,
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 26,
+                                bottomLeadingRadius: 0,
+                                bottomTrailingRadius: 0,
+                                topTrailingRadius: 26,
                                 style: .continuous
                             )
                         )
@@ -42,8 +45,16 @@ struct LoginView: View {
                 .ignoresSafeArea(edges: .bottom)
                 .transition(.move(edge: .bottom))
             }
+            
+            if let selectedTermsDetail = store.selectedTermsDetail {
+                termsDetailView(selectedTermsDetail)
+                    .ignoresSafeArea()
+                    .transition(.move(edge: .trailing))
+                    .zIndex(1)
+            }
         }
         .animation(.easeInOut(duration: 0.25), value: store.currentSheet)
+        .animation(.easeInOut(duration: 0.25), value: store.selectedTermsDetail)
     }
 }
 
@@ -143,15 +154,51 @@ extension LoginView {
                     store.send(.notificationSheetDismissed)
                 }
             )
-            .frame(height: 418)
+            .frame(height: 434)
             
         case .termsAgreement:
             TermsAgreementBottomSheet(
+                isServiceTermsAgreed: store.isServiceTermsAgreed,
+                isPrivacyTermsAgreed: store.isPrivacyTermsAgreed,
+                isMarketingCommunicationsAgreed: store.isMarketingCommunicationsAgreed,
+                onTermsDetailTapped: { detail in
+                    store.send(.termsDetailTapped(detail))
+                },
+                onServiceTermsAgreementTapped: {
+                    store.send(.serviceTermsAgreementToggled)
+                },
+                onPrivacyTermsAgreementTapped: {
+                    store.send(.privacyTermsAgreementToggled)
+                },
+                onMarketingCommunicationsAgreementTapped: {
+                    store.send(.marketingCommunicationsAgreementToggled)
+                },
+                onAllTermsAgreementTapped: {
+                    store.send(.allTermsAgreementToggled)
+                },
                 onStartTapped: {
                     store.send(.termsAgreementCompleted)
                 }
             )
-            .frame(height: 374)
+            .frame(height: 418)
+        }
+    }
+    
+    @ViewBuilder
+    private func termsDetailView(_ detail: TermsDetailKind) -> some View {
+        switch detail {
+        case .service:
+            ServiceTermsDetailView {
+                store.send(.termsDetailAgreementTapped(.service))
+            }
+        case .privacy:
+            PrivacyTermsDetailView {
+                store.send(.termsDetailAgreementTapped(.privacy))
+            }
+        case .marketing:
+            MarketingTermsDetailView {
+                store.send(.termsDetailAgreementTapped(.marketing))
+            }
         }
     }
 }
