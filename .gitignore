@@ -12,6 +12,7 @@ build/
 *.hmap
 
 # App packaging / debug symbols
+Kohere-AdHoc/
 *.ipa
 *.dSYM
 *.dSYM.zip
