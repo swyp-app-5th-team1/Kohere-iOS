@@ -42,7 +42,7 @@
 		778F3DF22FDA9A000AFF730 /* Exceptions for "Kohere" folder in "Kohere" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				Resource/Info.plist,
 			);
 			target = 9570C2992FD9DA9D002FA6DE /* Kohere */;
 		};
