@@ -66,10 +66,12 @@ iOS 26 Liquid Glass 기준 UI가 앱에 자동 적용되지 않도록 호환 모
 
 ### Decision
 
-앱 `Info.plist`에 `UIDesignRequiresCompatibility` 값을 `true`로 추가한다.
+하단 탭바는 iOS 26 Liquid Glass 대응 의도를 살리기 위해 앱 `Info.plist`에서 `UIDesignRequiresCompatibility` 값을 제거한다.
 
 ### Notes
 
-- 이 값은 iOS 26 Liquid Glass 호환 모드 플래그로 알려져 있어 현재 프로젝트에 적용한다.
+- 하단 탭바는 기본 `TabView` 기반이므로 iOS 26 시스템 탭바 스타일 영향을 받을 수 있다.
+- 네비게이션 바는 자체 커스텀 구성 예정이므로 시스템 네비게이션 바의 Liquid Glass 영향은 우선 주요 리스크로 보지 않는다.
+- 이후 `sheet`, `alert`, `picker`, `menu` 같은 시스템 컴포넌트가 들어가는 화면은 구현 시점에 별도 확인한다.
 - Apple 공개 문서 기준으로는 장기 지원 정책이나 필수 채택 기한이 명확히 검증되지 않았으므로, 추후 Xcode/iOS SDK 업데이트 시 다시 확인한다.
-- 앱의 디자인 방향은 Liquid Glass 전용 API에 의존하지 않고 기존 Kohere 디자인 시스템 기준을 유지한다.
+- 앱의 주요 화면과 커스텀 컴포넌트는 기존 Kohere 디자인 시스템 기준을 유지하되, 시스템 탭바의 Liquid Glass 표현은 허용한다.

@@ -24,8 +24,6 @@
 	<true/>
 	<key>NMFNcpKeyId</key>
 	<string>$(NAVER_MAP_CLIENT_ID)</string>
-	<key>UIDesignRequiresCompatibility</key>
-	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
