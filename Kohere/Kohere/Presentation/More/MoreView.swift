@@ -25,7 +25,7 @@ struct MoreView: View {
                             .init(title: "Recently viewed", iconName: "thunder_24"),
                             .init(title: "My Posts", iconName: "pencil_24")
                         ],
-                        horizontalPadding: 20
+                        horizontalPadding: 16
                     )
 
                     MoreMenuSection(
@@ -37,7 +37,7 @@ struct MoreView: View {
                             .init(title: "Bank Account Guide", iconName: "bankAccountGuide", rendersAsTemplate: false),
                             .init(title: "Moving Guide", iconName: "movingGuide", rendersAsTemplate: false)
                         ],
-                        horizontalPadding: 20
+                        horizontalPadding: 16
                     )
 
                     MoreMenuSection(
@@ -49,7 +49,7 @@ struct MoreView: View {
                                 iconName: "external_link_24"
                             )
                         ],
-                        horizontalPadding: 20
+                        horizontalPadding: 16
                     )
 
                     MoreMenuSection(
@@ -59,7 +59,7 @@ struct MoreView: View {
                             .init(title: "Send Feedback", iconName: "mail_24"),
                             .init(title: "Partner With Kohere", iconName: "send_24")
                         ],
-                        horizontalPadding: 20
+                        horizontalPadding: 16
                     )
                 }
                 .padding(16)
