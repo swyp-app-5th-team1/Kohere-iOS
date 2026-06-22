@@ -12,9 +12,15 @@ struct OnboardingTextField: View {
     // MARK: - Properties
     
     @Binding var text: String
-    @FocusState private var isFocused: Bool
+    @Binding var activeField: OnboardingField?
+    var keyboardField: FocusState<OnboardingField?>.Binding
     
+    let equals: OnboardingField
     let placeholder: String?
+    
+    private var isActive: Bool {
+        activeField == equals
+    }
     
     // MARK: - Body
     
@@ -25,9 +31,14 @@ struct OnboardingTextField: View {
                 .foregroundColor(.labelNeutral)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.none)
-                .focused($isFocused)
+                .focused(keyboardField, equals: equals)
+                .onChange(of: keyboardField.wrappedValue) { _, newValue in
+                    if newValue == equals {
+                        activeField = equals
+                    }
+                }
             
-            if !text.isEmpty {
+            if !text.isEmpty && isActive {
                 Button {
                     text = ""
                 } label: {
@@ -39,11 +50,19 @@ struct OnboardingTextField: View {
                 }
             }
         }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            activeField = equals
+            keyboardField.wrappedValue = equals
+        }
         .padding(.horizontal, 16)
         .frame(height: 40)
         .overlay {
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isFocused ? .labelNormal : .lineAlternative, lineWidth: 1)
+                .stroke(
+                    isActive ? .labelNormal : .lineAlternative,
+                    lineWidth: 1
+                )
         }
     }
 }
