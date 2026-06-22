@@ -13,24 +13,66 @@ struct MapView: View {
     let store: StoreOf<MapFeature>
 
     var body: some View {
-        NaverMapRepresentable(
-            markers: store.markers,
-            selectedMarkerID: store.selectedMarkerID,
-            onMarkerTapped: { id in
-                store.send(.markerTapped(id))
-            }
-        )
+        ZStack(alignment: .top) {
+            NaverMapRepresentable(
+                markers: store.markers,
+                selectedMarkerID: store.selectedMarkerID,
+                onViewportChanged: { viewport in
+                    store.send(.viewportChanged(viewport))
+                },
+                onMarkerTapped: { id in
+                    store.send(.markerTapped(id))
+                }
+            )
             .ignoresSafeArea()
+
+            if store.showsResearchButton {
+                researchButton
+                    .padding(.top, 12)
+            }
+        }
+    }
+
+    private var researchButton: some View {
+        Button {
+            store.send(.researchButtonTapped)
+        } label: {
+            HStack(spacing: 12) {
+                Image("refresh_16")
+                    .renderingMode(.template)
+                    .resizable()
+                    .frame(width: 16, height: 16)
+                    .foregroundStyle(.blue100)
+
+                Text("이 지역 검색하기")
+                    .kohereTextStyle(.label2Medium)
+                    .foregroundStyle(.blue100)
+            }
+            .padding(.horizontal, 16)
+            .frame(height: 36)
+            .kohereSurface(
+                background: .common0,
+                shape: .capsule,
+                elevation: .normalXSmall
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
+
+// MARK: - Naver Map Bridge
 
 private struct NaverMapRepresentable: UIViewRepresentable {
     let markers: [MapMarkerItem]
     let selectedMarkerID: String?
+    let onViewportChanged: (MapViewport) -> Void
     let onMarkerTapped: (String) -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onMarkerTapped: onMarkerTapped)
+        Coordinator(
+            onViewportChanged: onViewportChanged,
+            onMarkerTapped: onMarkerTapped
+        )
     }
 
     func makeUIView(context: Context) -> NMFMapView {
@@ -40,6 +82,7 @@ private struct NaverMapRepresentable: UIViewRepresentable {
             zoomTo: 13
         )
         mapView.moveCamera(cameraUpdate)
+        mapView.addCameraDelegate(delegate: context.coordinator)
         return mapView
     }
 
@@ -48,7 +91,8 @@ private struct NaverMapRepresentable: UIViewRepresentable {
         context.coordinator.updateSelectedMarkerIfNeeded(selectedMarkerID)
     }
 
-    final class Coordinator {
+    final class Coordinator: NSObject, NMFMapViewCameraDelegate {
+        private let onViewportChanged: (MapViewport) -> Void
         private let onMarkerTapped: (String) -> Void
         private var selectedMarkerID: String?
         private var clusterer: NMCClusterer<MapClusteringKey>?
@@ -56,8 +100,18 @@ private struct NaverMapRepresentable: UIViewRepresentable {
         private var clusteringKeysByID: [String: MapClusteringKey] = [:]
         private var leafMarkersByID: [String: NMFMarker] = [:]
 
-        init(onMarkerTapped: @escaping (String) -> Void) {
+        init(
+            onViewportChanged: @escaping (MapViewport) -> Void,
+            onMarkerTapped: @escaping (String) -> Void
+        ) {
+            self.onViewportChanged = onViewportChanged
             self.onMarkerTapped = onMarkerTapped
+            super.init()
+        }
+
+        // 지도 이동이 완전히 끝난 시점의 화면 정보를 TCA 상태로 전달한다.
+        func mapViewCameraIdle(_ mapView: NMFMapView) {
+            onViewportChanged(makeMapViewport(from: mapView))
         }
 
         // 마커 데이터 추가, 삭제, 좌표 변경이 있을 때만 클러스터러 데이터를 갱신한다.
@@ -166,6 +220,8 @@ private struct NaverMapRepresentable: UIViewRepresentable {
     }
 }
 
+// MARK: - Cluster Marker
+
 private final class MapClusterMarkerUpdater: NSObject, NMCClusterMarkerUpdater {
     private let defaultUpdater = NMCDefaultClusterMarkerUpdater()
 
@@ -191,6 +247,8 @@ private final class MapClusterMarkerUpdater: NSObject, NMCClusterMarkerUpdater {
     }
 }
 
+// MARK: - Clustering Key
+
 private final class MapClusteringKey: NSObject, NMCClusteringKey {
     let id: String
     let position: NMGLatLng
@@ -213,6 +271,8 @@ private final class MapClusteringKey: NSObject, NMCClusteringKey {
         id.hashValue
     }
 }
+
+// MARK: - Leaf Marker
 
 private final class MapLeafMarkerUpdater: NSObject, NMCLeafMarkerUpdater {
     private let defaultUpdater = NMCDefaultLeafMarkerUpdater()
@@ -249,6 +309,8 @@ private final class MapLeafMarkerUpdater: NSObject, NMCLeafMarkerUpdater {
     }
 }
 
+// MARK: - Marker Images
+
 private enum MapMarkerImageFactory {
     static let propertyMarker = NMFOverlayImage(
         name: "MapPropertyMarker",
@@ -263,6 +325,8 @@ private enum MapMarkerImageFactory {
         reuseIdentifier: "MapClusterMarkerDouble"
     )
 }
+
+// MARK: - Marker Styling
 
 // 단일 매물 마커는 같은 에셋을 유지하고 선택 상태에 따라 크기만 바꾼다.
 private func applyPropertyMarkerStyle(
@@ -299,9 +363,32 @@ private func animatePropertyMarkerSize(_ marker: NMFMarker, to targetSize: CGFlo
     }
 }
 
+// MARK: - Coordinate Mapping
+
 private func makeNaverLatLng(from coordinate: MapCoordinate) -> NMGLatLng {
     NMGLatLng(
         lat: coordinate.latitude,
         lng: coordinate.longitude
+    )
+}
+
+private func makeMapViewport(from mapView: NMFMapView) -> MapViewport {
+    let cameraPosition = mapView.cameraPosition
+    let contentBounds = mapView.contentBounds
+
+    return MapViewport(
+        center: makeMapCoordinate(from: cameraPosition.target),
+        zoomLevel: cameraPosition.zoom,
+        visibleBounds: MapBounds(
+            southWest: makeMapCoordinate(from: contentBounds.southWest),
+            northEast: makeMapCoordinate(from: contentBounds.northEast)
+        )
+    )
+}
+
+private func makeMapCoordinate(from latLng: NMGLatLng) -> MapCoordinate {
+    MapCoordinate(
+        latitude: latLng.lat,
+        longitude: latLng.lng
     )
 }

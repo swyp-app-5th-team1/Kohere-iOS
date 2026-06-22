@@ -53,12 +53,19 @@ struct MapFeature {
 
             case .researchButtonTapped:
                 state.lastSearchedViewport = state.currentViewport
+                state.selectedMarkerID = nil
                 state.showsResearchButton = false
                 return .none
 
             case let .viewportChanged(viewport):
                 state.currentViewport = viewport
-                state.showsResearchButton = state.lastSearchedViewport != viewport
+                guard let lastSearchedViewport = state.lastSearchedViewport else {
+                    state.lastSearchedViewport = viewport
+                    state.showsResearchButton = false
+                    return .none
+                }
+
+                state.showsResearchButton = lastSearchedViewport != viewport
                 return .none
 
             case .path:
