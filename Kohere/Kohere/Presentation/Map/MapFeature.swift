@@ -31,10 +31,15 @@ struct MapFeature {
             )
         ]
         var selectedMarkerID: String?
+        var currentViewport: MapViewport?
+        var lastSearchedViewport: MapViewport?
+        var showsResearchButton = false
     }
 
     enum Action {
         case markerTapped(String)
+        case researchButtonTapped
+        case viewportChanged(MapViewport)
         case path(StackActionOf<Path>)
     }
 
@@ -42,7 +47,25 @@ struct MapFeature {
         Reduce { state, action in
             switch action {
             case let .markerTapped(id):
+                guard state.selectedMarkerID != id else { return .none }
                 state.selectedMarkerID = id
+                return .none
+
+            case .researchButtonTapped:
+                state.lastSearchedViewport = state.currentViewport
+                state.selectedMarkerID = nil
+                state.showsResearchButton = false
+                return .none
+
+            case let .viewportChanged(viewport):
+                state.currentViewport = viewport
+                guard let lastSearchedViewport = state.lastSearchedViewport else {
+                    state.lastSearchedViewport = viewport
+                    state.showsResearchButton = false
+                    return .none
+                }
+
+                state.showsResearchButton = lastSearchedViewport != viewport
                 return .none
 
             case .path:
