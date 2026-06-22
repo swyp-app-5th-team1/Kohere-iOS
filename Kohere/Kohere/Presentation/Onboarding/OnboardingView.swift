@@ -5,30 +5,87 @@
 //  Created by mandoo on 6/21/26.
 //
 
+import ComposableArchitecture
 import SwiftUI
 
 struct OnboardingView: View {
     
     // MARK: - Properties
     
-    @State private var selectedMonth: DropdownMenuOption?
-    @State private var emailInput: String = ""
+    @Bindable var store: StoreOf<OnboardingFeature>
+    @State private var activeField: OnboardingField?
+    @FocusState private var keyboardField: OnboardingField?
     
     // MARK: - Body
     
     var body: some View {
-        // TODO: 컴포넌트 테스트 삭제 예정
-        VStack(spacing: 16) {
-            OnboardingTextField(
-                text: $emailInput,
-                placeholder: "Enter your email"
-            )
+        VStack(spacing: 0) {
+            topProgressBar
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
             
-            DropdownMenu(
-                selectedOption: $selectedMonth,
-                options: DropdownMenuOption.testMonths
-            )
+            VStack(alignment: .leading, spacing: 0) {
+                switch store.currentStep {
+                case .nameAndBirth:
+                    NameAndBirthStepView()
+                case .details:
+                    DetailsStepView()
+                case .emailVerification:
+                    EmailVerificationStepView()
+                }
+            }
+            .padding(.horizontal, 20)
+            
+            Spacer()
+            
+            bottomButtonArea
+                .padding(.horizontal, 20)
         }
-        .padding(.horizontal, 20)
+        .background(.backgroundNormalAlternative)
+    }
+}
+
+// MARK: - Subviews
+
+extension OnboardingView {
+    private var topProgressBar: some View {
+        HStack(spacing: 8) {
+            ForEach(1...3, id: \.self) { index in
+                Rectangle()
+                    .fill(store.currentStep.rawValue >= index ? .labelNormal : .fillStrong)
+                    .frame(height: 2)
+            }
+        }
+    }
+    
+    private var bottomButtonArea: some View {
+        HStack(spacing: 8) {
+            if store.currentStep > .nameAndBirth {
+                Button {
+                    store.send(.backButtonTapped)
+                } label: {
+                    Image(.arrowLeft24)
+                        .foregroundColor(.labelAlternative)
+                        .frame(width: 48, height: 48)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(.lineNormal, lineWidth: 1)
+                        }
+                }
+            }
+            
+            Button {
+                store.send(.nextButtonTapped)
+            } label: {
+                Text(store.currentStep == .emailVerification ? "Get Started" : "Next")
+                    .kohereTextStyle(.label1Semibold)
+                    .foregroundColor(.staticWhite)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(store.isNextButtonEnabled ? .primaryNormal : .primary10)
+                    .cornerRadius(16)
+            }
+            .disabled(!store.isNextButtonEnabled)
+        }
     }
 }
