@@ -5,9 +5,19 @@
 //  Created by mandoo on 6/23/26.
 //
 
+import ComposableArchitecture
 import SwiftUI
 
 struct DetailsStepView: View {
+    
+    // MARK: - Properties
+    
+    @Bindable var store: StoreOf<OnboardingFeature>
+    @Binding var activeField: OnboardingField?
+    var keyboardField: FocusState<OnboardingField?>.Binding
+    
+    // MARK: - Body
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 72) {
             Text("A few more details\nfor a safer contract")
@@ -24,7 +34,7 @@ struct DetailsStepView: View {
                     DropdownMenu(
                         selectedOption: $store.selectedVisa,
                         activeField: $activeField,
-                        keyboardField: $keyboardField,
+                        keyboardField: keyboardField,
                         equals: .visaStatus,
                         options: DropdownMenuOption.visas,
                         listHeight: 239
@@ -40,7 +50,7 @@ struct DetailsStepView: View {
                     DropdownMenu(
                         selectedOption: $store.selectedOccupation,
                         activeField: $activeField,
-                        keyboardField: $keyboardField,
+                        keyboardField: keyboardField,
                         equals: .occupation,
                         options: DropdownMenuOption.occupations,
                         listHeight: 239
@@ -57,7 +67,7 @@ struct DetailsStepView: View {
                         DropdownMenu(
                             selectedOption: $store.selectedNationality,
                             activeField: $activeField,
-                            keyboardField: $keyboardField,
+                            keyboardField: keyboardField,
                             equals: .nationality,
                             options: DropdownMenuOption.nationalities,
                             listHeight: 176
@@ -73,7 +83,7 @@ struct DetailsStepView: View {
                         DropdownMenu(
                             selectedOption: $store.selectedGender,
                             activeField: $activeField,
-                            keyboardField: $keyboardField,
+                            keyboardField: keyboardField,
                             equals: .gender,
                             options: DropdownMenuOption.genders,
                             listHeight: 92

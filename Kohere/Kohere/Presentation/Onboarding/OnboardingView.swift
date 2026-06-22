@@ -27,11 +27,11 @@ struct OnboardingView: View {
             VStack(alignment: .leading, spacing: 0) {
                 switch store.currentStep {
                 case .nameAndBirth:
-                    NameAndBirthStepView()
+                    NameAndBirthStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
                 case .details:
-                    DetailsStepView()
+                    DetailsStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
                 case .emailVerification:
-                    EmailVerificationStepView()
+                    EmailVerificationStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
                 }
             }
             .padding(.horizontal, 20)

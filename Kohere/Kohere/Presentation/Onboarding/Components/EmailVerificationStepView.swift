@@ -5,9 +5,19 @@
 //  Created by mandoo on 6/23/26.
 //
 
+import ComposableArchitecture
 import SwiftUI
 
 struct EmailVerificationStepView: View {
+    
+    // MARK: - Properties
+    
+    @Bindable var store: StoreOf<OnboardingFeature>
+    @Binding var activeField: OnboardingField?
+    var keyboardField: FocusState<OnboardingField?>.Binding
+    
+    // MARK: - Body
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
             Text("Verify your email\nand you're all set")
@@ -23,7 +33,7 @@ struct EmailVerificationStepView: View {
                     OnboardingTextField(
                         text: $store.email,
                         activeField: $activeField,
-                        keyboardField: $keyboardField,
+                        keyboardField: keyboardField,
                         equals: .email,
                         placeholder: "Enter your email"
                     )
@@ -47,7 +57,7 @@ struct EmailVerificationStepView: View {
                         OnboardingTextField(
                             text: $store.verificationCode,
                             activeField: $activeField,
-                            keyboardField: $keyboardField,
+                            keyboardField: keyboardField,
                             equals: .verificationCode,
                             placeholder: "Enter the 6-digit code"
                         )

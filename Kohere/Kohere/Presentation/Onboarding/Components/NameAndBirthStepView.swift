@@ -5,9 +5,19 @@
 //  Created by mandoo on 6/23/26.
 //
 
+import ComposableArchitecture
 import SwiftUI
 
 struct NameAndBirthStepView: View {
+    
+    // MARK: - Properties
+    
+    @Bindable var store: StoreOf<OnboardingFeature>
+    @Binding var activeField: OnboardingField?
+    var keyboardField: FocusState<OnboardingField?>.Binding
+    
+    // MARK: - Body
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 72) {
             Text("Welcome!\nLet's check your details.")
@@ -24,7 +34,7 @@ struct NameAndBirthStepView: View {
                     OnboardingTextField(
                         text: $store.lastName,
                         activeField: $activeField,
-                        keyboardField: $keyboardField,
+                        keyboardField: keyboardField,
                         equals: .lastName,
                         placeholder: nil
                     )
@@ -39,7 +49,7 @@ struct NameAndBirthStepView: View {
                     OnboardingTextField(
                         text: $store.firstName,
                         activeField: $activeField,
-                        keyboardField: $keyboardField,
+                        keyboardField: keyboardField,
                         equals: .firstName,
                         placeholder: nil
                     )
@@ -67,7 +77,7 @@ struct NameAndBirthStepView: View {
                         DropdownMenu(
                             selectedOption: $store.selectedMonth,
                             activeField: $activeField,
-                            keyboardField: $keyboardField,
+                            keyboardField: keyboardField,
                             equals: .birthMonth,
                             options: DropdownMenuOption.months,
                             listHeight: 176
@@ -76,7 +86,7 @@ struct NameAndBirthStepView: View {
                         DropdownMenu(
                             selectedOption: $store.selectedDay,
                             activeField: $activeField,
-                            keyboardField: $keyboardField,
+                            keyboardField: keyboardField,
                             equals: .birthDay,
                             options: DropdownMenuOption.days,
                             listHeight: 176
@@ -85,7 +95,7 @@ struct NameAndBirthStepView: View {
                         DropdownMenu(
                             selectedOption: $store.selectedYear,
                             activeField: $activeField,
-                            keyboardField: $keyboardField,
+                            keyboardField: keyboardField,
                             equals: .birthYear,
                             options: DropdownMenuOption.years,
                             listHeight: 176
