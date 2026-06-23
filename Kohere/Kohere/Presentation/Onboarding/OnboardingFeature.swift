@@ -98,14 +98,17 @@ struct OnboardingFeature {
                 return .none
                 
             case .sendVerificationCodeTapped:
+                let trimmedEmail = state.email.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !trimmedEmail.isEmpty else { return .none }
+                state.email = trimmedEmail
                 state.isCodeSent = true
+                state.verificationCode = ""
+                state.isEmailVerified = false
                 return .none
                 
             case .confirmVerificationCodeTapped:
-                // TODO: - 서버와 연동
-                if !state.verificationCode.isEmpty {
-                    state.isEmailVerified = true
-                }
+                guard state.isCodeSent else { return .none }
+                // TODO: 서버 검증 성공 시에만 진입 버튼 활성화
                 return .none
                 
             case .verificationSuccess:
