@@ -48,7 +48,6 @@ struct MapFeature {
     }
 
     enum Action {
-        case mapAppeared
         case locationAuthorizationChanged(MapLocationAuthorization)
         case userLocationUpdated(MapCoordinate)
         case myLocationButtonTapped
@@ -62,9 +61,6 @@ struct MapFeature {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
-            case .mapAppeared:
-                return .none
-
             case let .locationAuthorizationChanged(authorization):
                 state.locationAuthorization = authorization
 

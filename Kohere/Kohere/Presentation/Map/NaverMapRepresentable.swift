@@ -62,6 +62,7 @@ struct NaverMapRepresentable: UIViewRepresentable {
         private let onLocationAuthorizationChanged: (MapLocationAuthorization) -> Void
         private let onUserLocationUpdated: (MapCoordinate) -> Void
         private let onMarkerTapped: (String) -> Void
+        // TODO: 위치 권한 요청과 업데이트 수신은 현재 임시로 Coordinator에서 직접 처리한다. 다음 PR에서 TCA Effect 의존성으로 이관한다.
         private let locationManager = CLLocationManager()
         private var handledCameraMoveRequest: MapCoordinate?
         private var selectedMarkerID: String?
