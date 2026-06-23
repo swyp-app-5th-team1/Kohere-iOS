@@ -35,6 +35,8 @@ struct OnboardingTextField: View {
                 .onChange(of: keyboardField.wrappedValue) { _, newValue in
                     if newValue == equals {
                         activeField = equals
+                    } else if activeField == equals {
+                        activeField = nil
                     }
                 }
             
