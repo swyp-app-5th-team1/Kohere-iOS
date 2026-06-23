@@ -99,7 +99,9 @@ struct OnboardingFeature {
                 
             case .sendVerificationCodeTapped:
                 let trimmedEmail = state.email.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !trimmedEmail.isEmpty else { return .none }
+                guard !trimmedEmail.isEmpty else {
+                    return .none
+                }
                 state.email = trimmedEmail
                 state.isCodeSent = true
                 state.verificationCode = ""
@@ -107,7 +109,9 @@ struct OnboardingFeature {
                 return .none
                 
             case .confirmVerificationCodeTapped:
-                guard state.isCodeSent else { return .none }
+                guard state.isCodeSent else {
+                    return .none
+                }
                 // TODO: 서버 검증 성공 시에만 진입 버튼 활성화
                 return .none
                 
