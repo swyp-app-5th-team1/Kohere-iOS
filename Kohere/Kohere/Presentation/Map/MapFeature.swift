@@ -7,7 +7,7 @@
 
 import ComposableArchitecture
 
-enum MapLocationAuthorization: Equatable {
+enum MapLocationAuthorization: Equatable, Sendable {
     case notDetermined
     case authorized
     case denied
@@ -16,6 +16,9 @@ enum MapLocationAuthorization: Equatable {
 
 @Reducer
 struct MapFeature {
+    @Dependency(\.locationClient)
+    var locationClient
+
     @Reducer
     enum Path {
     }
@@ -48,6 +51,7 @@ struct MapFeature {
     }
 
     enum Action {
+        case mapAppeared
         case locationAuthorizationChanged(MapLocationAuthorization)
         case userLocationUpdated(MapCoordinate)
         case myLocationButtonTapped
@@ -61,6 +65,20 @@ struct MapFeature {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            case .mapAppeared:
+                return .run { [locationClient] send in
+                    let authorization = await locationClient.requestAuthorization()
+                    await send(.locationAuthorizationChanged(authorization))
+
+                    guard case .authorized = authorization else { return }
+
+                    let updates = await locationClient.locationUpdates()
+                    for await coordinate in updates {
+                        await send(.userLocationUpdated(coordinate))
+                    }
+                }
+                .cancellable(id: "MapFeature.locationUpdates", cancelInFlight: true)
+
             case let .locationAuthorizationChanged(authorization):
                 state.locationAuthorization = authorization
 

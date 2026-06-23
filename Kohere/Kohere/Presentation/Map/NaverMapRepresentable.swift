@@ -5,7 +5,6 @@
 //  Created by Codex on 6/23/26.
 //
 
-import CoreLocation
 import NMapsMap
 import SwiftUI
 
@@ -18,16 +17,12 @@ struct NaverMapRepresentable: UIViewRepresentable {
     let userLocation: MapCoordinate?
     let onViewportChanged: (MapViewport) -> Void
     let onCameraMoveRequestHandled: () -> Void
-    let onLocationAuthorizationChanged: (MapLocationAuthorization) -> Void
-    let onUserLocationUpdated: (MapCoordinate) -> Void
     let onMarkerTapped: (String) -> Void
 
     func makeCoordinator() -> Coordinator {
         Coordinator(
             onViewportChanged: onViewportChanged,
             onCameraMoveRequestHandled: onCameraMoveRequestHandled,
-            onLocationAuthorizationChanged: onLocationAuthorizationChanged,
-            onUserLocationUpdated: onUserLocationUpdated,
             onMarkerTapped: onMarkerTapped
         )
     }
@@ -41,12 +36,7 @@ struct NaverMapRepresentable: UIViewRepresentable {
         mapView.moveCamera(cameraUpdate)
         mapView.addCameraDelegate(delegate: context.coordinator)
         configureLocationOverlay(on: mapView)
-        context.coordinator.startLocationUpdates()
         return mapView
-    }
-
-    static func dismantleUIView(_ uiView: NMFMapView, coordinator: Coordinator) {
-        coordinator.stopLocationUpdates()
     }
 
     func updateUIView(_ uiView: NMFMapView, context: Context) {
@@ -56,14 +46,10 @@ struct NaverMapRepresentable: UIViewRepresentable {
         updateUserLocationOverlay(userLocation, on: uiView)
     }
 
-    final class Coordinator: NSObject, CLLocationManagerDelegate, NMFMapViewCameraDelegate {
+    final class Coordinator: NSObject, NMFMapViewCameraDelegate {
         private let onViewportChanged: (MapViewport) -> Void
         private let onCameraMoveRequestHandled: () -> Void
-        private let onLocationAuthorizationChanged: (MapLocationAuthorization) -> Void
-        private let onUserLocationUpdated: (MapCoordinate) -> Void
         private let onMarkerTapped: (String) -> Void
-        // TODO: 위치 권한 요청과 업데이트 수신은 현재 임시로 Coordinator에서 직접 처리한다. 다음 PR에서 TCA Effect 의존성으로 이관한다.
-        private let locationManager = CLLocationManager()
         private var handledCameraMoveRequest: MapCoordinate?
         private var selectedMarkerID: String?
         private var clusterer: NMCClusterer<MapClusteringKey>?
@@ -74,71 +60,12 @@ struct NaverMapRepresentable: UIViewRepresentable {
         init(
             onViewportChanged: @escaping (MapViewport) -> Void,
             onCameraMoveRequestHandled: @escaping () -> Void,
-            onLocationAuthorizationChanged: @escaping (MapLocationAuthorization) -> Void,
-            onUserLocationUpdated: @escaping (MapCoordinate) -> Void,
             onMarkerTapped: @escaping (String) -> Void
         ) {
             self.onViewportChanged = onViewportChanged
             self.onCameraMoveRequestHandled = onCameraMoveRequestHandled
-            self.onLocationAuthorizationChanged = onLocationAuthorizationChanged
-            self.onUserLocationUpdated = onUserLocationUpdated
             self.onMarkerTapped = onMarkerTapped
             super.init()
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
-        }
-
-        // 지도 진입 시 위치 권한을 확인하고, 허용된 경우 사용자 위치 업데이트를 시작한다.
-        func startLocationUpdates() {
-            handleLocationAuthorizationStatus(locationManager.authorizationStatus)
-        }
-
-        // 지도 화면이 해제될 때 위치 업데이트와 delegate 연결을 정리한다.
-        func stopLocationUpdates() {
-            locationManager.stopUpdatingLocation()
-            locationManager.delegate = nil
-        }
-
-        // 위치 권한 상태 변경을 TCA 상태로 전달하고 상태별 위치 업데이트 동작을 결정한다.
-        func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-            handleLocationAuthorizationStatus(manager.authorizationStatus)
-        }
-
-        // CoreLocation이 전달한 최신 좌표를 앱의 지도 좌표 모델로 변환해 전달한다.
-        func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-            guard let location = locations.last else { return }
-            notifyUserLocationUpdated(makeMapCoordinate(from: location.coordinate))
-        }
-
-        private func handleLocationAuthorizationStatus(_ status: CLAuthorizationStatus) {
-            let authorization = makeMapLocationAuthorization(from: status)
-            notifyLocationAuthorizationChanged(authorization)
-
-            switch status {
-            case .notDetermined:
-                locationManager.requestWhenInUseAuthorization()
-
-            case .authorizedAlways, .authorizedWhenInUse:
-                locationManager.startUpdatingLocation()
-
-            case .denied, .restricted:
-                locationManager.stopUpdatingLocation()
-
-            @unknown default:
-                locationManager.stopUpdatingLocation()
-            }
-        }
-
-        private func notifyLocationAuthorizationChanged(_ authorization: MapLocationAuthorization) {
-            DispatchQueue.main.async { [onLocationAuthorizationChanged] in
-                onLocationAuthorizationChanged(authorization)
-            }
-        }
-
-        private func notifyUserLocationUpdated(_ coordinate: MapCoordinate) {
-            DispatchQueue.main.async { [onUserLocationUpdated] in
-                onUserLocationUpdated(coordinate)
-            }
         }
 
         // 지도 이동이 완전히 끝난 시점의 화면 정보를 TCA 상태로 전달한다.

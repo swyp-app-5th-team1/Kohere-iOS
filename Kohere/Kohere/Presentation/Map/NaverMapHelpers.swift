@@ -5,7 +5,6 @@
 //  Created by Codex on 6/23/26.
 //
 
-import CoreLocation
 import NMapsMap
 
 // MARK: - Marker Images
@@ -121,30 +120,4 @@ func makeMapCoordinate(from latLng: NMGLatLng) -> MapCoordinate {
         latitude: latLng.lat,
         longitude: latLng.lng
     )
-}
-
-func makeMapCoordinate(from coordinate: CLLocationCoordinate2D) -> MapCoordinate {
-    MapCoordinate(
-        latitude: coordinate.latitude,
-        longitude: coordinate.longitude
-    )
-}
-
-func makeMapLocationAuthorization(from status: CLAuthorizationStatus) -> MapLocationAuthorization {
-    switch status {
-    case .notDetermined:
-        .notDetermined
-
-    case .authorizedAlways, .authorizedWhenInUse:
-        .authorized
-
-    case .denied:
-        .denied
-
-    case .restricted:
-        .restricted
-
-    @unknown default:
-        .restricted
-    }
 }

@@ -24,12 +24,6 @@ struct MapView: View {
                 onCameraMoveRequestHandled: {
                     store.send(.cameraMoveRequestHandled)
                 },
-                onLocationAuthorizationChanged: { authorization in
-                    store.send(.locationAuthorizationChanged(authorization))
-                },
-                onUserLocationUpdated: { coordinate in
-                    store.send(.userLocationUpdated(coordinate))
-                },
                 onMarkerTapped: { id in
                     store.send(.markerTapped(id))
                 }
@@ -42,6 +36,9 @@ struct MapView: View {
                 researchButton
                     .padding(.top, 12)
             }
+        }
+        .onAppear {
+            store.send(.mapAppeared)
         }
     }
 
