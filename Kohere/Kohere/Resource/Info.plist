@@ -24,6 +24,8 @@
 	<true/>
 	<key>NMFNcpKeyId</key>
 	<string>$(NAVER_MAP_CLIENT_ID)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>현재 위치를 기준으로 주변 매물을 확인하기 위해 위치 권한이 필요합니다.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

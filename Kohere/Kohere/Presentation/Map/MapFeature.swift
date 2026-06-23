@@ -7,6 +7,13 @@
 
 import ComposableArchitecture
 
+enum MapLocationAuthorization: Equatable {
+    case notDetermined
+    case authorized
+    case denied
+    case restricted
+}
+
 @Reducer
 struct MapFeature {
     @Reducer
@@ -34,9 +41,17 @@ struct MapFeature {
         var currentViewport: MapViewport?
         var lastSearchedViewport: MapViewport?
         var showsResearchButton = false
+        var locationAuthorization: MapLocationAuthorization = .notDetermined
+        var userLocation: MapCoordinate?
+        var cameraMoveRequest: MapCoordinate?
+        var hasMovedToInitialUserLocation = false
     }
 
     enum Action {
+        case locationAuthorizationChanged(MapLocationAuthorization)
+        case userLocationUpdated(MapCoordinate)
+        case myLocationButtonTapped
+        case cameraMoveRequestHandled
         case markerTapped(String)
         case researchButtonTapped
         case viewportChanged(MapViewport)
@@ -46,6 +61,40 @@ struct MapFeature {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            case let .locationAuthorizationChanged(authorization):
+                state.locationAuthorization = authorization
+
+                switch authorization {
+                case .authorized:
+                    break
+
+                case .notDetermined, .denied, .restricted:
+                    state.userLocation = nil
+                    state.hasMovedToInitialUserLocation = false
+                }
+
+                return .none
+
+            case let .userLocationUpdated(coordinate):
+                state.userLocation = coordinate
+
+                if !state.hasMovedToInitialUserLocation {
+                    state.cameraMoveRequest = coordinate
+                    state.hasMovedToInitialUserLocation = true
+                }
+
+                return .none
+
+            case .myLocationButtonTapped:
+                guard state.locationAuthorization == .authorized else { return .none }
+                guard let userLocation = state.userLocation else { return .none }
+                state.cameraMoveRequest = userLocation
+                return .none
+
+            case .cameraMoveRequestHandled:
+                state.cameraMoveRequest = nil
+                return .none
+
             case let .markerTapped(id):
                 guard state.selectedMarkerID != id else { return .none }
                 state.selectedMarkerID = id
