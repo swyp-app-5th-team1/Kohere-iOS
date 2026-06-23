@@ -71,7 +71,12 @@ struct OnboardingFeature {
         BindingReducer()
         Reduce { state, action in
             switch action {
-            case .binding:
+            case .binding(let action):
+                if action.keyPath == \.email {
+                    state.isCodeSent = false
+                    state.isEmailVerified = false
+                    state.verificationCode = ""
+                }
                 return .none
                 
             case .nextButtonTapped:
