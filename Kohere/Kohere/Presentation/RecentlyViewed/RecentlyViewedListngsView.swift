@@ -41,5 +41,8 @@ struct RecentlyViewedListngsView: View {
                 }
             }
         }
+        .onAppear {
+            store.send(.onAppear)
+        }
     }
 }

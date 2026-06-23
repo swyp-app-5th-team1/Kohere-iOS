@@ -41,5 +41,8 @@ struct SavedListingsView: View {
                 }
             }
         }
+        .onAppear {
+            store.send(.onAppear)
+        }
     }
 }
