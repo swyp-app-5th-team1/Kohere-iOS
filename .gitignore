@@ -12,6 +12,7 @@ build/
 *.hmap
 
 # App packaging / debug symbols
+Kohere-AdHoc/
 *.ipa
 *.dSYM
 *.dSYM.zip
@@ -52,6 +53,8 @@ fastlane/test_output/
 .env
 .env.*
 !.env.example
+Kohere/Config/Secrets.xcconfig
+GoogleService-Info.plist
 
 # Personal notes
 docs/private/

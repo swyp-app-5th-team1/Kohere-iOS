@@ -18,7 +18,8 @@
 - 타이포그래피, shadow 등 코드 기반 디자인 시스템 API는 `Core/DesignSystem`에 둔다.
 - 색상은 Asset Catalog의 Color Set 이름을 SwiftUI generated asset symbol로 직접 사용한다.
 - 디자인 시스템 extension은 일반 extension으로 보지 않고 `Core/DesignSystem` 안에 둔다.
-- SwiftUI 색상 접근 형태는 `Color.<assetName>`를 기준으로 한다.
+- SwiftUI 색상 접근은 타입 추론이 가능한 modifier와 디자인 시스템 API 안에서 `.<assetName>` 형태를 우선한다.
+  예: `.foregroundStyle(.labelNormal)`, `kohereSurface(background: .backgroundElevatedNormal, ...)`.
 - SwiftUI 타이포그래피 적용 형태는 `Text("Title").kohereTextStyle(.heading1Bold)`를 기준으로 한다.
 - 단순 UI 또는 디자인 시스템 작업만으로 Domain/Data 계층을 만들지 않는다.
 
@@ -82,7 +83,7 @@ VStack(alignment: .leading, spacing: 8) {
 }
 .padding(16)
 .kohereSurface(
-    background: Color.backgroundElevatedNormal,
+    background: .backgroundElevatedNormal,
     shape: .roundedRectangle(cornerRadius: 16),
     elevation: .normalSmall
 )
@@ -90,7 +91,7 @@ VStack(alignment: .leading, spacing: 8) {
 
 ```swift
 Circle()
-    .fill(Color.backgroundElevatedNormal)
+    .fill(.backgroundElevatedNormal)
     .frame(width: 56, height: 56)
     .kohereElevation(.normalSmall, shape: .circle)
 ```

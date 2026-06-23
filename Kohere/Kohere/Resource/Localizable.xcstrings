@@ -1,0 +1,78 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "@user_code" : {
+
+    },
+    "%@ - 한국어 English 日本語" : {
+
+    },
+    "Agree" : {
+
+    },
+    "Agree & Get Started" : {
+
+    },
+    "Agree to All Terms" : {
+
+    },
+    "Allow Notifications" : {
+
+    },
+    "Design System" : {
+
+    },
+    "Elevation" : {
+
+    },
+    "Here you are, in Korea" : {
+
+    },
+    "In just a minute!" : {
+
+    },
+    "Marketing Communications" : {
+
+    },
+    "Nickname" : {
+
+    },
+    "Pretendard JP와 elevation token을 확인하는 임시 샘플입니다." : {
+
+    },
+    "Privacy Policy *" : {
+
+    },
+    "Required Agreements" : {
+
+    },
+    "Review and agree to the terms\nto get started" : {
+
+    },
+    "RoundedRectangle / 16" : {
+
+    },
+    "Sign in with Apple" : {
+
+    },
+    "Sign in with Google" : {
+
+    },
+    "Skip" : {
+
+    },
+    "Terms of Service *" : {
+
+    },
+    "We'll send alerts\nso you don't miss great listings" : {
+
+    },
+    "You can manage notification settings anytime\nin your device settings." : {
+
+    },
+    "이 지역 검색하기" : {
+
+    }
+  },
+  "version" : "1.0"
+}
