@@ -31,7 +31,7 @@ struct HomeFlowView: View {
                     .navigationBarHidden(true)
                 
             case let .recentlyViewedList(recentlyViewedStore):
-                RecentlyViewedListngsView(store: recentlyViewedStore)
+                RecentlyViewedListingsView(store: recentlyViewedStore)
                     .navigationBarHidden(true)
             
             case let .notifications(notificationsStore):
