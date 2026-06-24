@@ -29,7 +29,7 @@ struct ListingCardView: View {
             
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading) {
                         Text(item.formattedPrice)
                             .kohereTextStyle(.label1Semibold)
                             .foregroundColor(.neutral80)
@@ -78,7 +78,7 @@ struct ListingCardView: View {
                         .kohereTextStyle(.caption1Regular)
                         .foregroundColor(.labelAlternative)
                 }
-                .padding(.top, 5)
+                .padding(.top, 4)
             }
         }
         .padding(.vertical, 16)
