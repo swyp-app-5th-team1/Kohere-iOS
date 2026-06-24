@@ -11,7 +11,7 @@ struct ListingCardView: View {
     
     // MARK: - Properties
     
-    let item: ListingItem
+    let item: ListingItemModel
     
     var onCardTapped: () -> Void
     var onLikeTapped: () -> Void

@@ -15,7 +15,7 @@ struct SavedListingsFeature {
     
     @ObservableState
     struct State: Equatable {
-        var items: [ListingItem] = ListingItem.mockList
+        var items: [ListingItemModel] = ListingItemModel.mockList
         var isLoading: Bool = false
     }
     

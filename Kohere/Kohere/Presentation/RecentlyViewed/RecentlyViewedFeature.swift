@@ -15,7 +15,7 @@ struct RecentlyViewedFeature {
     
     @ObservableState
     struct State: Equatable {
-        var items: [ListingItem] = ListingItem.mockList
+        var items: [ListingItemModel] = ListingItemModel.mockList
         var isLoading: Bool = false
     }
     
@@ -39,7 +39,7 @@ struct RecentlyViewedFeature {
                 
             case let .cardTapped(id):
                 // TODO: 매물 상세 화면 네비게이션
-                print("선택 매물\(id)") // never used 방지
+                print("선택 매물 \(id)")
                 return .none
                 
             case let .likeButtonTapped(id):

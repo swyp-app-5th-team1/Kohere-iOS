@@ -1,5 +1,5 @@
 //
-//  ListingItem.swift
+//  ListingItemModel.swift
 //  Kohere
 //
 //  Created by mandoo on 6/23/26.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ListingItem: Equatable, Identifiable {
+struct ListingItemModel: Equatable, Identifiable {
     let id: Int
     let formattedPrice: String
     let formattedUsdPrice: String
@@ -18,7 +18,7 @@ struct ListingItem: Equatable, Identifiable {
     var isLiked: Bool
 }
 
-extension ListingItem {
+extension ListingItemModel {
     init(from entity: Listing) {
         self.id = entity.id
         self.isLiked = entity.isLiked
@@ -31,9 +31,9 @@ extension ListingItem {
     }
 }
 
-extension ListingItem {
-    static let mockList: [ListingItem] = [
-        ListingItem(
+extension ListingItemModel {
+    static let mockList: [ListingItemModel] = [
+        ListingItemModel(
             id: 1,
             formattedPrice: "₩380~400K/mo",
             formattedUsdPrice: "≈$286/mo",
@@ -43,7 +43,7 @@ extension ListingItem {
             period: "1 mo~",
             isLiked: true
         ),
-        ListingItem(
+        ListingItemModel(
             id: 2,
             formattedPrice: "₩380~400K/mo",
             formattedUsdPrice: "≈$286/mo",
@@ -53,7 +53,7 @@ extension ListingItem {
             period: "1 mo~",
             isLiked: true
         ),
-        ListingItem(
+        ListingItemModel(
             id: 3,
             formattedPrice: "₩380~400K/mo",
             formattedUsdPrice: "≈$286/mo",
