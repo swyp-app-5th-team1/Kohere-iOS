@@ -10,6 +10,7 @@ import SwiftUI
 enum KohereShadowShape {
     case rectangle
     case roundedRectangle(cornerRadius: CGFloat)
+    case topRoundedRectangle(cornerRadius: CGFloat)
     case circle
     case capsule
 
@@ -19,6 +20,16 @@ enum KohereShadowShape {
             KohereAnyShape(Rectangle())
         case let .roundedRectangle(cornerRadius):
             KohereAnyShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        case let .topRoundedRectangle(cornerRadius):
+            KohereAnyShape(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: cornerRadius,
+                    bottomLeadingRadius: 0,
+                    bottomTrailingRadius: 0,
+                    topTrailingRadius: cornerRadius,
+                    style: .continuous
+                )
+            )
         case .circle:
             KohereAnyShape(Circle())
         case .capsule:
