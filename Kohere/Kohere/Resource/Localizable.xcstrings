@@ -1,10 +1,31 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "@user_code" : {
 
     },
     "%@ - 한국어 English 日本語" : {
+
+    },
+    "%lld" : {
+
+    },
+    "≈$355~398/mo" : {
+
+    },
+    "₩380~400K/mo" : {
+
+    },
+    "1 mo~" : {
+
+    },
+    "8-min walk Hongdae Sta." : {
+
+    },
+    "A few more details\nfor a safer contract" : {
 
     },
     "Agree" : {
@@ -19,10 +40,37 @@
     "Allow Notifications" : {
 
     },
+    "Confirm" : {
+
+    },
+    "Date of Birth" : {
+
+    },
+    "Dep. ₩200K · Maint. ₩20K" : {
+
+    },
     "Design System" : {
 
     },
+    "E-mail" : {
+
+    },
     "Elevation" : {
+
+    },
+    "Enter your name as shown on your passport" : {
+
+    },
+    "First Name" : {
+
+    },
+    "Gender" : {
+
+    },
+    "Get Started" : {
+
+    },
+    "Goshiwon" : {
 
     },
     "Here you are, in Korea" : {
@@ -31,10 +79,22 @@
     "In just a minute!" : {
 
     },
+    "Last Name" : {
+
+    },
     "Marketing Communications" : {
 
     },
+    "Nationality" : {
+
+    },
+    "Next" : {
+
+    },
     "Nickname" : {
+
+    },
+    "Occupation" : {
 
     },
     "Pretendard JP와 elevation token을 확인하는 임시 샘플입니다." : {
@@ -44,6 +104,9 @@
 
     },
     "Required Agreements" : {
+
+    },
+    "Resend" : {
 
     },
     "Review and agree to the terms\nto get started" : {
@@ -61,16 +124,40 @@
     "Skip" : {
 
     },
+    "Sky Goshiwon" : {
+
+    },
     "Terms of Service *" : {
 
     },
+    "Verified" : {
+
+    },
+    "Verify" : {
+
+    },
+    "Verify your email\nand you're all set" : {
+
+    },
+    "Visa Status" : {
+
+    },
     "We'll send alerts\nso you don't miss great listings" : {
+
+    },
+    "Welcome!\nLet's check your details." : {
 
     },
     "You can manage notification settings anytime\nin your device settings." : {
 
     },
     "이 지역 검색하기" : {
+
+    },
+    "적용하기" : {
+
+    },
+    "초기화" : {
 
     }
   },
