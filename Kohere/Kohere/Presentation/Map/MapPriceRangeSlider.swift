@@ -28,11 +28,11 @@ struct MapPriceRangeSlider: View {
                     .frame(width: max(maximumX - minimumX, trackHeight), height: trackHeight)
                     .position(x: (minimumX + maximumX) / 2, y: thumbSize / 2)
 
-                sliderThumb
+                sliderThumb(.minimum)
                     .position(x: minimumX, y: thumbSize / 2)
                     .zIndex(selection.minimum == selection.maximum ? 1 : 0)
 
-                sliderThumb
+                sliderThumb(.maximum)
                     .position(x: maximumX, y: thumbSize / 2)
                     .zIndex(1)
             }
@@ -61,7 +61,7 @@ struct MapPriceRangeSlider: View {
         }
     }
 
-    private var sliderThumb: some View {
+    private func sliderThumb(_ thumb: SliderThumb) -> some View {
         Circle()
             .fill(.common0)
             .frame(width: thumbSize, height: thumbSize)
@@ -71,6 +71,32 @@ struct MapPriceRangeSlider: View {
                     .stroke(.lineNeutral.opacity(0.16), lineWidth: 1)
             }
             .contentShape(Circle())
+            .accessibilityLabel(Text(thumb.accessibilityLabel))
+            .accessibilityValue(Text("\(thumb.value(in: selection))"))
+            .accessibilityAdjustableAction { direction in
+                adjust(thumb, direction: direction)
+            }
+    }
+
+    private func adjust(_ thumb: SliderThumb, direction: AccessibilityAdjustmentDirection) {
+        let step = accessibilityStep
+
+        switch (thumb, direction) {
+        case (.minimum, .increment):
+            onMinimumChange(min(selection.minimum + step, selection.maximum))
+        case (.minimum, .decrement):
+            onMinimumChange(max(selection.minimum - step, bounds.lowerBound))
+        case (.maximum, .increment):
+            onMaximumChange(min(selection.maximum + step, bounds.upperBound))
+        case (.maximum, .decrement):
+            onMaximumChange(max(selection.maximum - step, selection.minimum))
+        @unknown default:
+            break
+        }
+    }
+
+    private var accessibilityStep: Int {
+        bounds.upperBound <= 100 ? 5 : 10
     }
 
     private func position(for value: Int, width: CGFloat) -> CGFloat {
@@ -107,5 +133,23 @@ struct MapPriceRangeSlider: View {
     private enum SliderThumb {
         case minimum
         case maximum
+
+        var accessibilityLabel: String {
+            switch self {
+            case .minimum:
+                String(localized: "최소값")
+            case .maximum:
+                String(localized: "최대값")
+            }
+        }
+
+        func value(in selection: MapFilterPriceSelection) -> Int {
+            switch self {
+            case .minimum:
+                selection.minimum
+            case .maximum:
+                selection.maximum
+            }
+        }
     }
 }
