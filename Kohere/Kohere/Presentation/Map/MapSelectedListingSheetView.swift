@@ -61,7 +61,7 @@ struct MapSelectedListingSheetView: View {
                     .resizable()
                     .frame(width: 24, height: 24)
                     .foregroundStyle(.labelAlternative)
-                    .frame(width: 44, height: 44)
+                    .frame(width: 44, height: 44, alignment: .trailing)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
