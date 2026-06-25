@@ -39,7 +39,7 @@ extension DependencyValues {
 private final class LiveLocationService: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     private var authorizationContinuation: CheckedContinuation<MapLocationAuthorization, Never>?
-    private var locationContinuation: AsyncStream<MapCoordinate>.Continuation?
+    private var locationContinuations: [UUID: AsyncStream<MapCoordinate>.Continuation] = [:]
 
     override init() {
         super.init()
@@ -62,13 +62,22 @@ private final class LiveLocationService: NSObject, CLLocationManagerDelegate {
 
     func locationUpdates() -> AsyncStream<MapCoordinate> {
         AsyncStream { continuation in
-            locationContinuation = continuation
-            manager.startUpdatingLocation()
+            let id = UUID()
+            locationContinuations[id] = continuation
+
+            if locationContinuations.count == 1 {
+                manager.startUpdatingLocation()
+            }
 
             continuation.onTermination = { _ in
                 Task { @MainActor [weak self] in
-                    self?.manager.stopUpdatingLocation()
-                    self?.locationContinuation = nil
+                    guard let self else { return }
+
+                    locationContinuations[id] = nil
+
+                    if locationContinuations.isEmpty {
+                        manager.stopUpdatingLocation()
+                    }
                 }
             }
         }
@@ -87,7 +96,10 @@ private final class LiveLocationService: NSObject, CLLocationManagerDelegate {
         didUpdateLocations locations: [CLLocation]
     ) {
         guard let location = locations.last else { return }
-        locationContinuation?.yield(makeMapCoordinate(from: location.coordinate))
+        let coordinate = makeMapCoordinate(from: location.coordinate)
+        for continuation in locationContinuations.values {
+            continuation.yield(coordinate)
+        }
     }
 }
 
