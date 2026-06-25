@@ -86,23 +86,23 @@ enum MapFilterOption: CaseIterable, Hashable {
     var displayTitle: String {
         switch self {
         case .moveInNow:
-            "Move-in Now"
+            String(localized: "Move-in Now")
         case .femaleOnly:
-            "Female Only"
+            String(localized: "Female Only")
         case .mealsIncluded:
-            "Meals Included"
+            String(localized: "Meals Included")
         case .doubleRoom:
-            "Double Room"
+            String(localized: "Double Room")
         case .privateBathroom:
-            "Private Bath"
+            String(localized: "Private Bath")
         case .englishSupport:
-            "English OK"
+            String(localized: "English OK")
         case .addressRegistration:
-            "Address Registration"
+            String(localized: "Address Registration")
         case .noMaintenanceFee:
-            "No Maint. Fee"
+            String(localized: "No Maint. Fee")
         case .noARCRequired:
-            "No ARC"
+            String(localized: "No ARC")
         }
     }
 }
@@ -152,11 +152,11 @@ enum MapPropertyType: CaseIterable, Hashable {
     var displayTitle: String {
         switch self {
         case .goshiwon:
-            "고시원"
+            String(localized: "고시원")
         case .coLiving:
-            "코리빙"
+            String(localized: "코리빙")
         case .shareHouse:
-            "쉐어하우스"
+            String(localized: "쉐어하우스")
         }
     }
 }
