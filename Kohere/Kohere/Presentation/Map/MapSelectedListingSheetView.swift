@@ -61,8 +61,11 @@ struct MapSelectedListingSheetView: View {
                     .resizable()
                     .frame(width: 24, height: 24)
                     .foregroundStyle(.labelAlternative)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(Text("닫기"))
         }
     }
 
