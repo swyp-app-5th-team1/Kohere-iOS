@@ -34,12 +34,21 @@ struct KohereApp: App {
             name: "coolNeutral50",
             color: .secondaryLabel
         )
+        let backgroundColor = UIColor(named: "backgroundNormalNormal") ?? fallbackTabBarColor(
+            name: "backgroundNormalNormal",
+            color: .white
+        )
 
         let appearance = UITabBarAppearance()
 
-        appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = .clear
-        appearance.backgroundEffect = nil
+        if #available(iOS 26.0, *) {
+            appearance.configureWithTransparentBackground()
+            appearance.backgroundColor = .clear
+            appearance.backgroundEffect = nil
+        } else {
+            appearance.configureWithDefaultBackground()
+            appearance.backgroundColor = backgroundColor
+        }
         appearance.shadowColor = .clear
 
         configureTabBarItemAppearance(
@@ -62,7 +71,6 @@ struct KohereApp: App {
         tabBar.tintColor = selectedColor
         tabBar.unselectedItemTintColor = normalColor
         tabBar.isTranslucent = true
-        tabBar.backgroundColor = .clear
         tabBar.standardAppearance = appearance
         tabBar.scrollEdgeAppearance = appearance
     }
