@@ -37,6 +37,9 @@ struct MapView: View {
         .onAppear {
             store.send(.mapAppeared)
         }
+        .onDisappear {
+            store.send(.mapDismissed)
+        }
         .fullScreenCover(
             isPresented: Binding(
                 get: { store.isFilterPresented },

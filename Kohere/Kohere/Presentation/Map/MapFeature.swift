@@ -71,6 +71,7 @@ struct MapFeature {
 
     enum Action {
         case mapAppeared
+        case mapDismissed
         case locationAuthorizationChanged(MapLocationAuthorization)
         case userLocationUpdated(MapCoordinate)
         case myLocationButtonTapped
@@ -111,6 +112,9 @@ struct MapFeature {
                     }
                 }
                 .cancellable(id: "MapFeature.locationUpdates", cancelInFlight: true)
+
+            case .mapDismissed:
+                return .cancel(id: "MapFeature.locationUpdates")
 
             case let .locationAuthorizationChanged(authorization):
                 state.locationAuthorization = authorization
