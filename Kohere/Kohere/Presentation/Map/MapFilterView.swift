@@ -279,13 +279,16 @@ private struct FlowLayout: Layout {
 
         for subview in subviews {
             let size = subview.sizeThatFits(.unspecified)
-            if currentX > 0, currentX + size.width > containerWidth {
+            let nextX = currentX + (currentX > 0 ? spacing : 0) + size.width
+
+            if currentX > 0, nextX > containerWidth {
                 totalHeight += currentRowHeight + rowSpacing
-                currentX = 0
-                currentRowHeight = 0
+                currentX = size.width
+                currentRowHeight = size.height
+            } else {
+                currentX = nextX
+                currentRowHeight = max(currentRowHeight, size.height)
             }
-            currentX += size.width + (currentX > 0 ? spacing : 0)
-            currentRowHeight = max(currentRowHeight, size.height)
         }
         return CGSize(width: containerWidth, height: totalHeight + currentRowHeight)
     }
