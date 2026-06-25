@@ -14,6 +14,11 @@ enum MapLocationAuthorization: Equatable, Sendable {
     case restricted
 }
 
+enum MapSheetMode: Equatable {
+    case listingList
+    case selectedListing
+}
+
 @Reducer
 struct MapFeature {
     @Dependency(\.locationClient)
@@ -25,7 +30,10 @@ struct MapFeature {
 
     @ObservableState
     struct State: Equatable {
+        // navigation
         var path = StackState<Path.State>()
+
+        // 매물/마커 표시 상태
         var markers: [MapMarkerItem] = [
             MapMarkerItem(
                 id: "hongdae-station",
@@ -41,9 +49,20 @@ struct MapFeature {
             )
         ]
         var selectedMarkerID: String?
+
+        // 지도 viewport / 재검색 상태
         var currentViewport: MapViewport?
         var lastSearchedViewport: MapViewport?
         var showsResearchButton = false
+
+        // 바텀시트 / 필터 상태
+        var sheetMode: MapSheetMode = .listingList
+        var isFilterPresented = false
+        var appliedFilter = MapFilterState()
+        var editingFilter = MapFilterState()
+        var appliedFilterSource: MapFilterApplicationSource = .manual
+
+        // 위치 권한 / 현재 위치 / 카메라 이동 요청 상태
         var locationAuthorization: MapLocationAuthorization = .notDetermined
         var userLocation: MapCoordinate?
         var cameraMoveRequest: MapCoordinate?
@@ -60,6 +79,20 @@ struct MapFeature {
         case researchButtonTapped
         case viewportChanged(MapViewport)
         case path(StackActionOf<Path>)
+        case listingTapped(String)
+        case selectedListingCloseButtonTapped
+
+        // 필터 관련
+        case filterButtonTapped
+        case filterDismissed
+        case filterOptionTapped(MapFilterOption)
+        case filterPropertyTypeTapped(MapPropertyType)
+        case monthlyRentMinimumChanged(Int)
+        case monthlyRentMaximumChanged(Int)
+        case depositMinimumChanged(Int)
+        case depositMaximumChanged(Int)
+        case filterApplyButtonTapped
+        case filterResetButtonTapped
     }
 
     var body: some Reducer<State, Action> {
@@ -116,11 +149,13 @@ struct MapFeature {
             case let .markerTapped(id):
                 guard state.selectedMarkerID != id else { return .none }
                 state.selectedMarkerID = id
+                state.sheetMode = .selectedListing
                 return .none
 
             case .researchButtonTapped:
                 state.lastSearchedViewport = state.currentViewport
                 state.selectedMarkerID = nil
+                state.sheetMode = .listingList
                 state.showsResearchButton = false
                 return .none
 
@@ -136,6 +171,62 @@ struct MapFeature {
                 return .none
 
             case .path:
+                return .none
+
+            case let .listingTapped(id):
+                state.selectedMarkerID = id
+                state.sheetMode = .selectedListing
+                return .none
+
+            case .selectedListingCloseButtonTapped:
+                state.selectedMarkerID = nil
+                state.sheetMode = .listingList
+                return .none
+
+            case .filterButtonTapped:
+                state.editingFilter = state.appliedFilter
+                state.isFilterPresented = true
+                return .none
+
+            case .filterDismissed:
+                state.editingFilter = state.appliedFilter
+                state.isFilterPresented = false
+                return .none
+
+            case let .filterOptionTapped(option):
+                state.editingFilter.toggleOption(option)
+                return .none
+
+            case let .filterPropertyTypeTapped(property):
+                state.editingFilter.togglePropertyType(property)
+                return .none
+
+            case let .monthlyRentMinimumChanged(minimum):
+                state.editingFilter.updateMonthlyRentMinimum(minimum)
+                return .none
+
+            case let .monthlyRentMaximumChanged(maximum):
+                state.editingFilter.updateMonthlyRentMaximum(maximum)
+                return .none
+
+            case let .depositMinimumChanged(minimum):
+                state.editingFilter.updateDepositMinimum(minimum)
+                return .none
+
+            case let .depositMaximumChanged(maximum):
+                state.editingFilter.updateDepositMaximum(maximum)
+                return .none
+
+            case .filterApplyButtonTapped:
+                state.appliedFilter = state.editingFilter
+                if state.editingFilter.isDefault {
+                    state.appliedFilterSource = .manual
+                }
+                state.isFilterPresented = false
+                return .none
+
+            case .filterResetButtonTapped:
+                state.editingFilter = MapFilterState()
                 return .none
             }
         }
