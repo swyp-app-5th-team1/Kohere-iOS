@@ -1,5 +1,5 @@
 //
-//  RecentlyViewedListngsView.swift
+//  RecentlyViewedListingsView.swift
 //  Kohere
 //
 //  Created by mandoo on 6/24/26.
@@ -8,7 +8,7 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct RecentlyViewedListngsView: View {
+struct RecentlyViewedListingsView: View {
     
     // MARK: - Property
     

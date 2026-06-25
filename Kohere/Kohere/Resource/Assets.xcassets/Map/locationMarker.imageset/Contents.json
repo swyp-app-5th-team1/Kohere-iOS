@@ -2,8 +2,7 @@
   "images" : [
     {
       "filename" : "locationMarker.pdf",
-      "idiom" : "universal",
-      "preserves-vector-representation" : true
+      "idiom" : "universal"
     }
   ],
   "info" : {

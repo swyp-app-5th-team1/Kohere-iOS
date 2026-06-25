@@ -11,7 +11,7 @@ struct RecentlyViewedView: View {
     
     // MARK: - Properties
     
-    let items: [ListingItem]
+    let items: [ListingItemModel]
     
     let onSeeAllTapped: () -> Void
     let onBrowseTapped: () -> Void

@@ -31,11 +31,10 @@ struct MoreView: View {
                     MoreMenuSection(
                         title: "Korea Living Guide",
                         items: [
-                            .init(title: "Housing Types Guide", iconName: "housingTypeGuide", rendersAsTemplate: false),
-                            .init(title: "Contract Checklist", iconName: "contractChecklist", rendersAsTemplate: false),
-                            .init(title: "ARC Guide", iconName: "arcGuide", rendersAsTemplate: false),
+                            .init(title: "Korean Contract Checklist", iconName: "contractChecklist", rendersAsTemplate: false),
                             .init(title: "Bank Account Guide", iconName: "bankAccountGuide", rendersAsTemplate: false),
-                            .init(title: "Moving Guide", iconName: "movingGuide", rendersAsTemplate: false)
+                            .init(title: "Top 3 Seoul Subway Apps", iconName: "train", rendersAsTemplate: false),
+                            .init(title: "Health Insurance Guide", iconName: "healthInsurance", rendersAsTemplate: false)
                         ],
                         horizontalPadding: 16
                     )
@@ -156,11 +155,8 @@ private struct MoreMenuRow: View {
                     if let iconName = item.iconName {
                         Image(iconName)
                             .renderingMode(item.rendersAsTemplate ? .template : .original)
+                            .resizable()
                             .foregroundStyle(Color.coolNeutral40)
-                            .frame(width: 24, height: 24)
-                    } else {
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(Color.backgroundNormalAlternative)
                             .frame(width: 24, height: 24)
                     }
 

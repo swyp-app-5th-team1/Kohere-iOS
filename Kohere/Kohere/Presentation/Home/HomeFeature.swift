@@ -21,10 +21,18 @@ struct HomeFeature {
     @ObservableState
     struct State: Equatable {
         var path = StackState<Path.State>()
-        var recentlyViewedItems: [ListingItem] = []
+        var recentlyViewedItems: [ListingItemModel] = []
+        var quiz: QuizModel
+        var livingGuides: [LivingGuide] = []
         
-        init(recentlyViewedItems: [ListingItem] = ListingItem.mockList) {
+        init(
+            recentlyViewedItems: [ListingItemModel] = ListingItemModel.mockList,
+            quiz: Quiz = Quiz.mockQuiz,
+            livingGuides: [LivingGuide] = LivingGuide.mockLivingGuide
+        ) {
             self.recentlyViewedItems = recentlyViewedItems
+            self.quiz = QuizModel(entity: quiz, selectedAnswerIndex: nil)
+            self.livingGuides = livingGuides
         }
     }
     
@@ -42,6 +50,9 @@ struct HomeFeature {
         case browseListingsTapped
         case cardTapped(id: Int)
         case likeButtonTapped(id: Int)
+        
+        case quizOptionTapped(index: Int)
+        case livingGuideItemTapped(id: Int)
     }
     
     // MARK: - Reducer Body
@@ -90,13 +101,22 @@ struct HomeFeature {
                 
             case let .cardTapped(id):
                 // TODO: 매물 상세 뷰 네비게이션 (지도)
-                print("선택 매물\(id)") // never used 방지
+                print("선택 매물 \(id)")
                 return .none
                 
             case let .likeButtonTapped(id):
                 if let index = state.recentlyViewedItems.firstIndex(where: { $0.id == id }) {
                     state.recentlyViewedItems[index].isLiked.toggle()
                 }
+                return .none
+                
+            case let .quizOptionTapped(index):
+                guard !state.quiz.hasAnswered else { return .none }
+                state.quiz.selectedAnswerIndex = index
+                return .none
+                
+            case let .livingGuideItemTapped(id):
+                print("선택 콘텐츠 \(id)")
                 return .none
             }
         }

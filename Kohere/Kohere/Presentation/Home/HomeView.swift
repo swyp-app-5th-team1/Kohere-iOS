@@ -31,7 +31,7 @@ struct HomeView: View {
                 .foregroundStyle(.lineNeutral)
                 .frame(height: 1)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
                     RoomFinderBannerView(store: store)
                     
@@ -44,6 +44,12 @@ struct HomeView: View {
                     )
                     
                     homeDivider
+                    
+                    QuizView(store: store)
+                    
+                    homeDivider
+                    
+                    LivingInKoreaView(store: store)
                 }
             }
         }
