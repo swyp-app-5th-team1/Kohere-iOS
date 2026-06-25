@@ -53,16 +53,22 @@ struct MapListingSheetView: View {
                 Button {
                     store.send(.filterButtonTapped)
                 } label: {
-                    Image("tune_24")
-                        .renderingMode(.template)
-                        .resizable()
-                        .frame(width: 16, height: 16)
-                        .foregroundStyle(.labelAlternative)
-                        .frame(width: 32, height: 32)
-                        .background(.coolNeutral5)
-                        .clipShape(Circle())
+                    ZStack {
+                        Circle()
+                            .fill(.coolNeutral5)
+                            .frame(width: 32, height: 32)
+
+                        Image("tune_24")
+                            .renderingMode(.template)
+                            .resizable()
+                            .frame(width: 16, height: 16)
+                            .foregroundStyle(.labelAlternative)
+                    }
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(Text("필터 설정"))
 
                 ForEach(filterChips) { chip in
                     FilterChip(item: chip) {
