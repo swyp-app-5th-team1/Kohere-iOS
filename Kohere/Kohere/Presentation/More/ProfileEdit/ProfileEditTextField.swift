@@ -94,7 +94,7 @@ private extension ProfileEditTextField {
         Group {
             if let characterLimit {
                 Text("\(text.count)/\(characterLimit)")
-                    .kohereTextStyle(.caption2Medium)
+                    .kohereTextStyle(.caption2Regular)
                     .foregroundStyle(Color.coolNeutral20)
             }
         }
