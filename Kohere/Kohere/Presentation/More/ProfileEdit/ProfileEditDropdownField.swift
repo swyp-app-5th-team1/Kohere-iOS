@@ -11,7 +11,7 @@ struct ProfileEditDropdownField: View {
 
     // MARK: - Properties
 
-    let title: String
+    let title: LocalizedStringKey
     @Binding var selectedOption: DropdownMenuOption?
     @Binding var activeField: ProfileEditField?
     var keyboardField: FocusState<ProfileEditField?>.Binding
