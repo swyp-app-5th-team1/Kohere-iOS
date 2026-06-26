@@ -11,6 +11,7 @@ import ComposableArchitecture
 struct MoreFeature {
     @Reducer
     enum Path {
+        case profileEdit(ProfileEditFeature)
     }
 
     @ObservableState
@@ -20,15 +21,30 @@ struct MoreFeature {
 
     enum Action {
         case path(StackActionOf<Path>)
+        case navigationLanguageTapped
+        case navigationSettingTapped
+        case editProfileTapped
     }
 
     var body: some Reducer<State, Action> {
-        Reduce { _, action in
+        Reduce { state, action in
             switch action {
+            case .path(.element(id: _, action: .profileEdit(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case .navigationLanguageTapped, .navigationSettingTapped:
+                return .none
+
+            case .editProfileTapped:
+                state.path.append(.profileEdit(ProfileEditFeature.State()))
+                return .none
+
             case .path:
                 return .none
             }
         }
+        .forEach(\.path, action: \.path)
     }
 }
 
