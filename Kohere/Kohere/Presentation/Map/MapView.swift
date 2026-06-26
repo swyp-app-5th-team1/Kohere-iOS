@@ -9,9 +9,52 @@ import ComposableArchitecture
 import SwiftUI
 
 struct MapView: View {
-    let store: StoreOf<MapFeature>
+    @Bindable var store: StoreOf<MapFeature>
+    @State private var listingSheetDetent: MapListingSheetDetent = .minimum
+    @GestureState private var listingSheetDragTranslation: CGFloat = 0
 
     var body: some View {
+        GeometryReader { proxy in
+            let containerHeight = proxy.size.height
+            let listingSheetVisibleHeight = displayedListingSheetVisibleHeight(
+                containerHeight: containerHeight
+            )
+            let floatingControlBottomPadding = mapFloatingControlBottomPadding(
+                listingSheetVisibleHeight: listingSheetVisibleHeight,
+                containerHeight: containerHeight
+            )
+
+            ZStack(alignment: .bottom) {
+                mapContent
+
+                mapFloatingControls(bottomPadding: floatingControlBottomPadding)
+
+                mapListingSheet(containerHeight: containerHeight)
+
+                mapSelectedListingSheet
+            }
+        }
+        .onAppear {
+            store.send(.mapAppeared)
+        }
+        .onDisappear {
+            store.send(.mapDismissed)
+        }
+        .fullScreenCover(
+            isPresented: Binding(
+                get: { store.isFilterPresented },
+                set: { isPresented in
+                    guard !isPresented else { return }
+                    store.send(.filterDismissed)
+                }
+            )
+        ) {
+            MapFilterView(store: store)
+        }
+    }
+
+    // MARK: - Subviews
+    private var mapContent: some View {
         ZStack(alignment: .top) {
             NaverMapRepresentable(
                 markers: store.markers,
@@ -24,19 +67,11 @@ struct MapView: View {
                 onCameraMoveRequestHandled: {
                     store.send(.cameraMoveRequestHandled)
                 },
-                onLocationAuthorizationChanged: { authorization in
-                    store.send(.locationAuthorizationChanged(authorization))
-                },
-                onUserLocationUpdated: { coordinate in
-                    store.send(.userLocationUpdated(coordinate))
-                },
                 onMarkerTapped: { id in
                     store.send(.markerTapped(id))
                 }
             )
             .ignoresSafeArea()
-
-            mapFloatingControls
 
             if store.showsResearchButton {
                 researchButton
@@ -45,7 +80,7 @@ struct MapView: View {
         }
     }
 
-    private var mapFloatingControls: some View {
+    private func mapFloatingControls(bottomPadding: CGFloat) -> some View {
         VStack {
             Spacer()
 
@@ -54,7 +89,7 @@ struct MapView: View {
 
                 myLocationButton
                     .padding(.trailing, mapFloatingControlTrailingPadding)
-                    .padding(.bottom, mapFloatingControlBottomPadding)
+                    .padding(.bottom, bottomPadding)
             }
         }
     }
@@ -74,8 +109,8 @@ struct MapView: View {
         20
     }
 
-    private var mapFloatingControlBottomPadding: CGFloat {
-        20
+    private var mapFloatingControlSheetSpacing: CGFloat {
+        16
     }
 
     private var researchButton: some View {
@@ -103,4 +138,162 @@ struct MapView: View {
         }
         .buttonStyle(.plain)
     }
+
+    private func mapListingSheet(containerHeight: CGFloat) -> some View {
+        let maximumHeight = listingSheetHeight(for: .maximum, containerHeight: containerHeight)
+        let displayedOffset = displayedListingSheetOffset(containerHeight: containerHeight)
+
+        return MapListingSheetView(store: store)
+            .frame(height: maximumHeight)
+            .offset(
+                y: store.sheetMode == .selectedListing
+                ? maximumHeight + tabBarCoveredHeight + hiddenSheetExtraOffset
+                : displayedOffset
+            )
+            .allowsHitTesting(store.sheetMode == .listingList)
+            .gesture(
+                listingSheetDragGesture(containerHeight: containerHeight),
+                including: store.sheetMode == .listingList ? .all : .none
+            )
+            .animation(sheetAnimation, value: store.sheetMode)
+            .animation(sheetAnimation, value: listingSheetDetent)
+    }
+
+    private var mapSelectedListingSheet: some View {
+        MapSelectedListingSheetView {
+            store.send(.selectedListingCloseButtonTapped)
+        }
+        .frame(height: selectedListingSheetHeight)
+        .offset(
+            y: store.sheetMode == .selectedListing
+            ? tabBarCoveredHeight
+            : selectedListingSheetHeight + tabBarCoveredHeight + hiddenSheetExtraOffset
+        )
+        .allowsHitTesting(store.sheetMode == .selectedListing)
+        .animation(sheetAnimation, value: store.sheetMode)
+    }
+
+    // MARK: - Sheet Layout
+    private var selectedListingSheetHeight: CGFloat {
+        266
+    }
+
+    private var hiddenSheetExtraOffset: CGFloat {
+        40
+    }
+
+    private var tabBarCoveredHeight: CGFloat {
+        78
+    }
+
+    private var sheetAnimation: Animation {
+        .spring(response: 0.44, dampingFraction: 0.9)
+    }
+
+    private var selectedListingVisibleHeight: CGFloat {
+        selectedListingSheetHeight - tabBarCoveredHeight
+    }
+
+    private func mapFloatingControlBottomPadding(
+        listingSheetVisibleHeight: CGFloat,
+        containerHeight: CGFloat
+    ) -> CGFloat {
+        let sheetHeight: CGFloat
+
+        switch store.sheetMode {
+        case .listingList:
+            let mediumHeight = self.listingSheetHeight(
+                for: .medium,
+                containerHeight: containerHeight
+            )
+            sheetHeight = min(listingSheetVisibleHeight, mediumHeight)
+        case .selectedListing:
+            sheetHeight = selectedListingVisibleHeight
+        }
+
+        return sheetHeight + mapFloatingControlSheetSpacing
+    }
+
+    private func listingSheetHeight(
+        for detent: MapListingSheetDetent,
+        containerHeight: CGFloat
+    ) -> CGFloat {
+        switch detent {
+        case .minimum:
+            containerHeight * 0.20
+        case .medium:
+            containerHeight * 0.50
+        case .maximum:
+            containerHeight * 0.83
+        }
+    }
+
+    private func displayedListingSheetVisibleHeight(containerHeight: CGFloat) -> CGFloat {
+        let minimumHeight = listingSheetHeight(for: .minimum, containerHeight: containerHeight)
+        let maximumHeight = listingSheetHeight(for: .maximum, containerHeight: containerHeight)
+        let displayedOffset = displayedListingSheetOffset(containerHeight: containerHeight)
+
+        return min(max(maximumHeight - displayedOffset, minimumHeight), maximumHeight)
+    }
+
+    private func displayedListingSheetOffset(containerHeight: CGFloat) -> CGFloat {
+        let baseOffset = listingSheetOffset(
+            for: listingSheetDetent,
+            containerHeight: containerHeight
+        )
+        let draggedOffset = baseOffset + listingSheetDragTranslation
+        let minimumOffset = listingSheetOffset(for: .maximum, containerHeight: containerHeight)
+        let maximumOffset = listingSheetOffset(for: .minimum, containerHeight: containerHeight)
+
+        return min(max(draggedOffset, minimumOffset), maximumOffset)
+    }
+
+    private func listingSheetOffset(
+        for detent: MapListingSheetDetent,
+        containerHeight: CGFloat
+    ) -> CGFloat {
+        listingSheetHeight(for: .maximum, containerHeight: containerHeight)
+            - listingSheetHeight(for: detent, containerHeight: containerHeight)
+    }
+
+    private func listingSheetDragGesture(containerHeight: CGFloat) -> some Gesture {
+        DragGesture()
+            .updating($listingSheetDragTranslation) { value, state, _ in
+                state = value.translation.height
+            }
+            .onEnded { value in
+                let baseHeight = listingSheetHeight(
+                    for: listingSheetDetent,
+                    containerHeight: containerHeight
+                )
+                let proposedHeight = baseHeight - value.translation.height
+
+                listingSheetDetent = nearestListingSheetDetent(
+                    proposedHeight: proposedHeight,
+                    containerHeight: containerHeight
+                )
+            }
+    }
+
+    private func nearestListingSheetDetent(
+        proposedHeight: CGFloat,
+        containerHeight: CGFloat
+    ) -> MapListingSheetDetent {
+        MapListingSheetDetent.allCases.min { lhs, rhs in
+            let lhsDistance = abs(
+                listingSheetHeight(for: lhs, containerHeight: containerHeight) - proposedHeight
+            )
+            let rhsDistance = abs(
+                listingSheetHeight(for: rhs, containerHeight: containerHeight) - proposedHeight
+            )
+
+            return lhsDistance < rhsDistance
+        } ?? .medium
+    }
+}
+
+private enum MapListingSheetDetent: CaseIterable {
+    case minimum
+    case medium
+    case maximum
 }

@@ -15,6 +15,7 @@ enum KohereElevation: CaseIterable {
     case normalXLarge
     case spreadSmall
     case spreadMedium
+    case bottomSheet
 
     var tokenName: String {
         switch self {
@@ -25,6 +26,7 @@ enum KohereElevation: CaseIterable {
         case .normalXLarge: "shadow-normal-xlarge"
         case .spreadSmall: "shadow-spread-small"
         case .spreadMedium: "shadow-spread-medium"
+        case .bottomSheet: "shadow-bottom-sheet"
         }
     }
 
@@ -61,6 +63,10 @@ enum KohereElevation: CaseIterable {
         case .spreadMedium:
             [
                 .init(x: 0, y: 16, blur: 72, spread: 0, red: 23, green: 23, blue: 23, opacity: 0.16)
+            ]
+        case .bottomSheet:
+            [
+                .init(x: 0, y: -1, blur: 2, spread: -1, red: 23, green: 23, blue: 23, opacity: 0.1)
             ]
         }
     }

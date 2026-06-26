@@ -44,6 +44,51 @@ SwiftUI View와 TCA Feature를 기능 단위로 관리한다.
 
 `<FeatureName>Feature.swift`는 TCA의 State, Action, Reducer body를 포함한다.
 
+TCA `State` 내부 프로퍼티가 많아질 때는 성격이 비슷한 상태끼리 모아 배치한다.
+예를 들어 navigation, 화면 표시 상태, 필터/입력 상태, 지도 SDK 연동 상태처럼 역할 단위로 묶고, 그룹 사이에는 빈 줄을 둔다.
+프로퍼티를 단순 추가 순서로 계속 나열하지 않는다.
+
+#### SwiftUI View 구성
+
+SwiftUI View는 `body`가 화면의 큰 레이아웃 구조를 먼저 보여주도록 구성한다.
+`body` 안에 모든 세부 modifier를 직접 길게 나열하기보다, 의미 있는 UI 덩어리에 이름을 붙여 `private var` 또는 작은 `View`로 분리한다.
+
+분리 기준:
+
+- 여러 요소가 합쳐져 하나의 UI 의미를 만들면 묶는다.
+- Stack이 중첩되어 레이아웃 의도를 다시 해석해야 하면 이름을 붙인다.
+- overlay, alignment, gesture처럼 동작 의도가 있는 레이아웃은 의도가 드러나는 이름으로 감싼다.
+- 단순한 `Text` 한 줄처럼 독립 의미가 약한 요소를 과하게 쪼개지 않는다.
+- 여러 화면에서 재사용되거나 상태/로직이 생기면 별도 `View` 타입 또는 파일로 분리한다.
+
+예:
+
+```swift
+var body: some View {
+    VStack(alignment: .leading, spacing: 0) {
+        thumbnailWithLikeButton
+        listingInfo
+    }
+}
+
+private var thumbnailWithLikeButton: some View {
+    ZStack(alignment: .topTrailing) {
+        thumbnailImage
+        likeButton
+    }
+}
+
+private var listingInfo: some View {
+    VStack(alignment: .leading, spacing: 0) {
+        priceText
+        additionalInfoText
+        tagRow
+    }
+}
+```
+
+목적은 View를 작게 쪼개는 것이 아니라, 레이아웃 의도를 코드에서 바로 읽히게 하는 것이다.
+
 ## Navigation
 
 앱의 기본 탭 구조는 `RootFeature`와 `RootView`에서 관리한다.
