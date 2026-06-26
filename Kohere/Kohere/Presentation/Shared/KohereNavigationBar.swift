@@ -199,6 +199,8 @@ extension KohereNavigationBar {
                     .frame(width: 24, height: 24)
             }
             .disabled(!isEnabled)
+            .accessibilityLabel("Save profile")
+            .accessibilityHint("Enabled when all required fields are completed.")
         }
     }
 }
