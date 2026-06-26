@@ -7,11 +7,24 @@
     "@user_code" : {
 
     },
+    "*" : {
+
+    },
     "%@ - 한국어 English 日本語" : {
 
     },
     "%lld" : {
 
+    },
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
     },
     "≈$355~398/mo" : {
 
@@ -28,6 +41,9 @@
     "A few more details\nfor a safer contract" : {
 
     },
+    "Address Registration" : {
+
+    },
     "Agree" : {
 
     },
@@ -38,6 +54,12 @@
 
     },
     "Allow Notifications" : {
+
+    },
+    "Any" : {
+
+    },
+    "Browse Listings" : {
 
     },
     "Confirm" : {
@@ -52,13 +74,28 @@
     "Design System" : {
 
     },
+    "Double Room" : {
+
+    },
     "E-mail" : {
 
     },
     "Elevation" : {
 
     },
+    "English OK" : {
+
+    },
     "Enter your name as shown on your passport" : {
+
+    },
+    "Female Only" : {
+
+    },
+    "Find My Room" : {
+
+    },
+    "Find your perfect room\nin 1 minute." : {
 
     },
     "First Name" : {
@@ -82,7 +119,16 @@
     "Last Name" : {
 
     },
+    "Living in Korea" : {
+
+    },
     "Marketing Communications" : {
+
+    },
+    "Meals Included" : {
+
+    },
+    "Move-in Now" : {
 
     },
     "Nationality" : {
@@ -94,6 +140,15 @@
     "Nickname" : {
 
     },
+    "No ARC" : {
+
+    },
+    "No Maint. Fee" : {
+
+    },
+    "No recently viewed listings yet\nStart browsing to find your perfect room" : {
+
+    },
     "Occupation" : {
 
     },
@@ -101,6 +156,15 @@
 
     },
     "Privacy Policy *" : {
+
+    },
+    "Private Bath" : {
+
+    },
+    "Q. %@" : {
+
+    },
+    "Recently Viewed" : {
 
     },
     "Required Agreements" : {
@@ -113,6 +177,12 @@
 
     },
     "RoundedRectangle / 16" : {
+
+    },
+    "See All" : {
+
+    },
+    "See curated listings\nmatched to you" : {
 
     },
     "Sign in with Apple" : {
@@ -128,6 +198,9 @@
 
     },
     "Terms of Service *" : {
+
+    },
+    "Today's Korea Living Quiz" : {
 
     },
     "Verified" : {
@@ -151,6 +224,15 @@
     "You can manage notification settings anytime\nin your device settings." : {
 
     },
+    "고시원" : {
+
+    },
+    "닫기" : {
+
+    },
+    "쉐어하우스" : {
+
+    },
     "이 지역 검색하기" : {
 
     },
@@ -158,6 +240,18 @@
 
     },
     "초기화" : {
+
+    },
+    "최대값" : {
+
+    },
+    "최소값" : {
+
+    },
+    "코리빙" : {
+
+    },
+    "필터 설정" : {
 
     }
   },
