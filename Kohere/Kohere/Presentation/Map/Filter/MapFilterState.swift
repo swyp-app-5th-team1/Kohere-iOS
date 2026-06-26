@@ -31,8 +31,7 @@ extension MapFilterState {
     }
 
     var hasSelectedPriceRange: Bool {
-        monthlyRentRange != MapFilterPriceRange.defaultMonthlyRent
-            || depositRange != MapFilterPriceRange.defaultDeposit
+        monthlyRentRange != MapFilterPriceRange.defaultMonthlyRent || depositRange != MapFilterPriceRange.defaultDeposit
     }
 
     var hasSelectedPropertyTypes: Bool {
