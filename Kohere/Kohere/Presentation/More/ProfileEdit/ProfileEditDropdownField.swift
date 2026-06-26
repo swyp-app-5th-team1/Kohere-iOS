@@ -18,6 +18,7 @@ struct ProfileEditDropdownField: View {
     let equals: ProfileEditField
     let options: [DropdownMenuOption]
     let listHeight: CGFloat
+    var isRequired = false
 
     // MARK: - Body
 
@@ -33,10 +34,20 @@ struct ProfileEditDropdownField: View {
 
 private extension ProfileEditDropdownField {
     var titleText: some View {
-        Text(title)
-            .kohereTextStyle(.label2Semibold)
-            .foregroundStyle(Color.coolNeutral40)
-            .padding(.horizontal, 4)
+        HStack(spacing: 10) {
+            Text(title)
+                .kohereTextStyle(.label2Semibold)
+                .foregroundStyle(Color.coolNeutral40)
+
+            Spacer(minLength: 0)
+
+            if isRequired {
+                Text("*")
+                    .kohereTextStyle(.label2Semibold)
+                    .foregroundStyle(Color.statusDanger)
+            }
+        }
+        .padding(.horizontal, 4)
     }
 
     var dropdownMenu: some View {

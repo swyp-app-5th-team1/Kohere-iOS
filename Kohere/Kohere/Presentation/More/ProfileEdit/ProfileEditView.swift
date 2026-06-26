@@ -34,7 +34,10 @@ private extension ProfileEditView {
         KohereNavigationBar(
             left: .backButton({ store.send(.backButtonTapped) }),
             center: .text("Edit Profile"),
-            right: .none,
+            right: .checkButton(
+                isEnabled: store.isSaveButtonEnabled,
+                action: { store.send(.saveButtonTapped) }
+            ),
             backgroundColor: .backgroundNormalAlternative
         )
     }
@@ -43,8 +46,16 @@ private extension ProfileEditView {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(spacing: 16) {
+                    profileHeader
+                    
                     nameFields
-                    dropdownFields
+                    
+                    nationalityAndGenderFields
+                        .zIndex(3)
+                    visaStatusField
+                        .zIndex(2)
+                    occupationField
+                        .zIndex(1)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
@@ -53,6 +64,34 @@ private extension ProfileEditView {
                 scrollToActiveField(newValue, proxy: proxy)
             }
         }
+    }
+
+    var profileHeader: some View {
+        VStack(spacing: 3) {
+            Circle()
+                .fill(Color.primary50)
+                .frame(width: 73, height: 73)
+                .overlay(
+                    Image(.person24)
+                        .renderingMode(.template)
+                        .foregroundStyle(Color.staticWhite)
+                )
+                .overlay(
+                    Circle()
+                        .stroke(Color.primary50, lineWidth: 1.5)
+                )
+
+            Text(store.nickname)
+                .kohereTextStyle(.label1Semibold)
+                .foregroundStyle(Color.neutral70)
+                .lineLimit(1)
+
+            Text(store.email)
+                .kohereTextStyle(.caption1Regular)
+                .foregroundStyle(Color.neutral30)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     var nameFields: some View {
@@ -80,7 +119,7 @@ private extension ProfileEditView {
         }
     }
 
-    var dropdownFields: some View {
+    var nationalityAndGenderFields: some View {
         HStack(spacing: 8) {
             ProfileEditDropdownField(
                 title: "Nationality",
@@ -92,6 +131,7 @@ private extension ProfileEditView {
                 listHeight: 176
             )
             .id(ProfileEditField.nationality)
+            .zIndex(2)
 
             ProfileEditDropdownField(
                 title: "Gender",
@@ -103,7 +143,36 @@ private extension ProfileEditView {
                 listHeight: 92
             )
             .id(ProfileEditField.gender)
+            .zIndex(1)
         }
+    }
+
+    var visaStatusField: some View {
+        ProfileEditDropdownField(
+            title: "Visa Status",
+            selectedOption: $store.selectedVisa,
+            activeField: $activeField,
+            keyboardField: $keyboardField,
+            equals: .visaStatus,
+            options: DropdownMenuOption.visas,
+            listHeight: 239,
+            isRequired: true
+        )
+        .id(ProfileEditField.visaStatus)
+    }
+
+    var occupationField: some View {
+        ProfileEditDropdownField(
+            title: "Occupation",
+            selectedOption: $store.selectedOccupation,
+            activeField: $activeField,
+            keyboardField: $keyboardField,
+            equals: .occupation,
+            options: DropdownMenuOption.occupations,
+            listHeight: 239,
+            isRequired: true
+        )
+        .id(ProfileEditField.occupation)
     }
 
     func scrollToActiveField(_ field: ProfileEditField?, proxy: ScrollViewProxy) {

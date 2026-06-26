@@ -27,6 +27,7 @@ enum NavigationRight {
     case moreTab(onLanguage: () -> Void, onSetting: () -> Void)
     case detailInfo(onHeart: () -> Void, onShare: () -> Void)
     case searchButton(() -> Void)
+    case checkButton(isEnabled: Bool, action: () -> Void)
 }
 
 struct KohereNavigationBar: View {
@@ -189,6 +190,15 @@ extension KohereNavigationBar {
                     .foregroundColor(rightColor)
                     .frame(width: 24, height: 24)
             }
+
+        case .checkButton(let isEnabled, let action):
+            Button(action: action) {
+                Image(.circleCheckFill24)
+                    .renderingMode(.template)
+                    .foregroundColor(isEnabled ? .primary50 : .coolNeutral10)
+                    .frame(width: 24, height: 24)
+            }
+            .disabled(!isEnabled)
         }
     }
 }

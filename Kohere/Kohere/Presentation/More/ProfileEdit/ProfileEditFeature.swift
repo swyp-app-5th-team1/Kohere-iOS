@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 @Reducer
 struct ProfileEditFeature {
@@ -14,10 +15,22 @@ struct ProfileEditFeature {
 
     @ObservableState
     struct State: Equatable {
-        var firstName: String = "Gil Dong"
-        var lastName: String = "Hong"
-        var selectedNationality: DropdownMenuOption? = DropdownMenuOption(option: "England")
-        var selectedGender: DropdownMenuOption? = DropdownMenuOption(option: "Male")
+        var nickname: String = "Nickname"
+        var email: String = "user@example.com"
+
+        var firstName: String = ""
+        var lastName: String = ""
+        var selectedNationality: DropdownMenuOption?
+        var selectedGender: DropdownMenuOption?
+        var selectedVisa: DropdownMenuOption?
+        var selectedOccupation: DropdownMenuOption?
+
+        var isSaveButtonEnabled: Bool {
+            !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && selectedVisa != nil
+            && selectedOccupation != nil
+        }
     }
 
     // MARK: - Action
@@ -25,6 +38,7 @@ struct ProfileEditFeature {
     enum Action: BindableAction, Equatable {
         case binding(BindingAction<State>)
         case backButtonTapped
+        case saveButtonTapped
     }
 
     // MARK: - Reducer Body
@@ -37,6 +51,9 @@ struct ProfileEditFeature {
                 return .none
 
             case .backButtonTapped:
+                return .none
+
+            case .saveButtonTapped:
                 return .none
             }
         }
