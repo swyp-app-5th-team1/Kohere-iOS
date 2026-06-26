@@ -7,12 +7,11 @@
 
 import ComposableArchitecture
 import SwiftUI
-import UIKit
 
 @main
 struct KohereApp: App {
     init() {
-        configureTabBarAppearance()
+        TabBarAppearanceConfigurator.configure()
     }
 
     var body: some Scene {
@@ -23,69 +22,5 @@ struct KohereApp: App {
                 }
             )
         }
-    }
-
-    private func configureTabBarAppearance() {
-        let selectedColor = UIColor(named: "primary50") ?? fallbackTabBarColor(
-            name: "primary50",
-            color: .systemBlue
-        )
-        let normalColor = UIColor(named: "coolNeutral50") ?? fallbackTabBarColor(
-            name: "coolNeutral50",
-            color: .secondaryLabel
-        )
-        let backgroundColor = UIColor(named: "backgroundNormalNormal") ?? fallbackTabBarColor(
-            name: "backgroundNormalNormal",
-            color: .white
-        )
-
-        let appearance = UITabBarAppearance()
-
-        if #available(iOS 26.0, *) {
-            appearance.configureWithTransparentBackground()
-            appearance.backgroundColor = .clear
-            appearance.backgroundEffect = nil
-        } else {
-            appearance.configureWithDefaultBackground()
-            appearance.backgroundColor = backgroundColor
-        }
-        appearance.shadowColor = .clear
-
-        configureTabBarItemAppearance(
-            appearance.stackedLayoutAppearance,
-            selectedColor: selectedColor,
-            normalColor: normalColor
-        )
-        configureTabBarItemAppearance(
-            appearance.inlineLayoutAppearance,
-            selectedColor: selectedColor,
-            normalColor: normalColor
-        )
-        configureTabBarItemAppearance(
-            appearance.compactInlineLayoutAppearance,
-            selectedColor: selectedColor,
-            normalColor: normalColor
-        )
-
-        let tabBar = UITabBar.appearance()
-        tabBar.tintColor = selectedColor
-        tabBar.unselectedItemTintColor = normalColor
-        tabBar.isTranslucent = true
-        tabBar.standardAppearance = appearance
-        tabBar.scrollEdgeAppearance = appearance
-    }
-
-    private func configureTabBarItemAppearance(
-        _ appearance: UITabBarItemAppearance,
-        selectedColor: UIColor,
-        normalColor: UIColor
-    ) {
-        appearance.selected.iconColor = selectedColor
-        appearance.normal.iconColor = normalColor
-    }
-
-    private func fallbackTabBarColor(name: String, color: UIColor) -> UIColor {
-        assertionFailure("\(name) color is missing from the asset catalog.")
-        return color
     }
 }
