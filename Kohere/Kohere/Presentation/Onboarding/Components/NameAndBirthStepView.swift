@@ -74,31 +74,37 @@ struct NameAndBirthStepView: View {
                         .foregroundStyle(.neutral90)
                     
                     HStack(spacing: 8.5) {
-                        DropdownMenu(
+                        KohereDropdownMenu(
                             selectedOption: $store.selectedMonth,
                             activeField: $activeField,
-                            keyboardField: keyboardField,
                             equals: .birthMonth,
                             options: DropdownMenuOption.months,
-                            listHeight: 176
+                            listHeight: 176,
+                            onExpand: {
+                                keyboardField.wrappedValue = nil
+                            }
                         )
-                        
-                        DropdownMenu(
+
+                        KohereDropdownMenu(
                             selectedOption: $store.selectedDay,
                             activeField: $activeField,
-                            keyboardField: keyboardField,
                             equals: .birthDay,
                             options: DropdownMenuOption.days,
-                            listHeight: 176
+                            listHeight: 176,
+                            onExpand: {
+                                keyboardField.wrappedValue = nil
+                            }
                         )
-                        
-                        DropdownMenu(
+
+                        KohereDropdownMenu(
                             selectedOption: $store.selectedYear,
                             activeField: $activeField,
-                            keyboardField: keyboardField,
                             equals: .birthYear,
                             options: DropdownMenuOption.years,
-                            listHeight: 176
+                            listHeight: 176,
+                            onExpand: {
+                                keyboardField.wrappedValue = nil
+                            }
                         )
                     }
                 }
