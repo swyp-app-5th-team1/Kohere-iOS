@@ -40,7 +40,7 @@ extension DropdownMenuOption {
         DropdownMenuOption(option: String($0))
     }
 
-    static let visas = ["Diplomatic/Official(A-1,A-2)", "Visa Exempted(B)", "Journalism/Religious Affairs(C-1, D-5, D-6)", "Short Term Visit(C-2, C-3)", "Study(D-2)", "Trainee(D-3, D-4)", "Intra-Company Transfer(D-7)", "Professional(C-4, D-1, D-8, D-9, D-10, E-1, E-2, E-3, E-4, E-5, E-6, E-7)", "Non-Professional(E-8, E-9, E-10)", "Working Holiday(H-1)", "Work and Visit(H-2)", "Family Visitor/Dependent Family(F-1, F-2, F-3)", "Overseas Korean(F-4)", "Permanent Residence(F-5)", "Marrige Migrant(F-6)", "Others(G-1)"].map {
+    static let visas = ["Diplomatic/Official(A-1,A-2)", "Visa Exempted(B)", "Journalism/Religious Affairs(C-1, D-5, D-6)", "Short Term Visit(C-2, C-3)", "Study(D-2)", "Trainee(D-3, D-4)", "Intra-Company Transfer(D-7)", "Professional(C-4, D-1, D-8, D-9, D-10, E-1, E-2, E-3, E-4, E-5, E-6, E-7)", "Non-Professional(E-8, E-9, E-10)", "Working Holiday(H-1)", "Work and Visit(H-2)", "Family Visitor/Dependent Family(F-1, F-2, F-3)", "Overseas Korean(F-4)", "Permanent Residence(F-5)", "Marriage Migrant(F-6)", "Others(G-1)"].map {
         DropdownMenuOption(option: $0)
     }
 
