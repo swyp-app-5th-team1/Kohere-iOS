@@ -49,6 +49,7 @@ struct MapFeature {
             )
         ]
         var selectedMarkerID: String?
+        var listings: [ListingItemModel] = .mapMockList
 
         // 지도 viewport / 재검색 상태
         var currentViewport: MapViewport?
@@ -81,6 +82,7 @@ struct MapFeature {
         case viewportChanged(MapViewport)
         case path(StackActionOf<Path>)
         case listingTapped(String)
+        case listingLikeButtonTapped(Int)
         case selectedListingCloseButtonTapped
 
         // 필터 관련
@@ -182,6 +184,11 @@ struct MapFeature {
                 state.sheetMode = .selectedListing
                 return .none
 
+            case let .listingLikeButtonTapped(id):
+                guard let index = state.listings.firstIndex(where: { $0.id == id }) else { return .none }
+                state.listings[index].isLiked.toggle()
+                return .none
+
             case .selectedListingCloseButtonTapped:
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
@@ -238,3 +245,48 @@ struct MapFeature {
 }
 
 extension MapFeature.Path.State: Equatable {}
+
+private extension Array where Element == ListingItemModel {
+    static let mapMockList: [ListingItemModel] = [
+        ListingItemModel(
+            id: 1,
+            formattedPrice: "₩380~400K/mo",
+            formattedUsdPrice: "≈$355~398/mo",
+            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
+            locationDescription: "8-min walk Hongdae Sta.",
+            typeTag: "Goshiwon",
+            period: "1 mo~",
+            isLiked: false
+        ),
+        ListingItemModel(
+            id: 2,
+            formattedPrice: "₩380~400K/mo",
+            formattedUsdPrice: "≈$355~398/mo",
+            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
+            locationDescription: "8-min walk Hongdae Sta.",
+            typeTag: "Goshiwon",
+            period: "1 mo~",
+            isLiked: true
+        ),
+        ListingItemModel(
+            id: 3,
+            formattedPrice: "₩380~400K/mo",
+            formattedUsdPrice: "≈$355~398/mo",
+            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
+            locationDescription: "8-min walk Hongdae Sta.",
+            typeTag: "Goshiwon",
+            period: "1 mo~",
+            isLiked: false
+        ),
+        ListingItemModel(
+            id: 4,
+            formattedPrice: "₩380~400K/mo",
+            formattedUsdPrice: "≈$355~398/mo",
+            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
+            locationDescription: "8-min walk Hongdae Sta.",
+            typeTag: "Goshiwon",
+            period: "1 mo~",
+            isLiked: false
+        )
+    ]
+}

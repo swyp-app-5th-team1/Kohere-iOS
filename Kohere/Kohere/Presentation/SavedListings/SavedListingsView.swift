@@ -37,6 +37,7 @@ struct SavedListingsView: View {
                             )
                         }
                     }
+                    .padding(.top, 16)
                     .padding(.horizontal, 20)
                 }
             }

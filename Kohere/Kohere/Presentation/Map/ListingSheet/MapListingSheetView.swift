@@ -15,11 +15,11 @@ struct MapListingSheetView: View {
         VStack(alignment: .leading, spacing: 0) {
             grabber
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 10)
-                .padding(.bottom, 14)
+                .padding(.top, 12)
+                .padding(.bottom, 10)
 
             filterRow
-                .padding(.bottom, 18)
+                .padding(.bottom, 8)
 
             listingRows
         }
@@ -89,14 +89,17 @@ struct MapListingSheetView: View {
 
     private var listingRows: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 16) {
-                ForEach(0..<4, id: \.self) { index in
-                    Button {
-                        store.send(.listingTapped("preview-listing-\(index)"))
-                    } label: {
-                        MapListingPreviewRow()
-                    }
-                    .buttonStyle(.plain)
+            VStack(spacing: 0) {
+                ForEach(store.listings) { item in
+                    ListingCardView(
+                        item: item,
+                        onCardTapped: {
+                            store.send(.listingTapped("\(item.id)"))
+                        },
+                        onLikeTapped: {
+                            store.send(.listingLikeButtonTapped(item.id))
+                        }
+                    )
                 }
             }
             .padding(.horizontal, 20)

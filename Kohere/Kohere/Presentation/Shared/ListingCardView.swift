@@ -81,7 +81,7 @@ struct ListingCardView: View {
                 .padding(.top, 4)
             }
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, 8)
         .onTapGesture {
             onCardTapped()
         }
