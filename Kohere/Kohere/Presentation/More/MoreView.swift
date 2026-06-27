@@ -22,7 +22,7 @@ struct MoreView: View {
                 )
             )
 
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     profileCard
                         .padding(.horizontal, 16)
@@ -72,14 +72,14 @@ struct MoreView: View {
                         )
                     }
                     .padding(16)
-                    .background(Color.neutral5)
+                    .background(.neutral5)
                 }
                 .padding(.top, 8)
                 .padding(.bottom, 16)
             }
-            .background(Color.backgroundNormalAlternative)
+            .background(.backgroundNormalAlternative)
         }
-        .background(Color.backgroundNormalAlternative)
+        .background(.backgroundNormalAlternative)
     }
 
     private var profileCard: some View {
@@ -95,32 +95,32 @@ struct MoreView: View {
 
                 HStack(spacing: 8) {
                     Circle()
-                        .fill(Color.secondary5)
+                        .fill(.secondary5)
                         .frame(width: 36, height: 36)
                         .overlay(
                             Image("person_24")
                                 .renderingMode(.template)
-                                .foregroundStyle(Color.primary50)
+                                .foregroundStyle(.primary50)
                         )
                         .overlay(
                             Circle()
-                                .stroke(Color.secondary5, lineWidth: 1.5)
+                                .stroke(.secondary5, lineWidth: 1.5)
                         )
 
                     VStack(alignment: .leading, spacing: 0) {
                         Text("Nickname")
                             .kohereTextStyle(.label1Medium)
-                            .foregroundStyle(Color.neutral5)
+                            .foregroundStyle(.neutral5)
 
                         Text("@user_code")
                             .kohereTextStyle(.caption2Regular)
-                            .foregroundStyle(Color.primary5)
+                            .foregroundStyle(.primary5)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     Image("pencil_write_24")
                         .renderingMode(.template)
-                        .foregroundStyle(Color.staticWhite)
+                        .foregroundStyle(.staticWhite)
                         .frame(width: 24, height: 24)
                 }
                 .padding(.horizontal, 16)
@@ -140,7 +140,7 @@ private struct MoreMenuSection: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
                 .kohereTextStyle(.label2Semibold)
-                .foregroundStyle(Color.neutral30)
+                .foregroundStyle(.neutral30)
                 .frame(height: 28, alignment: .center)
 
             VStack(spacing: 4) {
@@ -152,7 +152,7 @@ private struct MoreMenuSection: View {
         .padding(.horizontal, horizontalPadding)
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.staticWhite)
+        .background(.staticWhite)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
@@ -169,19 +169,19 @@ private struct MoreMenuRow: View {
                         Image(iconName)
                             .renderingMode(item.rendersAsTemplate ? .template : .original)
                             .resizable()
-                            .foregroundStyle(Color.coolNeutral40)
+                            .foregroundStyle(.coolNeutral40)
                             .frame(width: 24, height: 24)
                     }
 
                     VStack(alignment: .leading, spacing: 0) {
                         Text(item.title)
                             .kohereTextStyle(.label2Medium)
-                            .foregroundStyle(Color.neutral80)
+                            .foregroundStyle(.neutral80)
 
                         if let subtitle = item.subtitle {
                             Text(subtitle)
                                 .kohereTextStyle(.label3Medium)
-                                .foregroundStyle(Color.neutral50)
+                                .foregroundStyle(.neutral50)
                         }
                     }
                 }
@@ -190,7 +190,7 @@ private struct MoreMenuRow: View {
 
                 Image("chevron_right_16")
                     .renderingMode(.template)
-                    .foregroundStyle(Color.coolNeutral40)
+                    .foregroundStyle(.coolNeutral40)
                     .frame(width: 16, height: 16)
             }
             .contentShape(Rectangle())

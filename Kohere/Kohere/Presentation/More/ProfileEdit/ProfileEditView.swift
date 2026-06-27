@@ -23,7 +23,7 @@ struct ProfileEditView: View {
             navigationBar
             profileForm
         }
-        .background(Color.backgroundNormalAlternative)
+        .background(.backgroundNormalAlternative)
     }
 }
 
@@ -69,26 +69,26 @@ private extension ProfileEditView {
     var profileHeader: some View {
         VStack(spacing: 3) {
             Circle()
-                .fill(Color.primary50)
+                .fill(.primary50)
                 .frame(width: 73, height: 73)
                 .overlay(
                     Image(.person24)
                         .renderingMode(.template)
-                        .foregroundStyle(Color.staticWhite)
+                        .foregroundStyle(.staticWhite)
                 )
                 .overlay(
                     Circle()
-                        .stroke(Color.primary50, lineWidth: 1.5)
+                        .stroke(.primary50, lineWidth: 1.5)
                 )
 
             Text(store.nickname)
                 .kohereTextStyle(.label1Semibold)
-                .foregroundStyle(Color.neutral70)
+                .foregroundStyle(.neutral70)
                 .lineLimit(1)
 
             Text(store.email)
                 .kohereTextStyle(.caption1Regular)
-                .foregroundStyle(Color.neutral30)
+                .foregroundStyle(.neutral30)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity)

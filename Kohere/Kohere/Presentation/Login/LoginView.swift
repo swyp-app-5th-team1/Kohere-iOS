@@ -106,7 +106,7 @@ extension LoginView {
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
-                    .background(Color.white)
+                    .background(.white)
                     .cornerRadius(26)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)

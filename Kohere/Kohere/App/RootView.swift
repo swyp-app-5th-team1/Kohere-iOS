@@ -72,7 +72,7 @@ struct RootView: View {
                     }
                     .tag(AppTab.more)
             }
-            .tint(Color.primary50)
+            .tint(.primary50)
         }
     }
 

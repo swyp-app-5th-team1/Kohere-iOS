@@ -24,7 +24,7 @@ struct MapFilterSelectionChip: View {
                 .clipShape(Capsule())
                 .overlay {
                     Capsule()
-                        .strokeBorder(isSelected ? Color.primaryPress : .clear, lineWidth: 1)
+                        .strokeBorder(isSelected ? .primaryPress : .clear, lineWidth: 1)
                 }
         }
         .buttonStyle(.plain)

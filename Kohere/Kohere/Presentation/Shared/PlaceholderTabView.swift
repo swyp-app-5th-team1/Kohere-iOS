@@ -17,7 +17,7 @@ struct PlaceholderTabView: View {
 
             Text(title)
                 .kohereTextStyle(.heading1Bold)
-                .foregroundStyle(Color.labelNormal)
+                .foregroundStyle(.labelNormal)
         }
     }
 }

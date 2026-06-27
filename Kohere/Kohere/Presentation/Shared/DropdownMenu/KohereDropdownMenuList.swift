@@ -31,7 +31,7 @@ struct KohereDropdownMenuList: View {
             .padding(.horizontal, 8)
         }
         .frame(height: listHeight)
-        .background(Color.white)
+        .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay {
             RoundedRectangle(cornerRadius: 12)
