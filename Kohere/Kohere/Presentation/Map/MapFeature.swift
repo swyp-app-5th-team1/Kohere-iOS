@@ -26,6 +26,7 @@ struct MapFeature {
 
     @Reducer
     enum Path {
+        case listingDetail(ListingDetailFeature)
     }
 
     @ObservableState
@@ -36,15 +37,15 @@ struct MapFeature {
         // 매물/마커 표시 상태
         var markers: [MapMarkerItem] = [
             MapMarkerItem(
-                id: "hongdae-station",
+                id: "1",
                 coordinate: MapCoordinate(latitude: 37.557192, longitude: 126.925381)
             ),
             MapMarkerItem(
-                id: "sinchon-station",
+                id: "2",
                 coordinate: MapCoordinate(latitude: 37.555134, longitude: 126.936893)
             ),
             MapMarkerItem(
-                id: "hapjeong-station",
+                id: "3",
                 coordinate: MapCoordinate(latitude: 37.549463, longitude: 126.913739)
             )
         ]
@@ -83,6 +84,7 @@ struct MapFeature {
         case path(StackActionOf<Path>)
         case listingTapped(String)
         case listingLikeButtonTapped(Int)
+        case selectedListingCardTapped
         case selectedListingCloseButtonTapped
 
         // 필터 관련
@@ -176,6 +178,10 @@ struct MapFeature {
                 state.showsResearchButton = lastSearchedViewport != viewport
                 return .none
 
+            case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
             case .path:
                 return .none
 
@@ -187,6 +193,11 @@ struct MapFeature {
             case let .listingLikeButtonTapped(id):
                 guard let index = state.listings.firstIndex(where: { $0.id == id }) else { return .none }
                 state.listings[index].isLiked.toggle()
+                return .none
+
+            case .selectedListingCardTapped:
+                guard let selectedMarkerID = state.selectedMarkerID else { return .none }
+                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: selectedMarkerID)))
                 return .none
 
             case .selectedListingCloseButtonTapped:
@@ -241,6 +252,7 @@ struct MapFeature {
                 return .none
             }
         }
+        .forEach(\.path, action: \.path)
     }
 }
 

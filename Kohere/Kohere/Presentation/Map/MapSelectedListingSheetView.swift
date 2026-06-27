@@ -8,14 +8,18 @@
 import SwiftUI
 
 struct MapSelectedListingSheetView: View {
-    let closeButtonTapped: () -> Void
+    let title: String
+    let item: ListingItemModel
+    let onCardTapped: () -> Void
+    let onLikeTapped: () -> Void
+    let onCloseButtonTapped: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
-                .padding(.bottom, 10)
+                .padding(.bottom, 2)
 
             selectedListingCard
                 .padding(.horizontal, 20)
@@ -40,79 +44,48 @@ struct MapSelectedListingSheetView: View {
     }
 
     private var header: some View {
-        HStack(spacing: 12) {
-            Text("Sky Goshiwon")
+        HStack(spacing: 8) {
+            Text(title)
                 .kohereTextStyle(.label1Semibold)
                 .foregroundStyle(.coolNeutral75)
+                .lineLimit(1)
 
             Spacer()
 
-            Image("heart_24")
-                .renderingMode(.template)
-                .resizable()
-                .frame(width: 24, height: 24)
-                .foregroundStyle(.labelAlternative)
+            Button {
+                onLikeTapped()
+            } label: {
+                Image(item.isLiked ? .heartFill24 : .heart24)
+                    .renderingMode(.template)
+                    .foregroundStyle(item.isLiked ? .primary50 : .labelAlternative)
+            }
+            .buttonStyle(.plain)
+            .frame(width: 24, height: 24)
+            .contentShape(Rectangle())
+            .accessibilityLabel(Text(item.isLiked ? "찜 해제" : "찜하기"))
 
             Button {
-                closeButtonTapped()
+                onCloseButtonTapped()
             } label: {
                 Image("close_24")
                     .renderingMode(.template)
                     .resizable()
                     .frame(width: 24, height: 24)
                     .foregroundStyle(.labelAlternative)
-                    .frame(width: 44, height: 44, alignment: .trailing)
-                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .frame(width: 24, height: 24)
+            .contentShape(Rectangle())
             .accessibilityLabel(Text("닫기"))
         }
     }
 
     private var selectedListingCard: some View {
-        HStack(alignment: .top, spacing: 14) {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(.backgroundNormalAlternative)
-                .frame(width: 120, height: 120)
-                .overlay {
-                    Image("home_fill_24")
-                        .renderingMode(.template)
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                        .foregroundStyle(.labelAssistive)
-                }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("₩380~400K/mo")
-                    .kohereTextStyle(.label1Semibold)
-                    .foregroundStyle(.labelNormal)
-
-                Text("≈$355~398/mo")
-                    .kohereTextStyle(.label3Medium)
-                    .foregroundStyle(.labelNormal)
-
-                Text("Dep. ₩200K · Maint. ₩20K")
-                    .kohereTextStyle(.label3Medium)
-                    .foregroundStyle(.labelAlternative)
-
-                Text("8-min walk Hongdae Sta.")
-                    .kohereTextStyle(.label3Medium)
-                    .foregroundStyle(.labelAlternative)
-
-                HStack(spacing: 6) {
-                    Text("Goshiwon")
-                        .kohereTextStyle(.caption2Medium)
-                        .foregroundStyle(.labelNeutral)
-                        .padding(.horizontal, 6)
-                        .frame(height: 20)
-                        .background(.backgroundNormalAlternative)
-                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
-
-                    Text("1 mo~")
-                        .kohereTextStyle(.caption2Medium)
-                        .foregroundStyle(.labelAlternative)
-                }
-            }
-        }
+        ListingCardView(
+            item: item,
+            showsLikeButton: false,
+            onCardTapped: onCardTapped,
+            onLikeTapped: onLikeTapped
+        )
     }
 }

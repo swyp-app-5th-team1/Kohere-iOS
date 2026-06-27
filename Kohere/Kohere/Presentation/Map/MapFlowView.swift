@@ -19,8 +19,13 @@ struct MapFlowView: View {
             )
         ) {
             MapView(store: store)
-        } destination: { _ in
-            EmptyView()
+        } destination: { store in
+            switch store.case {
+            case let .listingDetail(listingDetailStore):
+                ListingDetailView(store: listingDetailStore)
+                    .navigationBarHidden(true)
+            }
         }
+        .toolbar(store.path.isEmpty ? .visible : .hidden, for: .tabBar)
     }
 }

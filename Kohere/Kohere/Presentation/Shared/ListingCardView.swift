@@ -12,9 +12,22 @@ struct ListingCardView: View {
     // MARK: - Properties
     
     let item: ListingItemModel
+    let showsLikeButton: Bool
     
     var onCardTapped: () -> Void
     var onLikeTapped: () -> Void
+
+    init(
+        item: ListingItemModel,
+        showsLikeButton: Bool = true,
+        onCardTapped: @escaping () -> Void,
+        onLikeTapped: @escaping () -> Void
+    ) {
+        self.item = item
+        self.showsLikeButton = showsLikeButton
+        self.onCardTapped = onCardTapped
+        self.onLikeTapped = onLikeTapped
+    }
     
     // MARK: - Body
     
@@ -41,12 +54,14 @@ struct ListingCardView: View {
                     
                     Spacer()
                     
-                    Button {
-                        onLikeTapped()
-                    } label: {
-                        Image(item.isLiked ? .heartFill24 : .heart24)
-                            .renderingMode(.template)
-                            .foregroundColor(item.isLiked ? .primary50 : .labelAlternative)
+                    if showsLikeButton {
+                        Button {
+                            onLikeTapped()
+                        } label: {
+                            Image(item.isLiked ? .heartFill24 : .heart24)
+                                .renderingMode(.template)
+                                .foregroundColor(item.isLiked ? .primary50 : .labelAlternative)
+                        }
                     }
                 }
                 
@@ -80,6 +95,7 @@ struct ListingCardView: View {
                 }
                 .padding(.top, 4)
             }
+            .padding(.top, 4)
         }
         .padding(.vertical, 8)
         .onTapGesture {
