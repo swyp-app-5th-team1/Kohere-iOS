@@ -30,14 +30,12 @@ struct ChatBotOptionsView: View {
                 EmptyView()
             }
         }
-        .padding(.trailing, 20)
     }
 }
 
 // MARK: - Subviews
 
 extension ChatBotOptionsView {
-    
     private var horizontalOptionsView: some View {
         HStack(spacing: 8) {
             ForEach(diagnosis.options, id: \.code) { option in
@@ -102,7 +100,6 @@ extension ChatBotOptionsView {
                     }
                 }
             }
-            
             confirmButton
         }
     }

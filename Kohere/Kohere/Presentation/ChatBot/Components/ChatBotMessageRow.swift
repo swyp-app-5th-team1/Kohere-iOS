@@ -17,8 +17,25 @@ struct BotMessageRow: View {
     // MARK: - Body
     
     var body: some View {
-        HStack {
+        HStack(alignment: .top, spacing: 8) {
+            if isFirst {
+                Circle()
+                    .stroke(.lineNeutral, lineWidth: 1)
+                    .background(Circle().fill(.staticWhite))
+                    .frame(width: 24, height: 24)
+                    .overlay(
+                        Image(.smallLogo)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 16, height: 16)
+                    )
+            } else {
+                Color.clear
+                    .frame(width: 24, height: 24)
+            }
+            
             ChatBotBubbleView(text: text, isFirstBubble: isFirst)
+            
             Spacer()
         }
         .padding(.horizontal, 20)
