@@ -1,39 +1,38 @@
 //
-//  DropdownMenu.swift
-//  DropdownMenu
+//  KohereDropdownMenu.swift
+//  Kohere
 //
-//  Created by mandoo on 6/21/26.
+//  Created by Codex on 6/27/26.
 //
 
 import SwiftUI
 
-struct DropdownMenu: View {
-    
+struct KohereDropdownMenu<Field: Hashable>: View {
+
     // MARK: - Properties
 
     @Binding var selectedOption: DropdownMenuOption?
-    @Binding var activeField: OnboardingField?
-    
-    var keyboardField: FocusState<OnboardingField?>.Binding
-    let equals: OnboardingField
+    @Binding var activeField: Field?
+
+    let equals: Field
     let options: [DropdownMenuOption]
     let listHeight: CGFloat
+    var backgroundColor: Color = .clear
+    var onExpand: (() -> Void)?
 
     private var isOptionsPresented: Bool {
         activeField == equals
     }
 
     // MARK: - Body
-    
+
     var body: some View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) {
-
-                keyboardField.wrappedValue = nil
-
                 if isOptionsPresented {
                     activeField = nil
                 } else {
+                    onExpand?()
                     activeField = equals
                 }
             }
@@ -56,6 +55,8 @@ struct DropdownMenu: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 40)
+        .background(backgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(
@@ -67,7 +68,7 @@ struct DropdownMenu: View {
         }
         .overlay(alignment: .top) {
             if isOptionsPresented {
-                DropdownMenuList(
+                KohereDropdownMenuList(
                     options: options,
                     listHeight: listHeight
                 ) { option in

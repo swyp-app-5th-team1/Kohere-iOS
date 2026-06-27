@@ -27,6 +27,7 @@ enum NavigationRight {
     case moreTab(onLanguage: () -> Void, onSetting: () -> Void)
     case detailInfo(onHeart: () -> Void, onShare: () -> Void)
     case searchButton(() -> Void)
+    case checkButton(isEnabled: Bool, action: () -> Void)
 }
 
 struct KohereNavigationBar: View {
@@ -39,6 +40,7 @@ struct KohereNavigationBar: View {
     
     let leftColor: Color
     let rightColor: Color
+    let backgroundColor: Color
     
     // MARK: - Init
     
@@ -47,13 +49,15 @@ struct KohereNavigationBar: View {
         center: NavigationCenter = .none,
         right: NavigationRight = .none,
         leftColor: Color = .neutral70,
-        rightColor: Color = .neutral70
+        rightColor: Color = .neutral70,
+        backgroundColor: Color = .white
     ) {
         self.left = left
         self.center = center
         self.right = right
         self.leftColor = leftColor
         self.rightColor = rightColor
+        self.backgroundColor = backgroundColor
     }
     
     // MARK: - Body
@@ -70,7 +74,7 @@ struct KohereNavigationBar: View {
         }
         .padding(.horizontal, 20)
         .frame(height: 56)
-        .background(Color.white)
+        .background(backgroundColor)
     }
 }
 
@@ -186,6 +190,17 @@ extension KohereNavigationBar {
                     .foregroundColor(rightColor)
                     .frame(width: 24, height: 24)
             }
+
+        case .checkButton(let isEnabled, let action):
+            Button(action: action) {
+                Image(.circleCheckFill24)
+                    .renderingMode(.template)
+                    .foregroundColor(isEnabled ? .primary50 : .coolNeutral10)
+                    .frame(width: 24, height: 24)
+            }
+            .disabled(!isEnabled)
+            .accessibilityLabel("Save profile")
+            .accessibilityHint("Enabled when all required fields are completed.")
         }
     }
 }

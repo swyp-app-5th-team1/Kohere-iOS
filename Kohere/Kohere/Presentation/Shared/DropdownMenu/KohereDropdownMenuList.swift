@@ -1,13 +1,13 @@
 //
-//  DropdownMenuList.swift
+//  KohereDropdownMenuList.swift
 //  Kohere
 //
-//  Created by mandoo on 6/22/26.
+//  Created by Codex on 6/27/26.
 //
 
 import SwiftUI
 
-struct DropdownMenuList: View {
+struct KohereDropdownMenuList: View {
 
     // MARK: - Properties
 
@@ -21,7 +21,7 @@ struct DropdownMenuList: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 2) {
                 ForEach(options) { option in
-                    DropdownMenuListRow(
+                    KohereDropdownMenuListRow(
                         option: option,
                         onSelectedAction: onSelectedAction
                     )
@@ -40,9 +40,7 @@ struct DropdownMenuList: View {
     }
 }
 
-// MARK: - Row Subview
-
-struct DropdownMenuListRow: View {
+private struct KohereDropdownMenuListRow: View {
 
     // MARK: - Properties
 

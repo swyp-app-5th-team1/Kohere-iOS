@@ -12,66 +12,79 @@ struct MoreView: View {
     let store: StoreOf<MoreFeature>
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                profileCard
-                    .padding(.horizontal, 16)
+        VStack(spacing: 0) {
+            KohereNavigationBar(
+                left: .smallLogo,
+                center: .text("More"),
+                right: .moreTab(
+                    onLanguage: { store.send(.navigationLanguageTapped) },
+                    onSetting: { store.send(.navigationSettingTapped) }
+                )
+            )
 
-                VStack(spacing: 12) {
-                    MoreMenuSection(
-                        title: "내 활동",
-                        items: [
-                            .init(title: "Saved Listings", iconName: "heart_24"),
-                            .init(title: "Recently viewed", iconName: "thunder_24"),
-                            .init(title: "My Posts", iconName: "pencil_24")
-                        ],
-                        horizontalPadding: 16
-                    )
+            ScrollView {
+                VStack(spacing: 0) {
+                    profileCard
+                        .padding(.horizontal, 16)
 
-                    MoreMenuSection(
-                        title: "Korea Living Guide",
-                        items: [
-                            .init(title: "Korean Contract Checklist", iconName: "contractChecklist", rendersAsTemplate: false),
-                            .init(title: "Bank Account Guide", iconName: "bankAccountGuide", rendersAsTemplate: false),
-                            .init(title: "Top 3 Seoul Subway Apps", iconName: "train", rendersAsTemplate: false),
-                            .init(title: "Health Insurance Guide", iconName: "healthInsurance", rendersAsTemplate: false)
-                        ],
-                        horizontalPadding: 16
-                    )
+                    VStack(spacing: 12) {
+                        MoreMenuSection(
+                            title: "내 활동",
+                            items: [
+                                .init(title: "Saved Listings", iconName: "heart_24"),
+                                .init(title: "Recently viewed", iconName: "thunder_24"),
+                                .init(title: "My Posts", iconName: "pencil_24")
+                            ],
+                            horizontalPadding: 16
+                        )
 
-                    MoreMenuSection(
-                        title: "사장님 서비스",
-                        items: [
-                            .init(
-                                title: "무료로 방 홍보하기",
-                                subtitle: "고시원 · 쉐어하우스 · 코리빙 등",
-                                iconName: "external_link_24"
-                            )
-                        ],
-                        horizontalPadding: 16
-                    )
+                        MoreMenuSection(
+                            title: "Korea Living Guide",
+                            items: [
+                                .init(title: "Korean Contract Checklist", iconName: "contractChecklist", rendersAsTemplate: false),
+                                .init(title: "Bank Account Guide", iconName: "bankAccountGuide", rendersAsTemplate: false),
+                                .init(title: "Top 3 Seoul Subway Apps", iconName: "train", rendersAsTemplate: false),
+                                .init(title: "Health Insurance Guide", iconName: "healthInsurance", rendersAsTemplate: false)
+                            ],
+                            horizontalPadding: 16
+                        )
 
-                    MoreMenuSection(
-                        title: "Customer Support",
-                        items: [
-                            .init(title: "Announcements", iconName: "megaphone_24"),
-                            .init(title: "Send Feedback", iconName: "mail_24"),
-                            .init(title: "Partner With Kohere", iconName: "send_24")
-                        ],
-                        horizontalPadding: 16
-                    )
+                        MoreMenuSection(
+                            title: "사장님 서비스",
+                            items: [
+                                .init(
+                                    title: "무료로 방 홍보하기",
+                                    subtitle: "고시원 · 쉐어하우스 · 코리빙 등",
+                                    iconName: "external_link_24"
+                                )
+                            ],
+                            horizontalPadding: 16
+                        )
+
+                        MoreMenuSection(
+                            title: "Customer Support",
+                            items: [
+                                .init(title: "Announcements", iconName: "megaphone_24"),
+                                .init(title: "Send Feedback", iconName: "mail_24"),
+                                .init(title: "Partner With Kohere", iconName: "send_24")
+                            ],
+                            horizontalPadding: 16
+                        )
+                    }
+                    .padding(16)
+                    .background(Color.neutral5)
                 }
-                .padding(16)
-                .background(Color.neutral5)
+                .padding(.top, 8)
+                .padding(.bottom, 16)
             }
-            .padding(.top, 8)
-            .padding(.bottom, 16)
+            .background(Color.backgroundNormalAlternative)
         }
         .background(Color.backgroundNormalAlternative)
     }
 
     private var profileCard: some View {
         Button {
+            store.send(.editProfileTapped)
         } label: {
             ZStack {
                 Image("profileBackground")

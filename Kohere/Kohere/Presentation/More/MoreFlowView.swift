@@ -19,8 +19,12 @@ struct MoreFlowView: View {
             )
         ) {
             MoreView(store: store)
-        } destination: { _ in
-            EmptyView()
+        } destination: { store in
+            switch store.case {
+            case let .profileEdit(profileEditStore):
+                ProfileEditView(store: profileEditStore)
+                    .navigationBarHidden(true)
+            }
         }
     }
 }

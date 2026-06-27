@@ -31,13 +31,15 @@ struct DetailsStepView: View {
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
                     
-                    DropdownMenu(
+                    KohereDropdownMenu(
                         selectedOption: $store.selectedVisa,
                         activeField: $activeField,
-                        keyboardField: keyboardField,
                         equals: .visaStatus,
                         options: DropdownMenuOption.visas,
-                        listHeight: 239
+                        listHeight: 239,
+                        onExpand: {
+                            keyboardField.wrappedValue = nil
+                        }
                     )
                 }
                 .zIndex(4)
@@ -47,13 +49,15 @@ struct DetailsStepView: View {
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
                     
-                    DropdownMenu(
+                    KohereDropdownMenu(
                         selectedOption: $store.selectedOccupation,
                         activeField: $activeField,
-                        keyboardField: keyboardField,
                         equals: .occupation,
                         options: DropdownMenuOption.occupations,
-                        listHeight: 239
+                        listHeight: 239,
+                        onExpand: {
+                            keyboardField.wrappedValue = nil
+                        }
                     )
                 }
                 .zIndex(3)
@@ -64,13 +68,15 @@ struct DetailsStepView: View {
                             .kohereTextStyle(.label2Semibold)
                             .foregroundStyle(.neutral90)
                         
-                        DropdownMenu(
+                        KohereDropdownMenu(
                             selectedOption: $store.selectedNationality,
                             activeField: $activeField,
-                            keyboardField: keyboardField,
                             equals: .nationality,
                             options: DropdownMenuOption.nationalities,
-                            listHeight: 176
+                            listHeight: 176,
+                            onExpand: {
+                                keyboardField.wrappedValue = nil
+                            }
                         )
                     }
                     .zIndex(2)
@@ -80,13 +86,15 @@ struct DetailsStepView: View {
                             .kohereTextStyle(.label2Semibold)
                             .foregroundStyle(.neutral90)
                         
-                        DropdownMenu(
+                        KohereDropdownMenu(
                             selectedOption: $store.selectedGender,
                             activeField: $activeField,
-                            keyboardField: keyboardField,
                             equals: .gender,
                             options: DropdownMenuOption.genders,
-                            listHeight: 92
+                            listHeight: 92,
+                            onExpand: {
+                                keyboardField.wrappedValue = nil
+                            }
                         )
                     }
                     .zIndex(1)
