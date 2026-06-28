@@ -27,10 +27,10 @@ struct ListingDetailSectionHeader: View {
             Spacer()
 
             if showsChevron {
-                Image("chevron_right_24")
+                Image("chevron_right_16")
                     .renderingMode(.template)
                     .resizable()
-                    .frame(width: 24, height: 24)
+                    .frame(width: 16, height: 16)
                     .foregroundStyle(.labelAlternative)
             }
         }
@@ -48,6 +48,7 @@ struct ListingDetailRoomOfferCard: View {
                 .kohereTextStyle(.label1Semibold)
                 .foregroundStyle(.common0)
                 .lineLimit(1)
+                .padding(.bottom, 4)
 
             Text(offer.pricingText)
                 .kohereTextStyle(.body3Regular)
@@ -61,8 +62,14 @@ struct ListingDetailRoomOfferCard: View {
                         .foregroundStyle(.neutral5)
                         .padding(4)
                         .frame(height: 22)
-                        .background(.backgroundTransparentAlternative)
-                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                        .background {
+                            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                .fill(.ultraThinMaterial)
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                        .fill(.backgroundTransparentAlternative)
+                                }
+                        }
                 }
             }
         }
@@ -79,12 +86,11 @@ struct ListingDetailRoomOfferCard: View {
                 .overlay {
                     LinearGradient(
                         stops: [
-                            Gradient.Stop(color: .common100.opacity(0.55), location: 0),
-                            Gradient.Stop(color: .common100.opacity(0.18), location: 0.52),
-                            Gradient.Stop(color: .clear, location: 1)
+                            Gradient.Stop(color: .common100.opacity(0.4), location: 0.31762),
+                            Gradient.Stop(color: .common0.opacity(0), location: 0.87658)
                         ],
-                        startPoint: .bottomLeading,
-                        endPoint: .topTrailing
+                        startPoint: UnitPoint(x: 0, y: 0.634),
+                        endPoint: UnitPoint(x: 1, y: 0.366)
                     )
                 }
         }
@@ -101,7 +107,6 @@ struct ListingDetailInfoSection: View {
             Text(title)
                 .kohereTextStyle(.heading3Semibold)
                 .foregroundStyle(.common100)
-                .padding(.bottom, 8)
 
             ForEach(rows) { row in
                 ListingDetailInfoRow(row: row, showsDivider: row.id != rows.last?.id)
@@ -121,9 +126,9 @@ struct ListingDetailInfoRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
             Text(row.title)
-                .kohereTextStyle(.label2Medium)
+                .kohereTextStyle(.body2Regular)
                 .foregroundStyle(.common100)
-                .frame(width: 110, alignment: .leading)
+                .frame(width: 105, alignment: .leading)
 
             Text(row.value)
                 .kohereTextStyle(.body3Regular)
