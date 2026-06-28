@@ -18,7 +18,7 @@ struct ChatBotView: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
-            KohereNavigationBar(left: .backButton({}), center: .text("Find My Room"))
+            KohereNavigationBar(left: .backButton({ store.send(.backButtonTapped) }), center: .text("Find My Room"))
             
             Rectangle()
                 .fill(.lineNormal)

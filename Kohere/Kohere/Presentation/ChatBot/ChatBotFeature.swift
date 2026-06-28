@@ -47,6 +47,7 @@ struct ChatBotFeature {
     // MARK: - Action
     
     enum Action {
+        case backButtonTapped
         case onAppear
         case optionTapped(DiagnosisOption)
         case confirmButtonTapped
@@ -59,6 +60,9 @@ struct ChatBotFeature {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            case .backButtonTapped:
+                return .none
+                
             case .onAppear:
                 guard state.history.isEmpty else { return .none }
                 
