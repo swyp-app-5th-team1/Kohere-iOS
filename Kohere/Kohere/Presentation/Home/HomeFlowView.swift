@@ -13,7 +13,7 @@ struct HomeFlowView: View {
     // MARK: - Property
     
     @Bindable var store: StoreOf<HomeFeature>
-
+    
     // MARK: - Body
     
     var body: some View {
@@ -25,19 +25,26 @@ struct HomeFlowView: View {
         ) {
             HomeView(store: store)
         } destination: { store in
-            switch store.case {
-            case let .savedListings(savedListingsStore):
-                SavedListingsView(store: savedListingsStore)
-                    .navigationBarHidden(true)
-                
-            case let .recentlyViewedList(recentlyViewedStore):
-                RecentlyViewedListingsView(store: recentlyViewedStore)
-                    .navigationBarHidden(true)
-            
-            case let .notifications(notificationsStore):
-                NotificationsView(store: notificationsStore)
-                    .navigationBarHidden(true)
-            }
+            Group {
+                switch store.case {
+                case let .savedListings(savedListingsStore):
+                    SavedListingsView(store: savedListingsStore)
+                        .navigationBarHidden(true)
+                    
+                case let .recentlyViewedList(recentlyViewedStore):
+                    RecentlyViewedListingsView(store: recentlyViewedStore)
+                        .navigationBarHidden(true)
+                    
+                case let .notifications(notificationsStore):
+                    NotificationsView(store: notificationsStore)
+                        .navigationBarHidden(true)
+                    
+                case let .chatBot(chatBotStore):
+                    ChatBotView(store: chatBotStore)
+                        .navigationBarHidden(true)
+                }
+            } 
+            .toolbar(.hidden, for: .tabBar)
         }
     }
 }
