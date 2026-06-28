@@ -38,6 +38,7 @@ struct HomeFlowView: View {
                 NotificationsView(store: notificationsStore)
                     .navigationBarHidden(true)
             }
+            .toolbar(.hidden, for: .tabBar)
         }
     }
 }
