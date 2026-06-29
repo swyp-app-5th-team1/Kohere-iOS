@@ -93,6 +93,8 @@ private extension ProfileEditTextField {
     @ViewBuilder var characterCountText: some View {
         if let characterLimit {
             Text("\(text.count)/\(characterLimit)")
+                .kohereTextStyle(.caption2Regular)
+                .foregroundStyle(.coolNeutral10)
         }
     }
 
