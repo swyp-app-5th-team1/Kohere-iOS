@@ -53,7 +53,7 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
-            .background(Color.backgroundNormalAlternative)
+            .background(.backgroundNormalAlternative)
         }
     }
 
@@ -84,15 +84,15 @@ struct ContentView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(elevation.tokenName)
                             .kohereTextStyle(.label2Semibold)
-                            .foregroundStyle(Color.labelNormal)
+                            .foregroundStyle(.labelNormal)
                         Text("RoundedRectangle / 16")
                             .kohereTextStyle(.caption2Regular)
-                            .foregroundStyle(Color.labelAlternative)
+                            .foregroundStyle(.labelAlternative)
                     }
                     .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
                     .padding(16)
                     .kohereSurface(
-                        background: Color.backgroundElevatedNormal,
+                        background: .backgroundElevatedNormal,
                         shape: .roundedRectangle(cornerRadius: 16),
                         elevation: elevation
                     )

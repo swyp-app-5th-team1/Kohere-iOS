@@ -41,14 +41,14 @@ private extension ProfileEditTextField {
         HStack(spacing: 10) {
             Text(title)
                 .kohereTextStyle(.label2Semibold)
-                .foregroundStyle(Color.coolNeutral40)
+                .foregroundStyle(.coolNeutral40)
 
             Spacer(minLength: 0)
 
             if isRequired {
                 Text("*")
                     .kohereTextStyle(.label2Semibold)
-                    .foregroundStyle(Color.statusDanger)
+                    .foregroundStyle(.statusDanger)
             }
         }
         .padding(.horizontal, 4)
@@ -61,11 +61,11 @@ private extension ProfileEditTextField {
         }
         .padding(.horizontal, 16)
         .frame(height: 40)
-        .background(Color.backgroundNormalNormal)
+        .background(.backgroundNormalNormal)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay {
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isFocused ? Color.primary20 : Color.clear, lineWidth: 1)
+                .stroke(isFocused ? .primary20 : .clear, lineWidth: 1)
         }
         .contentShape(Rectangle())
         .onTapGesture {
@@ -77,7 +77,7 @@ private extension ProfileEditTextField {
     var textField: some View {
         TextField("", text: $text)
             .kohereTextStyle(.label2Medium)
-            .foregroundStyle(Color.coolNeutral70)
+            .foregroundStyle(.coolNeutral70)
             .keyboardType(keyboardType)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
@@ -90,13 +90,11 @@ private extension ProfileEditTextField {
             }
     }
 
-    var characterCountText: some View {
-        Group {
-            if let characterLimit {
-                Text("\(text.count)/\(characterLimit)")
-                    .kohereTextStyle(.caption2Regular)
-                    .foregroundStyle(Color.coolNeutral20)
-            }
+    @ViewBuilder var characterCountText: some View {
+        if let characterLimit {
+            Text("\(text.count)/\(characterLimit)")
+                .kohereTextStyle(.caption2Regular)
+                .foregroundStyle(.coolNeutral10)
         }
     }
 

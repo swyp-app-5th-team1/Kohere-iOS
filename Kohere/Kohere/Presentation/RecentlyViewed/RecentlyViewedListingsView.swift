@@ -37,6 +37,7 @@ struct RecentlyViewedListingsView: View {
                             )
                         }
                     }
+                    .padding(.top, 16)
                     .padding(.horizontal, 20)
                 }
             }

@@ -37,14 +37,14 @@ private extension ProfileEditDropdownField {
         HStack(spacing: 10) {
             Text(title)
                 .kohereTextStyle(.label2Semibold)
-                .foregroundStyle(Color.coolNeutral40)
+                .foregroundStyle(.coolNeutral40)
 
             Spacer(minLength: 0)
 
             if isRequired {
                 Text("*")
                     .kohereTextStyle(.label2Semibold)
-                    .foregroundStyle(Color.statusDanger)
+                    .foregroundStyle(.statusDanger)
             }
         }
         .padding(.horizontal, 4)

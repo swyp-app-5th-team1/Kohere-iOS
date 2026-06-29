@@ -26,6 +26,7 @@ struct MapFeature {
 
     @Reducer
     enum Path {
+        case listingDetail(ListingDetailFeature)
     }
 
     @ObservableState
@@ -36,19 +37,20 @@ struct MapFeature {
         // 매물/마커 표시 상태
         var markers: [MapMarkerItem] = [
             MapMarkerItem(
-                id: "hongdae-station",
+                id: "1",
                 coordinate: MapCoordinate(latitude: 37.557192, longitude: 126.925381)
             ),
             MapMarkerItem(
-                id: "sinchon-station",
+                id: "2",
                 coordinate: MapCoordinate(latitude: 37.555134, longitude: 126.936893)
             ),
             MapMarkerItem(
-                id: "hapjeong-station",
+                id: "3",
                 coordinate: MapCoordinate(latitude: 37.549463, longitude: 126.913739)
             )
         ]
         var selectedMarkerID: String?
+        var listings: [ListingItemModel] = .mapMockList
 
         // 지도 viewport / 재검색 상태
         var currentViewport: MapViewport?
@@ -81,6 +83,8 @@ struct MapFeature {
         case viewportChanged(MapViewport)
         case path(StackActionOf<Path>)
         case listingTapped(String)
+        case listingLikeButtonTapped(Int)
+        case selectedListingCardTapped
         case selectedListingCloseButtonTapped
 
         // 필터 관련
@@ -174,12 +178,26 @@ struct MapFeature {
                 state.showsResearchButton = lastSearchedViewport != viewport
                 return .none
 
+            case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
             case .path:
                 return .none
 
             case let .listingTapped(id):
                 state.selectedMarkerID = id
                 state.sheetMode = .selectedListing
+                return .none
+
+            case let .listingLikeButtonTapped(id):
+                guard let index = state.listings.firstIndex(where: { $0.id == id }) else { return .none }
+                state.listings[index].isLiked.toggle()
+                return .none
+
+            case .selectedListingCardTapped:
+                guard let selectedMarkerID = state.selectedMarkerID else { return .none }
+                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: selectedMarkerID)))
                 return .none
 
             case .selectedListingCloseButtonTapped:
@@ -234,7 +252,53 @@ struct MapFeature {
                 return .none
             }
         }
+        .forEach(\.path, action: \.path)
     }
 }
 
 extension MapFeature.Path.State: Equatable {}
+
+private extension Array where Element == ListingItemModel {
+    static let mapMockList: [ListingItemModel] = [
+        ListingItemModel(
+            id: 1,
+            formattedPrice: "₩380~400K/mo",
+            formattedUsdPrice: "≈$355~398/mo",
+            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
+            locationDescription: "8-min walk Hongdae Sta.",
+            typeTag: "Goshiwon",
+            period: "1 mo~",
+            isLiked: false
+        ),
+        ListingItemModel(
+            id: 2,
+            formattedPrice: "₩380~400K/mo",
+            formattedUsdPrice: "≈$355~398/mo",
+            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
+            locationDescription: "8-min walk Hongdae Sta.",
+            typeTag: "Goshiwon",
+            period: "1 mo~",
+            isLiked: true
+        ),
+        ListingItemModel(
+            id: 3,
+            formattedPrice: "₩380~400K/mo",
+            formattedUsdPrice: "≈$355~398/mo",
+            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
+            locationDescription: "8-min walk Hongdae Sta.",
+            typeTag: "Goshiwon",
+            period: "1 mo~",
+            isLiked: false
+        ),
+        ListingItemModel(
+            id: 4,
+            formattedPrice: "₩380~400K/mo",
+            formattedUsdPrice: "≈$355~398/mo",
+            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
+            locationDescription: "8-min walk Hongdae Sta.",
+            typeTag: "Goshiwon",
+            period: "1 mo~",
+            isLiked: false
+        )
+    ]
+}

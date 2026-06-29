@@ -31,8 +31,12 @@ struct MapView: View {
 
                 mapListingSheet(containerHeight: containerHeight)
 
-                mapSelectedListingSheet
+                if store.sheetMode == .selectedListing,
+                   let selectedListingItem {
+                    mapSelectedListingSheet(item: selectedListingItem)
+                }
             }
+            .animation(sheetAnimation, value: store.sheetMode)
         }
         .onAppear {
             store.send(.mapAppeared)
@@ -155,22 +159,37 @@ struct MapView: View {
                 listingSheetDragGesture(containerHeight: containerHeight),
                 including: store.sheetMode == .listingList ? .all : .none
             )
-            .animation(sheetAnimation, value: store.sheetMode)
             .animation(sheetAnimation, value: listingSheetDetent)
     }
 
-    private var mapSelectedListingSheet: some View {
-        MapSelectedListingSheetView {
-            store.send(.selectedListingCloseButtonTapped)
-        }
-        .frame(height: selectedListingSheetHeight)
-        .offset(
-            y: store.sheetMode == .selectedListing
-            ? tabBarCoveredHeight
-            : selectedListingSheetHeight + tabBarCoveredHeight + hiddenSheetExtraOffset
+    private func mapSelectedListingSheet(item: ListingItemModel) -> some View {
+        MapSelectedListingSheetView(
+            title: selectedListingTitle,
+            item: item,
+            onCardTapped: {
+                store.send(.selectedListingCardTapped)
+            },
+            onLikeTapped: {
+                store.send(.listingLikeButtonTapped(item.id))
+            },
+            onCloseButtonTapped: {
+                store.send(.selectedListingCloseButtonTapped)
+            }
         )
-        .allowsHitTesting(store.sheetMode == .selectedListing)
-        .animation(sheetAnimation, value: store.sheetMode)
+        .frame(height: selectedListingSheetHeight)
+        .clipped()
+        .offset(y: tabBarCoveredHeight)
+        .transition(.move(edge: .bottom))
+    }
+
+    private var selectedListingItem: ListingItemModel? {
+        guard let selectedMarkerID = store.selectedMarkerID else { return nil }
+        return store.listings.first { "\($0.id)" == selectedMarkerID }
+    }
+
+    private var selectedListingTitle: String {
+        guard let selectedMarkerID = store.selectedMarkerID else { return "" }
+        return ListingDetailModel.mock(id: selectedMarkerID).overview.title
     }
 
     // MARK: - Sheet Layout
