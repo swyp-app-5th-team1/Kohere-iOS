@@ -11,10 +11,11 @@ import ComposableArchitecture
 struct RootFeature {
     @Dependency(\.keychainClient)
     var keychainClient
-
+    
     @ObservableState
     struct State: Equatable {
         var authInfo: Auth?
+        var isAuthLoading = true
         var login = LoginFeature.State()
         var onboarding = OnboardingFeature.State()
         var selectedTab: AppTab = .home
@@ -29,6 +30,7 @@ struct RootFeature {
         case onAppear
         case storedAuthLoaded(Auth?)
         case login(LoginFeature.Action)
+        case saveAuthResponse(Result<Auth, Error>)
         case onboarding(OnboardingFeature.Action)
         case selectedTabChanged(AppTab)
         case home(HomeFeature.Action)
@@ -63,23 +65,26 @@ struct RootFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard state.authInfo == nil else { return .none }
-
+                guard state.authInfo == nil, state.isAuthLoading else { return .none }
+                
                 return .run { send in
                     let auth = try await keychainClient.loadAuth()
                     await send(.storedAuthLoaded(auth))
-                } catch: { _, _ in
+                } catch: { _, send in
+                    await send(.storedAuthLoaded(nil))
                 }
-
+                
             case let .storedAuthLoaded(auth):
                 state.authInfo = auth
+                state.isAuthLoading = false
                 return .none
                 
             case .login(.termsAgreementCompleted):
-                guard let authInfo = state.login.authInfo else { return .none }
+                guard state.login.isRequiredTermsAgreed,
+                      let authInfo = state.login.authInfo else { return .none }
                 state.authInfo = authInfo
                 return .none
-
+                
             case .onboarding(.onboardingCompleted):
                 guard let authInfo = state.authInfo else { return .none }
                 let updatedAuthInfo = Auth(
@@ -90,12 +95,20 @@ struct RootFeature {
                     refreshToken: authInfo.refreshToken,
                     expiresIn: authInfo.expiresIn
                 )
-                state.authInfo = updatedAuthInfo
-
-                return .run { _ in
+                
+                return .run { send in
                     try await keychainClient.saveAuth(updatedAuthInfo)
-                } catch: { _, _ in
+                    await send(.saveAuthResponse(.success(updatedAuthInfo)))
+                } catch: { error, send in
+                    await send(.saveAuthResponse(.failure(error)))
                 }
+            
+            case let .saveAuthResponse(.success(updatedAuthInfo)):
+                state.authInfo = updatedAuthInfo
+                return .none
+
+            case let .saveAuthResponse(.failure):
+                return .none
                 
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
