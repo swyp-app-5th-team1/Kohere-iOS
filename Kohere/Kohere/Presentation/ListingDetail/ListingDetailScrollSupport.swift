@@ -39,6 +39,16 @@ enum ListingDetailSection: Int, CaseIterable, Identifiable {
     }
 }
 
+/// 전체 상세 ScrollView의 세로 offset을 계산하기 위한 iOS 18 미만 fallback key.
+struct ListingDetailScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+/// 섹션별 현재 minY를 모아 sticky 탭의 active 섹션을 판단하기 위한 key.
 struct ListingDetailSectionPositionKey: PreferenceKey {
     static var defaultValue: [ListingDetailSection: CGFloat] = [:]
 

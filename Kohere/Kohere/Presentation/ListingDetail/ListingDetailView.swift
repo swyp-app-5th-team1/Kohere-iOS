@@ -77,7 +77,7 @@ struct ListingDetailView: View {
                 scrollOffsetReader
 
                 VStack(spacing: 16) {
-                    heroSection
+                    ListingDetailHeroSection(overview: store.detail.overview)
                     tabsAndRoomOffersSection(scrollProxy: scrollProxy)
                     trackedSection(.price) {
                         ListingDetailInfoSection(title: "가격 정보", rows: store.detail.priceInfo)
@@ -266,40 +266,14 @@ struct ListingDetailView: View {
         }
     }
 
-    private var heroSection: some View {
-        VStack(spacing: 0) {
-            heroImage
-            overviewSection
-        }
-        .background(.common0)
-    }
-
-    private var heroImage: some View {
-        Image(.roomPlaceholder)
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-            .frame(maxWidth: .infinity)
-            .frame(height: 267)
-            .clipped()
-            .overlay {
-                Color.common100.opacity(0.2)
-            }
-            .overlay(alignment: .bottomTrailing) {
-                Text(store.detail.overview.imageCountText)
-                    .kohereTextStyle(.caption2Regular)
-                    .foregroundStyle(.common0)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.backgroundTransparentAlternative)
-                    .clipShape(Capsule())
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 20)
-            }
-    }
-
     private func topChromeOverlay(scrollProxy: ScrollViewProxy) -> some View {
         VStack(spacing: 0) {
-            topNavigationBar
+            ListingDetailTopNavigationBar(
+                progress: topChromeProgress,
+                height: collapsedNavigationBarHeight,
+                onBackTap: { store.send(.backButtonTapped) },
+                onShareTap: { store.send(.shareButtonTapped) }
+            )
 
             if showsPinnedTabs {
                 sectionTabs(scrollProxy: scrollProxy)
@@ -309,100 +283,14 @@ struct ListingDetailView: View {
         .zIndex(2)
     }
 
-    private var topNavigationBar: some View {
-        HStack {
-            topChromeButton(imageName: "chevron_left_24") {
-                store.send(.backButtonTapped)
-            }
-
-            Spacer()
-
-            topChromeButton(imageName: "share_ios_24") {
-                store.send(.shareButtonTapped)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 56)
-        .frame(maxWidth: .infinity)
-        .frame(height: collapsedNavigationBarHeight, alignment: .bottom)
-        .background(.common0.opacity(topChromeProgress))
-    }
-
-    private func topChromeButton(imageName: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            ZStack {
-                Image(imageName)
-                    .renderingMode(.template)
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                    .foregroundStyle(.common0)
-                    .opacity(1 - topChromeProgress)
-
-                Image(imageName)
-                    .renderingMode(.template)
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                    .foregroundStyle(.labelAlternative)
-                    .opacity(topChromeProgress)
-            }
-            .frame(width: 44, height: 44)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var overviewSection: some View {
-        ListingDetailOverviewSection(overview: store.detail.overview)
-    }
-
     private func sectionTabs(scrollProxy: ScrollViewProxy) -> some View {
-        ScrollViewReader { tabScrollProxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 0) {
-                    ForEach(ListingDetailSection.allCases) { section in
-                        let isSelected = selectedSection == section
-
-                        Button {
-                            scrollToSection(section, scrollProxy: scrollProxy)
-                        } label: {
-                            Text(title(for: section))
-                                .kohereTextStyle(isSelected ? .label2Semibold : .body2Regular)
-                                .foregroundStyle(isSelected ? .labelNormal : .neutral70)
-                                .lineLimit(1)
-                                .fixedSize(horizontal: true, vertical: false)
-                                .padding(.horizontal, 12)
-                                .frame(height: 44)
-                                .overlay(alignment: .bottom) {
-                                    if isSelected {
-                                        Rectangle()
-                                            .fill(.primary50)
-                                            .frame(height: 3)
-                                            .padding(.horizontal, 12)
-                                    }
-                                }
-                        }
-                        .buttonStyle(.plain)
-                        .id(section)
-                    }
-                }
-                .padding(.horizontal, 12)
+        ListingDetailSectionTabs(
+            selectedSection: selectedSection,
+            title: title(for:),
+            onTap: { section in
+                scrollToSection(section, scrollProxy: scrollProxy)
             }
-            .onAppear {
-                tabScrollProxy.scrollTo(selectedSection, anchor: .center)
-            }
-            .onChange(of: selectedSection) { _, section in
-                withAnimation(.snappy(duration: 0.25)) {
-                    tabScrollProxy.scrollTo(section, anchor: .center)
-                }
-            }
-        }
-        .frame(height: 44)
-        .background(.common0)
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(.lineNeutral)
-                .frame(height: 1)
-        }
-        .zIndex(1)
+        )
     }
 
     private func title(for section: ListingDetailSection) -> String {
@@ -439,31 +327,9 @@ struct ListingDetailView: View {
         VStack(spacing: 0) {
             contentSectionTabs(scrollProxy: scrollProxy)
             trackedSection(.roomOffers) {
-                roomOffersSection
+                ListingDetailRoomOffersSection(roomOffers: store.detail.roomOffers)
             }
         }
-    }
-
-    private var roomOffersSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            ListingDetailSectionHeader(
-                title: "각 방 정보",
-                count: store.detail.roomOffers.count,
-                showsChevron: true
-            )
-                .padding(.horizontal, 20)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(store.detail.roomOffers) { offer in
-                        ListingDetailRoomOfferCard(offer: offer)
-                    }
-                }
-                .padding(.horizontal, 20)
-            }
-        }
-        .padding(.vertical, 16)
-        .background(.common0)
     }
 
     private var bottomBar: some View {
@@ -473,13 +339,5 @@ struct ListingDetailView: View {
             onContactTap: { store.send(.contactButtonTapped) },
             onApplyTap: { store.send(.applyButtonTapped) }
         )
-    }
-}
-
-private struct ListingDetailScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
     }
 }
