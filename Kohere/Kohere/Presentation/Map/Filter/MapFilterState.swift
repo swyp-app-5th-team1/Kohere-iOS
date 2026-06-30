@@ -106,37 +106,16 @@ enum MapFilterOption: CaseIterable, Hashable {
     }
 }
 
-struct MapFilterPriceSelection: Equatable {
-    var minimum: Int
-    var maximum: Int
-
-    init(minimum: Int, maximum: Int, bounds: ClosedRange<Int>) {
-        let clampedMinimum = min(max(minimum, bounds.lowerBound), bounds.upperBound)
-        let clampedMaximum = min(max(maximum, bounds.lowerBound), bounds.upperBound)
-
-        self.minimum = min(clampedMinimum, clampedMaximum)
-        self.maximum = max(clampedMinimum, clampedMaximum)
-    }
-
-    mutating func updateMinimum(_ value: Int, bounds: ClosedRange<Int>) {
-        minimum = min(max(value, bounds.lowerBound), maximum)
-    }
-
-    mutating func updateMaximum(_ value: Int, bounds: ClosedRange<Int>) {
-        maximum = max(min(value, bounds.upperBound), minimum)
-    }
-}
-
 enum MapFilterPriceRange {
     static let monthlyRent = 0...100
     static let deposit = 0...300
 
-    static let defaultMonthlyRent = MapFilterPriceSelection(
+    static let defaultMonthlyRent = RangeSliderValue(
         minimum: monthlyRent.lowerBound,
         maximum: 50,
         bounds: monthlyRent
     )
-    static let defaultDeposit = MapFilterPriceSelection(
+    static let defaultDeposit = RangeSliderValue(
         minimum: deposit.lowerBound,
         maximum: 150,
         bounds: deposit
