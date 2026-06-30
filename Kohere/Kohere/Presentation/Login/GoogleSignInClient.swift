@@ -22,30 +22,32 @@ extension GoogleSignInClient: DependencyKey {
         else {
             throw DataError.underlying(message: "Google iOS Client ID가 설정되지 않았습니다.")
         }
-
-        let serverClientID = Bundle.main.object(forInfoDictionaryKey: "GOOGLE_SERVER_CLIENT_ID") as? String
-        let normalizedServerClientID = serverClientID.flatMap { value -> String? in
-            guard !value.isEmpty, value != "$(GOOGLE_SERVER_CLIENT_ID)" else { return nil }
-            return value
+        
+        guard
+            let serverClientID = Bundle.main.object(forInfoDictionaryKey: "GOOGLE_SERVER_CLIENT_ID") as? String,
+            !serverClientID.isEmpty,
+            serverClientID != "$(GOOGLE_SERVER_CLIENT_ID)"
+        else {
+            throw DataError.underlying(message: "Google Server Client ID가 설정되지 않았습니다.")
         }
-
+        
         GIDSignIn.sharedInstance.configuration = GIDConfiguration(
             clientID: clientID,
-            serverClientID: normalizedServerClientID
+            serverClientID: serverClientID
         )
-
+        
         guard let presentingViewController = UIApplication.shared.kohereRootViewController else {
-            throw DataError.underlying(message: "Google 로그인 화면을 표시할 수 없습니다.")
+            throw DataError.underlying(message: "로그인 화면을 표시할 수 없습니다.")
         }
-
+        
         let result = try await GIDSignIn.sharedInstance.signIn(
             withPresenting: presentingViewController
         )
-
+        
         guard let idToken = result.user.idToken?.tokenString else {
             throw DataError.underlying(message: "Google idToken을 가져오지 못했습니다.")
         }
-
+        
         return idToken
     }
 }
