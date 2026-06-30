@@ -12,17 +12,6 @@ struct SocialLoginResponseDTO: Decodable {
     let accessToken: String
     let refreshToken: String?
     let expiresIn: Int
-
-    func toEntity() -> Auth {
-        Auth(
-            onboardingRequired: onboardingRequired,
-            status: AuthStatus(rawValue: status) ?? .unknown,
-            tokenType: tokenType,
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            expiresIn: expiresIn
-        )
-    }
 }
 
 struct TokenResponseDTO: Decodable {
@@ -30,13 +19,4 @@ struct TokenResponseDTO: Decodable {
     let accessToken: String
     let refreshToken: String
     let expiresIn: Int
-
-    func toEntity() -> AuthToken {
-        AuthToken(
-            tokenType: tokenType,
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            expiresIn: expiresIn
-        )
-    }
 }
