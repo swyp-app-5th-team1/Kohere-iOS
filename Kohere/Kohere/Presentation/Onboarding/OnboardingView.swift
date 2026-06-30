@@ -75,7 +75,11 @@ extension OnboardingView {
             }
             
             Button {
-                store.send(.nextButtonTapped)
+                if store.currentStep == .emailVerification {
+                    store.send(.onboardingCompleted)
+                } else {
+                    store.send(.nextButtonTapped)
+                }
             } label: {
                 Text(store.currentStep == .emailVerification ? "Get Started" : "Next")
                     .kohereTextStyle(.label1Semibold)
