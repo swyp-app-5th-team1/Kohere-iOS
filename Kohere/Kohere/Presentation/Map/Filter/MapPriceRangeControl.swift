@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MapPriceRangeControl: View {
     let title: String
-    let selection: MapFilterPriceSelection
+    let selection: RangeSliderValue
     let bounds: ClosedRange<Int>
     let middleLabel: String
     let maximumLabel: String
@@ -31,8 +31,8 @@ struct MapPriceRangeControl: View {
             }
 
             VStack(spacing: 6) {
-                MapPriceRangeSlider(
-                    selection: selection,
+                RangeSlider(
+                    value: selection,
                     bounds: bounds,
                     onMinimumChange: onMinimumChange,
                     onMaximumChange: onMaximumChange

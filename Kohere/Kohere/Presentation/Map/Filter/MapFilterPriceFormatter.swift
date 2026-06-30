@@ -9,7 +9,7 @@ import Foundation
 
 enum MapFilterPriceFormatter {
     static func controlSummary(
-        selection: MapFilterPriceSelection,
+        selection: RangeSliderValue,
         bounds: ClosedRange<Int>
     ) -> String {
         switch rangeState(
@@ -30,8 +30,8 @@ enum MapFilterPriceFormatter {
 
     static func chipTitle(
         prefix: String,
-        selection: MapFilterPriceSelection,
-        defaultSelection: MapFilterPriceSelection
+        selection: RangeSliderValue,
+        defaultSelection: RangeSliderValue
     ) -> String? {
         switch rangeState(
             selection: selection,
@@ -50,7 +50,7 @@ enum MapFilterPriceFormatter {
     }
 
     private static func rangeState(
-        selection: MapFilterPriceSelection,
+        selection: RangeSliderValue,
         minimumBoundary: Int,
         maximumBoundary: Int
     ) -> RangeState {

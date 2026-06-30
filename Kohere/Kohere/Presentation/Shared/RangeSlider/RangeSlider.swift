@@ -1,12 +1,40 @@
+//
+//  RangeSlider.swift
+//  Kohere
+//
+//  Created by Codex on 6/30/26.
+//
+
 import SwiftUI
 
-struct MapPriceRangeSlider: View {
+struct RangeSliderValue: Equatable {
+    var minimum: Int
+    var maximum: Int
+
+    init(minimum: Int, maximum: Int, bounds: ClosedRange<Int>) {
+        let clampedMinimum = min(max(minimum, bounds.lowerBound), bounds.upperBound)
+        let clampedMaximum = min(max(maximum, bounds.lowerBound), bounds.upperBound)
+
+        self.minimum = min(clampedMinimum, clampedMaximum)
+        self.maximum = max(clampedMinimum, clampedMaximum)
+    }
+
+    mutating func updateMinimum(_ value: Int, bounds: ClosedRange<Int>) {
+        minimum = min(max(value, bounds.lowerBound), maximum)
+    }
+
+    mutating func updateMaximum(_ value: Int, bounds: ClosedRange<Int>) {
+        maximum = max(min(value, bounds.upperBound), minimum)
+    }
+}
+
+struct RangeSlider: View {
     @State private var activeThumb: SliderThumb?
 
     private let thumbSize: CGFloat = 24
     private let trackHeight: CGFloat = 4
 
-    let selection: MapFilterPriceSelection
+    let value: RangeSliderValue
     let bounds: ClosedRange<Int>
     let onMinimumChange: (Int) -> Void
     let onMaximumChange: (Int) -> Void
@@ -14,8 +42,8 @@ struct MapPriceRangeSlider: View {
     var body: some View {
         GeometryReader { proxy in
             let width = proxy.size.width
-            let minimumX = position(for: selection.minimum, width: width)
-            let maximumX = position(for: selection.maximum, width: width)
+            let minimumX = position(for: value.minimum, width: width)
+            let maximumX = position(for: value.maximum, width: width)
 
             ZStack(alignment: .leading) {
                 Capsule()
@@ -30,7 +58,7 @@ struct MapPriceRangeSlider: View {
 
                 sliderThumb(.minimum)
                     .position(x: minimumX, y: thumbSize / 2)
-                    .zIndex(selection.minimum == selection.maximum ? 1 : 0)
+                    .zIndex(value.minimum == value.maximum ? 1 : 0)
 
                 sliderThumb(.maximum)
                     .position(x: maximumX, y: thumbSize / 2)
@@ -72,7 +100,7 @@ struct MapPriceRangeSlider: View {
             }
             .contentShape(Circle())
             .accessibilityLabel(Text(thumb.accessibilityLabel))
-            .accessibilityValue(Text("\(thumb.value(in: selection))"))
+            .accessibilityValue(Text("\(thumb.value(in: value))"))
             .accessibilityAdjustableAction { direction in
                 adjust(thumb, direction: direction)
             }
@@ -83,13 +111,13 @@ struct MapPriceRangeSlider: View {
 
         switch (thumb, direction) {
         case (.minimum, .increment):
-            onMinimumChange(min(selection.minimum + step, selection.maximum))
+            onMinimumChange(min(value.minimum + step, value.maximum))
         case (.minimum, .decrement):
-            onMinimumChange(max(selection.minimum - step, bounds.lowerBound))
+            onMinimumChange(max(value.minimum - step, bounds.lowerBound))
         case (.maximum, .increment):
-            onMaximumChange(min(selection.maximum + step, bounds.upperBound))
+            onMaximumChange(min(value.maximum + step, bounds.upperBound))
         case (.maximum, .decrement):
-            onMaximumChange(max(selection.maximum - step, selection.minimum))
+            onMaximumChange(max(value.maximum - step, value.minimum))
         @unknown default:
             break
         }
@@ -143,12 +171,12 @@ struct MapPriceRangeSlider: View {
             }
         }
 
-        func value(in selection: MapFilterPriceSelection) -> Int {
+        func value(in value: RangeSliderValue) -> Int {
             switch self {
             case .minimum:
-                selection.minimum
+                value.minimum
             case .maximum:
-                selection.maximum
+                value.maximum
             }
         }
     }
