@@ -5,7 +5,7 @@
 //  Created by mandoo on 6/30/26.
 //
 
-nonisolated struct SocialLoginRequestDTO: Encodable {
+nonisolated struct SocialLoginRequestDTO: Encodable, Sendable {
     let provider: SocialLoginProviderDTO
     let idToken: String
 }
