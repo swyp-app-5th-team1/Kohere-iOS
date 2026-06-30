@@ -63,6 +63,7 @@ struct OnboardingFeature {
         case sendVerificationCodeTapped
         case confirmVerificationCodeTapped
         case verificationSuccess
+        case onboardingCompleted
     }
     
     // MARK: - Reducer Body
@@ -117,6 +118,9 @@ struct OnboardingFeature {
                 
             case .verificationSuccess:
                 state.isEmailVerified = true
+                return .none
+
+            case .onboardingCompleted:
                 return .none
             }
         }
