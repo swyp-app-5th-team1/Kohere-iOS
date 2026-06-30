@@ -10,6 +10,13 @@ import Foundation
 
 @Reducer
 struct LoginFeature {
+    @Dependency(\.googleSignInClient)
+    var googleSignInClient
+    @Dependency(\.socialLoginUseCase)
+    var socialLoginUseCase
+    @Dependency(\.keychainClient)
+    var keychainClient
+
     enum LoginSheet: Equatable, Identifiable {
         case notificationOption
         case termsAgreement
@@ -23,6 +30,8 @@ struct LoginFeature {
     struct State: Equatable {
         var isLoginRequesting = false
         var authInfo: Auth?
+        var loginStatusMessage: String?
+        var loginErrorMessage: String?
         var currentSheet: LoginSheet?
         var isServiceTermsAgreed = true
         var isPrivacyTermsAgreed = true
@@ -43,8 +52,9 @@ struct LoginFeature {
     enum Action: Equatable {
         case googleLoginButtonTapped
         case appleLoginButtonTapped
+        case googleIDTokenReceived(String)
         case loginSuccess(Auth)
-        case loginFailure
+        case loginFailure(String)
         
         case notificationSheetDismissed
         case termsAgreementCompleted
@@ -65,28 +75,66 @@ struct LoginFeature {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
-            case .googleLoginButtonTapped, .appleLoginButtonTapped:
+            case .googleLoginButtonTapped:
                 state.isLoginRequesting = true
-                
+                state.loginStatusMessage = "Google 계정 인증 중입니다."
+                state.loginErrorMessage = nil
+
                 return .run { send in
-                    try await Task.sleep(nanoseconds: 1_000_000_000)
-                    let mockData = Auth(
-                        userId: 1,
-                        email: "test@test.com",
-                        accessToken: "mock_access_token",
-                        refreshToken: "mock_refresh_token"
-                    )
-                    await send(.loginSuccess(mockData))
+                    do {
+                        let idToken = try await googleSignInClient.signIn()
+                        await send(.googleIDTokenReceived(idToken))
+                    } catch {
+                        await send(.loginFailure(error.localizedDescription))
+                    }
+                }
+
+            case .appleLoginButtonTapped:
+                state.loginStatusMessage = nil
+                state.loginErrorMessage = "Apple 로그인 연동 전"
+                return .none
+
+            case let .googleIDTokenReceived(idToken):
+                state.loginStatusMessage = "서버 로그인 중입니다."
+                return .run { send in
+                    do {
+                        let auth = try await withThrowingTaskGroup(of: Auth.self) { group in
+                            group.addTask {
+                                try await socialLoginUseCase.execute(.google, idToken)
+                            }
+                            group.addTask {
+                                try await Task.sleep(nanoseconds: 15_000_000_000)
+                                throw DataError.underlying(message: "서버 로그인 응답이 지연되고 있습니다.")
+                            }
+
+                            guard let auth = try await group.next() else {
+                                throw DataError.underlying(message: "서버 로그인 응답을 받지 못했습니다.")
+                            }
+                            group.cancelAll()
+                            return auth
+                        }
+                        await send(.loginSuccess(auth))
+                    } catch {
+                        await send(.loginFailure(error.localizedDescription))
+                    }
                 }
                 
             case let .loginSuccess(auth):
                 state.isLoginRequesting = false
                 state.authInfo = auth
+                state.loginStatusMessage = nil
+                state.loginErrorMessage = nil
                 state.currentSheet = .notificationOption
-                return .none
+                return .run { _ in
+                    try await keychainClient.saveAuth(auth)
+                } catch: { error, send in
+                    await send(.loginFailure(error.localizedDescription))
+                }
                 
-            case .loginFailure:
+            case let .loginFailure(message):
                 state.isLoginRequesting = false
+                state.loginStatusMessage = nil
+                state.loginErrorMessage = message
                 return .none
                 
             case .notificationSheetDismissed:

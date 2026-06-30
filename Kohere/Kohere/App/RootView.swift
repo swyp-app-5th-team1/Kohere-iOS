@@ -16,64 +16,87 @@ struct RootView: View {
             Color.backgroundNormalNormal
                 .ignoresSafeArea()
 
-            TabView(selection: $store.selectedTab.sending(\.selectedTabChanged)) {
-                HomeFlowView(
+            if store.authInfo == nil {
+                LoginView(
                     store: store.scope(
-                        state: \RootFeature.State.home,
-                        action: \.home
+                        state: \RootFeature.State.login,
+                        action: \.login
                     )
                 )
-                    .tabItem {
-                        tabIcon(.home)
-                    }
-                    .tag(AppTab.home)
-
-                CommunityFlowView(
+            } else if store.authInfo?.onboardingRequired == true {
+                OnboardingView(
                     store: store.scope(
-                        state: \RootFeature.State.community,
-                        action: \.community
+                        state: \RootFeature.State.onboarding,
+                        action: \.onboarding
                     )
                 )
-                    .tabItem {
-                        tabIcon(.community)
-                    }
-                    .tag(AppTab.community)
-
-                MapFlowView(
-                    store: store.scope(
-                        state: \RootFeature.State.map,
-                        action: \.map
-                    )
-                )
-                    .tabItem {
-                        tabIcon(.map)
-                    }
-                    .tag(AppTab.map)
-
-                ChatFlowView(
-                    store: store.scope(
-                        state: \RootFeature.State.chat,
-                        action: \.chat
-                    )
-                )
-                    .tabItem {
-                        tabIcon(.chat)
-                    }
-                    .tag(AppTab.chat)
-
-                MoreFlowView(
-                    store: store.scope(
-                        state: \RootFeature.State.more,
-                        action: \.more
-                    )
-                )
-                    .tabItem {
-                        tabIcon(.more)
-                    }
-                    .tag(AppTab.more)
+            } else {
+                tabView
             }
-            .tint(.primary50)
         }
+        .onAppear {
+            store.send(.onAppear)
+        }
+    }
+
+    private var tabView: some View {
+        TabView(selection: $store.selectedTab.sending(\.selectedTabChanged)) {
+            HomeFlowView(
+                store: store.scope(
+                    state: \RootFeature.State.home,
+                    action: \.home
+                )
+            )
+                .tabItem {
+                    tabIcon(.home)
+                }
+                .tag(AppTab.home)
+
+            CommunityFlowView(
+                store: store.scope(
+                    state: \RootFeature.State.community,
+                    action: \.community
+                )
+            )
+                .tabItem {
+                    tabIcon(.community)
+                }
+                .tag(AppTab.community)
+
+            MapFlowView(
+                store: store.scope(
+                    state: \RootFeature.State.map,
+                    action: \.map
+                )
+            )
+                .tabItem {
+                    tabIcon(.map)
+                }
+                .tag(AppTab.map)
+
+            ChatFlowView(
+                store: store.scope(
+                    state: \RootFeature.State.chat,
+                    action: \.chat
+                )
+            )
+                .tabItem {
+                    tabIcon(.chat)
+                }
+                .tag(AppTab.chat)
+
+            MoreFlowView(
+                store: store.scope(
+                    state: \RootFeature.State.more,
+                    action: \.more
+                )
+            )
+                .tabItem {
+                    tabIcon(.more)
+                }
+                .tag(AppTab.more)
+        }
+        .tint(.primary50)
     }
 
     private func tabIcon(_ tab: AppTab) -> some View {
