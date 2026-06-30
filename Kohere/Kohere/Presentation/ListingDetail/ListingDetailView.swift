@@ -89,7 +89,7 @@ struct ListingDetailView: View {
                         ListingDetailInfoSection(title: "건물 정보", rows: store.detail.buildingInfo)
                     }
                     trackedSection(.facility) {
-                        ListingDetailInfoSection(title: "공용시설", rows: store.detail.facilityInfo)
+                        ListingDetailInfoSection(title: "공용 시설", rows: store.detail.facilityInfo)
                     }
                     trackedSection(.location) {
                         ListingDetailLocationSection(locationInfo: store.detail.locationInfo)
