@@ -107,7 +107,7 @@ struct RootFeature {
                 state.authInfo = updatedAuthInfo
                 return .none
 
-            case let .saveAuthResponse(.failure):
+            case .saveAuthResponse(.failure):
                 return .none
                 
             case let .selectedTabChanged(tab):

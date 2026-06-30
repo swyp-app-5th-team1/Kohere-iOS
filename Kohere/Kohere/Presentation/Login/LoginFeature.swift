@@ -30,7 +30,6 @@ struct LoginFeature {
     struct State: Equatable {
         var isLoginRequesting = false
         var authInfo: Auth?
-        var loginStatusMessage: String?
         var loginErrorMessage: String?
         var currentSheet: LoginSheet?
         var isServiceTermsAgreed = true
@@ -77,7 +76,6 @@ struct LoginFeature {
             switch action {
             case .googleLoginButtonTapped:
                 state.isLoginRequesting = true
-                state.loginStatusMessage = "Google 계정 인증 중입니다."
                 state.loginErrorMessage = nil
 
                 return .run { send in
@@ -90,12 +88,10 @@ struct LoginFeature {
                 }
 
             case .appleLoginButtonTapped:
-                state.loginStatusMessage = nil
                 state.loginErrorMessage = "Apple 로그인 연동 전"
                 return .none
 
             case let .googleIDTokenReceived(idToken):
-                state.loginStatusMessage = "서버 로그인 중입니다."
                 return .run { send in
                     do {
                         let auth = try await withThrowingTaskGroup(of: Auth.self) { group in
@@ -122,7 +118,6 @@ struct LoginFeature {
             case let .loginSuccess(auth):
                 state.isLoginRequesting = false
                 state.authInfo = auth
-                state.loginStatusMessage = nil
                 state.loginErrorMessage = nil
                 state.currentSheet = .notificationOption
                 return .run { _ in
@@ -133,7 +128,6 @@ struct LoginFeature {
                 
             case let .loginFailure(message):
                 state.isLoginRequesting = false
-                state.loginStatusMessage = nil
                 state.loginErrorMessage = message
                 return .none
                 
