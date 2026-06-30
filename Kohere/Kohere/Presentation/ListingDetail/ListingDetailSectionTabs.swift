@@ -68,6 +68,7 @@ struct ListingDetailSectionTabs: View {
                 }
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .id(section)
     }
 }
