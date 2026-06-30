@@ -15,11 +15,19 @@ struct ListingDetailTopNavigationBar: View {
 
     var body: some View {
         HStack {
-            chromeButton(imageName: "chevron_left_24", action: onBackTap)
+            chromeButton(
+                imageName: "chevron_left_24",
+                accessibilityLabel: "뒤로가기",
+                action: onBackTap
+            )
 
             Spacer()
 
-            chromeButton(imageName: "share_ios_24", action: onShareTap)
+            chromeButton(
+                imageName: "share_ios_24",
+                accessibilityLabel: "공유하기",
+                action: onShareTap
+            )
         }
         .padding(.horizontal, 20)
         .padding(.top, 56)
@@ -30,6 +38,7 @@ struct ListingDetailTopNavigationBar: View {
 
     private func chromeButton(
         imageName: String,
+        accessibilityLabel: String,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -51,5 +60,6 @@ struct ListingDetailTopNavigationBar: View {
             .frame(width: 44, height: 44)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text(accessibilityLabel))
     }
 }
