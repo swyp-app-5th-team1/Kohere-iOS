@@ -113,6 +113,8 @@ struct ListingDetailBottomBar: View {
                     }
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(isLiked ? "찜 해제" : "찜하기")
+            .accessibilityValue(isLiked ? "찜한 매물" : "찜하지 않은 매물")
 
             Button(action: onContactTap) {
                 Text("문의 하기")
