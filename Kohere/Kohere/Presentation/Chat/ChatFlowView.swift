@@ -9,7 +9,12 @@ import ComposableArchitecture
 import SwiftUI
 
 struct ChatFlowView: View {
+    
+    // MARK: - Property
+    
     @Bindable var store: StoreOf<ChatFeature>
+    
+    // MARK: - Body
 
     var body: some View {
         NavigationStack(
@@ -19,8 +24,12 @@ struct ChatFlowView: View {
             )
         ) {
             ChatView(store: store)
-        } destination: { _ in
-            EmptyView()
+        } destination: { store in
+            switch store.case {
+            case let .chatDetail(detailStore):
+                ChatDetailView(store: detailStore)
+                    .navigationBarHidden(true)
+            }
         }
     }
 }

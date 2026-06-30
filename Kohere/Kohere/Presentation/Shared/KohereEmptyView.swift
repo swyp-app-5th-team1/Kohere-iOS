@@ -12,6 +12,8 @@ struct KohereEmptyView: View {
     // MARK: - Property
     
     let title: String
+    var fontStyle: KohereTextStyle = .body2Regular
+    var fontColor: Color = .labelNeutral
     
     // MARK: - Body
     
@@ -23,8 +25,9 @@ struct KohereEmptyView: View {
                 .opacity(0.5)
             
             Text(title)
-                .kohereTextStyle(.body2Regular)
-                .foregroundColor(.labelNeutral)
+                .kohereTextStyle(fontStyle)
+                .foregroundColor(fontColor)
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
