@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		772FBCF62FF3A3F200336CF6 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 772FBCF72FF3A3F200336CF6 /* Alamofire */; };
+		772FBCF82FF3A40100336CF6 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 772FBCF92FF3A40100336CF6 /* GoogleSignIn */; };
 		778F3DF12FDA7D0D00AFF730 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 778F3DF02FDA7D0D00AFF730 /* .swiftlint.yml */; };
 		778F3DF32FDAA3000AFF730 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 778F3DF42FDAA3000AFF730 /* ComposableArchitecture */; };
 		9570E47F2FE45C37002FA6DE /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 9570E47E2FE45C37002FA6DE /* NMapsMap */; };
@@ -75,6 +77,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				778F3DF32FDAA3000AFF730 /* ComposableArchitecture in Frameworks */,
+				772FBCF62FF3A3F200336CF6 /* Alamofire in Frameworks */,
+				772FBCF82FF3A40100336CF6 /* GoogleSignIn in Frameworks */,
 				9570E47F2FE45C37002FA6DE /* NMapsMap in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -149,6 +153,8 @@
 			name = Kohere;
 			packageProductDependencies = (
 				778F3DF42FDAA3000AFF730 /* ComposableArchitecture */,
+				772FBCF72FF3A3F200336CF6 /* Alamofire */,
+				772FBCF92FF3A40100336CF6 /* GoogleSignIn */,
 				9570E47E2FE45C37002FA6DE /* NMapsMap */,
 			);
 			productName = Kohere;
@@ -242,6 +248,8 @@
 			packageReferences = (
 				778F3DF52FDAA3000AFF730 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 				9570E47D2FE45C37002FA6DE /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
+				772FBCF42FF38F2F00336CF6 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				772FBCF52FF3981E00336CF6 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9570C29B2FD9DA9D002FA6DE /* Products */;
@@ -658,6 +666,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		772FBCF42FF38F2F00336CF6 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.2.0;
+			};
+		};
+		772FBCF52FF3981E00336CF6 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.12.0;
+			};
+		};
 		778F3DF52FDAA3000AFF730 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
@@ -677,6 +701,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		772FBCF72FF3A3F200336CF6 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 772FBCF52FF3981E00336CF6 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		772FBCF92FF3A40100336CF6 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 772FBCF42FF38F2F00336CF6 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
 		778F3DF42FDAA3000AFF730 /* ComposableArchitecture */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 778F3DF52FDAA3000AFF730 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;

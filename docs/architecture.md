@@ -10,6 +10,49 @@ Kohere는 SwiftUI와 TCA를 기반으로 구성한다.
 예: `Resource`, `Feature`, `Entity`, `UseCase`.
 여러 구현 파일을 묶는 category folder도 단수형으로 이름 붙인다.
 
+## Project Folder Structure
+프로젝트의 전체 디렉터리 계층 구조는 다음과 같은 구조적 규칙을 따른다. 특정 도메인이나 화면에 종속되지 않도록 `<FeatureName>`과 `<DomainName>`으로 추상화하여 정의한다.
+
+```text
+Kohere/
+├── App/
+│   ├── KohereApp.swift
+│   └── Root/
+│       ├── RootView.swift
+│       └── RootFeature.swift
+├── Presentation/
+│   └── <FeatureName>/
+│       ├── <FeatureName>View.swift
+│       └── <FeatureName>Feature.swift
+├── Domain/
+│   ├── Entity/
+│   │   └── <EntityName>.swift
+│   ├── UseCase/
+│   │   ├── <UseCaseName>UseCase.swift
+│   │   └── <DomainName>UseCaseDependencies.swift
+│   └── Interface/
+│       └── <DomainName>RepositoryProtocol.swift
+├── Data/
+│   ├── Repository/
+│   │   └── <DomainName>Repository.swift
+│   └── Network/
+│       ├── Core/
+│       │   ├── NetworkService.swift
+│       │   └── BaseResponseDTO.swift
+│       ├── Error/
+│       │   └── DataError.swift
+│       └── <DomainName>/
+│           ├── <DomainName>Router.swift
+│           ├── <DomainName>RequestDTO.swift
+│           └── <DomainName>ResponseDTO.swift
+├── Core/
+│   ├── DesignSystem/
+│   └── Extension/
+└── Resource/
+    ├── Assets.xcassets
+    └── Info.plist
+```
+
 ## Layers
 
 ### App
@@ -89,7 +132,7 @@ private var listingInfo: some View {
 
 목적은 View를 작게 쪼개는 것이 아니라, 레이아웃 의도를 코드에서 바로 읽히게 하는 것이다.
 
-## Navigation
+### Navigation
 
 앱의 기본 탭 구조는 `RootFeature`와 `RootView`에서 관리한다.
 
@@ -153,26 +196,21 @@ extension HomeFeature.Path.State: Equatable {}
 
 ### Domain
 
-순수 비즈니스 로직을 담당한다.
+UI 프레임워크나 외부 데이터 소스(Alamofire, Keychain 등)에 의존하지 않는 순수 비즈니스 로직을 담당한다.
 
 구성:
-- `Entity`
-- `UseCase`
-- `Interface`
-
-UseCase는 비즈니스 로직 인터페이스와 구현체를 포함할 수 있다.
-TCA에서 필요한 의존성 등록은 별도 dependency 파일로 관리한다.
+- `Entity`: 서비스의 순수 비즈니스 모델 구조체. 서버 DTO의 규격에 종속되지 않고 화면 및 로직에 필요한 형태로 정의한다.
+- `UseCase`: 단일 책임 원칙(SRP)에 따라 하나의 비즈니스 흐름당 하나의 파일로 구현하는 것을 지향한다. 인터페이스와 구현체를 포함하며, TCA Dependency 시스템에 등록하여 사용한다.
+- `Interface`:  데이터 레이어의 고립 및 의존성 역전(DIP)을 위해 Repository 프로토콜을 이 계층에 선언한다.
 
 ### Data
 
-외부 데이터 소스, 네트워크 통신, DTO 변환을 담당한다.
+외부 데이터 소스 및 네트워크 통신을 처리하고, 서버 원시 데이터를 도메인 엔티티로 변환하는 계층이다.
 
 구성:
-- `Repository`
-- `Network`
-
-Repository는 DTO 검증, 도메인 에러 매핑, Entity 변환을 담당한다.
-Network는 순수 통신과 제네릭 디코딩을 담당한다.
+- `Repository`: Data/Repository에 위치하며, DTO 검증, 도메인 에러 매핑, Entity 변환을 전담한다.
+- `Network/Core`: 네트워크 서비스 인프라 및 전역 공통 응답 규격을 관리한다.
+- `Network/도메인별 폴더`: Router(URLRequestConvertible), RequestDTO, ResponseDTO 규격을 명확히 분리하여 캡슐화한다.
 
 ### Resource
 
@@ -182,6 +220,15 @@ Network는 순수 통신과 제네릭 디코딩을 담당한다.
 - Assets
 - xcconfig
 - Info.plist
+
+## Network & API 연동 가이드라인
+### 공통 응답 포맷 (Common Wrapper) 처리
+서버의 모든 응답(성공/실패)은 전역 공통 구조를 따르므로, BaseResponseDTO를 통해 1차 파싱을 수행한다. 실패 응답 시 클라이언트는 HTTP 상태 코드뿐만 아니라 error.code 문자열을 기반으로 비즈니스 분기를 처리해야 한다.
+
+### NetworkService의 책임 및 인터셉터(Interceptor)
+NetworkService는 Alamofire Session을 관리하며 아래 규격을 준수한다.
+- 제네릭 디코딩: 응답 성공 시 BaseResponseDTO.data를 언래핑하여 리턴한다.
+- 서버 공통 에러 변환: success가 false이거나 에러 객체가 포함된 경우, error.code를 추출하여 DataError.serverError(code:message:)를 상위 레이어로 던진다.
 
 ## Scope Rule
 
