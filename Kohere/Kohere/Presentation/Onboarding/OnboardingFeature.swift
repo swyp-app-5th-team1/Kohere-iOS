@@ -8,40 +8,109 @@
 import ComposableArchitecture
 import Foundation
 
-enum Step: Int, Equatable, Comparable {
-    case nameAndBirth = 1
-    case details = 2
-    case emailVerification = 3
-    
+enum OnboardingUserType: Equatable {
+    case tenant
+    case landlord
+}
+
+enum Step: Equatable, Comparable {
+    case nameAndBirth
+    case details
+    case emailVerification
+    case landlordNameAndBirth
+    case landlordPhoneVerification
+
     static func < (lhs: Step, rhs: Step) -> Bool {
-        return lhs.rawValue < rhs.rawValue
+        lhs.sortOrder < rhs.sortOrder
+    }
+
+    var progressIndex: Int {
+        switch self {
+        case .nameAndBirth, .landlordNameAndBirth:
+            return 1
+        case .details, .landlordPhoneVerification:
+            return 2
+        case .emailVerification:
+            return 3
+        }
+    }
+
+    private var sortOrder: Int {
+        switch self {
+        case .nameAndBirth:
+            return 1
+        case .details:
+            return 2
+        case .emailVerification:
+            return 3
+        case .landlordNameAndBirth:
+            return 4
+        case .landlordPhoneVerification:
+            return 5
+        }
     }
 }
 
 @Reducer
 struct OnboardingFeature {
     // MARK: - State
-    
+
     @ObservableState
     struct State: Equatable {
-        var currentStep: Step = .nameAndBirth
-        
+        var userType: OnboardingUserType
+        var currentStep: Step
+
         var lastName: String = ""
         var firstName: String = ""
         var selectedMonth: DropdownMenuOption?
         var selectedDay: DropdownMenuOption?
         var selectedYear: DropdownMenuOption?
-        
+
         var selectedVisa: DropdownMenuOption?
         var selectedOccupation: DropdownMenuOption?
         var selectedNationality: DropdownMenuOption?
         var selectedGender: DropdownMenuOption?
-        
+
         var email: String = ""
         var verificationCode: String = ""
         var isEmailVerified: Bool = false
         var isCodeSent: Bool = false
-        
+        var lastVerificationCodeSentEmail: String?
+        var emailMessage: String?
+        var emailVerificationCodeErrorMessage: String?
+
+        var landlordName: String = ""
+        var phoneNumber: String = ""
+        var phoneVerificationCode: String = ""
+        var isPhoneVerified: Bool = false
+        var isPhoneCodeSent: Bool = false
+        var lastVerificationCodeSentPhoneNumber: String?
+        var phoneMessage: String?
+        var phoneVerificationCodeErrorMessage: String?
+
+        init(userType: OnboardingUserType = .tenant) {
+            self.userType = userType
+            self.currentStep = userType == .tenant ? .nameAndBirth : .landlordNameAndBirth
+        }
+
+        var totalStepCount: Int {
+            switch userType {
+            case .tenant:
+                return 3
+            case .landlord:
+                return 2
+            }
+        }
+
+        var primaryButtonTitle: String {
+            switch userType {
+            case .tenant:
+                return currentStep == .emailVerification ? "Get Started" : "Next"
+            case .landlord:
+                return currentStep == .landlordPhoneVerification ? "시작하기" : "다음"
+            }
+        }
+
         var isNextButtonEnabled: Bool {
             switch currentStep {
             case .nameAndBirth:
