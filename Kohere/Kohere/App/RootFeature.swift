@@ -79,10 +79,11 @@ struct RootFeature {
                 state.isAuthLoading = false
                 return .none
                 
-            case .login(.termsAgreementCompleted):
+            case let .login(.userTypeSelected(userType)):
                 guard state.login.isRequiredTermsAgreed,
                       let authInfo = state.login.authInfo else { return .none }
                 state.authInfo = authInfo
+                state.onboarding = OnboardingFeature.State(userType: userType)
                 return .none
                 
             case .onboarding(.onboardingCompleted):
