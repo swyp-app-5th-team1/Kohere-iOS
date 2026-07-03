@@ -11,6 +11,8 @@ import ComposableArchitecture
 struct RootFeature {
     @Dependency(\.keychainClient)
     var keychainClient
+    @Dependency(\.userDefaultsClient)
+    var userDefaultsClient
     
     @ObservableState
     struct State: Equatable {
@@ -65,15 +67,19 @@ struct RootFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard state.isAuthLoading else { return .none }
-
-                if state.authInfo != nil {
-                    state.isAuthLoading = false
-                    return .none
-                }
+                guard state.authInfo == nil, state.isAuthLoading else { return .none }
+                let keychainClient = keychainClient
+                let userDefaultsClient = userDefaultsClient
                 
                 return .run { send in
-                    let auth = try await keychainClient.loadAuth()
+                    let hasLaunchedBefore = try userDefaultsClient.load(for: .hasLaunchedBefore) ?? false
+
+                    if !hasLaunchedBefore {
+                        try keychainClient.delete(for: .auth)
+                        try userDefaultsClient.save(true, for: .hasLaunchedBefore)
+                    }
+
+                    let auth = try keychainClient.load(for: .auth)
                     await send(.storedAuthLoaded(auth))
                 } catch: { _, send in
                     await send(.storedAuthLoaded(nil))
@@ -106,9 +112,10 @@ struct RootFeature {
                     refreshToken: authInfo.refreshToken,
                     expiresIn: authInfo.expiresIn
                 )
-
+                let keychainClient = keychainClient
+                
                 return .run { send in
-                    try await keychainClient.saveAuth(updatedAuthInfo)
+                    try keychainClient.save(updatedAuthInfo, for: .auth)
                     await send(.saveAuthResponse(.success(updatedAuthInfo)))
                 } catch: { error, send in
                     await send(.saveAuthResponse(.failure(error)))

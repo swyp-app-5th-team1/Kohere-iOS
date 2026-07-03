@@ -12,6 +12,8 @@ import Foundation
 struct LoginFeature {
     @Dependency(\.googleSignInClient)
     var googleSignInClient
+    @Dependency(\.appleSignInClient)
+    var appleSignInClient
     @Dependency(\.socialLoginUseCase)
     var socialLoginUseCase
     @Dependency(\.keychainClient)
@@ -52,7 +54,7 @@ struct LoginFeature {
     enum Action: Equatable {
         case googleLoginButtonTapped
         case appleLoginButtonTapped
-        case googleIDTokenReceived(String)
+        case socialLoginCredentialReceived(SocialLoginCredential)
         case loginSuccess(Auth)
         case loginFailure(String)
         
@@ -83,22 +85,33 @@ struct LoginFeature {
                 return .run { send in
                     do {
                         let idToken = try await googleSignInClient.signIn()
-                        await send(.googleIDTokenReceived(idToken))
+                        await send(.socialLoginCredentialReceived(.google(idToken: idToken)))
                     } catch {
                         await send(.loginFailure(error.localizedDescription))
                     }
                 }
 
             case .appleLoginButtonTapped:
-                state.loginErrorMessage = "Apple 로그인 연동 전"
-                return .none
+                state.isLoginRequesting = true
+                state.loginErrorMessage = nil
 
-            case let .googleIDTokenReceived(idToken):
+                return .run { send in
+                    do {
+                        let result = try await appleSignInClient.signIn()
+                        await send(
+                            .socialLoginCredentialReceived(.apple(authorizationCode: result.authorizationCode))
+                        )
+                    } catch {
+                        await send(.loginFailure(error.localizedDescription))
+                    }
+                }
+
+            case let .socialLoginCredentialReceived(credential):
                 return .run { send in
                     do {
                         let auth = try await withThrowingTaskGroup(of: Auth.self) { group in
                             group.addTask {
-                                try await socialLoginUseCase.execute(.google, idToken)
+                                try await socialLoginUseCase.execute(credential)
                             }
                             group.addTask {
                                 try await Task.sleep(nanoseconds: 15_000_000_000)
@@ -122,8 +135,9 @@ struct LoginFeature {
                 state.authInfo = auth
                 state.loginErrorMessage = nil
                 state.currentSheet = .notificationOption
+                let keychainClient = keychainClient
                 return .run { _ in
-                    try await keychainClient.saveAuth(auth)
+                    try keychainClient.save(auth, for: .auth)
                 } catch: { error, send in
                     await send(.loginFailure(error.localizedDescription))
                 }

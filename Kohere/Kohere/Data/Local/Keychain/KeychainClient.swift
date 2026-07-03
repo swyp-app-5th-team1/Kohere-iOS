@@ -10,24 +10,63 @@ import Foundation
 import Security
 
 struct KeychainClient: Sendable {
-    var saveAuth: @Sendable (_ auth: Auth) async throws -> Void
-    var loadAuth: @Sendable () async throws -> Auth?
-    var deleteAuth: @Sendable () async throws -> Void
+    var save: @Sendable (_ key: String, _ data: Data) throws -> Void
+    var read: @Sendable (_ key: String) throws -> Data?
+    var delete: @Sendable (_ key: String) throws -> Void
+}
+
+struct KeychainKey<Value: Codable & Sendable>: Sendable {
+    let rawValue: String
+}
+
+extension KeychainKey where Value == Auth {
+    nonisolated static let auth = Self(rawValue: "auth")
+}
+
+extension KeychainClient {
+    nonisolated func save<Value: Codable & Sendable>(
+        _ value: Value,
+        for key: KeychainKey<Value>
+    ) throws {
+        guard let data = try? JSONEncoder().encode(value) else {
+            throw KeychainError.encodingFailed
+        }
+        
+        try save(key.rawValue, data)
+    }
+    
+    nonisolated func load<Value: Codable & Sendable>(
+        for key: KeychainKey<Value>
+    ) throws -> Value? {
+        guard let data = try read(key.rawValue) else { return nil }
+        
+        guard let value = try? JSONDecoder().decode(Value.self, from: data) else {
+            throw KeychainError.decodingFailed
+        }
+        
+        return value
+    }
+    
+    nonisolated func delete<Value: Codable & Sendable>(
+        for key: KeychainKey<Value>
+    ) throws {
+        try delete(key.rawValue)
+    }
 }
 
 extension KeychainClient: DependencyKey {
     static let liveValue: KeychainClient = {
-        let store = KeychainAuthStore()
+        let store = KeychainStore()
         
         return KeychainClient(
-            saveAuth: { auth in
-                try await store.save(auth)
+            save: { key, data in
+                try store.save(key: key, data: data)
             },
-            loadAuth: {
-                try await store.load()
+            read: { key in
+                try store.read(key: key)
             },
-            deleteAuth: {
-                try await store.delete()
+            delete: { key in
+                try store.delete(key: key)
             }
         )
     }()
@@ -61,23 +100,18 @@ extension KeychainError: LocalizedError {
     }
 }
 
-private final class KeychainAuthStore: @unchecked Sendable {
+private final class KeychainStore: @unchecked Sendable {
     private let service: String
-    private let account = "auth"
     
-    init(service: String = Bundle.main.bundleIdentifier ?? "com.kohere.auth") {
+    init(service: String = Bundle.main.bundleIdentifier ?? "com.kohere.Kohere") {
         self.service = service
     }
     
-    func save(_ auth: Auth) throws {
-        guard let data = try? JSONEncoder().encode(auth) else {
-            throw KeychainError.encodingFailed
-        }
-        
+    nonisolated func save(key: String, data: Data) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: account
+            kSecAttrAccount as String: key
         ]
         
         let updateStatus = SecItemUpdate(
@@ -99,11 +133,11 @@ private final class KeychainAuthStore: @unchecked Sendable {
         }
     }
     
-    func load() throws -> Auth? {
+    nonisolated func read(key: String) throws -> Data? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
+            kSecAttrAccount as String: key,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
@@ -119,19 +153,18 @@ private final class KeychainAuthStore: @unchecked Sendable {
             throw KeychainError.unhandledStatus(status)
         }
         
-        guard let data = item as? Data,
-              let auth = try? JSONDecoder().decode(Auth.self, from: data) else {
+        guard let data = item as? Data else {
             throw KeychainError.decodingFailed
         }
         
-        return auth
+        return data
     }
     
-    func delete() throws {
+    nonisolated func delete(key: String) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: account
+            kSecAttrAccount as String: key
         ]
         
         let status = SecItemDelete(query as CFDictionary)
