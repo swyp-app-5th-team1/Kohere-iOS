@@ -10,8 +10,7 @@ import ComposableArchitecture
 import UIKit
 
 struct AppleSignInResult: Equatable, Sendable {
-    let idToken: String
-    let authorizationCode: String?
+    let authorizationCode: String
 }
 
 struct AppleSignInClient {
@@ -24,22 +23,18 @@ extension AppleSignInClient: DependencyKey {
         let request = provider.createRequest()
         request.requestedScopes = [.fullName, .email]
 
-        let credential = try await AppleSignInCoordinator().signIn(request: request)
-
-        guard
-            let identityToken = credential.identityToken,
-            let idToken = String(data: identityToken, encoding: .utf8)
-        else {
-            throw DataError.underlying(message: "Apple idToken을 가져오지 못했습니다.")
+        guard let window = UIApplication.shared.kohereKeyWindow else {
+            throw DataError.underlying(message: "Apple 로그인 화면을 표시할 window를 찾지 못했습니다.")
         }
 
-        let authorizationCode = credential.authorizationCode
-            .flatMap { String(data: $0, encoding: .utf8) }
+        let credential = try await AppleSignInCoordinator(presentationAnchor: window).signIn(request: request)
 
-        return AppleSignInResult(
-            idToken: idToken,
-            authorizationCode: authorizationCode
-        )
+        guard let authorizationCode = credential.authorizationCode
+            .flatMap({ String(data: $0, encoding: .utf8) }) else {
+            throw DataError.underlying(message: "Apple authorizationCode를 가져오지 못했습니다.")
+        }
+
+        return AppleSignInResult(authorizationCode: authorizationCode)
     }
 }
 
@@ -52,7 +47,12 @@ extension DependencyValues {
 
 @MainActor
 private final class AppleSignInCoordinator: NSObject {
+    private let presentationAnchor: ASPresentationAnchor
     private var continuation: CheckedContinuation<ASAuthorizationAppleIDCredential, Error>?
+
+    init(presentationAnchor: ASPresentationAnchor) {
+        self.presentationAnchor = presentationAnchor
+    }
 
     func signIn(request: ASAuthorizationAppleIDRequest) async throws -> ASAuthorizationAppleIDCredential {
         try await withCheckedThrowingContinuation { continuation in
@@ -94,7 +94,7 @@ extension AppleSignInCoordinator: ASAuthorizationControllerDelegate {
 
 extension AppleSignInCoordinator: ASAuthorizationControllerPresentationContextProviding {
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        UIApplication.shared.kohereKeyWindow ?? ASPresentationAnchor()
+        presentationAnchor
     }
 }
 

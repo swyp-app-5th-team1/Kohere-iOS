@@ -96,11 +96,8 @@ struct LoginFeature {
                 return .run { send in
                     do {
                         let result = try await appleSignInClient.signIn()
-                        guard let authorizationCode = result.authorizationCode else {
-                            throw DataError.underlying(message: "Apple authorizationCode를 가져오지 못했습니다.")
-                        }
                         await send(
-                            .socialLoginCredentialReceived(.apple(authorizationCode: authorizationCode))
+                            .socialLoginCredentialReceived(.apple(authorizationCode: result.authorizationCode))
                         )
                     } catch {
                         await send(.loginFailure(error.localizedDescription))
