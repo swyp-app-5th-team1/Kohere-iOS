@@ -52,7 +52,7 @@ struct UserTypeSelectBottomSheet: View {
                     koreanTitle: "방 내놓기",
                     description: "매물을 등록하고 안전하게 관리하세요",
                     image: .rent,
-                    action: RentOutTapped
+                    action: rentOutTapped
                 )
             }
             .padding(.top, 20)
