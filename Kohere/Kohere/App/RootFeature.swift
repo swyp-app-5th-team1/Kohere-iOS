@@ -65,7 +65,12 @@ struct RootFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard state.authInfo == nil, state.isAuthLoading else { return .none }
+                guard state.isAuthLoading else { return .none }
+
+                if state.authInfo != nil {
+                    state.isAuthLoading = false
+                    return .none
+                }
                 
                 return .run { send in
                     let auth = try await keychainClient.loadAuth()
@@ -78,6 +83,11 @@ struct RootFeature {
                 state.authInfo = auth
                 state.isAuthLoading = false
                 return .none
+
+            case let .login(.loginSuccess(auth)):
+                guard !auth.onboardingRequired else { return .none }
+                state.authInfo = auth
+                return .none
                 
             case let .login(.userTypeSelected(userType)):
                 guard state.login.isRequiredTermsAgreed,
@@ -86,17 +96,7 @@ struct RootFeature {
                 state.onboarding = OnboardingFeature.State(userType: userType)
                 return .none
                 
-            case .onboarding(.onboardingCompleted):
-                guard let authInfo = state.authInfo else { return .none }
-                let updatedAuthInfo = Auth(
-                    onboardingRequired: false,
-                    status: authInfo.status,
-                    tokenType: authInfo.tokenType,
-                    accessToken: authInfo.accessToken,
-                    refreshToken: authInfo.refreshToken,
-                    expiresIn: authInfo.expiresIn
-                )
-                
+            case let .onboarding(.onboardingResponse(.success(updatedAuthInfo))):
                 return .run { send in
                     try await keychainClient.saveAuth(updatedAuthInfo)
                     await send(.saveAuthResponse(.success(updatedAuthInfo)))
