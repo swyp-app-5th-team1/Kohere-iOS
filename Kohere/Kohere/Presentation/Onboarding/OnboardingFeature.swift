@@ -148,7 +148,7 @@ struct OnboardingFeature {
 
         var hasPhoneNumberFormatError: Bool {
             guard !phoneNumber.isEmpty else { return false }
-            let allowedCharacters = CharacterSet(charactersIn: "0123456789-")
+            let allowedCharacters = CharacterSet(charactersIn: "0123456789")
             return phoneNumber.rangeOfCharacter(from: allowedCharacters.inverted) != nil
         }
 
