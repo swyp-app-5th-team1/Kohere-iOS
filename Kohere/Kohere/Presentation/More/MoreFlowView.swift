@@ -24,6 +24,9 @@ struct MoreFlowView: View {
             case let .profileEdit(profileEditStore):
                 ProfileEditView(store: profileEditStore)
                     .navigationBarHidden(true)
+            case let .promoteRoomWeb(promoteRoomWebStore):
+                PromoteRoomWebView(store: promoteRoomWebStore)
+                    .navigationBarHidden(true)
             }
         }
     }

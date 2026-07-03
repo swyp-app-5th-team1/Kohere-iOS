@@ -9,21 +9,21 @@ import ComposableArchitecture
 import SwiftUI
 
 struct OnboardingView: View {
-    
+
     // MARK: - Properties
-    
+
     @Bindable var store: StoreOf<OnboardingFeature>
     @State private var activeField: OnboardingField?
     @FocusState private var keyboardField: OnboardingField?
-    
+
     // MARK: - Body
-    
+
     var body: some View {
         VStack(spacing: 0) {
             topProgressBar
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
-            
+
             VStack(alignment: .leading, spacing: 0) {
                 switch store.currentStep {
                 case .nameAndBirth:
@@ -32,12 +32,16 @@ struct OnboardingView: View {
                     DetailsStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
                 case .emailVerification:
                     EmailVerificationStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
+                case .landlordNameAndBirth:
+                    LandlordNameAndBirthStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
+                case .landlordPhoneVerification:
+                    PhoneVerificationStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
                 }
             }
             .padding(.horizontal, 20)
-            
+
             Spacer()
-            
+
             bottomButtonArea
                 .padding(.horizontal, 20)
         }
@@ -50,17 +54,17 @@ struct OnboardingView: View {
 extension OnboardingView {
     private var topProgressBar: some View {
         HStack(spacing: 8) {
-            ForEach(1...3, id: \.self) { index in
+            ForEach(1...store.totalStepCount, id: \.self) { index in
                 Rectangle()
-                    .fill(store.currentStep.rawValue >= index ? .labelNormal : .fillStrong)
+                    .fill(store.currentStep.progressIndex == index ? .labelNormal : .fillStrong)
                     .frame(height: 2)
             }
         }
     }
-    
+
     private var bottomButtonArea: some View {
         HStack(spacing: 8) {
-            if store.currentStep > .nameAndBirth {
+            if store.currentStep.progressIndex > 1 {
                 Button {
                     store.send(.backButtonTapped)
                 } label: {
@@ -73,15 +77,15 @@ extension OnboardingView {
                         }
                 }
             }
-            
+
             Button {
-                if store.currentStep == .emailVerification {
+                if store.currentStep == .emailVerification || store.currentStep == .landlordPhoneVerification {
                     store.send(.onboardingCompleted)
                 } else {
                     store.send(.nextButtonTapped)
                 }
             } label: {
-                Text(store.currentStep == .emailVerification ? "Get Started" : "Next")
+                Text(store.primaryButtonTitle)
                     .kohereTextStyle(.label1Semibold)
                     .foregroundColor(.staticWhite)
                     .frame(maxWidth: .infinity)
