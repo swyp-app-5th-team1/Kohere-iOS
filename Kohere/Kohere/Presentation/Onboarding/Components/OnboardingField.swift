@@ -8,6 +8,7 @@
 enum OnboardingField: Hashable {
     case lastName
     case firstName
+    case landlordName
 
     case birthMonth
     case birthDay
@@ -20,4 +21,6 @@ enum OnboardingField: Hashable {
 
     case email
     case verificationCode
+    case phoneNumber
+    case phoneVerificationCode
 }

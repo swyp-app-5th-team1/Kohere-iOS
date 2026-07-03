@@ -8,22 +8,42 @@
 import SwiftUI
 
 struct OnboardingTextField: View {
-    
+
     // MARK: - Properties
-    
+
     @Binding var text: String
     @Binding var activeField: OnboardingField?
     var keyboardField: FocusState<OnboardingField?>.Binding
-    
+
     let equals: OnboardingField
     let placeholder: String?
-    
+    let keyboardType: UIKeyboardType
+    let hasError: Bool
+
+    init(
+        text: Binding<String>,
+        activeField: Binding<OnboardingField?>,
+        keyboardField: FocusState<OnboardingField?>.Binding,
+        equals: OnboardingField,
+        placeholder: String?,
+        keyboardType: UIKeyboardType = .default,
+        hasError: Bool = false
+    ) {
+        self._text = text
+        self._activeField = activeField
+        self.keyboardField = keyboardField
+        self.equals = equals
+        self.placeholder = placeholder
+        self.keyboardType = keyboardType
+        self.hasError = hasError
+    }
+
     private var isActive: Bool {
         activeField == equals
     }
-    
+
     // MARK: - Body
-    
+
     var body: some View {
         HStack {
             TextField("", text: $text, prompt: Text(placeholder ?? ""))
@@ -31,6 +51,7 @@ struct OnboardingTextField: View {
                 .foregroundColor(.labelNeutral)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.none)
+                .keyboardType(keyboardType)
                 .focused(keyboardField, equals: equals)
                 .onChange(of: keyboardField.wrappedValue) { _, newValue in
                     if newValue == equals {
@@ -39,7 +60,7 @@ struct OnboardingTextField: View {
                         activeField = nil
                     }
                 }
-            
+
             if !text.isEmpty && isActive {
                 Button {
                     text = ""
@@ -62,9 +83,19 @@ struct OnboardingTextField: View {
         .overlay {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(
-                    isActive ? .labelNormal : .lineAlternative,
+                    borderColor,
                     lineWidth: 1
                 )
+        }
+    }
+
+    private var borderColor: Color {
+        if hasError {
+            return .statusDanger
+        } else if isActive {
+            return .labelNormal
+        } else {
+            return .lineAlternative
         }
     }
 }

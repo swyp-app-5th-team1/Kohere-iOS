@@ -22,6 +22,7 @@ struct LoginFeature {
     enum LoginSheet: Equatable, Identifiable {
         case notificationOption
         case termsAgreement
+        case userTypeSelect
         
         var id: Self { self }
     }
@@ -59,6 +60,7 @@ struct LoginFeature {
         
         case notificationSheetDismissed
         case termsAgreementCompleted
+        case userTypeSelected(OnboardingUserType)
         
         case serviceTermsAgreementToggled
         case privacyTermsAgreementToggled
@@ -151,8 +153,11 @@ struct LoginFeature {
                 
             case .termsAgreementCompleted:
                 guard state.isRequiredTermsAgreed else { return .none }
+                state.currentSheet = .userTypeSelect
+                return .none
+
+            case .userTypeSelected:
                 state.currentSheet = nil
-                // TODO: 온보딩 또는 홈으로 전환하는 네비게이션 로직 구현
                 return .none
                 
             case .serviceTermsAgreementToggled:
