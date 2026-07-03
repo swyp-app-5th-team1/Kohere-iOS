@@ -11,6 +11,8 @@ import ComposableArchitecture
 struct RootFeature {
     @Dependency(\.keychainClient)
     var keychainClient
+    @Dependency(\.userDefaultsClient)
+    var userDefaultsClient
     
     @ObservableState
     struct State: Equatable {
@@ -68,6 +70,16 @@ struct RootFeature {
                 guard state.authInfo == nil, state.isAuthLoading else { return .none }
                 
                 return .run { send in
+                    let hasLaunchedBefore = await userDefaultsClient.load(
+                        Bool.self,
+                        for: .hasLaunchedBefore
+                    ) ?? false
+
+                    if !hasLaunchedBefore {
+                        try await keychainClient.deleteAuth()
+                        await userDefaultsClient.save(true, for: .hasLaunchedBefore)
+                    }
+
                     let auth = try await keychainClient.loadAuth()
                     await send(.storedAuthLoaded(auth))
                 } catch: { _, send in
