@@ -5,6 +5,8 @@
 //  Created by mandoo on 6/30/26.
 //
 
+import ComposableArchitecture
+
 final class AuthRepository: AuthInterface {
     private let networkService: NetworkService
     private let environmentProvider: () throws -> APIEnvironment
@@ -49,6 +51,13 @@ final class AuthRepository: AuthInterface {
             )
         )
     }
+}
+
+extension AuthClient: DependencyKey {
+    static let liveValue: AuthClient = {
+        let repository: any AuthInterface = AuthRepository()
+        return AuthClient(repository: repository)
+    }()
 }
 
 private extension SocialLoginRequestDTO {

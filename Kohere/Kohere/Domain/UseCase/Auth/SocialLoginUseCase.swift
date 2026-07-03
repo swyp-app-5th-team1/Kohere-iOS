@@ -12,9 +12,14 @@ struct SocialLoginUseCase {
 }
 
 extension SocialLoginUseCase: DependencyKey {
-    static let liveValue = SocialLoginUseCase { credential in
-        try await AuthRepository().socialLogin(credential: credential)
-    }
+    static let liveValue: SocialLoginUseCase = {
+        @Dependency(\.authClient)
+        var authClient
+        
+        return SocialLoginUseCase { credential in
+            try await authClient.socialLogin(credential)
+        }
+    }()
 }
 
 extension DependencyValues {
