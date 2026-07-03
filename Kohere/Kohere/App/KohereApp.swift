@@ -43,6 +43,7 @@ struct KohereApp: App {
                     refreshToken: "mock_refresh_token_for_debug",
                     expiresIn: 3600
                 ),
+                isAuthLoading: false,
                 selectedTab: .home
             )
         } else {
