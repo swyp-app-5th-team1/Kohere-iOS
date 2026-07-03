@@ -8,12 +8,12 @@
 import ComposableArchitecture
 
 struct SocialLoginUseCase {
-    var execute: (_ provider: SocialLoginProvider, _ idToken: String) async throws -> Auth
+    var execute: (_ credential: SocialLoginCredential) async throws -> Auth
 }
 
 extension SocialLoginUseCase: DependencyKey {
-    static let liveValue = SocialLoginUseCase { provider, idToken in
-        try await AuthRepository().socialLogin(provider: provider, idToken: idToken)
+    static let liveValue = SocialLoginUseCase { credential in
+        try await AuthRepository().socialLogin(credential: credential)
     }
 }
 

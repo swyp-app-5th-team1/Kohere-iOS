@@ -6,7 +6,7 @@
 //
 
 protocol AuthInterface {
-    func socialLogin(provider: SocialLoginProvider, idToken: String) async throws -> Auth
+    func socialLogin(credential: SocialLoginCredential) async throws -> Auth
     func reissue(refreshToken: String) async throws -> AuthToken
     func logout(accessToken: String, refreshToken: String) async throws
 }

@@ -12,6 +12,8 @@ import Foundation
 struct LoginFeature {
     @Dependency(\.googleSignInClient)
     var googleSignInClient
+    @Dependency(\.appleSignInClient)
+    var appleSignInClient
     @Dependency(\.socialLoginUseCase)
     var socialLoginUseCase
     @Dependency(\.keychainClient)
@@ -51,7 +53,7 @@ struct LoginFeature {
     enum Action: Equatable {
         case googleLoginButtonTapped
         case appleLoginButtonTapped
-        case googleIDTokenReceived(String)
+        case socialLoginCredentialReceived(SocialLoginCredential)
         case loginSuccess(Auth)
         case loginFailure(String)
         
@@ -81,22 +83,36 @@ struct LoginFeature {
                 return .run { send in
                     do {
                         let idToken = try await googleSignInClient.signIn()
-                        await send(.googleIDTokenReceived(idToken))
+                        await send(.socialLoginCredentialReceived(.google(idToken: idToken)))
                     } catch {
                         await send(.loginFailure(error.localizedDescription))
                     }
                 }
 
             case .appleLoginButtonTapped:
-                state.loginErrorMessage = "Apple 로그인 연동 전"
-                return .none
+                state.isLoginRequesting = true
+                state.loginErrorMessage = nil
 
-            case let .googleIDTokenReceived(idToken):
+                return .run { send in
+                    do {
+                        let result = try await appleSignInClient.signIn()
+                        guard let authorizationCode = result.authorizationCode else {
+                            throw DataError.underlying(message: "Apple authorizationCode를 가져오지 못했습니다.")
+                        }
+                        await send(
+                            .socialLoginCredentialReceived(.apple(authorizationCode: authorizationCode))
+                        )
+                    } catch {
+                        await send(.loginFailure(error.localizedDescription))
+                    }
+                }
+
+            case let .socialLoginCredentialReceived(credential):
                 return .run { send in
                     do {
                         let auth = try await withThrowingTaskGroup(of: Auth.self) { group in
                             group.addTask {
-                                try await socialLoginUseCase.execute(.google, idToken)
+                                try await socialLoginUseCase.execute(credential)
                             }
                             group.addTask {
                                 try await Task.sleep(nanoseconds: 15_000_000_000)

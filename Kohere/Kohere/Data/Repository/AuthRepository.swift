@@ -17,12 +17,9 @@ final class AuthRepository: AuthInterface {
         self.environmentProvider = environmentProvider
     }
     
-    func socialLogin(provider: SocialLoginProvider, idToken: String) async throws -> Auth {
+    func socialLogin(credential: SocialLoginCredential) async throws -> Auth {
         let environment = try environmentProvider()
-        let requestDTO = SocialLoginRequestDTO(
-            provider: .init(provider),
-            idToken: idToken
-        )
+        let requestDTO = SocialLoginRequestDTO(credential)
         let responseDTO: SocialLoginResponseDTO = try await networkService.request(
             AuthRouter.socialLogin(requestDTO, environment)
         )
@@ -54,11 +51,14 @@ final class AuthRepository: AuthInterface {
     }
 }
 
-private extension SocialLoginProviderDTO {
-    init(_ provider: SocialLoginProvider) {
-        switch provider {
-        case .google:
-            self = .google
+private extension SocialLoginRequestDTO {
+    init(_ credential: SocialLoginCredential) {
+        switch credential {
+        case let .google(idToken):
+            self = .google(idToken: idToken)
+
+        case let .apple(authorizationCode):
+            self = .apple(authorizationCode: authorizationCode)
         }
     }
 }

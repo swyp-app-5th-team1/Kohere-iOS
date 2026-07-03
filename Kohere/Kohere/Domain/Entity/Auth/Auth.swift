@@ -27,6 +27,7 @@ enum AuthStatus: String, Equatable, Codable {
     case unknown
 }
 
-enum SocialLoginProvider: Equatable {
-    case google
+enum SocialLoginCredential: Equatable, Sendable {
+    case google(idToken: String)
+    case apple(authorizationCode: String)
 }
