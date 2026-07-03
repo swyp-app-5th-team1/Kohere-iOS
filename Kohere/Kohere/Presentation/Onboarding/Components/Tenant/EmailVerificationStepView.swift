@@ -19,15 +19,14 @@ struct EmailVerificationStepView: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 28) {
+        VStack(alignment: .leading, spacing: 72) {
             Text("Verify your email\nand you're all set")
                 .kohereTextStyle(.heading1Bold)
-                .foregroundColor(.neutral90)
-                .padding(.top, 40)
+                .foregroundColor(.coolNeutral90)
 
             VStack(alignment: .leading, spacing: 16) {
                 Text("E-mail")
-                    .font(.system(size: 14, weight: .semibold))
+                    .kohereTextStyle(.label2Semibold)
 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {

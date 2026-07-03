@@ -8,26 +8,26 @@
 import SwiftUI
 
 struct UserTypeSelectBottomSheet: View {
-
+    
     // MARK: - Properties
-
+    
     let findMyRoomTapped: () -> Void
     let rentOutTapped: () -> Void
-
+    
     // MARK: - Body
-
+    
     var body: some View {
         VStack(spacing: 0) {
             RoundedRectangle(cornerRadius: 999)
                 .fill(.fillStrong)
                 .frame(width: 40, height: 4)
                 .padding(.top, 12)
-
+            
             VStack(alignment: .leading, spacing: 2) {
                 Text("What brings you here?")
                     .kohereTextStyle(.heading2Bold)
                     .foregroundStyle(.labelNormal)
-
+                
                 Text("원하시는 서비스를 선택해주세요")
                     .kohereTextStyle(.body2Regular)
                     .foregroundStyle(.labelAlternative)
@@ -35,7 +35,7 @@ struct UserTypeSelectBottomSheet: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 30)
             .padding(.horizontal, 40)
-
+            
             VStack(spacing: 8) {
                 UserTypeButton(
                     title: "Find My Room",
@@ -45,7 +45,7 @@ struct UserTypeSelectBottomSheet: View {
                     image: .homeEmpty,
                     action: findMyRoomTapped
                 )
-
+                
                 UserTypeButton(
                     title: "Rent Out",
                     isPrimary: false,
@@ -71,7 +71,7 @@ struct UserTypeButton: View {
     let description: String
     let image: UIImage
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
@@ -80,25 +80,26 @@ struct UserTypeButton: View {
                     .scaledToFit()
                     .frame(width: 48, height: 48)
                     .padding(.leading, 16)
-
+                
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 8) {
                         Text(title)
                             .kohereTextStyle(.heading3Semibold)
                             .foregroundStyle(isPrimary ? .primaryNormal : .labelNormal)
-
+                        
                         Text(koreanTitle)
                             .kohereTextStyle(.heading3Semibold)
                             .foregroundStyle(.labelNormal)
                     }
-
+                    
                     Text(description)
                         .kohereTextStyle(.caption1Regular)
                         .foregroundStyle(.labelAlternative)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: 84)
+            .padding(.top, 16)
+            .padding(.bottom, 20)
             .background(.backgroundNormalNormal)
             .overlay {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -106,7 +107,7 @@ struct UserTypeButton: View {
             }
         }
     }
-
+    
     private var borderStyle: AnyShapeStyle {
         if isPrimary {
             AnyShapeStyle(

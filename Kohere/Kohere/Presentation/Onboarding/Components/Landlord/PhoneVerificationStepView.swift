@@ -19,16 +19,15 @@ struct PhoneVerificationStepView: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 28) {
+        VStack(alignment: .leading, spacing: 72) {
             Text("사장님이 맞는지\n안전하게 확인해볼게요!")
                 .kohereTextStyle(.heading1Bold)
-                .foregroundColor(.neutral90)
-                .padding(.top, 40)
+                .foregroundColor(.coolNeutral90)
 
             VStack(alignment: .leading, spacing: 16) {
                 Text("전화번호")
                     .kohereTextStyle(.label2Semibold)
-                    .foregroundStyle(.neutral90)
+                    .foregroundStyle(.coolNeutral90)
 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
