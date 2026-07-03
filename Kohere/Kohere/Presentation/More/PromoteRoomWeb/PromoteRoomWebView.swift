@@ -11,7 +11,6 @@ import WebKit
 
 struct PromoteRoomWebView: View {
     let store: StoreOf<PromoteRoomWebFeature>
-    @State private var isLoading = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,9 +19,13 @@ struct PromoteRoomWebView: View {
             )
 
             ZStack {
-                WebPageView(url: store.url, isLoading: $isLoading)
+                WebPageView(
+                    url: store.url,
+                    onLoadingStarted: { store.send(.loadingStarted) },
+                    onLoadingFinished: { store.send(.loadingFinished) }
+                )
 
-                if isLoading {
+                if store.isLoading {
                     ProgressView()
                         .tint(.primary50)
                 }
@@ -34,7 +37,8 @@ struct PromoteRoomWebView: View {
 
 private struct WebPageView: UIViewRepresentable {
     let url: URL
-    @Binding var isLoading: Bool
+    let onLoadingStarted: () -> Void
+    let onLoadingFinished: () -> Void
 
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
@@ -49,22 +53,30 @@ private struct WebPageView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(isLoading: $isLoading)
+        Coordinator(
+            onLoadingStarted: onLoadingStarted,
+            onLoadingFinished: onLoadingFinished
+        )
     }
 
     final class Coordinator: NSObject, WKNavigationDelegate {
-        @Binding private var isLoading: Bool
+        private let onLoadingStarted: () -> Void
+        private let onLoadingFinished: () -> Void
 
-        init(isLoading: Binding<Bool>) {
-            _isLoading = isLoading
+        init(
+            onLoadingStarted: @escaping () -> Void,
+            onLoadingFinished: @escaping () -> Void
+        ) {
+            self.onLoadingStarted = onLoadingStarted
+            self.onLoadingFinished = onLoadingFinished
         }
 
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            isLoading = true
+            onLoadingStarted()
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            isLoading = false
+            onLoadingFinished()
         }
 
         func webView(
@@ -72,7 +84,7 @@ private struct WebPageView: UIViewRepresentable {
             didFail navigation: WKNavigation!,
             withError error: Error
         ) {
-            isLoading = false
+            onLoadingFinished()
         }
 
         func webView(
@@ -80,7 +92,7 @@ private struct WebPageView: UIViewRepresentable {
             didFailProvisionalNavigation navigation: WKNavigation!,
             withError error: Error
         ) {
-            isLoading = false
+            onLoadingFinished()
         }
     }
 }
