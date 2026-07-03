@@ -96,7 +96,17 @@ struct RootFeature {
                 state.onboarding = OnboardingFeature.State(userType: userType)
                 return .none
                 
-            case let .onboarding(.onboardingResponse(.success(updatedAuthInfo))):
+            case .onboarding(.onboardingCompleted):
+                guard let authInfo = state.authInfo else { return .none }
+                let updatedAuthInfo = Auth(
+                    onboardingRequired: false,
+                    status: authInfo.status,
+                    tokenType: authInfo.tokenType,
+                    accessToken: authInfo.accessToken,
+                    refreshToken: authInfo.refreshToken,
+                    expiresIn: authInfo.expiresIn
+                )
+
                 return .run { send in
                     try await keychainClient.saveAuth(updatedAuthInfo)
                     await send(.saveAuthResponse(.success(updatedAuthInfo)))
