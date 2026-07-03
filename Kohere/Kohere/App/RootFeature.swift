@@ -68,19 +68,18 @@ struct RootFeature {
             switch action {
             case .onAppear:
                 guard state.authInfo == nil, state.isAuthLoading else { return .none }
+                let keychainClient = keychainClient
+                let userDefaultsClient = userDefaultsClient
                 
                 return .run { send in
-                    let hasLaunchedBefore = await userDefaultsClient.load(
-                        Bool.self,
-                        for: .hasLaunchedBefore
-                    ) ?? false
+                    let hasLaunchedBefore = try userDefaultsClient.load(for: .hasLaunchedBefore) ?? false
 
                     if !hasLaunchedBefore {
-                        try await keychainClient.deleteAuth()
-                        await userDefaultsClient.save(true, for: .hasLaunchedBefore)
+                        try keychainClient.delete(for: .auth)
+                        try userDefaultsClient.save(true, for: .hasLaunchedBefore)
                     }
 
-                    let auth = try await keychainClient.loadAuth()
+                    let auth = try keychainClient.load(for: .auth)
                     await send(.storedAuthLoaded(auth))
                 } catch: { _, send in
                     await send(.storedAuthLoaded(nil))
@@ -107,9 +106,10 @@ struct RootFeature {
                     refreshToken: authInfo.refreshToken,
                     expiresIn: authInfo.expiresIn
                 )
+                let keychainClient = keychainClient
                 
                 return .run { send in
-                    try await keychainClient.saveAuth(updatedAuthInfo)
+                    try keychainClient.save(updatedAuthInfo, for: .auth)
                     await send(.saveAuthResponse(.success(updatedAuthInfo)))
                 } catch: { error, send in
                     await send(.saveAuthResponse(.failure(error)))

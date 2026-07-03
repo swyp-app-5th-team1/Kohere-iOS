@@ -136,8 +136,9 @@ struct LoginFeature {
                 state.authInfo = auth
                 state.loginErrorMessage = nil
                 state.currentSheet = .notificationOption
+                let keychainClient = keychainClient
                 return .run { _ in
-                    try await keychainClient.saveAuth(auth)
+                    try keychainClient.save(auth, for: .auth)
                 } catch: { error, send in
                     await send(.loginFailure(error.localizedDescription))
                 }
