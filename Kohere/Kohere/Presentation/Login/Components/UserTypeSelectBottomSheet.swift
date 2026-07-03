@@ -12,7 +12,7 @@ struct UserTypeSelectBottomSheet: View {
     // MARK: - Properties
 
     let findMyRoomTapped: () -> Void
-    let RentOutTapped: () -> Void
+    let rentOutTapped: () -> Void
 
     // MARK: - Body
 

@@ -187,7 +187,7 @@ extension LoginView {
                 findMyRoomTapped: {
                     store.send(.userTypeSelected(.tenant))
                 },
-                RentOutTapped: {
+                rentOutTapped: {
                     store.send(.userTypeSelected(.landlord))
                 }
             )
