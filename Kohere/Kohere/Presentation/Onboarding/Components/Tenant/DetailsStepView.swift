@@ -12,7 +12,7 @@ struct DetailsStepView: View {
     
     // MARK: - Properties
     
-    @Bindable var store: StoreOf<OnboardingFeature>
+    @Bindable var store: StoreOf<TenantOnboardingFeature>
     @Binding var activeField: OnboardingField?
     var keyboardField: FocusState<OnboardingField?>.Binding
     
@@ -32,7 +32,7 @@ struct DetailsStepView: View {
                         .foregroundStyle(.neutral90)
                     
                     KohereDropdownMenu(
-                        selectedOption: $store.selectedVisa,
+                        selectedOption: selectedVisaOption,
                         activeField: $activeField,
                         equals: .visaStatus,
                         options: DropdownMenuOption.visas,
@@ -50,7 +50,7 @@ struct DetailsStepView: View {
                         .foregroundStyle(.neutral90)
                     
                     KohereDropdownMenu(
-                        selectedOption: $store.selectedOccupation,
+                        selectedOption: selectedOccupationOption,
                         activeField: $activeField,
                         equals: .occupation,
                         options: DropdownMenuOption.occupations,
@@ -87,7 +87,7 @@ struct DetailsStepView: View {
                             .foregroundStyle(.neutral90)
                         
                         KohereDropdownMenu(
-                            selectedOption: $store.selectedGender,
+                            selectedOption: selectedGenderOption,
                             activeField: $activeField,
                             equals: .gender,
                             options: DropdownMenuOption.genders,
@@ -101,5 +101,40 @@ struct DetailsStepView: View {
                 }
             }
         }
+    }
+}
+
+private extension DetailsStepView {
+    var selectedVisaOption: Binding<DropdownMenuOption?> {
+        Binding(
+            get: {
+                store.selectedVisa.map(DropdownMenuOption.init)
+            },
+            set: { option in
+                store.selectedVisa = option?.visaType
+            }
+        )
+    }
+
+    var selectedOccupationOption: Binding<DropdownMenuOption?> {
+        Binding(
+            get: {
+                store.selectedOccupation.map(DropdownMenuOption.init)
+            },
+            set: { option in
+                store.selectedOccupation = option?.occupation
+            }
+        )
+    }
+
+    var selectedGenderOption: Binding<DropdownMenuOption?> {
+        Binding(
+            get: {
+                store.selectedGender.map(DropdownMenuOption.init)
+            },
+            set: { option in
+                store.selectedGender = option?.gender
+            }
+        )
     }
 }

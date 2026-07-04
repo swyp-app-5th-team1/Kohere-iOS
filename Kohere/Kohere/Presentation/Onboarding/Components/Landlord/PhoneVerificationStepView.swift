@@ -12,7 +12,7 @@ struct PhoneVerificationStepView: View {
 
     // MARK: - Properties
 
-    @Bindable var store: StoreOf<OnboardingFeature>
+    @Bindable var store: StoreOf<LandlordOnboardingFeature>
     @Binding var activeField: OnboardingField?
     var keyboardField: FocusState<OnboardingField?>.Binding
 
@@ -40,14 +40,14 @@ struct PhoneVerificationStepView: View {
                             keyboardType: .phonePad,
                             hasError: store.hasPhoneNumberFormatError
                         )
-                        .disabled(store.isPhoneVerified)
+                        .disabled(store.isPhoneVerified || store.isPhoneVerificationCodeRequesting)
 
                         Button {
                             store.send(.sendPhoneVerificationCodeTapped)
                         } label: {
                             verificationButtonTitle
                         }
-                        .disabled(!store.canSendPhoneVerificationCode || store.isPhoneVerified)
+                        .disabled(!store.canSendPhoneVerificationCode || store.isPhoneVerified || store.isPhoneVerificationCodeRequesting)
                     }
 
                     phoneSupportText
@@ -71,7 +71,7 @@ struct PhoneVerificationStepView: View {
                         } label: {
                             confirmButtonTitle
                         }
-                        .disabled(!store.canConfirmPhoneVerificationCode || store.isPhoneVerified)
+                        .disabled(!store.canConfirmPhoneVerificationCode || store.isPhoneVerified || store.isPhoneVerificationRequesting)
                     }
 
                     phoneVerificationCodeSupportText
@@ -87,18 +87,18 @@ extension PhoneVerificationStepView {
     private var verificationButtonTitle: some View {
         Text(store.isPhoneVerified ? "인증완료" : (store.isPhoneCodeSent ? "재발송" : "인증"))
             .kohereTextStyle(.label2Medium)
-            .foregroundColor(store.canSendPhoneVerificationCode && !store.isPhoneVerified ? .labelNormal : .labelAssistive)
+            .foregroundColor(store.canSendPhoneVerificationCode && !store.isPhoneVerified && !store.isPhoneVerificationCodeRequesting ? .labelNormal : .labelAssistive)
             .frame(width: 80, height: 40)
-            .background(store.canSendPhoneVerificationCode && !store.isPhoneVerified ? .fillStrong : .fillNormal)
+            .background(store.canSendPhoneVerificationCode && !store.isPhoneVerified && !store.isPhoneVerificationCodeRequesting ? .fillStrong : .fillNormal)
             .cornerRadius(12)
     }
 
     private var confirmButtonTitle: some View {
         Text("확인")
             .kohereTextStyle(.label2Medium)
-            .foregroundColor(store.canConfirmPhoneVerificationCode && !store.isPhoneVerified ? .staticWhite : .labelAssistive)
+            .foregroundColor(store.canConfirmPhoneVerificationCode && !store.isPhoneVerified && !store.isPhoneVerificationRequesting ? .staticWhite : .labelAssistive)
             .frame(width: 80, height: 40)
-            .background(store.canConfirmPhoneVerificationCode && !store.isPhoneVerified ? .labelNormal : .fillNormal)
+            .background(store.canConfirmPhoneVerificationCode && !store.isPhoneVerified && !store.isPhoneVerificationRequesting ? .labelNormal : .fillNormal)
             .cornerRadius(12)
     }
 
