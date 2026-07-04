@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 enum MapLocationAuthorization: Equatable, Sendable {
     case notDetermined
@@ -25,6 +26,8 @@ struct MapFeature {
     var locationClient
     @Dependency(\.settingsClient)
     var settingsClient
+    @Dependency(\.userDefaultsClient)
+    var userDefaultsClient
 
     @Reducer
     enum Path {
@@ -72,6 +75,8 @@ struct MapFeature {
         var cameraMoveRequest: MapCoordinate?
         var hasMovedToInitialUserLocation = false
         var isLocationPermissionDialogPresented = false
+        var isDiagnosisButtonExpanded = false
+        var isDiagnosisMatchesButtonExpanded = true
     }
 
     enum Action {
@@ -80,6 +85,10 @@ struct MapFeature {
         case locationAuthorizationChanged(MapLocationAuthorization)
         case userLocationUpdated(MapCoordinate)
         case myLocationButtonTapped
+        case diagnosisButtonTapped
+        case diagnosisButtonCloseButtonTapped
+        case diagnosisButtonAutoCollapseDelayFinished
+        case diagnosisFilterApplied(MapFilterState)
         case locationPermissionDialogCloseButtonTapped
         case locationPermissionDialogSettingsButtonTapped
         case cameraMoveRequestHandled
@@ -109,21 +118,35 @@ struct MapFeature {
         Reduce { state, action in
             switch action {
             case .mapAppeared:
-                return .run { [locationClient] send in
-                    let authorization = await locationClient.requestAuthorization()
-                    await send(.locationAuthorizationChanged(authorization))
+                var effects: [Effect<Action>] = [
+                    .run { [locationClient] send in
+                        let authorization = await locationClient.requestAuthorization()
+                        await send(.locationAuthorizationChanged(authorization))
 
-                    guard case .authorized = authorization else { return }
+                        guard case .authorized = authorization else { return }
 
-                    let updates = await locationClient.locationUpdates()
-                    for await coordinate in updates {
-                        await send(.userLocationUpdated(coordinate))
+                        let updates = await locationClient.locationUpdates()
+                        for await coordinate in updates {
+                            await send(.userLocationUpdated(coordinate))
+                        }
                     }
+                    .cancellable(id: "MapFeature.locationUpdates", cancelInFlight: true)
+                ]
+
+                if state.appliedFilterSource != .diagnosis,
+                   shouldExpandDiagnosisButtonToday(userDefaultsClient: userDefaultsClient) {
+                    state.isDiagnosisButtonExpanded = true
+                    effects.append(diagnosisButtonAutoCollapseEffect)
                 }
-                .cancellable(id: "MapFeature.locationUpdates", cancelInFlight: true)
+
+                return .merge(effects)
 
             case .mapDismissed:
-                return .cancel(id: "MapFeature.locationUpdates")
+                state.isDiagnosisButtonExpanded = false
+                return .merge(
+                    .cancel(id: "MapFeature.locationUpdates"),
+                    .cancel(id: "MapFeature.diagnosisButtonAutoCollapse")
+                )
 
             case let .locationAuthorizationChanged(authorization):
                 state.locationAuthorization = authorization
@@ -165,6 +188,25 @@ struct MapFeature {
                 guard let userLocation = state.userLocation else { return .none }
                 state.cameraMoveRequest = userLocation
                 return .none
+
+            case .diagnosisButtonTapped:
+                return .none
+
+            case .diagnosisButtonCloseButtonTapped:
+                state.isDiagnosisMatchesButtonExpanded = false
+                return .none
+
+            case .diagnosisButtonAutoCollapseDelayFinished:
+                state.isDiagnosisButtonExpanded = false
+                return .none
+
+            case let .diagnosisFilterApplied(filter):
+                state.appliedFilter = filter
+                state.editingFilter = filter
+                state.appliedFilterSource = .diagnosis
+                state.isDiagnosisButtonExpanded = false
+                state.isDiagnosisMatchesButtonExpanded = true
+                return .cancel(id: "MapFeature.diagnosisButtonAutoCollapse")
 
             case .locationPermissionDialogCloseButtonTapped:
                 state.isLocationPermissionDialogPresented = false
@@ -267,9 +309,8 @@ struct MapFeature {
 
             case .filterApplyButtonTapped:
                 state.appliedFilter = state.editingFilter
-                if state.editingFilter.isDefault {
-                    state.appliedFilterSource = .manual
-                }
+                state.appliedFilterSource = .manual
+                state.isDiagnosisMatchesButtonExpanded = true
                 state.isFilterPresented = false
                 return .none
 
@@ -280,6 +321,31 @@ struct MapFeature {
         }
         .forEach(\.path, action: \.path)
     }
+}
+
+private var diagnosisButtonAutoCollapseEffect: Effect<MapFeature.Action> {
+    .run { send in
+        do {
+            try await Task.sleep(nanoseconds: 3_000_000_000)
+            await send(.diagnosisButtonAutoCollapseDelayFinished)
+        } catch {
+            return
+        }
+    }
+    .cancellable(id: "MapFeature.diagnosisButtonAutoCollapse", cancelInFlight: true)
+}
+
+private func shouldExpandDiagnosisButtonToday(userDefaultsClient: UserDefaultsClient) -> Bool {
+    let now = Date()
+    let lastExpandedAt = try? userDefaultsClient.load(for: .mapDiagnosisButtonLastExpandedAt)
+
+    if let lastExpandedAt,
+       Calendar.current.isDate(lastExpandedAt, inSameDayAs: now) {
+        return false
+    }
+
+    try? userDefaultsClient.save(now, for: .mapDiagnosisButtonLastExpandedAt)
+    return true
 }
 
 extension MapFeature.Path.State: Equatable {}

@@ -53,8 +53,8 @@ struct MapView: View {
         .onDisappear {
             store.send(.mapDismissed)
         }
-        .onChange(of: scenePhase) { phase in
-            guard phase == .active else { return }
+        .onChange(of: scenePhase) {
+            guard scenePhase == .active else { return }
             store.send(.mapAppeared)
         }
         .fullScreenCover(
@@ -101,14 +101,37 @@ struct MapView: View {
         VStack {
             Spacer()
 
-            HStack {
+            HStack(alignment: .bottom) {
+                diagnosisButton
+                    .padding(.leading, mapFloatingControlHorizontalPadding)
+
                 Spacer()
 
                 myLocationButton
-                    .padding(.trailing, mapFloatingControlTrailingPadding)
-                    .padding(.bottom, bottomPadding)
+                    .padding(.trailing, mapFloatingControlHorizontalPadding)
             }
+            .padding(.bottom, bottomPadding)
         }
+    }
+
+    private var diagnosisButton: some View {
+        let variant: MapDiagnosisButton.Variant = store.appliedFilterSource == .diagnosis
+            ? .matches
+            : .discovery
+        let isExpanded = store.appliedFilterSource == .diagnosis
+            ? store.isDiagnosisMatchesButtonExpanded
+            : store.isDiagnosisButtonExpanded
+
+        return MapDiagnosisButton(
+            variant: variant,
+            isExpanded: isExpanded,
+            action: {
+                store.send(.diagnosisButtonTapped)
+            },
+            closeAction: {
+                store.send(.diagnosisButtonCloseButtonTapped)
+            }
+        )
     }
 
     private var myLocationButton: some View {
@@ -141,7 +164,7 @@ struct MapView: View {
         .zIndex(10)
     }
 
-    private var mapFloatingControlTrailingPadding: CGFloat {
+    private var mapFloatingControlHorizontalPadding: CGFloat {
         20
     }
 
