@@ -12,12 +12,14 @@ struct LogoutUseCase {
 }
 
 extension LogoutUseCase: DependencyKey {
-    static let liveValue = LogoutUseCase { accessToken, refreshToken in
-        try await AuthRepository().logout(
-            accessToken: accessToken,
-            refreshToken: refreshToken
-        )
-    }
+    static let liveValue: LogoutUseCase = {
+        @Dependency(\.authClient)
+        var authClient
+        
+        return LogoutUseCase { accessToken, refreshToken in
+            try await authClient.logout(accessToken, refreshToken)
+        }
+    }()
 }
 
 extension DependencyValues {

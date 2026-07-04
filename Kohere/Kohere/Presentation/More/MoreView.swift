@@ -55,10 +55,12 @@ struct MoreView: View {
                                 .init(
                                     title: "무료로 방 홍보하기",
                                     subtitle: "고시원 · 쉐어하우스 · 코리빙 등",
-                                    iconName: "external_link_24"
+                                    iconName: "external_link_24",
+                                    action: .promoteRoom
                                 )
                             ],
-                            horizontalPadding: 16
+                            horizontalPadding: 16,
+                            onItemTapped: handleMenuItemTapped
                         )
 
                         MoreMenuSection(
@@ -80,6 +82,15 @@ struct MoreView: View {
             .background(.backgroundNormalAlternative)
         }
         .background(.backgroundNormalAlternative)
+    }
+
+    private func handleMenuItemTapped(_ item: MoreMenuItem) {
+        switch item.action {
+        case .promoteRoom:
+            store.send(.promoteRoomTapped)
+        case nil:
+            break
+        }
     }
 
     private var profileCard: some View {
@@ -135,6 +146,7 @@ private struct MoreMenuSection: View {
     let title: String
     let items: [MoreMenuItem]
     let horizontalPadding: CGFloat
+    var onItemTapped: (MoreMenuItem) -> Void = { _ in }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -145,7 +157,9 @@ private struct MoreMenuSection: View {
 
             VStack(spacing: 4) {
                 ForEach(items) { item in
-                    MoreMenuRow(item: item)
+                    MoreMenuRow(item: item) {
+                        onItemTapped(item)
+                    }
                 }
             }
         }
@@ -159,9 +173,11 @@ private struct MoreMenuSection: View {
 
 private struct MoreMenuRow: View {
     let item: MoreMenuItem
+    let onTap: () -> Void
 
     var body: some View {
         Button {
+            onTap()
         } label: {
             HStack {
                 HStack(spacing: 4) {
@@ -205,6 +221,11 @@ private struct MoreMenuItem: Identifiable, Equatable {
     var subtitle: String?
     let iconName: String?
     var rendersAsTemplate = true
+    var action: MoreMenuAction?
 
     var id: String { title }
+}
+
+private enum MoreMenuAction: Equatable {
+    case promoteRoom
 }

@@ -12,9 +12,14 @@ struct ReissueTokenUseCase {
 }
 
 extension ReissueTokenUseCase: DependencyKey {
-    static let liveValue = ReissueTokenUseCase { refreshToken in
-        try await AuthRepository().reissue(refreshToken: refreshToken)
-    }
+    static let liveValue: ReissueTokenUseCase = {
+        @Dependency(\.authClient)
+        var authClient
+        
+        return ReissueTokenUseCase { refreshToken in
+            try await authClient.reissue(refreshToken)
+        }
+    }()
 }
 
 extension DependencyValues {

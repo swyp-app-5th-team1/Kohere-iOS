@@ -181,6 +181,17 @@ extension LoginView {
                 }
             )
             .frame(height: 418)
+
+        case .userTypeSelect:
+            UserTypeSelectBottomSheet(
+                findMyRoomTapped: {
+                    store.send(.userTypeSelected(.tenant))
+                },
+                rentOutTapped: {
+                    store.send(.userTypeSelected(.landlord))
+                }
+            )
+            .frame(height: 326)
         }
     }
     
