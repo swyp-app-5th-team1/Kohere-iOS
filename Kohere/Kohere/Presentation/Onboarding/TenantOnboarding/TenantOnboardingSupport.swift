@@ -19,7 +19,7 @@ extension TenantOnboardingFeature.State {
     var isNextButtonEnabled: Bool {
         switch currentStep {
         case .nameAndBirth:
-            return !lastName.isEmpty && !firstName.isEmpty && selectedMonth != nil && selectedDay != nil && selectedYear != nil
+            return !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && birthDate != nil
         case .details:
             return selectedVisa != nil && selectedOccupation != nil && selectedNationality != nil && selectedGender != nil
         case .emailVerification:
@@ -121,16 +121,6 @@ extension TenantOnboardingFeature.State {
         return resolvedComponents.year == year
             && resolvedComponents.month == month
             && resolvedComponents.day == day
-    }
-}
-
-extension TenantOnboardingFeature {
-    static func toDataError(_ error: Error) -> DataError {
-        if let dataError = error as? DataError {
-            return dataError
-        }
-
-        return .underlying(message: error.localizedDescription)
     }
 }
 

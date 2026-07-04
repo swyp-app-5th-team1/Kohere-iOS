@@ -25,15 +25,9 @@ extension LandlordOnboardingFeature.State {
         }
     }
 
-    var hasPhoneNumberFormatError: Bool {
-        guard !phoneNumber.isEmpty else { return false }
-        let allowedCharacters = CharacterSet(charactersIn: "0123456789-")
-        return phoneNumber.rangeOfCharacter(from: allowedCharacters.inverted) != nil
-    }
-
     var canSendPhoneVerificationCode: Bool {
         let digitCount = phoneNumber.filter(\.isNumber).count
-        return !phoneNumber.isEmpty && !hasPhoneNumberFormatError && digitCount >= 10 && !isPhoneVerificationCodeRequesting
+        return !phoneNumber.isEmpty && digitCount >= 10 && !isPhoneVerificationCodeRequesting
     }
 
     var canConfirmPhoneVerificationCode: Bool {
@@ -70,15 +64,5 @@ extension LandlordOnboardingFeature.State {
         phoneVerificationCode = ""
         phoneMessage = nil
         phoneVerificationCodeErrorMessage = nil
-    }
-}
-
-extension LandlordOnboardingFeature {
-    static func toDataError(_ error: Error) -> DataError {
-        if let dataError = error as? DataError {
-            return dataError
-        }
-
-        return .underlying(message: error.localizedDescription)
     }
 }

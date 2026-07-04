@@ -37,8 +37,7 @@ struct PhoneVerificationStepView: View {
                             keyboardField: keyboardField,
                             equals: .phoneNumber,
                             placeholder: "'-'를 제외하고 숫자만 입력해주세요",
-                            keyboardType: .phonePad,
-                            hasError: store.hasPhoneNumberFormatError
+                            keyboardType: .phonePad
                         )
                         .disabled(store.isPhoneVerified || store.isPhoneVerificationCodeRequesting)
 
@@ -103,12 +102,7 @@ extension PhoneVerificationStepView {
     }
 
     @ViewBuilder private var phoneSupportText: some View {
-        if store.hasPhoneNumberFormatError {
-            Text("전화번호 형식에 맞지 않는 문자가 포함되어 있어요.")
-                .kohereTextStyle(.caption2Medium)
-                .foregroundStyle(.statusDanger)
-                .padding(.leading, 8)
-        } else if let phoneMessage = store.phoneMessage {
+        if let phoneMessage = store.phoneMessage {
             Text(phoneMessage)
                 .kohereTextStyle(.caption2Medium)
                 .foregroundStyle(.statusInfo)
