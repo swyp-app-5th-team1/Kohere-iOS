@@ -19,6 +19,7 @@ struct RootFeature {
     struct State: Equatable {
         var authInfo: Auth?
         var isAuthLoading = true
+        var isOnboardingBypassedForDebug = false
         var login = LoginFeature.State()
         var onboarding = OnboardingFeature.State()
         var selectedTab: AppTab = .home
@@ -113,7 +114,7 @@ struct RootFeature {
                 return .none
 
             case let .login(.loginSuccess(auth)):
-                guard !auth.onboardingRequired else { return .none }
+                guard !auth.onboardingRequired || state.isOnboardingBypassedForDebug else { return .none }
                 state.authInfo = auth
                 return .none
                 

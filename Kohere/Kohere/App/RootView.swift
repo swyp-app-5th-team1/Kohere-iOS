@@ -25,7 +25,8 @@ struct RootView: View {
                         action: \.login
                     )
                 )
-            } else if store.authInfo?.onboardingRequired == true {
+            } else if store.authInfo?.onboardingRequired == true,
+                      !store.isOnboardingBypassedForDebug {
                 OnboardingView(
                     store: store.scope(
                         state: \RootFeature.State.onboarding,
