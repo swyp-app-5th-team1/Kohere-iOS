@@ -9,13 +9,19 @@ import ComposableArchitecture
 
 final class AuthRepository: AuthInterface {
     private let networkService: NetworkService
+    private let authenticatedNetworkService: NetworkService
+    private let keychainClient: KeychainClient
     private let environmentProvider: () throws -> APIEnvironment
     
     init(
-        networkService: NetworkService = NetworkService(),
+        networkService: NetworkService = .plain(),
+        authenticatedNetworkService: NetworkService = .authenticated(),
+        keychainClient: KeychainClient = .liveValue,
         environmentProvider: @escaping () throws -> APIEnvironment = { try APIEnvironment.live() }
     ) {
         self.networkService = networkService
+        self.authenticatedNetworkService = authenticatedNetworkService
+        self.keychainClient = keychainClient
         self.environmentProvider = environmentProvider
     }
     
@@ -39,17 +45,33 @@ final class AuthRepository: AuthInterface {
         return responseDTO.toEntity()
     }
     
-    func logout(accessToken: String, refreshToken: String) async throws {
+    func logout() async throws {
+        defer {
+            try? keychainClient.delete(for: .auth)
+        }
+        
+        let auth = try loadStoredAuth()
+        guard let refreshToken = auth.refreshToken else {
+            throw AuthRepositoryError.missingRefreshToken
+        }
+        
         let environment = try environmentProvider()
         let requestDTO = LogoutRequestDTO(refreshToken: refreshToken)
         
-        try await networkService.requestVoid(
+        try await authenticatedNetworkService.requestVoid(
             AuthRouter.logout(
                 requestDTO,
-                accessToken: accessToken,
-                environment: environment
+                environment
             )
         )
+    }
+    
+    private func loadStoredAuth() throws -> Auth {
+        guard let auth = try keychainClient.load(for: .auth) else {
+            throw AuthRepositoryError.missingAuth
+        }
+        
+        return auth
     }
 }
 
@@ -94,4 +116,9 @@ private extension TokenResponseDTO {
             expiresIn: expiresIn
         )
     }
+}
+
+private enum AuthRepositoryError: Error {
+    case missingAuth
+    case missingRefreshToken
 }
