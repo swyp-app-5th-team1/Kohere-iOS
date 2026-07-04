@@ -8,7 +8,7 @@
 import Foundation
 
 struct MapFilterState: Equatable {
-    var selectedOptions: Set<MapFilterOption> = []
+    var selectedOptions: Set<RoomCondition> = []
 
     var monthlyRentRange = MapFilterPriceRange.defaultMonthlyRent
     var depositRange = MapFilterPriceRange.defaultDeposit
@@ -38,7 +38,7 @@ extension MapFilterState {
         !selectedPropertyTypes.isEmpty
     }
 
-    mutating func toggleOption(_ option: MapFilterOption) {
+    mutating func toggleOption(_ option: RoomCondition) {
         if selectedOptions.contains(option) {
             selectedOptions.remove(option)
         } else {
@@ -68,41 +68,6 @@ extension MapFilterState {
 
     mutating func updateDepositMaximum(_ maximum: Int) {
         depositRange.updateMaximum(maximum, bounds: MapFilterPriceRange.deposit)
-    }
-}
-
-enum MapFilterOption: CaseIterable, Hashable {
-    case moveInNow
-    case femaleOnly
-    case mealsIncluded
-    case doubleRoom
-    case privateBathroom
-    case englishSupport
-    case addressRegistration
-    case noMaintenanceFee
-    case noARCRequired
-
-    var displayTitle: String {
-        switch self {
-        case .moveInNow:
-            String(localized: "Move-in Now")
-        case .femaleOnly:
-            String(localized: "Female Only")
-        case .mealsIncluded:
-            String(localized: "Meals Included")
-        case .doubleRoom:
-            String(localized: "Double Room")
-        case .privateBathroom:
-            String(localized: "Private Bath")
-        case .englishSupport:
-            String(localized: "English OK")
-        case .addressRegistration:
-            String(localized: "Address Registration")
-        case .noMaintenanceFee:
-            String(localized: "No Maint. Fee")
-        case .noARCRequired:
-            String(localized: "No ARC")
-        }
     }
 }
 

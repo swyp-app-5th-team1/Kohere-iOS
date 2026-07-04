@@ -23,8 +23,8 @@ struct RecentlyViewedFeature {
     
     enum Action: Equatable {
         case onAppear
-        case cardTapped(id: Int)
-        case likeButtonTapped(id: Int)
+        case cardTapped(id: String)
+        case likeButtonTapped(id: String)
         case backButtonTapped
     }
     

@@ -154,6 +154,15 @@ struct RootFeature {
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
                 return .none
+
+            case let .home(.path(.element(id: _, action: .chatBot(.diagnosisCompleted(diagnosisID))))):
+                state.home.path = StackState<HomeFeature.Path.State>()
+                state.selectedTab = .map
+                return .send(.map(.diagnosisResultRequested(diagnosisID: diagnosisID)))
+
+            case let .map(.path(.element(id: _, action: .chatBot(.diagnosisCompleted(diagnosisID))))):
+                state.selectedTab = .map
+                return .send(.map(.diagnosisResultRequested(diagnosisID: diagnosisID)))
                 
             case .login, .onboarding, .home, .community, .map, .chat, .more:
                 return .none

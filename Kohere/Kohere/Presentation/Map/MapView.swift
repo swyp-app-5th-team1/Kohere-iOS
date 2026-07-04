@@ -225,7 +225,7 @@ struct MapView: View {
                 store.send(.selectedListingCardTapped)
             },
             onLikeTapped: {
-                store.send(.listingLikeButtonTapped(item.id))
+                store.send(.listingLikeButtonTapped(item.listingID))
             },
             onCloseButtonTapped: {
                 store.send(.selectedListingCloseButtonTapped)
@@ -239,11 +239,14 @@ struct MapView: View {
 
     private var selectedListingItem: ListingItemModel? {
         guard let selectedMarkerID = store.selectedMarkerID else { return nil }
-        return store.listings.first { "\($0.id)" == selectedMarkerID }
+        return store.listings.first { $0.listingID == selectedMarkerID }
     }
 
     private var selectedListingTitle: String {
         guard let selectedMarkerID = store.selectedMarkerID else { return "" }
+        if let selectedListingItem, !selectedListingItem.title.isEmpty {
+            return selectedListingItem.title
+        }
         return ListingDetailModel.mock(id: selectedMarkerID).overview.title
     }
 

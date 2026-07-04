@@ -49,8 +49,8 @@ struct HomeFeature {
         case roomFinderBannerTapped
         case seeAllListingsTapped
         case browseListingsTapped
-        case cardTapped(id: Int)
-        case likeButtonTapped(id: Int)
+        case cardTapped(id: String)
+        case likeButtonTapped(id: String)
         
         case quizOptionTapped(index: Int)
         case livingGuideItemTapped(id: Int)

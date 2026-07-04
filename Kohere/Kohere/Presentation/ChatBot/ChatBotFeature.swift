@@ -52,6 +52,7 @@ struct ChatBotFeature {
         case optionTapped(DiagnosisOption)
         case confirmButtonTapped
         case findButtonTapped
+        case diagnosisCompleted(diagnosisID: Int)
         case resetButtonTapped
     }
     
@@ -121,7 +122,10 @@ struct ChatBotFeature {
                 return .none
                 
             case .findButtonTapped:
-                // TODO: 지도 탭으로 연결
+                // TODO: 진단 제출 API 성공 후 diagnosisCompleted(diagnosisID:) 액션 전송
+                return .none
+
+            case .diagnosisCompleted:
                 return .none
                 
             case .resetButtonTapped:

@@ -51,7 +51,7 @@ struct MapListingFilterChipItem: Identifiable {
 
         return MapListingFilterChipItem(
             kind: .options,
-            title: MapFilterOption.allCases
+            title: RoomCondition.allCases
                 .filter { filter.selectedOptions.contains($0) }
                 .map(\.displayTitle)
                 .joined(separator: ", "),

@@ -28,10 +28,13 @@ struct MapFeature {
     var settingsClient
     @Dependency(\.userDefaultsClient)
     var userDefaultsClient
+    @Dependency(\.diagnosisClient)
+    var diagnosisClient
 
     @Reducer
     enum Path {
         case listingDetail(ListingDetailFeature)
+        case chatBot(ChatBotFeature)
     }
 
     @ObservableState
@@ -40,22 +43,13 @@ struct MapFeature {
         var path = StackState<Path.State>()
 
         // 매물/마커 표시 상태
-        var markers: [MapMarkerItem] = [
-            MapMarkerItem(
-                id: "1",
-                coordinate: MapCoordinate(latitude: 37.557192, longitude: 126.925381)
-            ),
-            MapMarkerItem(
-                id: "2",
-                coordinate: MapCoordinate(latitude: 37.555134, longitude: 126.936893)
-            ),
-            MapMarkerItem(
-                id: "3",
-                coordinate: MapCoordinate(latitude: 37.549463, longitude: 126.913739)
-            )
-        ]
+        var markers: [MapMarkerItem] = []
         var selectedMarkerID: String?
-        var listings: [ListingItemModel] = .mapMockList
+        var listings: [ListingItemModel] = []
+        var isDiagnosisDetailLoading = false
+        var isRecommendationsLoading = false
+        var diagnosisErrorMessage: String?
+        var recommendationsErrorMessage: String?
 
         // 지도 viewport / 재검색 상태
         var currentViewport: MapViewport?
@@ -67,6 +61,7 @@ struct MapFeature {
         var isFilterPresented = false
         var appliedFilter = MapFilterState()
         var editingFilter = MapFilterState()
+        var activeDiagnosisID: Int?
         var appliedFilterSource: MapFilterApplicationSource = .manual
 
         // 위치 권한 / 현재 위치 / 카메라 이동 요청 상태
@@ -88,7 +83,9 @@ struct MapFeature {
         case diagnosisButtonTapped
         case diagnosisButtonCloseButtonTapped
         case diagnosisButtonAutoCollapseDelayFinished
-        case diagnosisFilterApplied(MapFilterState)
+        case diagnosisResultRequested(diagnosisID: Int)
+        case diagnosisDetailResponse(Result<DiagnosisDetail, Error>)
+        case diagnosisRecommendationsResponse(Result<DiagnosisRecommendations, Error>)
         case locationPermissionDialogCloseButtonTapped
         case locationPermissionDialogSettingsButtonTapped
         case cameraMoveRequestHandled
@@ -97,14 +94,14 @@ struct MapFeature {
         case viewportChanged(MapViewport)
         case path(StackActionOf<Path>)
         case listingTapped(String)
-        case listingLikeButtonTapped(Int)
+        case listingLikeButtonTapped(String)
         case selectedListingCardTapped
         case selectedListingCloseButtonTapped
 
         // 필터 관련
         case filterButtonTapped
         case filterDismissed
-        case filterOptionTapped(MapFilterOption)
+        case filterOptionTapped(RoomCondition)
         case filterPropertyTypeTapped(MapPropertyType)
         case monthlyRentMinimumChanged(Int)
         case monthlyRentMaximumChanged(Int)
@@ -145,7 +142,9 @@ struct MapFeature {
                 state.isDiagnosisButtonExpanded = false
                 return .merge(
                     .cancel(id: "MapFeature.locationUpdates"),
-                    .cancel(id: "MapFeature.diagnosisButtonAutoCollapse")
+                    .cancel(id: "MapFeature.diagnosisButtonAutoCollapse"),
+                    .cancel(id: "MapFeature.diagnosisDetail"),
+                    .cancel(id: "MapFeature.diagnosisRecommendations")
                 )
 
             case let .locationAuthorizationChanged(authorization):
@@ -190,6 +189,7 @@ struct MapFeature {
                 return .none
 
             case .diagnosisButtonTapped:
+                state.path.append(.chatBot(ChatBotFeature.State()))
                 return .none
 
             case .diagnosisButtonCloseButtonTapped:
@@ -200,13 +200,78 @@ struct MapFeature {
                 state.isDiagnosisButtonExpanded = false
                 return .none
 
-            case let .diagnosisFilterApplied(filter):
-                state.appliedFilter = filter
-                state.editingFilter = filter
+            case let .diagnosisResultRequested(diagnosisID):
+                state.path = StackState<Path.State>()
+                state.activeDiagnosisID = diagnosisID
+                state.selectedMarkerID = nil
+                state.sheetMode = .listingList
+                state.isFilterPresented = false
                 state.appliedFilterSource = .diagnosis
                 state.isDiagnosisButtonExpanded = false
                 state.isDiagnosisMatchesButtonExpanded = true
-                return .cancel(id: "MapFeature.diagnosisButtonAutoCollapse")
+                state.lastSearchedViewport = state.currentViewport
+                state.showsResearchButton = false
+                state.markers = []
+                state.listings = []
+                state.isDiagnosisDetailLoading = true
+                state.isRecommendationsLoading = true
+                state.diagnosisErrorMessage = nil
+                state.recommendationsErrorMessage = nil
+
+                let diagnosisClient = diagnosisClient
+                return .merge(
+                    .cancel(id: "MapFeature.diagnosisButtonAutoCollapse"),
+                    .run { send in
+                        do {
+                            let detail = try await diagnosisClient.fetchDetail(diagnosisID)
+                            await send(.diagnosisDetailResponse(.success(detail)))
+                        } catch {
+                            await send(.diagnosisDetailResponse(.failure(error)))
+                        }
+                    }
+                    .cancellable(id: "MapFeature.diagnosisDetail", cancelInFlight: true),
+                    .run { send in
+                        do {
+                            let recommendations = try await diagnosisClient.fetchRecommendations(diagnosisID)
+                            await send(.diagnosisRecommendationsResponse(.success(recommendations)))
+                        } catch {
+                            await send(.diagnosisRecommendationsResponse(.failure(error)))
+                        }
+                    }
+                    .cancellable(id: "MapFeature.diagnosisRecommendations", cancelInFlight: true)
+                )
+
+            case let .diagnosisDetailResponse(.success(detail)):
+                guard state.activeDiagnosisID == detail.diagnosisID else { return .none }
+                debugLogDiagnosisDetail(detail)
+                let filter = MapFilterState(diagnosisDetail: detail)
+                state.appliedFilter = filter
+                state.editingFilter = filter
+                state.isDiagnosisDetailLoading = false
+                state.diagnosisErrorMessage = nil
+                return .none
+
+            case let .diagnosisDetailResponse(.failure(error)):
+                debugLogDiagnosisError("detail", error)
+                state.isDiagnosisDetailLoading = false
+                state.diagnosisErrorMessage = error.localizedDescription
+                return .none
+
+            case let .diagnosisRecommendationsResponse(.success(recommendations)):
+                debugLogDiagnosisRecommendations(recommendations)
+                state.listings = recommendations.listings.map(ListingItemModel.init(recommendation:))
+                state.markers = recommendations.markers
+                state.selectedMarkerID = nil
+                state.sheetMode = .listingList
+                state.isRecommendationsLoading = false
+                state.recommendationsErrorMessage = nil
+                return .none
+
+            case let .diagnosisRecommendationsResponse(.failure(error)):
+                debugLogDiagnosisError("recommendations", error)
+                state.isRecommendationsLoading = false
+                state.recommendationsErrorMessage = error.localizedDescription
+                return .none
 
             case .locationPermissionDialogCloseButtonTapped:
                 state.isLocationPermissionDialogPresented = false
@@ -250,6 +315,10 @@ struct MapFeature {
                 _ = state.path.popLast()
                 return .none
 
+            case .path(.element(id: _, action: .chatBot(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
             case .path:
                 return .none
 
@@ -258,8 +327,8 @@ struct MapFeature {
                 state.sheetMode = .selectedListing
                 return .none
 
-            case let .listingLikeButtonTapped(id):
-                guard let index = state.listings.firstIndex(where: { $0.id == id }) else { return .none }
+            case let .listingLikeButtonTapped(listingID):
+                guard let index = state.listings.firstIndex(where: { $0.listingID == listingID }) else { return .none }
                 state.listings[index].isLiked.toggle()
                 return .none
 
@@ -323,74 +392,4 @@ struct MapFeature {
     }
 }
 
-private var diagnosisButtonAutoCollapseEffect: Effect<MapFeature.Action> {
-    .run { send in
-        do {
-            try await Task.sleep(nanoseconds: 3_000_000_000)
-            await send(.diagnosisButtonAutoCollapseDelayFinished)
-        } catch {
-            return
-        }
-    }
-    .cancellable(id: "MapFeature.diagnosisButtonAutoCollapse", cancelInFlight: true)
-}
-
-private func shouldExpandDiagnosisButtonToday(userDefaultsClient: UserDefaultsClient) -> Bool {
-    let now = Date()
-    let lastExpandedAt = try? userDefaultsClient.load(for: .mapDiagnosisButtonLastExpandedAt)
-
-    if let lastExpandedAt,
-       Calendar.current.isDate(lastExpandedAt, inSameDayAs: now) {
-        return false
-    }
-
-    try? userDefaultsClient.save(now, for: .mapDiagnosisButtonLastExpandedAt)
-    return true
-}
-
 extension MapFeature.Path.State: Equatable {}
-
-private extension Array where Element == ListingItemModel {
-    static let mapMockList: [ListingItemModel] = [
-        ListingItemModel(
-            id: 1,
-            formattedPrice: "₩380~400K/mo",
-            formattedUsdPrice: "≈$355~398/mo",
-            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
-            locationDescription: "8-min walk Hongdae Sta.",
-            typeTag: "Goshiwon",
-            period: "1 mo~",
-            isLiked: false
-        ),
-        ListingItemModel(
-            id: 2,
-            formattedPrice: "₩380~400K/mo",
-            formattedUsdPrice: "≈$355~398/mo",
-            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
-            locationDescription: "8-min walk Hongdae Sta.",
-            typeTag: "Goshiwon",
-            period: "1 mo~",
-            isLiked: true
-        ),
-        ListingItemModel(
-            id: 3,
-            formattedPrice: "₩380~400K/mo",
-            formattedUsdPrice: "≈$355~398/mo",
-            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
-            locationDescription: "8-min walk Hongdae Sta.",
-            typeTag: "Goshiwon",
-            period: "1 mo~",
-            isLiked: false
-        ),
-        ListingItemModel(
-            id: 4,
-            formattedPrice: "₩380~400K/mo",
-            formattedUsdPrice: "≈$355~398/mo",
-            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
-            locationDescription: "8-min walk Hongdae Sta.",
-            typeTag: "Goshiwon",
-            period: "1 mo~",
-            isLiked: false
-        )
-    ]
-}

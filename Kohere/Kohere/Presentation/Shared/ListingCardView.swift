@@ -47,9 +47,11 @@ struct ListingCardView: View {
                             .kohereTextStyle(.label1Semibold)
                             .foregroundColor(.neutral80)
                         
-                        Text(item.formattedUsdPrice)
-                            .kohereTextStyle(.body2Regular)
-                            .foregroundColor(.labelNormal)
+                        if !item.formattedUsdPrice.isEmpty {
+                            Text(item.formattedUsdPrice)
+                                .kohereTextStyle(.body2Regular)
+                                .foregroundColor(.labelNormal)
+                        }
                     }
                     
                     Spacer()

@@ -15,8 +15,8 @@ struct RecentlyViewedView: View {
     
     let onSeeAllTapped: () -> Void
     let onBrowseTapped: () -> Void
-    let onCardTapped: (Int) -> Void
-    let onLikeTapped: (Int) -> Void
+    let onCardTapped: (String) -> Void
+    let onLikeTapped: (String) -> Void
     
     // MARK: - Body
     
