@@ -23,6 +23,8 @@ enum MapSheetMode: Equatable {
 struct MapFeature {
     @Dependency(\.locationClient)
     var locationClient
+    @Dependency(\.settingsClient)
+    var settingsClient
 
     @Reducer
     enum Path {
@@ -69,6 +71,7 @@ struct MapFeature {
         var userLocation: MapCoordinate?
         var cameraMoveRequest: MapCoordinate?
         var hasMovedToInitialUserLocation = false
+        var isLocationPermissionDialogPresented = false
     }
 
     enum Action {
@@ -77,6 +80,8 @@ struct MapFeature {
         case locationAuthorizationChanged(MapLocationAuthorization)
         case userLocationUpdated(MapCoordinate)
         case myLocationButtonTapped
+        case locationPermissionDialogCloseButtonTapped
+        case locationPermissionDialogSettingsButtonTapped
         case cameraMoveRequestHandled
         case markerTapped(String)
         case researchButtonTapped
@@ -145,10 +150,31 @@ struct MapFeature {
                 return .none
 
             case .myLocationButtonTapped:
-                guard state.locationAuthorization == .authorized else { return .none }
+                switch state.locationAuthorization {
+                case .authorized:
+                    break
+
+                case .denied, .restricted:
+                    state.isLocationPermissionDialogPresented = true
+                    return .none
+
+                case .notDetermined:
+                    return .none
+                }
+
                 guard let userLocation = state.userLocation else { return .none }
                 state.cameraMoveRequest = userLocation
                 return .none
+
+            case .locationPermissionDialogCloseButtonTapped:
+                state.isLocationPermissionDialogPresented = false
+                return .none
+
+            case .locationPermissionDialogSettingsButtonTapped:
+                state.isLocationPermissionDialogPresented = false
+                return .run { [settingsClient] _ in
+                    await settingsClient.openApplicationSettings()
+                }
 
             case .cameraMoveRequestHandled:
                 state.cameraMoveRequest = nil

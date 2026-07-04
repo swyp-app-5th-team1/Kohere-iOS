@@ -9,6 +9,10 @@ import ComposableArchitecture
 import SwiftUI
 
 struct MapView: View {
+    @Environment(
+        \.scenePhase
+    )
+    private var scenePhase
     @Bindable var store: StoreOf<MapFeature>
     @State private var listingSheetDetent: MapListingSheetDetent = .minimum
     @GestureState private var listingSheetDragTranslation: CGFloat = 0
@@ -35,14 +39,23 @@ struct MapView: View {
                    let selectedListingItem {
                     mapSelectedListingSheet(item: selectedListingItem)
                 }
+
+                if store.isLocationPermissionDialogPresented {
+                    locationPermissionDialogOverlay
+                }
             }
             .animation(sheetAnimation, value: store.sheetMode)
+            .animation(.easeInOut(duration: 0.2), value: store.isLocationPermissionDialogPresented)
         }
         .onAppear {
             store.send(.mapAppeared)
         }
         .onDisappear {
             store.send(.mapDismissed)
+        }
+        .onChange(of: scenePhase) { phase in
+            guard phase == .active else { return }
+            store.send(.mapAppeared)
         }
         .fullScreenCover(
             isPresented: Binding(
@@ -107,6 +120,25 @@ struct MapView: View {
                 .frame(width: 40, height: 40)
         }
         .buttonStyle(.plain)
+    }
+
+    private var locationPermissionDialogOverlay: some View {
+        ZStack {
+            Color.materialDimmer
+                .ignoresSafeArea()
+
+            LocationPermissionDialog(
+                onCloseTapped: {
+                    store.send(.locationPermissionDialogCloseButtonTapped)
+                },
+                onSettingsTapped: {
+                    store.send(.locationPermissionDialogSettingsButtonTapped)
+                }
+            )
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .transition(.opacity)
+        .zIndex(10)
     }
 
     private var mapFloatingControlTrailingPadding: CGFloat {
