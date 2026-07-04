@@ -11,41 +11,34 @@ import Foundation
 enum AuthRouter: URLRequestConvertible {
     case socialLogin(SocialLoginRequestDTO, APIEnvironment)
     case reissue(ReissueTokenRequestDTO, APIEnvironment)
-    case logout(LogoutRequestDTO, accessToken: String, environment: APIEnvironment)
+    case logout(LogoutRequestDTO, APIEnvironment)
     case sendPhoneVerificationCode(
         PhoneVerificationCodeRequestDTO,
-        accessToken: String,
-        environment: APIEnvironment
+        APIEnvironment
     )
     case verifyPhone(
         PhoneVerificationRequestDTO,
-        accessToken: String,
-        environment: APIEnvironment
+        APIEnvironment
     )
     case sendEmailVerificationCode(
         EmailVerificationCodeRequestDTO,
-        accessToken: String,
-        environment: APIEnvironment
+        APIEnvironment
     )
     case verifyEmail(
         EmailVerificationRequestDTO,
-        accessToken: String,
-        environment: APIEnvironment
+        APIEnvironment
     )
     case agreeTerms(
         TermsAgreementRequestDTO,
-        accessToken: String,
-        environment: APIEnvironment
+        APIEnvironment
     )
     case completeOnboarding(
         AuthOnboardingRequestDTO,
-        accessToken: String,
-        environment: APIEnvironment
+        APIEnvironment
     )
     case completeLandlordOnboarding(
         LandlordOnboardingRequestDTO,
-        accessToken: String,
-        environment: APIEnvironment
+        APIEnvironment
     )
 
     private var method: HTTPMethod {
@@ -95,14 +88,14 @@ enum AuthRouter: URLRequestConvertible {
         switch self {
         case let .socialLogin(_, environment),
              let .reissue(_, environment),
-             let .logout(_, _, environment),
-             let .sendPhoneVerificationCode(_, _, environment),
-             let .verifyPhone(_, _, environment),
-             let .sendEmailVerificationCode(_, _, environment),
-             let .verifyEmail(_, _, environment),
-             let .agreeTerms(_, _, environment),
-             let .completeOnboarding(_, _, environment),
-             let .completeLandlordOnboarding(_, _, environment):
+             let .logout(_, environment),
+             let .sendPhoneVerificationCode(_, environment),
+             let .verifyPhone(_, environment),
+             let .sendEmailVerificationCode(_, environment),
+             let .verifyEmail(_, environment),
+             let .agreeTerms(_, environment),
+             let .completeOnboarding(_, environment),
+             let .completeLandlordOnboarding(_, environment):
             environment
         }
     }
@@ -121,36 +114,28 @@ enum AuthRouter: URLRequestConvertible {
         case let .reissue(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
-        case let .logout(requestDTO, accessToken, _):
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        case let .logout(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
-        case let .sendPhoneVerificationCode(requestDTO, accessToken, _):
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        case let .sendPhoneVerificationCode(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
-        case let .verifyPhone(requestDTO, accessToken, _):
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        case let .verifyPhone(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
-        case let .sendEmailVerificationCode(requestDTO, accessToken, _):
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        case let .sendEmailVerificationCode(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
-        case let .verifyEmail(requestDTO, accessToken, _):
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        case let .verifyEmail(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
-        case let .agreeTerms(requestDTO, accessToken, _):
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        case let .agreeTerms(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
-        case let .completeOnboarding(requestDTO, accessToken, _):
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        case let .completeOnboarding(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
-        case let .completeLandlordOnboarding(requestDTO, accessToken, _):
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        case let .completeLandlordOnboarding(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
         }
 

@@ -10,13 +10,13 @@ import ComposableArchitecture
 protocol AuthInterface {
     func socialLogin(credential: SocialLoginCredential) async throws -> Auth
     func reissue(refreshToken: String) async throws -> AuthToken
-    func logout(accessToken: String, refreshToken: String) async throws
+    func logout() async throws
 }
 
 struct AuthClient: Sendable {
     var socialLogin: @Sendable (_ credential: SocialLoginCredential) async throws -> Auth
     var reissue: @Sendable (_ refreshToken: String) async throws -> AuthToken
-    var logout: @Sendable (_ accessToken: String, _ refreshToken: String) async throws -> Void
+    var logout: @Sendable () async throws -> Void
 }
 
 extension AuthClient {
@@ -28,11 +28,8 @@ extension AuthClient {
             reissue: { refreshToken in
                 try await repository.reissue(refreshToken: refreshToken)
             },
-            logout: { accessToken, refreshToken in
-                try await repository.logout(
-                    accessToken: accessToken,
-                    refreshToken: refreshToken
-                )
+            logout: {
+                try await repository.logout()
             }
         )
     }
