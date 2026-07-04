@@ -16,6 +16,8 @@ struct LoginFeature {
     var appleSignInClient
     @Dependency(\.socialLoginUseCase)
     var socialLoginUseCase
+    @Dependency(\.agreeTermsUseCase)
+    var agreeTermsUseCase
     @Dependency(\.keychainClient)
     var keychainClient
 
@@ -38,6 +40,7 @@ struct LoginFeature {
         var isServiceTermsAgreed = true
         var isPrivacyTermsAgreed = true
         var isMarketingCommunicationsAgreed = false
+        var isTermsAgreementRequesting = false
         var selectedTermsDetail: TermsDetailKind?
         
         var isRequiredTermsAgreed: Bool {
@@ -60,6 +63,7 @@ struct LoginFeature {
         
         case notificationSheetDismissed
         case termsAgreementCompleted
+        case termsAgreementResponse(Result<TermsAgreement, DataError>)
         case userTypeSelected(OnboardingUserType)
         
         case serviceTermsAgreementToggled
@@ -87,7 +91,7 @@ struct LoginFeature {
                         let idToken = try await googleSignInClient.signIn()
                         await send(.socialLoginCredentialReceived(.google(idToken: idToken)))
                     } catch {
-                        await send(.loginFailure(error.localizedDescription))
+                        await send(.loginFailure(Self.loginErrorMessage(for: error)))
                     }
                 }
 
@@ -126,7 +130,7 @@ struct LoginFeature {
                         }
                         await send(.loginSuccess(auth))
                     } catch {
-                        await send(.loginFailure(error.localizedDescription))
+                        await send(.loginFailure(Self.loginErrorMessage(for: error)))
                     }
                 }
                 
@@ -134,12 +138,15 @@ struct LoginFeature {
                 state.isLoginRequesting = false
                 state.authInfo = auth
                 state.loginErrorMessage = nil
-                state.currentSheet = .notificationOption
+                state.currentSheet = auth.onboardingRequired ? .notificationOption : nil
+                guard !auth.onboardingRequired else {
+                    return .none
+                }
                 let keychainClient = keychainClient
                 return .run { _ in
                     try keychainClient.save(auth, for: .auth)
                 } catch: { error, send in
-                    await send(.loginFailure(error.localizedDescription))
+                    await send(.loginFailure(Self.loginErrorMessage(for: error)))
                 }
                 
             case let .loginFailure(message):
@@ -152,8 +159,35 @@ struct LoginFeature {
                 return .none
                 
             case .termsAgreementCompleted:
-                guard state.isRequiredTermsAgreed else { return .none }
+                guard state.isRequiredTermsAgreed,
+                      !state.isTermsAgreementRequesting,
+                      state.authInfo != nil else { return .none }
+                state.isTermsAgreementRequesting = true
+
+                let termsOfServiceAgreed = state.isServiceTermsAgreed
+                let privacyPolicyAgreed = state.isPrivacyTermsAgreed
+                let marketingAgreed = state.isMarketingCommunicationsAgreed
+
+                return .run { send in
+                    do {
+                        let response = try await agreeTermsUseCase.execute(
+                            termsOfServiceAgreed,
+                            privacyPolicyAgreed,
+                            marketingAgreed
+                        )
+                        await send(.termsAgreementResponse(.success(response)))
+                    } catch {
+                        await send(.termsAgreementResponse(.failure(Self.toDataError(error))))
+                    }
+                }
+
+            case .termsAgreementResponse(.success):
+                state.isTermsAgreementRequesting = false
                 state.currentSheet = .userTypeSelect
+                return .none
+
+            case .termsAgreementResponse(.failure):
+                state.isTermsAgreementRequesting = false
                 return .none
 
             case .userTypeSelected:
@@ -200,5 +234,34 @@ struct LoginFeature {
                 return .none
             }
         }
+    }
+}
+
+private extension LoginFeature {
+    static func loginErrorMessage(for error: Error) -> String {
+        if let dataError = error as? DataError {
+            switch dataError {
+            case let .serverError(code, _):
+                switch code {
+                case "UNAUTHENTICATED", "TOKEN_EXPIRED":
+                    return "인증이 필요합니다. 다시 로그인해주세요."
+                default:
+                    return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요."
+                }
+
+            default:
+                return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요."
+            }
+        }
+
+        return error.localizedDescription
+    }
+
+    static func toDataError(_ error: Error) -> DataError {
+        if let dataError = error as? DataError {
+            return dataError
+        }
+
+        return .underlying(message: error.localizedDescription)
     }
 }

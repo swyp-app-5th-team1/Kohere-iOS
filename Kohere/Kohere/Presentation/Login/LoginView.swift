@@ -161,6 +161,7 @@ extension LoginView {
                 isServiceTermsAgreed: store.isServiceTermsAgreed,
                 isPrivacyTermsAgreed: store.isPrivacyTermsAgreed,
                 isMarketingCommunicationsAgreed: store.isMarketingCommunicationsAgreed,
+                isTermsAgreementRequesting: store.isTermsAgreementRequesting,
                 onTermsDetailTapped: { detail in
                     store.send(.termsDetailTapped(detail))
                 },
@@ -180,7 +181,7 @@ extension LoginView {
                     store.send(.termsAgreementCompleted)
                 }
             )
-            .frame(height: 418)
+            .frame(height: 442)
 
         case .userTypeSelect:
             UserTypeSelectBottomSheet(
