@@ -102,4 +102,16 @@ final class NetworkService {
     }
 }
 
+extension NetworkService {
+    static func plain() -> NetworkService {
+        NetworkService(session: .default)
+    }
+    
+    static func authenticated(
+        interceptor: AuthInterceptor = AuthInterceptor()
+    ) -> NetworkService {
+        NetworkService(session: Session(interceptor: interceptor))
+    }
+}
+
 private struct EmptyResponseDTO: Decodable {}

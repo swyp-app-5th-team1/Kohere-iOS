@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 @Reducer
 struct RootFeature {
@@ -31,6 +32,7 @@ struct RootFeature {
     enum Action {
         case onAppear
         case storedAuthLoaded(Auth?)
+        case authSessionExpired
         case login(LoginFeature.Action)
         case saveAuthResponse(Result<Auth, Error>)
         case onboarding(OnboardingFeature.Action)
@@ -67,27 +69,47 @@ struct RootFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard state.authInfo == nil, state.isAuthLoading else { return .none }
                 let keychainClient = keychainClient
                 let userDefaultsClient = userDefaultsClient
-                
-                return .run { send in
-                    let hasLaunchedBefore = try userDefaultsClient.load(for: .hasLaunchedBefore) ?? false
-
-                    if !hasLaunchedBefore {
-                        try keychainClient.delete(for: .auth)
-                        try userDefaultsClient.save(true, for: .hasLaunchedBefore)
+                var effects: [Effect<Action>] = [
+                    .run { send in
+                        for await _ in NotificationCenter.default.notifications(named: .authSessionExpired) {
+                            await send(.authSessionExpired)
+                        }
                     }
+                    .cancellable(
+                        id: "RootFeature.authSessionObserver",
+                        cancelInFlight: true
+                    )
+                ]
+                
+                if state.authInfo == nil, state.isAuthLoading {
+                    effects.append(
+                        .run { send in
+                            let hasLaunchedBefore = try userDefaultsClient.load(for: .hasLaunchedBefore) ?? false
 
-                    let auth = try keychainClient.load(for: .auth)
-                    await send(.storedAuthLoaded(auth))
-                } catch: { _, send in
-                    await send(.storedAuthLoaded(nil))
+                            if !hasLaunchedBefore {
+                                try keychainClient.delete(for: .auth)
+                                try userDefaultsClient.save(true, for: .hasLaunchedBefore)
+                            }
+
+                            let auth = try keychainClient.load(for: .auth)
+                            await send(.storedAuthLoaded(auth))
+                        } catch: { _, send in
+                            await send(.storedAuthLoaded(nil))
+                        }
+                    )
                 }
+                
+                return .merge(effects)
                 
             case let .storedAuthLoaded(auth):
                 state.authInfo = auth
                 state.isAuthLoading = false
+                return .none
+
+            case .authSessionExpired:
+                state = State(isAuthLoading: false)
                 return .none
 
             case let .login(.loginSuccess(auth)):
