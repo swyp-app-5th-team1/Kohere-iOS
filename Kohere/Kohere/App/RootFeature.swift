@@ -127,6 +127,11 @@ struct RootFeature {
 
             case .saveAuthResponse(.failure):
                 return .none
+
+            case .home(.mapTabRequested):
+                state.selectedTab = .map
+                state.home.path.removeAll()
+                return .none
                 
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
