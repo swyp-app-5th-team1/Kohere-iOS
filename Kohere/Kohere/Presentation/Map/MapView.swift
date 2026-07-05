@@ -36,7 +36,7 @@ struct MapView: View {
                 mapListingSheet(containerHeight: containerHeight)
 
                 if store.sheetMode == .selectedListing,
-                   let selectedListingItem {
+                   let selectedListingItem = store.selectedListingItem {
                     mapSelectedListingSheet(item: selectedListingItem)
                 }
 
@@ -219,7 +219,7 @@ struct MapView: View {
 
     private func mapSelectedListingSheet(item: ListingItemModel) -> some View {
         MapSelectedListingSheetView(
-            title: selectedListingTitle,
+            title: store.selectedListingTitle,
             item: item,
             onCardTapped: {
                 store.send(.selectedListingCardTapped)
@@ -235,19 +235,6 @@ struct MapView: View {
         .clipped()
         .offset(y: tabBarCoveredHeight)
         .transition(.move(edge: .bottom))
-    }
-
-    private var selectedListingItem: ListingItemModel? {
-        guard let selectedMarkerID = store.selectedMarkerID else { return nil }
-        return store.listings.first { $0.listingID == selectedMarkerID }
-    }
-
-    private var selectedListingTitle: String {
-        guard let selectedMarkerID = store.selectedMarkerID else { return "" }
-        if let selectedListingItem, !selectedListingItem.title.isEmpty {
-            return selectedListingItem.title
-        }
-        return ListingDetailModel.mock(id: selectedMarkerID).overview.title
     }
 
     // MARK: - Sheet Layout
