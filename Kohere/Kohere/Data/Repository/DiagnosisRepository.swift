@@ -62,7 +62,7 @@ private extension DiagnosisDetailResponseDTO {
             purpose: purpose,
             university: university,
             district: district,
-            conditions: conditions.compactMap(RoomCondition.init(rawValue:)),
+            conditions: conditions.compactMap(RoomCondition.init(conditionCode:)),
             monthlyRentMin: monthlyRentMin,
             monthlyRentMax: monthlyRentMax,
             arcStatus: arcStatus,
@@ -105,7 +105,7 @@ private extension DiagnosisRecommendedListingResponseDTO {
             deposit: deposit,
             thumbnailURL: thumbnailUrl,
             coordinate: coordinate,
-            conditions: (conditions ?? []).compactMap(RoomCondition.init(rawValue:))
+            conditions: (conditions ?? []).compactMap(RoomCondition.init(conditionCode:))
         )
     }
 }

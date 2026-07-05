@@ -24,3 +24,9 @@ func debugLogDiagnosisError(_ endpoint: String, _ error: Error) {
     print("[MapFeature] diagnosis \(endpoint) request failed:", error.localizedDescription)
 #endif
 }
+
+func debugLogDiagnosisGeneralListingFallback(diagnosisID: Int) {
+#if DEBUG
+    print("[MapFeature] diagnosis \(diagnosisID) completed, but recommendations are disabled. Falling back to general listing search.")
+#endif
+}

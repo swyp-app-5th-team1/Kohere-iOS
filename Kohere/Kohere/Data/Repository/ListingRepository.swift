@@ -47,7 +47,7 @@ private extension ListingListResponseDTO {
 }
 
 private extension ListingListItemResponseDTO {
-    func toEntity() -> ListingSearchListing? {
+    func toEntity() -> Listing? {
         guard let listingId else { return nil }
 
         let coordinate: MapCoordinate?
@@ -57,21 +57,37 @@ private extension ListingListItemResponseDTO {
             coordinate = nil
         }
 
-        return ListingSearchListing(
+        return Listing(
             listingID: listingId,
-            roomOfferID: roomOfferId ?? "",
-            roomOfferName: roomOfferName ?? "",
-            title: title ?? roomOfferName ?? "",
+            title: title ?? "",
             type: type ?? "",
-            monthlyRent: monthlyRent,
-            deposit: deposit,
-            maintenanceFee: maintenanceFee,
-            availableCount: availableCount,
+            minMonthlyRent: minMonthlyRent,
+            maxMonthlyRent: maxMonthlyRent,
+            minDeposit: minDeposit,
+            maxDeposit: maxDeposit,
+            minMaintenanceFee: minMaintenanceFee,
+            maxMaintenanceFee: maxMaintenanceFee,
+            minStayMonths: minStayMonths,
+            maxStayMonths: maxStayMonths,
             thumbnailURL: thumbnailUrl,
             coordinate: coordinate,
             address: address,
-            conditions: (conditions ?? []).compactMap(RoomCondition.init(rawValue:)),
-            distanceMeters: distanceMeters
+            nearestTransit: nearestTransit?.toEntity(),
+            conditions: (conditions ?? []).compactMap(RoomCondition.init(conditionCode:)),
+            distanceMeters: distanceMeters,
+            isFavorited: favorited ?? false
+        )
+    }
+}
+
+private extension ListingNearestTransitResponseDTO {
+    func toEntity() -> ListingNearestTransit? {
+        guard let type, let name else { return nil }
+
+        return ListingNearestTransit(
+            type: type,
+            name: name,
+            walkMinutes: walkMinutes
         )
     }
 }

@@ -15,7 +15,7 @@ struct RecentlyViewedFeature {
     
     @ObservableState
     struct State: Equatable {
-        var items: [ListingItemModel] = ListingItemModel.mockList
+        var items: [ListingItemModel] = []
         var isLoading: Bool = false
     }
     

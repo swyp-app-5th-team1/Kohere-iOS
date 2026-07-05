@@ -27,7 +27,7 @@ struct HomeFeature {
         var livingGuides: [LivingGuide] = []
         
         init(
-            recentlyViewedItems: [ListingItemModel] = ListingItemModel.mockList,
+            recentlyViewedItems: [ListingItemModel] = [],
             quiz: Quiz = Quiz.mockQuiz,
             livingGuides: [LivingGuide] = LivingGuide.mockLivingGuide
         ) {

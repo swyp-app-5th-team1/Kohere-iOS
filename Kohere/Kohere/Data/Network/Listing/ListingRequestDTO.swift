@@ -36,7 +36,7 @@ extension ListingListQueryDTO {
             minDeposit: input.minDeposit,
             maxDeposit: input.maxDeposit,
             type: input.propertyTypes.map(\.rawValue),
-            conditions: input.conditions.map(\.rawValue),
+            conditions: input.conditions.map(\.conditionCode),
             arcRequired: input.arcRequired,
             sort: input.sort.rawValue,
             page: input.page,

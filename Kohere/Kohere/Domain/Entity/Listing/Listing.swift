@@ -6,15 +6,30 @@
 //
 
 struct Listing: Equatable, Identifiable {
-    let id: Int
-    let minPriceKRW: Int
-    let maxPriceKRW: Int
-    let priceUSD: Int
-    let deposit: Int
-    let maintenanceFee: Int
-    let distanceToStationMinutes: Int
-    let stationName: String
-    let accommodationType: String
-    let minStayMonths: Int
-    var isLiked: Bool
+    nonisolated var id: String { listingID }
+
+    let listingID: String
+    let title: String
+    let type: String
+    let minMonthlyRent: Int?
+    let maxMonthlyRent: Int?
+    let minDeposit: Int?
+    let maxDeposit: Int?
+    let minMaintenanceFee: Int?
+    let maxMaintenanceFee: Int?
+    let minStayMonths: Int?
+    let maxStayMonths: Int?
+    let thumbnailURL: String?
+    let coordinate: MapCoordinate?
+    let address: String?
+    let nearestTransit: ListingNearestTransit?
+    let conditions: [RoomCondition]
+    let distanceMeters: Double?
+    let isFavorited: Bool
+}
+
+struct ListingNearestTransit: Equatable {
+    let type: String
+    let name: String
+    let walkMinutes: Int?
 }
