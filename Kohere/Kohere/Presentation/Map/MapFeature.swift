@@ -8,18 +8,6 @@
 import ComposableArchitecture
 import Foundation
 
-enum MapLocationAuthorization: Equatable, Sendable {
-    case notDetermined
-    case authorized
-    case denied
-    case restricted
-}
-
-enum MapSheetMode: Equatable {
-    case listingList
-    case selectedListing
-}
-
 @Reducer
 struct MapFeature {
     @Dependency(\.locationClient)
@@ -46,6 +34,7 @@ struct MapFeature {
         var markers: [MapMarkerItem] = []
         var selectedMarkerID: String?
         var listings: [ListingItemModel] = []
+        var listingSource: MapListingSource = .idle
         var isDiagnosisDetailLoading = false
         var isRecommendationsLoading = false
         var diagnosisErrorMessage: String?
@@ -86,6 +75,7 @@ struct MapFeature {
         case diagnosisResultRequested(diagnosisID: Int)
         case diagnosisDetailResponse(Result<DiagnosisDetail, Error>)
         case diagnosisRecommendationsResponse(Result<DiagnosisRecommendations, Error>)
+        case locationSearchStarted
         case locationPermissionDialogCloseButtonTapped
         case locationPermissionDialogSettingsButtonTapped
         case cameraMoveRequestHandled
@@ -200,9 +190,18 @@ struct MapFeature {
                 state.isDiagnosisButtonExpanded = false
                 return .none
 
+            case .locationSearchStarted:
+                state.listingSource = .locationSearch
+                state.activeDiagnosisID = nil
+                state.appliedFilterSource = .manual
+                state.selectedMarkerID = nil
+                state.sheetMode = .listingList
+                return .none
+
             case let .diagnosisResultRequested(diagnosisID):
                 state.path = StackState<Path.State>()
                 state.activeDiagnosisID = diagnosisID
+                state.listingSource = .diagnosis
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
                 state.isFilterPresented = false
