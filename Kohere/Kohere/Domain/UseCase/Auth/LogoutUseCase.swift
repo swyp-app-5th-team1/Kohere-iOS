@@ -8,7 +8,7 @@
 import ComposableArchitecture
 
 struct LogoutUseCase {
-    var execute: (_ accessToken: String, _ refreshToken: String) async throws -> Void
+    var execute: () async throws -> Void
 }
 
 extension LogoutUseCase: DependencyKey {
@@ -16,8 +16,8 @@ extension LogoutUseCase: DependencyKey {
         @Dependency(\.authClient)
         var authClient
         
-        return LogoutUseCase { accessToken, refreshToken in
-            try await authClient.logout(accessToken, refreshToken)
+        return LogoutUseCase {
+            try await authClient.logout()
         }
     }()
 }

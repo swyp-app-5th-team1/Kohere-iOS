@@ -12,7 +12,7 @@ struct NameAndBirthStepView: View {
     
     // MARK: - Properties
     
-    @Bindable var store: StoreOf<OnboardingFeature>
+    @Bindable var store: StoreOf<TenantOnboardingFeature>
     @Binding var activeField: OnboardingField?
     var keyboardField: FocusState<OnboardingField?>.Binding
     

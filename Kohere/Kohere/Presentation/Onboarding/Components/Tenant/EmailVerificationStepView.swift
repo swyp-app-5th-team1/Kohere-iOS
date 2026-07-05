@@ -12,7 +12,7 @@ struct EmailVerificationStepView: View {
 
     // MARK: - Properties
 
-    @Bindable var store: StoreOf<OnboardingFeature>
+    @Bindable var store: StoreOf<TenantOnboardingFeature>
     @Binding var activeField: OnboardingField?
     var keyboardField: FocusState<OnboardingField?>.Binding
 
@@ -39,14 +39,14 @@ struct EmailVerificationStepView: View {
                             keyboardType: .emailAddress,
                             hasError: store.hasEmailFormatError
                         )
-                        .disabled(store.isEmailVerified)
+                        .disabled(store.isEmailVerified || store.isEmailVerificationCodeRequesting)
 
                         Button {
                             store.send(.sendVerificationCodeTapped)
                         } label: {
                             verificationButtonTitle
                         }
-                        .disabled(!store.canSendEmailVerificationCode || store.isEmailVerified)
+                        .disabled(!store.canSendEmailVerificationCode || store.isEmailVerified || store.isEmailVerificationCodeRequesting)
                     }
 
                     emailSupportText
@@ -70,7 +70,7 @@ struct EmailVerificationStepView: View {
                         } label: {
                             confirmButtonTitle
                         }
-                        .disabled(!store.canConfirmEmailVerificationCode || store.isEmailVerified)
+                        .disabled(!store.canConfirmEmailVerificationCode || store.isEmailVerified || store.isEmailVerificationRequesting)
                     }
 
                     emailVerificationCodeSupportText
@@ -93,9 +93,9 @@ extension EmailVerificationStepView {
     }
 
     private var verificationButtonTextColor: Color {
-        if store.isCodeSent && !store.isEmailVerified {
+        if store.isCodeSent && !store.isEmailVerified && !store.isEmailVerificationCodeRequesting {
             return .labelNormal
-        } else if store.canSendEmailVerificationCode && !store.isEmailVerified {
+        } else if store.canSendEmailVerificationCode && !store.isEmailVerified && !store.isEmailVerificationCodeRequesting {
             return .staticWhite
         } else {
             return .labelAssistive
@@ -103,9 +103,9 @@ extension EmailVerificationStepView {
     }
 
     private var verificationButtonBackgroundColor: Color {
-        if store.isCodeSent && !store.isEmailVerified {
+        if store.isCodeSent && !store.isEmailVerified && !store.isEmailVerificationCodeRequesting {
             return .fillStrong
-        } else if store.canSendEmailVerificationCode && !store.isEmailVerified {
+        } else if store.canSendEmailVerificationCode && !store.isEmailVerified && !store.isEmailVerificationCodeRequesting {
             return .labelNormal
         } else {
             return .fillNormal
@@ -115,9 +115,9 @@ extension EmailVerificationStepView {
     private var confirmButtonTitle: some View {
         Text("Confirm")
             .kohereTextStyle(.label2Medium)
-            .foregroundColor(store.canConfirmEmailVerificationCode && !store.isEmailVerified ? .staticWhite : .labelAssistive)
+            .foregroundColor(store.canConfirmEmailVerificationCode && !store.isEmailVerified && !store.isEmailVerificationRequesting ? .staticWhite : .labelAssistive)
             .frame(width: 80, height: 40)
-            .background(store.canConfirmEmailVerificationCode && !store.isEmailVerified ? .labelNormal : .fillNormal)
+            .background(store.canConfirmEmailVerificationCode && !store.isEmailVerified && !store.isEmailVerificationRequesting ? .labelNormal : .fillNormal)
             .cornerRadius(12)
     }
 
