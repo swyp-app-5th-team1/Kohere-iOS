@@ -14,6 +14,7 @@ struct TermsAgreementBottomSheet: View {
     let isServiceTermsAgreed: Bool
     let isPrivacyTermsAgreed: Bool
     let isMarketingCommunicationsAgreed: Bool
+    let isTermsAgreementRequesting: Bool
     
     private var isRequiredTermsAgreed: Bool {
         isServiceTermsAgreed && isPrivacyTermsAgreed
@@ -162,9 +163,9 @@ struct TermsAgreementBottomSheet: View {
             
             Spacer()
             
-            VStack(spacing: 0) {
+            VStack(spacing: 8) {
                 Button {
-                    if isRequiredTermsAgreed {
+                    if isRequiredTermsAgreed, !isTermsAgreementRequesting {
                         onStartTapped()
                     }
                 } label: {
@@ -173,10 +174,10 @@ struct TermsAgreementBottomSheet: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
-                        .background(isRequiredTermsAgreed ? .primaryNormal : .primary10)
+                        .background(isRequiredTermsAgreed && !isTermsAgreementRequesting ? .primaryNormal : .primary10)
                         .cornerRadius(16)
                 }
-                .disabled(!isRequiredTermsAgreed)
+                .disabled(!isRequiredTermsAgreed || isTermsAgreementRequesting)
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 32)

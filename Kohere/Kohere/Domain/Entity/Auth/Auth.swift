@@ -31,3 +31,49 @@ enum SocialLoginCredential: Equatable, Sendable {
     case google(idToken: String)
     case apple(authorizationCode: String)
 }
+
+struct PhoneVerificationCode: Equatable {
+    let message: String?
+    let phoneNumber: String?
+    let expiresIn: Int
+}
+
+struct PhoneVerification: Equatable {
+    let phoneNumber: String
+    let verified: Bool
+}
+
+struct EmailVerificationCode: Equatable {
+    let message: String?
+    let email: String
+    let expiresIn: Int
+}
+
+struct EmailVerification: Equatable {
+    let email: String
+    let verified: Bool
+}
+
+struct TermsAgreement: Equatable {
+    let status: String
+    let termsOfServiceAgreed: Bool
+    let privacyPolicyAgreed: Bool
+    let marketingAgreed: Bool
+    let agreedAt: String
+}
+
+struct AuthOnboardingProfile: Equatable {
+    let firstName: String
+    let lastName: String
+    let gender: Gender
+    let birthDate: String
+    let country: String
+    let occupation: Occupation
+    let email: String
+    let visaType: VisaType
+}
+
+struct LandlordOnboardingProfile: Equatable {
+    let name: String
+    let phoneNumber: String
+}
