@@ -97,7 +97,10 @@ extension MapFeature {
         state.isListingSearchLoading = true
         state.listingSearchErrorMessage = nil
 
-        let input = state.appliedFilter.listingSearchInput(bounds: viewport.visibleBounds)
+        let input = state.appliedFilter.listingSearchInput(
+            bounds: viewport.visibleBounds,
+            source: state.appliedFilterSource
+        )
 
         return .run { [listingClient] send in
             debugLogListingSearchRequest(input)
@@ -129,7 +132,8 @@ extension MapFeature {
 
         let input = state.appliedFilter.listingSearchInput(
             bounds: lastSearchedViewport.visibleBounds,
-            page: nextPage
+            page: nextPage,
+            source: state.appliedFilterSource
         )
 
         return .run { [listingClient] send in

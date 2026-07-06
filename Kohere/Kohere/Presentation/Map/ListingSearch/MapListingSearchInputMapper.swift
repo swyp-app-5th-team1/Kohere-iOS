@@ -9,17 +9,18 @@ extension MapFilterState {
     func listingSearchInput(
         bounds: MapBounds,
         page: Int = 0,
-        size: Int = ListingSearchInput.defaultPageSize
+        size: Int = ListingSearchInput.defaultPageSize,
+        source: MapFilterApplicationSource = .manual
     ) -> ListingSearchInput {
         ListingSearchInput(
             bounds: bounds,
             page: page,
             size: size,
             minBudget: monthlyRentRange.minimumSearchValue(
-                defaultValue: MapFilterPriceRange.defaultMonthlyRent.minimum
+                defaultValue: monthlyRentDefaultMinimum(for: source)
             ),
             maxBudget: monthlyRentRange.maximumSearchValue(
-                defaultValue: MapFilterPriceRange.defaultMonthlyRent.maximum
+                defaultValue: monthlyRentDefaultMaximum(for: source)
             ),
             minDeposit: depositRange.minimumSearchValue(
                 defaultValue: MapFilterPriceRange.defaultDeposit.minimum
@@ -32,6 +33,26 @@ extension MapFilterState {
                 .sorted(by: { $0.rawValue < $1.rawValue }),
             conditions: selectedOptions.sorted(by: { $0.rawValue < $1.rawValue })
         )
+    }
+}
+
+private extension MapFilterState {
+    func monthlyRentDefaultMinimum(for source: MapFilterApplicationSource) -> Int {
+        switch source {
+        case .manual:
+            MapFilterPriceRange.defaultMonthlyRent.minimum
+        case .diagnosis:
+            MapFilterPriceRange.monthlyRent.lowerBound
+        }
+    }
+
+    func monthlyRentDefaultMaximum(for source: MapFilterApplicationSource) -> Int {
+        switch source {
+        case .manual:
+            MapFilterPriceRange.defaultMonthlyRent.maximum
+        case .diagnosis:
+            MapFilterPriceRange.monthlyRent.upperBound
+        }
     }
 }
 
