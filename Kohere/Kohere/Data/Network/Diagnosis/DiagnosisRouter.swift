@@ -9,9 +9,9 @@ import Alamofire
 import Foundation
 
 enum DiagnosisRouter: URLRequestConvertible {
-    case question(step: Int, accessToken: String, environment: APIEnvironment)
-    case saveAnswer(DiagnosisAnswerRequestDTO, accessToken: String, environment: APIEnvironment)
-    case submit(accessToken: String, environment: APIEnvironment)
+    case question(step: Int, environment: APIEnvironment)
+    case saveAnswer(DiagnosisAnswerRequestDTO, environment: APIEnvironment)
+    case submit(environment: APIEnvironment)
 
     private var method: HTTPMethod {
         switch self {
@@ -25,7 +25,7 @@ enum DiagnosisRouter: URLRequestConvertible {
 
     private var path: String {
         switch self {
-        case let .question(step, _, _):
+        case let .question(step, _):
             "api/v1/diagnoses/questions/\(step)"
 
         case .saveAnswer:
@@ -38,19 +38,10 @@ enum DiagnosisRouter: URLRequestConvertible {
 
     private var environment: APIEnvironment {
         switch self {
-        case let .question(_, _, environment),
-             let .saveAnswer(_, _, environment),
-             let .submit(_, environment):
+        case let .question(_, environment),
+             let .saveAnswer(_, environment),
+             let .submit(environment):
             environment
-        }
-    }
-
-    private var accessToken: String {
-        switch self {
-        case let .question(_, accessToken, _),
-             let .saveAnswer(_, accessToken, _),
-             let .submit(accessToken, _):
-            accessToken
         }
     }
 
@@ -60,10 +51,9 @@ enum DiagnosisRouter: URLRequestConvertible {
         request.method = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
         switch self {
-        case let .saveAnswer(requestDTO, _, _):
+        case let .saveAnswer(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
         case .question, .submit:

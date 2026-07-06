@@ -15,16 +15,9 @@ extension SubmitDiagnosisUseCase: DependencyKey {
     static let liveValue: SubmitDiagnosisUseCase = {
         @Dependency(\.diagnosisClient)
         var diagnosisClient
-        @Dependency(\.keychainClient)
-        var keychainClient
 
         return SubmitDiagnosisUseCase {
-            let auth = try keychainClient.load(for: .auth)
-            guard let accessToken = auth?.accessToken else {
-                throw DataError.serverError(code: "UNAUTHENTICATED", message: "인증이 필요합니다.")
-            }
-
-            return try await diagnosisClient.submit(accessToken)
+            try await diagnosisClient.submit()
         }
     }()
 }

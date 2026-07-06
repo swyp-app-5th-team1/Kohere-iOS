@@ -15,16 +15,9 @@ extension FetchDiagnosisQuestionUseCase: DependencyKey {
     static let liveValue: FetchDiagnosisQuestionUseCase = {
         @Dependency(\.diagnosisClient)
         var diagnosisClient
-        @Dependency(\.keychainClient)
-        var keychainClient
 
         return FetchDiagnosisQuestionUseCase { step in
-            let auth = try keychainClient.load(for: .auth)
-            guard let accessToken = auth?.accessToken else {
-                throw DataError.serverError(code: "UNAUTHENTICATED", message: "인증이 필요합니다.")
-            }
-
-            return try await diagnosisClient.fetchQuestion(step, accessToken)
+            try await diagnosisClient.fetchQuestion(step)
         }
     }()
 }

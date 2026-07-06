@@ -8,28 +8,28 @@
 import ComposableArchitecture
 
 protocol DiagnosisInterface {
-    func fetchQuestion(step: Int, accessToken: String) async throws -> Diagnosis
-    func saveAnswer(_ answer: DiagnosisAnswer, accessToken: String) async throws
-    func submit(accessToken: String) async throws -> DiagnosisSubmission
+    func fetchQuestion(step: Int) async throws -> Diagnosis
+    func saveAnswer(_ answer: DiagnosisAnswer) async throws
+    func submit() async throws -> DiagnosisSubmission
 }
 
 struct DiagnosisClient: Sendable {
-    var fetchQuestion: @Sendable (_ step: Int, _ accessToken: String) async throws -> Diagnosis
-    var saveAnswer: @Sendable (_ answer: DiagnosisAnswer, _ accessToken: String) async throws -> Void
-    var submit: @Sendable (_ accessToken: String) async throws -> DiagnosisSubmission
+    var fetchQuestion: @Sendable (_ step: Int) async throws -> Diagnosis
+    var saveAnswer: @Sendable (_ answer: DiagnosisAnswer) async throws -> Void
+    var submit: @Sendable () async throws -> DiagnosisSubmission
 }
 
 extension DiagnosisClient {
     init(repository: any DiagnosisInterface) {
         self.init(
-            fetchQuestion: { step, accessToken in
-                try await repository.fetchQuestion(step: step, accessToken: accessToken)
+            fetchQuestion: { step in
+                try await repository.fetchQuestion(step: step)
             },
-            saveAnswer: { answer, accessToken in
-                try await repository.saveAnswer(answer, accessToken: accessToken)
+            saveAnswer: { answer in
+                try await repository.saveAnswer(answer)
             },
-            submit: { accessToken in
-                try await repository.submit(accessToken: accessToken)
+            submit: {
+                try await repository.submit()
             }
         )
     }

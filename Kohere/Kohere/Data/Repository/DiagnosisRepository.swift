@@ -12,19 +12,18 @@ final class DiagnosisRepository: DiagnosisInterface {
     private let environmentProvider: () throws -> APIEnvironment
 
     init(
-        networkService: NetworkService = NetworkService(),
+        networkService: NetworkService = .authenticated(),
         environmentProvider: @escaping () throws -> APIEnvironment = { try APIEnvironment.live() }
     ) {
         self.networkService = networkService
         self.environmentProvider = environmentProvider
     }
 
-    func fetchQuestion(step: Int, accessToken: String) async throws -> Diagnosis {
+    func fetchQuestion(step: Int) async throws -> Diagnosis {
         let environment = try environmentProvider()
         let responseDTO: DiagnosisQuestionResponseDTO = try await networkService.request(
             DiagnosisRouter.question(
                 step: step,
-                accessToken: accessToken,
                 environment: environment
             )
         )
@@ -32,24 +31,22 @@ final class DiagnosisRepository: DiagnosisInterface {
         return responseDTO.toEntity()
     }
 
-    func saveAnswer(_ answer: DiagnosisAnswer, accessToken: String) async throws {
+    func saveAnswer(_ answer: DiagnosisAnswer) async throws {
         let environment = try environmentProvider()
         let requestDTO = DiagnosisAnswerRequestDTO(answer)
 
         try await networkService.requestVoid(
             DiagnosisRouter.saveAnswer(
                 requestDTO,
-                accessToken: accessToken,
                 environment: environment
             )
         )
     }
 
-    func submit(accessToken: String) async throws -> DiagnosisSubmission {
+    func submit() async throws -> DiagnosisSubmission {
         let environment = try environmentProvider()
         let responseDTO: DiagnosisSubmissionResponseDTO = try await networkService.request(
             DiagnosisRouter.submit(
-                accessToken: accessToken,
                 environment: environment
             )
         )
