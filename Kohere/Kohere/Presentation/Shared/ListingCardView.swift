@@ -47,9 +47,11 @@ struct ListingCardView: View {
                             .kohereTextStyle(.label1Semibold)
                             .foregroundColor(.neutral80)
                         
-                        Text(item.formattedUsdPrice)
-                            .kohereTextStyle(.body2Regular)
-                            .foregroundColor(.labelNormal)
+                        if !item.formattedUsdPrice.isEmpty {
+                            Text(item.formattedUsdPrice)
+                                .kohereTextStyle(.body2Regular)
+                                .foregroundColor(.labelNormal)
+                        }
                     }
                     
                     Spacer()
@@ -65,35 +67,45 @@ struct ListingCardView: View {
                     }
                 }
                 
-                Text(item.detailsDescription)
-                    .kohereTextStyle(.caption1Regular)
-                    .foregroundColor(.labelAlternative)
-                    .padding(.top, 8)
-                
-                Text(item.locationDescription)
-                    .kohereTextStyle(.caption1Regular)
-                    .foregroundColor(.labelAlternative)
-                    .padding(.top, 2)
-                    .lineLimit(1)
-                
-                HStack(spacing: 4) {
-                    Text(item.typeTag)
-                        .kohereTextStyle(.caption2Regular)
-                        .foregroundColor(.labelNormal)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 2)
-                        .background(.fillAlternative)
-                        .cornerRadius(4)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(.lineAlternative, lineWidth: 1)
-                        )
-                    
-                    Text(item.period)
+                if !item.detailsDescription.isEmpty {
+                    Text(item.detailsDescription)
                         .kohereTextStyle(.caption1Regular)
                         .foregroundColor(.labelAlternative)
+                        .padding(.top, 8)
                 }
-                .padding(.top, 4)
+                
+                if !item.locationDescription.isEmpty {
+                    Text(item.locationDescription)
+                        .kohereTextStyle(.caption1Regular)
+                        .foregroundColor(.labelAlternative)
+                        .padding(.top, 2)
+                        .lineLimit(1)
+                }
+                
+                if !item.typeTag.isEmpty || !item.period.isEmpty {
+                    HStack(spacing: 4) {
+                        if !item.typeTag.isEmpty {
+                            Text(item.typeTag)
+                                .kohereTextStyle(.caption2Regular)
+                                .foregroundColor(.labelNormal)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(.fillAlternative)
+                                .cornerRadius(4)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(.lineAlternative, lineWidth: 1)
+                                )
+                        }
+                    
+                        if !item.period.isEmpty {
+                            Text(item.period)
+                                .kohereTextStyle(.caption1Regular)
+                                .foregroundColor(.labelAlternative)
+                        }
+                    }
+                    .padding(.top, 4)
+                }
             }
             .padding(.top, 4)
         }

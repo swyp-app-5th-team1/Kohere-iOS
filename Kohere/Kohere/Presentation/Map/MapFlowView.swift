@@ -24,6 +24,10 @@ struct MapFlowView: View {
             case let .listingDetail(listingDetailStore):
                 ListingDetailView(store: listingDetailStore)
                     .navigationBarHidden(true)
+
+            case let .chatBot(chatBotStore):
+                ChatBotView(store: chatBotStore)
+                    .navigationBarHidden(true)
             }
         }
         .toolbar(store.path.isEmpty ? .visible : .hidden, for: .tabBar)

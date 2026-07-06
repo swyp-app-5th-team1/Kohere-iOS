@@ -15,7 +15,7 @@ struct SavedListingsFeature {
     
     @ObservableState
     struct State: Equatable {
-        var items: [ListingItemModel] = ListingItemModel.mockList
+        var items: [ListingItemModel] = []
         var isLoading: Bool = false
     }
     
@@ -23,8 +23,8 @@ struct SavedListingsFeature {
     
     enum Action: Equatable {
         case onAppear
-        case cardTapped(id: Int)
-        case likeButtonTapped(id: Int)
+        case cardTapped(id: String)
+        case likeButtonTapped(id: String)
         case backButtonTapped
     }
     

@@ -11,12 +11,16 @@ protocol DiagnosisInterface {
     func fetchQuestion(step: Int) async throws -> Diagnosis
     func saveAnswer(_ answer: DiagnosisAnswer) async throws
     func submit() async throws -> DiagnosisSubmission
+	func fetchDetail(diagnosisID: Int) async throws -> DiagnosisDetail
+    func fetchRecommendations(diagnosisID: Int) async throws -> DiagnosisRecommendations
 }
 
 struct DiagnosisClient: Sendable {
     var fetchQuestion: @Sendable (_ step: Int) async throws -> Diagnosis
     var saveAnswer: @Sendable (_ answer: DiagnosisAnswer) async throws -> Void
     var submit: @Sendable () async throws -> DiagnosisSubmission
+	var fetchDetail: @Sendable (_ diagnosisID: Int) async throws -> DiagnosisDetail
+    var fetchRecommendations: @Sendable (_ diagnosisID: Int) async throws -> DiagnosisRecommendations
 }
 
 extension DiagnosisClient {
@@ -30,6 +34,12 @@ extension DiagnosisClient {
             },
             submit: {
                 try await repository.submit()
+			},
+            fetchDetail: { diagnosisID in
+                try await repository.fetchDetail(diagnosisID: diagnosisID)
+            },
+            fetchRecommendations: { diagnosisID in
+                try await repository.fetchRecommendations(diagnosisID: diagnosisID)
             }
         )
     }

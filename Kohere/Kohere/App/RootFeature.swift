@@ -141,19 +141,34 @@ struct RootFeature {
             case .saveAuthResponse(.failure):
                 return .none
 
-            // TODO: - Map 연결
             case let .home(.mapTabRequested(diagnosisID)):
-                state.selectedTab = .map
                 state.home.path.removeAll()
-                return .none
+                return openMap(diagnosisID: diagnosisID, state: &state)
                 
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
-                return .none
+                guard tab == .map else { return .none }
+                return .send(.map(.locationSearchStarted))
+
+            case let .map(.path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID))))):
+                state.map.path.removeAll()
+                return openMap(diagnosisID: diagnosisID, state: &state)
                 
             case .login, .onboarding, .home, .community, .map, .chat, .more:
                 return .none
             }
         }
+    }
+
+    private func openMap(diagnosisID: String?, state: inout State) -> Effect<Action> {
+        state.selectedTab = .map
+
+        guard let diagnosisID,
+              let diagnosisID = Int(diagnosisID)
+        else {
+            return .send(.map(.locationSearchStarted))
+        }
+
+        return .send(.map(.diagnosisResultRequested(diagnosisID: diagnosisID)))
     }
 }

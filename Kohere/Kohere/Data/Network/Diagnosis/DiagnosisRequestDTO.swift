@@ -5,6 +5,12 @@
 //  Created by Codex on 7/4/26.
 //
 
+nonisolated struct DiagnosisRecommendationsQueryDTO: Encodable {
+    let page: Int?
+    let size: Int?
+    let sort: String?
+}
+
 nonisolated enum DiagnosisAnswerRequestDTO: Encodable, Sendable {
     case single(field: String, code: String)
     case multiple(field: String, codes: [String])

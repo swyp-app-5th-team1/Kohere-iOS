@@ -38,13 +38,16 @@
     "1 mo~" : {
 
     },
+    "6/12/2026 Tue" : {
+
+    },
     "8-min walk Hongdae Sta." : {
 
     },
-    "A few more details\nfor a safer contract" : {
+    "23:03" : {
 
     },
-    "Address Registration" : {
+    "A few more details\nfor a safer contract" : {
 
     },
     "Agree" : {
@@ -56,6 +59,15 @@
     "Agree to All Terms" : {
 
     },
+    "AI" : {
+
+    },
+    "AI room matching diagnosis" : {
+
+    },
+    "AI room matching results" : {
+
+    },
     "Allow Notifications" : {
 
     },
@@ -63,6 +75,12 @@
 
     },
     "Browse Listings" : {
+
+    },
+    "Collapse AI room matching button" : {
+
+    },
+    "confirm" : {
 
     },
     "Confirm" : {
@@ -77,9 +95,6 @@
     "Design System" : {
 
     },
-    "Double Room" : {
-
-    },
     "E-mail" : {
 
     },
@@ -89,13 +104,7 @@
     "Enabled when all required fields are completed." : {
 
     },
-    "English OK" : {
-
-    },
     "Enter your name as shown on your passport" : {
-
-    },
-    "Female Only" : {
 
     },
     "Find My Room" : {
@@ -104,13 +113,13 @@
     "Find your perfect room\nin 1 minute." : {
 
     },
+    "Find Your Perfect Room with AI" : {
+
+    },
     "First Name" : {
 
     },
     "Gender" : {
-
-    },
-    "Get Started" : {
 
     },
     "Goshiwon" : {
@@ -131,25 +140,10 @@
     "Marketing Communications" : {
 
     },
-    "Meals Included" : {
-
-    },
-    "Move-in Now" : {
-
-    },
     "Nationality" : {
 
     },
-    "Next" : {
-
-    },
     "Nickname" : {
-
-    },
-    "No ARC" : {
-
-    },
-    "No Maint. Fee" : {
 
     },
     "No recently viewed listings yet\nStart browsing to find your perfect room" : {
@@ -158,13 +152,13 @@
     "Occupation" : {
 
     },
+    "Please enter a valid email address" : {
+
+    },
     "Pretendard JP와 elevation token을 확인하는 임시 샘플입니다." : {
 
     },
     "Privacy Policy *" : {
-
-    },
-    "Private Bath" : {
 
     },
     "Q. %@" : {
@@ -203,10 +197,16 @@
     "Skip" : {
 
     },
+    "Start Matching" : {
+
+    },
     "Terms of Service *" : {
 
     },
     "Today's Korea Living Quiz" : {
+
+    },
+    "Try again for better matches" : {
 
     },
     "Verified" : {
@@ -218,6 +218,9 @@
     "Verify your email\nand you're all set" : {
 
     },
+    "View Details" : {
+
+    },
     "Visa Status" : {
 
     },
@@ -227,7 +230,16 @@
     "Welcome!\nLet's check your details." : {
 
     },
+    "What brings you here?" : {
+
+    },
     "You can manage notification settings anytime\nin your device settings." : {
+
+    },
+    "Your Matches" : {
+
+    },
+    "고객님의 편리한 Kohere 이용을 위해\n위치 접근 권한의 허용이 필요합니다" : {
 
     },
     "고시원" : {
@@ -245,22 +257,67 @@
     "문의 하기" : {
 
     },
+    "반가워요! 가입된 정보가\n맞는지 확인해 드릴게요" : {
+
+    },
+    "사장님이 맞는지\n안전하게 확인해볼게요!" : {
+
+    },
+    "생년월일" : {
+
+    },
+    "설정 바로가기" : {
+
+    },
     "쉐어하우스" : {
 
     },
     "신청 하기" : {
 
     },
+    "원하시는 서비스를 선택해주세요" : {
+
+    },
+    "위치 권한을 허용해주세요" : {
+
+    },
     "이 지역 검색하기" : {
 
     },
+    "이름" : {
+
+    },
+    "인증" : {
+
+    },
+    "인증완료" : {
+
+    },
+    "재발송" : {
+
+    },
     "적용하기" : {
+
+    },
+    "전화번호" : {
+
+    },
+    "전화번호 형식에 맞지 않는 문자가 포함되어 있어요." : {
 
     },
     "찜 해제" : {
 
     },
     "찜하기" : {
+
+    },
+    "찜하지 않은 매물" : {
+
+    },
+    "찜한 매물" : {
+
+    },
+    "찾아보기" : {
 
     },
     "초기화" : {
@@ -276,6 +333,9 @@
 
     },
     "필터 설정" : {
+
+    },
+    "확인" : {
 
     }
   },

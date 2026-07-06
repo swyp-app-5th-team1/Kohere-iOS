@@ -13,8 +13,8 @@ struct HomeListingCardView: View {
     
     let item: ListingItemModel
     
-    let onCardTapped: (Int) -> Void
-    let onLikeTapped: (Int) -> Void
+    let onCardTapped: (String) -> Void
+    let onLikeTapped: (String) -> Void
     
     // MARK: - Body
     
