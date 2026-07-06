@@ -26,18 +26,19 @@ final class NetworkService {
     ) async throws -> Response {
         let response = await session
             .request(urlRequest)
+            .validate(statusCode: 200..<300)
             .serializingData()
             .response
-        
-        if let error = response.error {
-            throw mapAFError(error)
-        }
         
         let statusCode = response.response?.statusCode
         let data = response.data ?? Data()
         
         if let statusCode, !(200..<300).contains(statusCode) {
             throw parseServerError(from: data) ?? DataError.httpStatus(code: statusCode, message: nil)
+        }
+
+        if let error = response.error {
+            throw mapAFError(error)
         }
         
         guard !data.isEmpty else {
@@ -66,18 +67,19 @@ final class NetworkService {
     func requestVoid(_ urlRequest: URLRequestConvertible) async throws {
         let response = await session
             .request(urlRequest)
+            .validate(statusCode: 200..<300)
             .serializingData()
             .response
-        
-        if let error = response.error {
-            throw mapAFError(error)
-        }
         
         let statusCode = response.response?.statusCode
         let data = response.data ?? Data()
         
         if let statusCode, !(200..<300).contains(statusCode) {
             throw parseServerError(from: data) ?? DataError.httpStatus(code: statusCode, message: nil)
+        }
+
+        if let error = response.error {
+            throw mapAFError(error)
         }
         
         if !data.isEmpty, let error = parseServerError(from: data) {
