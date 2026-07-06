@@ -141,7 +141,8 @@ struct RootFeature {
             case .saveAuthResponse(.failure):
                 return .none
 
-            case .home(.mapTabRequested):
+            // TODO: - Map 연결
+            case let .home(.mapTabRequested(diagnosisID)):
                 state.selectedTab = .map
                 state.home.path.removeAll()
                 return .none
