@@ -7,6 +7,6 @@
 
 import Foundation
 
-struct FrankfurterRateResponseDTO: Decodable {
+nonisolated struct FrankfurterRateResponseDTO: Decodable, Sendable {
     let rate: Decimal
 }

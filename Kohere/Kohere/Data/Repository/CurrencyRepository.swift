@@ -7,9 +7,10 @@
 
 import ComposableArchitecture
 
-final class CurrencyRepository: CurrencyInterface {
+actor CurrencyRepository: CurrencyInterface {
     private let networkService: CurrencyNetworkService
     private var cachedKRWToUSDExchangeRate: KRWToUSDExchangeRate?
+    private var inFlightKRWToUSDExchangeRateTask: Task<KRWToUSDExchangeRate, Error>?
 
     init(networkService: CurrencyNetworkService = CurrencyNetworkService()) {
         self.networkService = networkService
@@ -20,13 +21,28 @@ final class CurrencyRepository: CurrencyInterface {
             return cachedKRWToUSDExchangeRate
         }
 
-        let responseDTO: FrankfurterRateResponseDTO = try await networkService.request(
-            CurrencyRouter.krwToUSDExchangeRate
-        )
-        let exchangeRate = responseDTO.toEntity()
-        cachedKRWToUSDExchangeRate = exchangeRate
+        if let inFlightKRWToUSDExchangeRateTask {
+            return try await inFlightKRWToUSDExchangeRateTask.value
+        }
 
-        return exchangeRate
+        let task = Task<KRWToUSDExchangeRate, Error> { [networkService] in
+            let responseDTO: FrankfurterRateResponseDTO = try await networkService.request(
+                CurrencyRouter.krwToUSDExchangeRate
+            )
+            return responseDTO.toEntity()
+        }
+
+        inFlightKRWToUSDExchangeRateTask = task
+
+        do {
+            let exchangeRate = try await task.value
+            cachedKRWToUSDExchangeRate = exchangeRate
+            inFlightKRWToUSDExchangeRateTask = nil
+            return exchangeRate
+        } catch {
+            inFlightKRWToUSDExchangeRateTask = nil
+            throw error
+        }
     }
 }
 
@@ -38,7 +54,7 @@ extension CurrencyClient: DependencyKey {
 }
 
 private extension FrankfurterRateResponseDTO {
-    func toEntity() -> KRWToUSDExchangeRate {
+    nonisolated func toEntity() -> KRWToUSDExchangeRate {
         KRWToUSDExchangeRate(usdPerKRW: rate)
     }
 }

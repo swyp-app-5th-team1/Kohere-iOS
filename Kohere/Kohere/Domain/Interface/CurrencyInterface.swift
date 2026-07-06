@@ -7,7 +7,7 @@
 
 import ComposableArchitecture
 
-protocol CurrencyInterface {
+protocol CurrencyInterface: Sendable {
     func fetchKRWToUSDExchangeRate() async throws -> KRWToUSDExchangeRate
 }
 

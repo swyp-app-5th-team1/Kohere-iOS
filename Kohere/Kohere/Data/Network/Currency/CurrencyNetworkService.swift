@@ -8,7 +8,7 @@
 import Alamofire
 import Foundation
 
-final class CurrencyNetworkService {
+nonisolated final class CurrencyNetworkService: @unchecked Sendable {
     private let session: URLSession
     private let decoder: JSONDecoder
 
