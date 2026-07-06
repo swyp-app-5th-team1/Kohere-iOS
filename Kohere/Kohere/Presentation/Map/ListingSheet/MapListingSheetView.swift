@@ -90,7 +90,7 @@ struct MapListingSheetView: View {
 
     private var listingRows: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 0) {
+            LazyVStack(spacing: 0) {
                 if shouldShowEmptyState {
                     emptyListingView
                 } else {
@@ -131,6 +131,9 @@ struct MapListingSheetView: View {
                     store.send(.listingLikeButtonTapped(item.listingID))
                 }
             )
+            .onAppear {
+                store.send(.listingRowAppeared(item.listingID))
+            }
         }
     }
 

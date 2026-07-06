@@ -74,6 +74,7 @@ extension MapFeature {
         case markerTapped(String)
         case researchButtonTapped
         case viewportChanged(MapViewport)
+        case listingRowAppeared(String)
         case path(StackActionOf<Path>)
         case listingTapped(String)
         case listingLikeButtonTapped(String)

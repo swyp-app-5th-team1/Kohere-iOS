@@ -155,6 +155,7 @@ struct MapFeature {
                 state.isDiagnosisButtonExpanded = false
                 state.isDiagnosisMatchesButtonExpanded = true
                 state.showsResearchButton = false
+                state.lastSearchedViewport = nil
                 state.markers = []
                 state.listings = []
                 state.listingSearchResults = []
@@ -223,6 +224,11 @@ struct MapFeature {
                     exchangeRate: state.krwToUSDExchangeRate
                 )
                 state.markers = recommendations.markers
+                let cameraCoordinate = recommendations.listings.compactMap(\.coordinate).first ?? recommendations.markers.first?.coordinate
+                state.cameraMoveRequest = cameraCoordinate
+                if cameraCoordinate == nil {
+                    state.lastSearchedViewport = state.currentViewport
+                }
                 state.isRecommendationsLoading = false
                 state.recommendationsErrorMessage = nil
                 return .none
@@ -261,45 +267,16 @@ struct MapFeature {
                 return startListingSearchEffect(state: &state, viewport: viewport)
 
             case let .viewportChanged(viewport):
-                state.currentViewport = viewport
+                return handleViewportChanged(viewport, state: &state)
 
-                guard state.listingSource == .locationSearch else {
-                    state.showsResearchButton = false
-                    return .none
-                }
-
-                guard let lastSearchedViewport = state.lastSearchedViewport else {
-                    state.showsResearchButton = false
-                    guard canStartFirstListingSearch(state: state) else { return .none }
-                    return startListingSearchEffect(state: &state, viewport: viewport)
-                }
-
-                guard lastSearchedViewport != viewport else {
-                    state.showsResearchButton = false
-                    return .none
-                }
-
-                state.showsResearchButton = true
-                return .none
+            case let .listingRowAppeared(listingID):
+                return startNextListingPageEffect(appearedListingID: listingID, state: &state)
 
             case let .listingSearchResponse(.success(page)):
                 debugLogListingSearchResponse(page)
                 state.isListingSearchLoading = false
                 state.listingSearchErrorMessage = nil
-                state.listingPageInfo = page.page
-                state.listingSearchResults = page.content
-                state.listings = listingItemModels(
-                    from: page.content,
-                    exchangeRate: state.krwToUSDExchangeRate
-                )
-                state.markers = page.content.compactMap { listing in
-                    guard let coordinate = listing.coordinate else { return nil }
-                    return MapMarkerItem(id: listing.id, coordinate: coordinate)
-                }
-                if let selectedMarkerID = state.selectedMarkerID,
-                   !state.markers.contains(where: { $0.id == selectedMarkerID }) {
-                    state.selectedMarkerID = nil
-                }
+                applyListingSearchPage(page, to: &state)
                 return .none
 
             case let .listingSearchResponse(.failure(error)):
@@ -321,6 +298,7 @@ struct MapFeature {
 
             case let .listingTapped(id):
                 state.selectedMarkerID = id
+                state.cameraMoveRequest = state.markers.first { $0.id == id }?.coordinate
                 state.sheetMode = .selectedListing
                 return .none
 
@@ -374,8 +352,9 @@ struct MapFeature {
                 return .none
 
             case .filterApplyButtonTapped:
+                let previousAppliedFilter = state.appliedFilter
                 state.appliedFilter = state.editingFilter
-                if state.appliedFilterSource != .diagnosis {
+                if state.appliedFilterSource != .diagnosis || state.appliedFilter != previousAppliedFilter {
                     state.appliedFilterSource = .manual
                 }
                 state.isDiagnosisMatchesButtonExpanded = true
@@ -385,9 +364,7 @@ struct MapFeature {
                 guard let viewport = state.currentViewport,
                       canStartListingSearch(state: state)
                 else { return .none }
-
                 return startListingSearchEffect(state: &state, viewport: viewport)
-
             case .filterResetButtonTapped:
                 state.editingFilter = MapFilterState()
                 return .none
