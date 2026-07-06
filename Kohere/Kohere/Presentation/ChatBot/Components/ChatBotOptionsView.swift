@@ -174,6 +174,7 @@ extension ChatBotOptionsView {
                     .foregroundColor(.statusRed50)
                     .padding(.trailing, 2)
             }
+            .disabled(store.isAnswerSaving)
         }
     }
     
