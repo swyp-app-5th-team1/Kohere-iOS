@@ -9,14 +9,24 @@ import ComposableArchitecture
 
 final class CurrencyRepository: CurrencyInterface {
     private let networkService: CurrencyNetworkService
+    private var cachedKRWToUSDExchangeRate: KRWToUSDExchangeRate?
 
     init(networkService: CurrencyNetworkService = CurrencyNetworkService()) {
         self.networkService = networkService
     }
 
     func fetchKRWToUSDExchangeRate() async throws -> KRWToUSDExchangeRate {
-        let responseDTO = try await networkService.fetchKRWToUSDRate()
-        return responseDTO.toEntity()
+        if let cachedKRWToUSDExchangeRate {
+            return cachedKRWToUSDExchangeRate
+        }
+
+        let responseDTO: FrankfurterRateResponseDTO = try await networkService.request(
+            CurrencyRouter.krwToUSDExchangeRate
+        )
+        let exchangeRate = responseDTO.toEntity()
+        cachedKRWToUSDExchangeRate = exchangeRate
+
+        return exchangeRate
     }
 }
 

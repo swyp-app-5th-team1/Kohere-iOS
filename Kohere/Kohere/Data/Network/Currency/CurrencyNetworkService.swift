@@ -11,7 +11,6 @@ import Foundation
 final class CurrencyNetworkService {
     private let session: URLSession
     private let decoder: JSONDecoder
-    private var cachedKRWToUSDRateResponseDTO: FrankfurterRateResponseDTO?
 
     init(
         session: URLSession = .shared,
@@ -21,21 +20,7 @@ final class CurrencyNetworkService {
         self.decoder = decoder
     }
 
-    func fetchKRWToUSDRate() async throws -> FrankfurterRateResponseDTO {
-        if let cachedKRWToUSDRateResponseDTO {
-            return cachedKRWToUSDRateResponseDTO
-        }
-
-        let responseDTO = try await request(
-            CurrencyRouter.krwToUSDExchangeRate,
-            as: FrankfurterRateResponseDTO.self
-        )
-        cachedKRWToUSDRateResponseDTO = responseDTO
-
-        return responseDTO
-    }
-
-    private func request<Response: Decodable>(
+    func request<Response: Decodable>(
         _ urlRequest: URLRequestConvertible,
         as responseType: Response.Type = Response.self
     ) async throws -> Response {
