@@ -128,7 +128,7 @@ struct ListingDetailInfoRow: View {
             Text(row.title)
                 .kohereTextStyle(.body2Regular)
                 .foregroundStyle(.common100)
-                .frame(width: 105, alignment: .leading)
+                .frame(width: 128, alignment: .leading)
 
             Text(row.value)
                 .kohereTextStyle(.body3Regular)

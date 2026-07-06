@@ -27,7 +27,7 @@ struct HomeFeature {
         var livingGuides: [LivingGuide] = []
         
         init(
-            recentlyViewedItems: [ListingItemModel] = ListingItemModel.mockList,
+            recentlyViewedItems: [ListingItemModel] = [],
             quiz: Quiz = Quiz.mockQuiz,
             livingGuides: [LivingGuide] = LivingGuide.mockLivingGuide
         ) {
@@ -50,8 +50,8 @@ struct HomeFeature {
         case roomFinderBannerTapped
         case seeAllListingsTapped
         case browseListingsTapped
-        case cardTapped(id: Int)
-        case likeButtonTapped(id: Int)
+        case cardTapped(id: String)
+        case likeButtonTapped(id: String)
         
         case quizOptionTapped(index: Int)
         case livingGuideItemTapped(id: Int)

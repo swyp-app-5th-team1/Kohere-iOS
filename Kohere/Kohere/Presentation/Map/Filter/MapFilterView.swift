@@ -43,7 +43,7 @@ struct MapFilterView: View {
     private var filterOptionsSection: some View {
         MapFilterSection(title: "매물 옵션") {
             MapFilterFlowLayout(spacing: 8, rowSpacing: 8) {
-                ForEach(MapFilterOption.allCases, id: \.self) { option in
+                ForEach(RoomCondition.allCases, id: \.self) { option in
                     MapFilterSelectionChip(
                         title: option.displayTitle,
                         isSelected: store.editingFilter.selectedOptions.contains(option)

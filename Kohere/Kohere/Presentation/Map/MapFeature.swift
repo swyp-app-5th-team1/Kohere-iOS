@@ -6,119 +6,63 @@
 //
 
 import ComposableArchitecture
-
-enum MapLocationAuthorization: Equatable, Sendable {
-    case notDetermined
-    case authorized
-    case denied
-    case restricted
-}
-
-enum MapSheetMode: Equatable {
-    case listingList
-    case selectedListing
-}
+import Foundation
 
 @Reducer
 struct MapFeature {
     @Dependency(\.locationClient)
     var locationClient
+    @Dependency(\.settingsClient)
+    var settingsClient
+    @Dependency(\.userDefaultsClient)
+    var userDefaultsClient
+    @Dependency(\.listingClient)
+    var listingClient
+    @Dependency(\.diagnosisClient)
+    var diagnosisClient
 
     @Reducer
     enum Path {
         case listingDetail(ListingDetailFeature)
-    }
-
-    @ObservableState
-    struct State: Equatable {
-        // navigation
-        var path = StackState<Path.State>()
-
-        // 매물/마커 표시 상태
-        var markers: [MapMarkerItem] = [
-            MapMarkerItem(
-                id: "1",
-                coordinate: MapCoordinate(latitude: 37.557192, longitude: 126.925381)
-            ),
-            MapMarkerItem(
-                id: "2",
-                coordinate: MapCoordinate(latitude: 37.555134, longitude: 126.936893)
-            ),
-            MapMarkerItem(
-                id: "3",
-                coordinate: MapCoordinate(latitude: 37.549463, longitude: 126.913739)
-            )
-        ]
-        var selectedMarkerID: String?
-        var listings: [ListingItemModel] = .mapMockList
-
-        // 지도 viewport / 재검색 상태
-        var currentViewport: MapViewport?
-        var lastSearchedViewport: MapViewport?
-        var showsResearchButton = false
-
-        // 바텀시트 / 필터 상태
-        var sheetMode: MapSheetMode = .listingList
-        var isFilterPresented = false
-        var appliedFilter = MapFilterState()
-        var editingFilter = MapFilterState()
-        var appliedFilterSource: MapFilterApplicationSource = .manual
-
-        // 위치 권한 / 현재 위치 / 카메라 이동 요청 상태
-        var locationAuthorization: MapLocationAuthorization = .notDetermined
-        var userLocation: MapCoordinate?
-        var cameraMoveRequest: MapCoordinate?
-        var hasMovedToInitialUserLocation = false
-    }
-
-    enum Action {
-        case mapAppeared
-        case mapDismissed
-        case locationAuthorizationChanged(MapLocationAuthorization)
-        case userLocationUpdated(MapCoordinate)
-        case myLocationButtonTapped
-        case cameraMoveRequestHandled
-        case markerTapped(String)
-        case researchButtonTapped
-        case viewportChanged(MapViewport)
-        case path(StackActionOf<Path>)
-        case listingTapped(String)
-        case listingLikeButtonTapped(Int)
-        case selectedListingCardTapped
-        case selectedListingCloseButtonTapped
-
-        // 필터 관련
-        case filterButtonTapped
-        case filterDismissed
-        case filterOptionTapped(MapFilterOption)
-        case filterPropertyTypeTapped(MapPropertyType)
-        case monthlyRentMinimumChanged(Int)
-        case monthlyRentMaximumChanged(Int)
-        case depositMinimumChanged(Int)
-        case depositMaximumChanged(Int)
-        case filterApplyButtonTapped
-        case filterResetButtonTapped
+        case chatBot(ChatBotFeature)
     }
 
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
             case .mapAppeared:
-                return .run { [locationClient] send in
-                    let authorization = await locationClient.requestAuthorization()
-                    await send(.locationAuthorizationChanged(authorization))
+                var effects: [Effect<Action>] = [
+                    .run { [locationClient] send in
+                        let authorization = await locationClient.requestAuthorization()
+                        await send(.locationAuthorizationChanged(authorization))
 
-                    guard case .authorized = authorization else { return }
+                        guard case .authorized = authorization else { return }
 
-                    let updates = await locationClient.locationUpdates()
-                    for await coordinate in updates {
-                        await send(.userLocationUpdated(coordinate))
+                        let updates = await locationClient.locationUpdates()
+                        for await coordinate in updates {
+                            await send(.userLocationUpdated(coordinate))
+                        }
                     }
+                    .cancellable(id: "MapFeature.locationUpdates", cancelInFlight: true)
+                ]
+
+                if state.appliedFilterSource != .diagnosis,
+                   shouldExpandDiagnosisButtonToday(userDefaultsClient: userDefaultsClient) {
+                    state.isDiagnosisButtonExpanded = true
+                    effects.append(diagnosisButtonAutoCollapseEffect)
                 }
-                .cancellable(id: "MapFeature.locationUpdates", cancelInFlight: true)
+
+                return .merge(effects)
 
             case .mapDismissed:
-                return .cancel(id: "MapFeature.locationUpdates")
+                state.isDiagnosisButtonExpanded = false
+                return .merge(
+                    .cancel(id: "MapFeature.locationUpdates"),
+                    .cancel(id: "MapFeature.diagnosisButtonAutoCollapse"),
+                    .cancel(id: "MapFeature.diagnosisDetail"),
+                    .cancel(id: "MapFeature.diagnosisRecommendations"),
+                    .cancel(id: "MapFeature.listingSearch")
+                )
 
             case let .locationAuthorizationChanged(authorization):
                 state.locationAuthorization = authorization
@@ -132,7 +76,14 @@ struct MapFeature {
                     state.hasMovedToInitialUserLocation = false
                 }
 
-                return .none
+                guard authorization != .notDetermined,
+                      state.listingSource == .locationSearch,
+                      state.lastSearchedViewport == nil,
+                      let viewport = state.currentViewport,
+                      canStartFirstListingSearch(state: state)
+                else { return .none }
+
+                return startListingSearchEffect(state: &state, viewport: viewport)
 
             case let .userLocationUpdated(coordinate):
                 state.userLocation = coordinate
@@ -145,10 +96,136 @@ struct MapFeature {
                 return .none
 
             case .myLocationButtonTapped:
-                guard state.locationAuthorization == .authorized else { return .none }
+                switch state.locationAuthorization {
+                case .authorized:
+                    break
+
+                case .denied, .restricted:
+                    state.isLocationPermissionDialogPresented = true
+                    return .none
+
+                case .notDetermined:
+                    return .none
+                }
+
                 guard let userLocation = state.userLocation else { return .none }
                 state.cameraMoveRequest = userLocation
                 return .none
+
+            case .diagnosisButtonTapped:
+                state.path.append(.chatBot(ChatBotFeature.State()))
+                return .none
+
+            case .diagnosisButtonCloseButtonTapped:
+                state.isDiagnosisMatchesButtonExpanded = false
+                return .none
+
+            case .diagnosisButtonAutoCollapseDelayFinished:
+                state.isDiagnosisButtonExpanded = false
+                return .none
+
+            case .locationSearchStarted:
+                state.listingSource = .locationSearch
+                state.activeDiagnosisID = nil
+                state.appliedFilterSource = .manual
+                state.selectedMarkerID = nil
+                state.sheetMode = .listingList
+                state.isDiagnosisDetailLoading = false
+                state.isRecommendationsLoading = false
+                state.diagnosisErrorMessage = nil
+                state.recommendationsErrorMessage = nil
+
+                guard let viewport = state.currentViewport,
+                      canStartListingSearch(state: state)
+                else { return .none }
+
+                return startListingSearchEffect(state: &state, viewport: viewport)
+
+            case let .diagnosisResultRequested(diagnosisID):
+                state.path = StackState<Path.State>()
+                state.activeDiagnosisID = diagnosisID
+                state.listingSource = .diagnosis
+                state.selectedMarkerID = nil
+                state.sheetMode = .listingList
+                state.isFilterPresented = false
+                state.appliedFilterSource = .diagnosis
+                state.isDiagnosisButtonExpanded = false
+                state.isDiagnosisMatchesButtonExpanded = true
+                state.showsResearchButton = false
+                state.markers = []
+                state.listings = []
+                state.isDiagnosisDetailLoading = true
+                state.isRecommendationsLoading = true
+                state.diagnosisErrorMessage = nil
+                state.recommendationsErrorMessage = nil
+
+                let diagnosisClient = diagnosisClient
+                return .merge(
+                    .cancel(id: "MapFeature.diagnosisButtonAutoCollapse"),
+                    .cancel(id: "MapFeature.diagnosisDetail"),
+                    .cancel(id: "MapFeature.diagnosisRecommendations"),
+                    .run { send in
+                        do {
+                            let detail = try await diagnosisClient.fetchDetail(diagnosisID)
+                            await send(.diagnosisDetailResponse(.success(detail)))
+                        } catch {
+                            await send(.diagnosisDetailResponse(.failure(error)))
+                        }
+                    }
+                    .cancellable(id: "MapFeature.diagnosisDetail", cancelInFlight: true),
+                    .run { send in
+                        do {
+                            let recommendations = try await diagnosisClient.fetchRecommendations(diagnosisID)
+                            await send(.diagnosisRecommendationsResponse(.success(recommendations)))
+                        } catch {
+                            await send(.diagnosisRecommendationsResponse(.failure(error)))
+                        }
+                    }
+                    .cancellable(id: "MapFeature.diagnosisRecommendations", cancelInFlight: true)
+                )
+
+            case let .diagnosisDetailResponse(.success(detail)):
+                guard state.activeDiagnosisID == detail.diagnosisID else { return .none }
+                debugLogDiagnosisDetail(detail)
+                let filter = MapFilterState(diagnosisDetail: detail)
+                state.appliedFilter = filter
+                state.editingFilter = filter
+                state.isDiagnosisDetailLoading = false
+                state.diagnosisErrorMessage = nil
+                return .none
+
+            case let .diagnosisDetailResponse(.failure(error)):
+                debugLogDiagnosisError("detail", error)
+                state.isDiagnosisDetailLoading = false
+                state.diagnosisErrorMessage = error.localizedDescription
+                return .none
+
+            case let .diagnosisRecommendationsResponse(.success(recommendations)):
+                guard state.listingSource == .diagnosis else { return .none }
+                debugLogDiagnosisRecommendations(recommendations)
+                state.selectedMarkerID = nil
+                state.sheetMode = .listingList
+                state.listings = recommendations.listings.map(ListingItemModel.init(recommendation:))
+                state.markers = recommendations.markers
+                state.isRecommendationsLoading = false
+                state.recommendationsErrorMessage = nil
+                return .none
+
+            case let .diagnosisRecommendationsResponse(.failure(error)):
+                debugLogDiagnosisError("recommendations", error)
+                state.isRecommendationsLoading = false
+                state.recommendationsErrorMessage = error.localizedDescription
+                return .none
+
+            case .locationPermissionDialogCloseButtonTapped:
+                state.isLocationPermissionDialogPresented = false
+                return .none
+
+            case .locationPermissionDialogSettingsButtonTapped:
+                state.isLocationPermissionDialogPresented = false
+                return .run { [settingsClient] _ in
+                    await settingsClient.openApplicationSettings()
+                }
 
             case .cameraMoveRequestHandled:
                 state.cameraMoveRequest = nil
@@ -161,24 +238,61 @@ struct MapFeature {
                 return .none
 
             case .researchButtonTapped:
-                state.lastSearchedViewport = state.currentViewport
+                guard let viewport = state.currentViewport else { return .none }
+                state.listingSource = .locationSearch
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
-                state.showsResearchButton = false
-                return .none
+                return startListingSearchEffect(state: &state, viewport: viewport)
 
             case let .viewportChanged(viewport):
                 state.currentViewport = viewport
-                guard let lastSearchedViewport = state.lastSearchedViewport else {
-                    state.lastSearchedViewport = viewport
+
+                guard state.listingSource == .locationSearch else {
                     state.showsResearchButton = false
                     return .none
                 }
 
-                state.showsResearchButton = lastSearchedViewport != viewport
+                guard let lastSearchedViewport = state.lastSearchedViewport else {
+                    state.showsResearchButton = false
+                    guard canStartFirstListingSearch(state: state) else { return .none }
+                    return startListingSearchEffect(state: &state, viewport: viewport)
+                }
+
+                guard lastSearchedViewport != viewport else {
+                    state.showsResearchButton = false
+                    return .none
+                }
+
+                state.showsResearchButton = true
+                return .none
+
+            case let .listingSearchResponse(.success(page)):
+                debugLogListingSearchResponse(page)
+                state.isListingSearchLoading = false
+                state.listingSearchErrorMessage = nil
+                state.listingPageInfo = page.page
+                state.listings = page.content.map(ListingItemModel.init(listing:))
+                state.markers = page.content.compactMap { listing in
+                    guard let coordinate = listing.coordinate else { return nil }
+                    return MapMarkerItem(id: listing.id, coordinate: coordinate)
+                }
+                if let selectedMarkerID = state.selectedMarkerID,
+                   !state.markers.contains(where: { $0.id == selectedMarkerID }) {
+                    state.selectedMarkerID = nil
+                }
+                return .none
+
+            case let .listingSearchResponse(.failure(error)):
+                debugLogListingSearchError(error)
+                state.isListingSearchLoading = false
+                state.listingSearchErrorMessage = error.localizedDescription
                 return .none
 
             case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case .path(.element(id: _, action: .chatBot(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
 
@@ -190,8 +304,8 @@ struct MapFeature {
                 state.sheetMode = .selectedListing
                 return .none
 
-            case let .listingLikeButtonTapped(id):
-                guard let index = state.listings.firstIndex(where: { $0.id == id }) else { return .none }
+            case let .listingLikeButtonTapped(listingID):
+                guard let index = state.listings.firstIndex(where: { $0.listingID == listingID }) else { return .none }
                 state.listings[index].isLiked.toggle()
                 return .none
 
@@ -241,11 +355,18 @@ struct MapFeature {
 
             case .filterApplyButtonTapped:
                 state.appliedFilter = state.editingFilter
-                if state.editingFilter.isDefault {
+                if state.appliedFilterSource != .diagnosis {
                     state.appliedFilterSource = .manual
                 }
+                state.isDiagnosisMatchesButtonExpanded = true
                 state.isFilterPresented = false
-                return .none
+                state.listingSource = .locationSearch
+
+                guard let viewport = state.currentViewport,
+                      canStartListingSearch(state: state)
+                else { return .none }
+
+                return startListingSearchEffect(state: &state, viewport: viewport)
 
             case .filterResetButtonTapped:
                 state.editingFilter = MapFilterState()
@@ -257,48 +378,3 @@ struct MapFeature {
 }
 
 extension MapFeature.Path.State: Equatable {}
-
-private extension Array where Element == ListingItemModel {
-    static let mapMockList: [ListingItemModel] = [
-        ListingItemModel(
-            id: 1,
-            formattedPrice: "₩380~400K/mo",
-            formattedUsdPrice: "≈$355~398/mo",
-            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
-            locationDescription: "8-min walk Hongdae Sta.",
-            typeTag: "Goshiwon",
-            period: "1 mo~",
-            isLiked: false
-        ),
-        ListingItemModel(
-            id: 2,
-            formattedPrice: "₩380~400K/mo",
-            formattedUsdPrice: "≈$355~398/mo",
-            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
-            locationDescription: "8-min walk Hongdae Sta.",
-            typeTag: "Goshiwon",
-            period: "1 mo~",
-            isLiked: true
-        ),
-        ListingItemModel(
-            id: 3,
-            formattedPrice: "₩380~400K/mo",
-            formattedUsdPrice: "≈$355~398/mo",
-            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
-            locationDescription: "8-min walk Hongdae Sta.",
-            typeTag: "Goshiwon",
-            period: "1 mo~",
-            isLiked: false
-        ),
-        ListingItemModel(
-            id: 4,
-            formattedPrice: "₩380~400K/mo",
-            formattedUsdPrice: "≈$355~398/mo",
-            detailsDescription: "Dep. ₩200K · Maint. ₩20K",
-            locationDescription: "8-min walk Hongdae Sta.",
-            typeTag: "Goshiwon",
-            period: "1 mo~",
-            isLiked: false
-        )
-    ]
-}

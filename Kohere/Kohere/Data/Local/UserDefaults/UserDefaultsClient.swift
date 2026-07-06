@@ -20,6 +20,10 @@ extension UserDefaultsKey where Value == Bool {
     nonisolated static let hasLaunchedBefore = Self(rawValue: "hasLaunchedBefore")
 }
 
+extension UserDefaultsKey where Value == Date {
+    nonisolated static let mapDiagnosisButtonLastExpandedAt = Self(rawValue: "mapDiagnosisButtonLastExpandedAt")
+}
+
 enum UserDefaultsStoredValue: Sendable {
     case bool(Bool)
     case integer(Int)

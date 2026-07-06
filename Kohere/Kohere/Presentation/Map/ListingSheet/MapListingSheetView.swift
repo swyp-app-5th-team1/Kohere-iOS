@@ -94,10 +94,10 @@ struct MapListingSheetView: View {
                     ListingCardView(
                         item: item,
                         onCardTapped: {
-                            store.send(.listingTapped("\(item.id)"))
+                            store.send(.listingTapped(item.listingID))
                         },
                         onLikeTapped: {
-                            store.send(.listingLikeButtonTapped(item.id))
+                            store.send(.listingLikeButtonTapped(item.listingID))
                         }
                     )
                 }

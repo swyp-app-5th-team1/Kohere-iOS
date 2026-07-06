@@ -9,6 +9,10 @@ import ComposableArchitecture
 import SwiftUI
 
 struct MapView: View {
+    @Environment(
+        \.scenePhase
+    )
+    private var scenePhase
     @Bindable var store: StoreOf<MapFeature>
     @State private var listingSheetDetent: MapListingSheetDetent = .minimum
     @GestureState private var listingSheetDragTranslation: CGFloat = 0
@@ -32,17 +36,26 @@ struct MapView: View {
                 mapListingSheet(containerHeight: containerHeight)
 
                 if store.sheetMode == .selectedListing,
-                   let selectedListingItem {
+                   let selectedListingItem = store.selectedListingItem {
                     mapSelectedListingSheet(item: selectedListingItem)
+                }
+
+                if store.isLocationPermissionDialogPresented {
+                    locationPermissionDialogOverlay
                 }
             }
             .animation(sheetAnimation, value: store.sheetMode)
+            .animation(.easeInOut(duration: 0.2), value: store.isLocationPermissionDialogPresented)
         }
         .onAppear {
             store.send(.mapAppeared)
         }
         .onDisappear {
             store.send(.mapDismissed)
+        }
+        .onChange(of: scenePhase) {
+            guard scenePhase == .active else { return }
+            store.send(.mapAppeared)
         }
         .fullScreenCover(
             isPresented: Binding(
@@ -88,14 +101,37 @@ struct MapView: View {
         VStack {
             Spacer()
 
-            HStack {
+            HStack(alignment: .bottom) {
+                diagnosisButton
+                    .padding(.leading, mapFloatingControlHorizontalPadding)
+
                 Spacer()
 
                 myLocationButton
-                    .padding(.trailing, mapFloatingControlTrailingPadding)
-                    .padding(.bottom, bottomPadding)
+                    .padding(.trailing, mapFloatingControlHorizontalPadding)
             }
+            .padding(.bottom, bottomPadding)
         }
+    }
+
+    private var diagnosisButton: some View {
+        let variant: MapDiagnosisButton.Variant = store.appliedFilterSource == .diagnosis
+            ? .matches
+            : .discovery
+        let isExpanded = store.appliedFilterSource == .diagnosis
+            ? store.isDiagnosisMatchesButtonExpanded
+            : store.isDiagnosisButtonExpanded
+
+        return MapDiagnosisButton(
+            variant: variant,
+            isExpanded: isExpanded,
+            action: {
+                store.send(.diagnosisButtonTapped)
+            },
+            closeAction: {
+                store.send(.diagnosisButtonCloseButtonTapped)
+            }
+        )
     }
 
     private var myLocationButton: some View {
@@ -109,7 +145,26 @@ struct MapView: View {
         .buttonStyle(.plain)
     }
 
-    private var mapFloatingControlTrailingPadding: CGFloat {
+    private var locationPermissionDialogOverlay: some View {
+        ZStack {
+            Color.materialDimmer
+                .ignoresSafeArea()
+
+            LocationPermissionDialog(
+                onCloseTapped: {
+                    store.send(.locationPermissionDialogCloseButtonTapped)
+                },
+                onSettingsTapped: {
+                    store.send(.locationPermissionDialogSettingsButtonTapped)
+                }
+            )
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .transition(.opacity)
+        .zIndex(10)
+    }
+
+    private var mapFloatingControlHorizontalPadding: CGFloat {
         20
     }
 
@@ -164,13 +219,13 @@ struct MapView: View {
 
     private func mapSelectedListingSheet(item: ListingItemModel) -> some View {
         MapSelectedListingSheetView(
-            title: selectedListingTitle,
+            title: store.selectedListingTitle,
             item: item,
             onCardTapped: {
                 store.send(.selectedListingCardTapped)
             },
             onLikeTapped: {
-                store.send(.listingLikeButtonTapped(item.id))
+                store.send(.listingLikeButtonTapped(item.listingID))
             },
             onCloseButtonTapped: {
                 store.send(.selectedListingCloseButtonTapped)
@@ -180,16 +235,6 @@ struct MapView: View {
         .clipped()
         .offset(y: tabBarCoveredHeight)
         .transition(.move(edge: .bottom))
-    }
-
-    private var selectedListingItem: ListingItemModel? {
-        guard let selectedMarkerID = store.selectedMarkerID else { return nil }
-        return store.listings.first { "\($0.id)" == selectedMarkerID }
-    }
-
-    private var selectedListingTitle: String {
-        guard let selectedMarkerID = store.selectedMarkerID else { return "" }
-        return ListingDetailModel.mock(id: selectedMarkerID).overview.title
     }
 
     // MARK: - Sheet Layout
