@@ -18,6 +18,8 @@ struct MapFeature {
     var userDefaultsClient
     @Dependency(\.listingClient)
     var listingClient
+    @Dependency(\.diagnosisClient)
+    var diagnosisClient
 
     @Reducer
     enum Path {
@@ -141,33 +143,46 @@ struct MapFeature {
 
             case let .diagnosisResultRequested(diagnosisID):
                 state.path = StackState<Path.State>()
-                state.activeDiagnosisID = nil
-                state.listingSource = .locationSearch
+                state.activeDiagnosisID = diagnosisID
+                state.listingSource = .diagnosis
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
                 state.isFilterPresented = false
-                state.appliedFilterSource = .manual
+                state.appliedFilterSource = .diagnosis
                 state.isDiagnosisButtonExpanded = false
-                state.isDiagnosisMatchesButtonExpanded = false
+                state.isDiagnosisMatchesButtonExpanded = true
                 state.showsResearchButton = false
-                state.isDiagnosisDetailLoading = false
-                state.isRecommendationsLoading = false
+                state.markers = []
+                state.listings = []
+                state.isDiagnosisDetailLoading = true
+                state.isRecommendationsLoading = true
                 state.diagnosisErrorMessage = nil
                 state.recommendationsErrorMessage = nil
 
-                var effects: [Effect<Action>] = [
+                let diagnosisClient = diagnosisClient
+                return .merge(
                     .cancel(id: "MapFeature.diagnosisButtonAutoCollapse"),
                     .cancel(id: "MapFeature.diagnosisDetail"),
-                    .cancel(id: "MapFeature.diagnosisRecommendations")
-                ]
-
-                if let viewport = state.currentViewport,
-                   canStartListingSearch(state: state) {
-                    effects.append(startListingSearchEffect(state: &state, viewport: viewport))
-                }
-
-                debugLogDiagnosisGeneralListingFallback(diagnosisID: diagnosisID)
-                return .merge(effects)
+                    .cancel(id: "MapFeature.diagnosisRecommendations"),
+                    .run { send in
+                        do {
+                            let detail = try await diagnosisClient.fetchDetail(diagnosisID)
+                            await send(.diagnosisDetailResponse(.success(detail)))
+                        } catch {
+                            await send(.diagnosisDetailResponse(.failure(error)))
+                        }
+                    }
+                    .cancellable(id: "MapFeature.diagnosisDetail", cancelInFlight: true),
+                    .run { send in
+                        do {
+                            let recommendations = try await diagnosisClient.fetchRecommendations(diagnosisID)
+                            await send(.diagnosisRecommendationsResponse(.success(recommendations)))
+                        } catch {
+                            await send(.diagnosisRecommendationsResponse(.failure(error)))
+                        }
+                    }
+                    .cancellable(id: "MapFeature.diagnosisRecommendations", cancelInFlight: true)
+                )
 
             case let .diagnosisDetailResponse(.success(detail)):
                 guard state.activeDiagnosisID == detail.diagnosisID else { return .none }
@@ -186,9 +201,12 @@ struct MapFeature {
                 return .none
 
             case let .diagnosisRecommendationsResponse(.success(recommendations)):
+                guard state.listingSource == .diagnosis else { return .none }
                 debugLogDiagnosisRecommendations(recommendations)
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
+                state.listings = recommendations.listings.map(ListingItemModel.init(recommendation:))
+                state.markers = recommendations.markers
                 state.isRecommendationsLoading = false
                 state.recommendationsErrorMessage = nil
                 return .none

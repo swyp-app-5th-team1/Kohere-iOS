@@ -8,7 +8,7 @@
 import Foundation
 
 extension ListingItemModel {
-    init(recommendation: DiagnosisRecommendedListing) {
+    nonisolated init(recommendation: DiagnosisRecommendedListing) {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
@@ -22,17 +22,17 @@ extension ListingItemModel {
         )
     }
 
-    private static func monthlyRentTitle(from monthlyRent: Int?) -> String {
+    nonisolated private static func monthlyRentTitle(from monthlyRent: Int?) -> String {
         guard let monthlyRent else { return "가격 문의" }
         return "₩\(monthlyRent / 1000)K/mo"
     }
 
-    private static func depositTitle(from deposit: Int?) -> String {
+    nonisolated private static func depositTitle(from deposit: Int?) -> String {
         guard let deposit else { return "Dep. 문의" }
         return "Dep. ₩\(deposit / 1000)K"
     }
 
-    private static func typeTitle(from type: String) -> String {
+    nonisolated private static func typeTitle(from type: String) -> String {
         switch type.uppercased() {
         case "GOSHIWON":
             return "Goshiwon"

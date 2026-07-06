@@ -21,7 +21,7 @@ enum DiagnosisRouter: URLRequestConvertible {
 
     private var method: HTTPMethod {
         switch self {
-        case .question, .detail, .recommendation:
+        case .question, .detail, .recommendations:
             .get
 
         case .saveAnswer, .submit:
@@ -67,8 +67,8 @@ enum DiagnosisRouter: URLRequestConvertible {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         switch self {
-		case let .recommendations(_, query, _):
-			request = try URLEncodedFormParameterEncoder.default.encode(query, into: request)
+        case let .recommendations(_, query, _):
+            request = try URLEncodedFormParameterEncoder.default.encode(query, into: request)
 
         case let .saveAnswer(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
