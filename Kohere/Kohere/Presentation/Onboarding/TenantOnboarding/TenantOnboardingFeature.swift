@@ -135,7 +135,7 @@ struct TenantOnboardingFeature {
                         let response = try await sendEmailVerificationCodeUseCase.execute(trimmedEmail)
                         await send(.sendVerificationCodeResponse(trimmedEmail, .success(response)))
                     } catch {
-                        await send(.sendVerificationCodeResponse(trimmedEmail, .failure(Self.toDataError(error))))
+                        await send(.sendVerificationCodeResponse(trimmedEmail, .failure(DataError.from(error))))
                     }
                 }
 
@@ -174,7 +174,7 @@ struct TenantOnboardingFeature {
                         let response = try await verifyEmailUseCase.execute(email, trimmedCode)
                         await send(.confirmVerificationCodeResponse(.success(response)))
                     } catch {
-                        await send(.confirmVerificationCodeResponse(.failure(Self.toDataError(error))))
+                        await send(.confirmVerificationCodeResponse(.failure(DataError.from(error))))
                     }
                 }
 
@@ -203,7 +203,7 @@ struct TenantOnboardingFeature {
                         let auth = try await completeOnboardingUseCase.execute(profile)
                         await send(.onboardingResponse(.success(auth)))
                     } catch {
-                        await send(.onboardingResponse(.failure(Self.toDataError(error))))
+                        await send(.onboardingResponse(.failure(DataError.from(error))))
                     }
                 }
 
