@@ -26,10 +26,14 @@ actor CurrencyRepository: CurrencyInterface {
         }
 
         let task = Task<KRWToUSDExchangeRate, Error> { [networkService] in
-            let responseDTO: FrankfurterRateResponseDTO = try await networkService.request(
-                CurrencyRouter.krwToUSDExchangeRate
-            )
-            return responseDTO.toEntity()
+            do {
+                let responseDTO: FrankfurterRateResponseDTO = try await networkService.request(
+                    CurrencyRouter.krwToUSDExchangeRate
+                )
+                return responseDTO.toEntity()
+            } catch {
+                throw CurrencyError.exchangeRateUnavailable
+            }
         }
 
         inFlightKRWToUSDExchangeRateTask = task
