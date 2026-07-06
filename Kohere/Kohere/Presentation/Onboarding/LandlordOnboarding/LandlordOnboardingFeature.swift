@@ -118,7 +118,7 @@ struct LandlordOnboardingFeature {
                         let response = try await sendPhoneVerificationCodeUseCase.execute(phoneNumber)
                         await send(.sendPhoneVerificationCodeResponse(trimmedPhoneNumber, .success(response)))
                     } catch {
-                        await send(.sendPhoneVerificationCodeResponse(trimmedPhoneNumber, .failure(Self.toDataError(error))))
+                        await send(.sendPhoneVerificationCodeResponse(trimmedPhoneNumber, .failure(DataError.from(error))))
                     }
                 }
 
@@ -157,7 +157,7 @@ struct LandlordOnboardingFeature {
                         let response = try await verifyPhoneUseCase.execute(phoneNumber, trimmedCode)
                         await send(.confirmPhoneVerificationCodeResponse(.success(response)))
                     } catch {
-                        await send(.confirmPhoneVerificationCodeResponse(.failure(Self.toDataError(error))))
+                        await send(.confirmPhoneVerificationCodeResponse(.failure(DataError.from(error))))
                     }
                 }
 
@@ -186,7 +186,7 @@ struct LandlordOnboardingFeature {
                         let auth = try await completeLandlordOnboardingUseCase.execute(profile)
                         await send(.onboardingResponse(.success(auth)))
                     } catch {
-                        await send(.onboardingResponse(.failure(Self.toDataError(error))))
+                        await send(.onboardingResponse(.failure(DataError.from(error))))
                     }
                 }
 
