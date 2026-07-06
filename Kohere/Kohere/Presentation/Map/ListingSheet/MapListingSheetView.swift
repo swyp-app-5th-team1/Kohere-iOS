@@ -10,6 +10,7 @@ import SwiftUI
 
 struct MapListingSheetView: View {
     let store: StoreOf<MapFeature>
+    let contentBottomPadding: CGFloat
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -97,7 +98,7 @@ struct MapListingSheetView: View {
                 }
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 104)
+            .padding(.bottom, contentBottomPadding)
         }
     }
 
