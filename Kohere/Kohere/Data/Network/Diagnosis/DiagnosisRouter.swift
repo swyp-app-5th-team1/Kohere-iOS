@@ -9,6 +9,9 @@ import Alamofire
 import Foundation
 
 enum DiagnosisRouter: URLRequestConvertible {
+    case question(step: Int, environment: APIEnvironment)
+    case saveAnswer(DiagnosisAnswerRequestDTO, environment: APIEnvironment)
+    case submit(environment: APIEnvironment)
     case detail(diagnosisID: Int, APIEnvironment)
     case recommendations(
         diagnosisID: Int,
@@ -18,13 +21,25 @@ enum DiagnosisRouter: URLRequestConvertible {
 
     private var method: HTTPMethod {
         switch self {
-        case .detail, .recommendations:
+        case .question, .detail, .recommendation:
             .get
+
+        case .saveAnswer, .submit:
+            .post
         }
     }
 
     private var path: String {
         switch self {
+        case let .question(step, _):
+            "api/v1/diagnoses/questions/\(step)"
+
+        case .saveAnswer:
+            "api/v1/diagnoses/answers"
+
+        case .submit:
+            "api/v1/diagnoses"
+
         case let .detail(diagnosisID, _):
             "api/v1/diagnoses/\(diagnosisID)"
 
@@ -35,7 +50,10 @@ enum DiagnosisRouter: URLRequestConvertible {
 
     private var environment: APIEnvironment {
         switch self {
-        case let .detail(_, environment),
+        case let .question(_, environment),
+             let .saveAnswer(_, environment),
+			 let .submit(environment),
+			 let .detail(_, environment),
              let .recommendations(_, _, environment):
             environment
         }
@@ -45,14 +63,20 @@ enum DiagnosisRouter: URLRequestConvertible {
         let url = environment.baseURL.appendingPathComponent(path)
         var request = URLRequest(url: url)
         request.method = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         switch self {
-        case .detail:
-            return request
+		case let .recommendations(_, query, _):
+			request = try URLEncodedFormParameterEncoder.default.encode(query, into: request)
 
-        case let .recommendations(_, query, _):
-            return try URLEncodedFormParameterEncoder.default.encode(query, into: request)
+        case let .saveAnswer(requestDTO, _):
+            request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
+
+        case .detail, .question, .submit:
+            break
         }
+
+        return request
     }
 }

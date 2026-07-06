@@ -41,6 +41,7 @@ struct HomeFeature {
     
     enum Action {
         case path(StackActionOf<Path>)
+        case mapTabRequested(diagnosisID: String?)
         
         case navigationSearchTapped
         case navigationHeartTapped
@@ -76,6 +77,9 @@ struct HomeFeature {
             case .path(.element(id: _, action: .chatBot(.backButtonTapped))):
                 _ = state.path.popLast() 
                 return .none
+
+            case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
+                return .send(.mapTabRequested(diagnosisID: diagnosisID))
                 
             case .path:
                 return .none
@@ -101,8 +105,7 @@ struct HomeFeature {
                 return .none
                 
             case .browseListingsTapped:
-                // TODO: 지도 탭으로 네비게이션
-                return .none
+                return .send(.mapTabRequested(diagnosisID: nil))
                 
             case let .cardTapped(id):
                 // TODO: 매물 상세 뷰 네비게이션 (지도)
@@ -122,6 +125,9 @@ struct HomeFeature {
                 
             case let .livingGuideItemTapped(id):
                 print("선택 콘텐츠 \(id)")
+                return .none
+
+            case .mapTabRequested:
                 return .none
             }
         }
