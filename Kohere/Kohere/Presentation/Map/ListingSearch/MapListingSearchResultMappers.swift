@@ -109,7 +109,7 @@ extension ListingItemModel {
         guard let months, months > 0 else { return "" }
         guard months != 1 else { return "한달 이상" }
 
-        return "\(months)달 이상"
+        return "\(months)개월 이상"
     }
 
     nonisolated private static func typeTitle(from type: String) -> String {
