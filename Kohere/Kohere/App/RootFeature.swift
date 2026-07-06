@@ -155,8 +155,7 @@ struct RootFeature {
                 
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
-                guard tab == .map else { return .none }
-                return .send(.map(.locationSearchStarted))
+                return .none
 
             case let .map(.path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID))))):
                 state.map.path.removeAll()

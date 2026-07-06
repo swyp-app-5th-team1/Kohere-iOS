@@ -57,6 +57,10 @@ struct MapFeature {
                     effects.append(diagnosisButtonAutoCollapseEffect)
                 }
 
+                if state.listingSource == .idle {
+                    effects.append(.send(.locationSearchStarted))
+                }
+
                 return .merge(effects)
 
             case .mapDismissed:
@@ -160,8 +164,10 @@ struct MapFeature {
                 state.listings = []
                 state.listingSearchResults = []
                 state.diagnosisRecommendedListings = []
+                state.isListingSearchLoading = false
                 state.isDiagnosisDetailLoading = true
                 state.isRecommendationsLoading = true
+                state.listingSearchErrorMessage = nil
                 state.diagnosisErrorMessage = nil
                 state.recommendationsErrorMessage = nil
 
@@ -170,6 +176,7 @@ struct MapFeature {
                     .cancel(id: "MapFeature.diagnosisButtonAutoCollapse"),
                     .cancel(id: "MapFeature.diagnosisDetail"),
                     .cancel(id: "MapFeature.diagnosisRecommendations"),
+                    .cancel(id: "MapFeature.listingSearch"),
                     .run { send in
                         do {
                             let detail = try await diagnosisClient.fetchDetail(diagnosisID)
@@ -273,6 +280,7 @@ struct MapFeature {
                 return startNextListingPageEffect(appearedListingID: listingID, state: &state)
 
             case let .listingSearchResponse(.success(page)):
+                guard state.listingSource == .locationSearch else { return .none }
                 debugLogListingSearchResponse(page)
                 state.isListingSearchLoading = false
                 state.listingSearchErrorMessage = nil
@@ -280,6 +288,7 @@ struct MapFeature {
                 return .none
 
             case let .listingSearchResponse(.failure(error)):
+                guard state.listingSource == .locationSearch else { return .none }
                 debugLogListingSearchError(error)
                 state.isListingSearchLoading = false
                 state.listingSearchErrorMessage = error.localizedDescription
