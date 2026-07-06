@@ -8,6 +8,32 @@
 import ComposableArchitecture
 
 extension MapFeature {
+    func listingItemModels(
+        from listings: [Listing],
+        exchangeRate: KRWToUSDExchangeRate?
+    ) -> [ListingItemModel] {
+        listings.map {
+            ListingItemModel(
+                listing: $0,
+                exchangeRate: exchangeRate,
+                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase
+            )
+        }
+    }
+
+    func listingItemModels(
+        from recommendations: [DiagnosisRecommendedListing],
+        exchangeRate: KRWToUSDExchangeRate?
+    ) -> [ListingItemModel] {
+        recommendations.map {
+            ListingItemModel(
+                recommendation: $0,
+                exchangeRate: exchangeRate,
+                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase
+            )
+        }
+    }
+
     func canStartListingSearch(state: State) -> Bool {
         if state.lastSearchedViewport != nil {
             return true

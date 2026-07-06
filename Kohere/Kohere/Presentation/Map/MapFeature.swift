@@ -20,6 +20,10 @@ struct MapFeature {
     var listingClient
     @Dependency(\.diagnosisClient)
     var diagnosisClient
+    @Dependency(\.fetchKRWToUSDExchangeRateUseCase)
+    var fetchKRWToUSDExchangeRateUseCase
+    @Dependency(\.convertMonthlyRentCurrencyUseCase)
+    var convertMonthlyRentCurrencyUseCase
 
     @Reducer
     enum Path {
@@ -32,6 +36,7 @@ struct MapFeature {
             switch action {
             case .mapAppeared:
                 var effects: [Effect<Action>] = [
+                    startExchangeRateFetchEffect(),
                     .run { [locationClient] send in
                         let authorization = await locationClient.requestAuthorization()
                         await send(.locationAuthorizationChanged(authorization))
@@ -58,6 +63,7 @@ struct MapFeature {
                 state.isDiagnosisButtonExpanded = false
                 return .merge(
                     .cancel(id: "MapFeature.locationUpdates"),
+                    .cancel(id: "MapFeature.exchangeRate"),
                     .cancel(id: "MapFeature.diagnosisButtonAutoCollapse"),
                     .cancel(id: "MapFeature.diagnosisDetail"),
                     .cancel(id: "MapFeature.diagnosisRecommendations"),
@@ -87,23 +93,19 @@ struct MapFeature {
 
             case let .userLocationUpdated(coordinate):
                 state.userLocation = coordinate
-
                 if !state.hasMovedToInitialUserLocation {
                     state.cameraMoveRequest = coordinate
                     state.hasMovedToInitialUserLocation = true
                 }
-
                 return .none
 
             case .myLocationButtonTapped:
                 switch state.locationAuthorization {
                 case .authorized:
                     break
-
                 case .denied, .restricted:
                     state.isLocationPermissionDialogPresented = true
                     return .none
-
                 case .notDetermined:
                     return .none
                 }
@@ -134,6 +136,7 @@ struct MapFeature {
                 state.isRecommendationsLoading = false
                 state.diagnosisErrorMessage = nil
                 state.recommendationsErrorMessage = nil
+                state.diagnosisRecommendedListings = []
 
                 guard let viewport = state.currentViewport,
                       canStartListingSearch(state: state)
@@ -154,6 +157,8 @@ struct MapFeature {
                 state.showsResearchButton = false
                 state.markers = []
                 state.listings = []
+                state.listingSearchResults = []
+                state.diagnosisRecommendedListings = []
                 state.isDiagnosisDetailLoading = true
                 state.isRecommendationsLoading = true
                 state.diagnosisErrorMessage = nil
@@ -200,12 +205,23 @@ struct MapFeature {
                 state.diagnosisErrorMessage = error.localizedDescription
                 return .none
 
+            case let .exchangeRateResponse(.success(exchangeRate)):
+                applyExchangeRate(exchangeRate, to: &state)
+                return .none
+
+            case .exchangeRateResponse(.failure):
+                return .none
+
             case let .diagnosisRecommendationsResponse(.success(recommendations)):
                 guard state.listingSource == .diagnosis else { return .none }
                 debugLogDiagnosisRecommendations(recommendations)
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
-                state.listings = recommendations.listings.map(ListingItemModel.init(recommendation:))
+                state.diagnosisRecommendedListings = recommendations.listings
+                state.listings = listingItemModels(
+                    from: recommendations.listings,
+                    exchangeRate: state.krwToUSDExchangeRate
+                )
                 state.markers = recommendations.markers
                 state.isRecommendationsLoading = false
                 state.recommendationsErrorMessage = nil
@@ -271,7 +287,11 @@ struct MapFeature {
                 state.isListingSearchLoading = false
                 state.listingSearchErrorMessage = nil
                 state.listingPageInfo = page.page
-                state.listings = page.content.map(ListingItemModel.init(listing:))
+                state.listingSearchResults = page.content
+                state.listings = listingItemModels(
+                    from: page.content,
+                    exchangeRate: state.krwToUSDExchangeRate
+                )
                 state.markers = page.content.compactMap { listing in
                     guard let coordinate = listing.coordinate else { return nil }
                     return MapMarkerItem(id: listing.id, coordinate: coordinate)
