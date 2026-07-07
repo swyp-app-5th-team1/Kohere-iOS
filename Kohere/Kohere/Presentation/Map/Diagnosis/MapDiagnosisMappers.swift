@@ -22,6 +22,32 @@ extension ListingItemModel {
         )
     }
 
+    nonisolated init(
+        recommendation: DiagnosisRecommendedListing,
+        exchangeRate: KRWToUSDExchangeRate?,
+        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase
+    ) {
+        let convertedMonthlyRentText: String
+        if let exchangeRate, let monthlyRent = recommendation.monthlyRent {
+            let convertedMonthlyRent = convertMonthlyRentCurrencyUseCase.execute(monthlyRent, exchangeRate)
+            convertedMonthlyRentText = MonthlyRentPriceFormatter.usdTitle(from: convertedMonthlyRent)
+        } else {
+            convertedMonthlyRentText = ""
+        }
+
+        self.init(
+            id: recommendation.listingID,
+            title: recommendation.title,
+            formattedPrice: Self.monthlyRentTitle(from: recommendation.monthlyRent),
+            formattedUsdPrice: convertedMonthlyRentText,
+            detailsDescription: Self.depositTitle(from: recommendation.deposit),
+            locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
+            typeTag: Self.typeTitle(from: recommendation.type),
+            period: "1 mo~",
+            isLiked: false
+        )
+    }
+
     nonisolated private static func monthlyRentTitle(from monthlyRent: Int?) -> String {
         guard let monthlyRent else { return "가격 문의" }
         return "₩\(monthlyRent / 1000)K/mo"

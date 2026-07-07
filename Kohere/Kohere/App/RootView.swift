@@ -54,17 +54,6 @@ struct RootView: View {
             }
             .tag(AppTab.home)
             
-            CommunityFlowView(
-                store: store.scope(
-                    state: \RootFeature.State.community,
-                    action: \.community
-                )
-            )
-            .tabItem {
-                tabIcon(.community)
-            }
-            .tag(AppTab.community)
-            
             MapFlowView(
                 store: store.scope(
                     state: \RootFeature.State.map,

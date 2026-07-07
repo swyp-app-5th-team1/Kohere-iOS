@@ -161,15 +161,17 @@ struct LoginFeature {
             case .termsAgreementCompleted:
                 guard state.isRequiredTermsAgreed,
                       !state.isTermsAgreementRequesting,
-                      state.authInfo != nil else { return .none }
+                      let auth = state.authInfo else { return .none }
                 state.isTermsAgreementRequesting = true
 
                 let termsOfServiceAgreed = state.isServiceTermsAgreed
                 let privacyPolicyAgreed = state.isPrivacyTermsAgreed
                 let marketingAgreed = state.isMarketingCommunicationsAgreed
+                let keychainClient = keychainClient
 
                 return .run { send in
                     do {
+                        try keychainClient.save(auth, for: .auth)
                         let response = try await agreeTermsUseCase.execute(
                             termsOfServiceAgreed,
                             privacyPolicyAgreed,

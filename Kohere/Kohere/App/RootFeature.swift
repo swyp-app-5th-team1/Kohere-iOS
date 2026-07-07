@@ -14,6 +14,8 @@ struct RootFeature {
     var keychainClient
     @Dependency(\.userDefaultsClient)
     var userDefaultsClient
+    @Dependency(\.reissueTokenUseCase)
+    var reissueTokenUseCase
     
     @ObservableState
     struct State: Equatable {
@@ -71,6 +73,7 @@ struct RootFeature {
             case .onAppear:
                 let keychainClient = keychainClient
                 let userDefaultsClient = userDefaultsClient
+                let reissueTokenUseCase = reissueTokenUseCase
                 var effects: [Effect<Action>] = [
                     .run { send in
                         for await _ in NotificationCenter.default.notifications(named: .authSessionExpired) {
@@ -94,7 +97,12 @@ struct RootFeature {
                             }
 
                             let auth = try keychainClient.load(for: .auth)
-                            await send(.storedAuthLoaded(auth))
+                            let resolvedAuth = await Self.resolveStoredAuth(
+                                auth,
+                                keychainClient: keychainClient,
+                                reissueToken: reissueTokenUseCase.execute
+                            )
+                            await send(.storedAuthLoaded(resolvedAuth))
                         } catch: { _, send in
                             await send(.storedAuthLoaded(nil))
                         }
@@ -147,8 +155,7 @@ struct RootFeature {
                 
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
-                guard tab == .map else { return .none }
-                return .send(.map(.locationSearchStarted))
+                return .none
 
             case let .map(.path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID))))):
                 state.map.path.removeAll()
@@ -170,5 +177,36 @@ struct RootFeature {
         }
 
         return .send(.map(.diagnosisResultRequested(diagnosisID: diagnosisID)))
+    }
+}
+
+private extension RootFeature {
+    static let startupRefreshBuffer: TimeInterval = 60
+
+    static func resolveStoredAuth(
+        _ auth: Auth?,
+        keychainClient: KeychainClient,
+        reissueToken: (_ refreshToken: String) async throws -> AuthToken
+    ) async -> Auth? {
+        guard let auth else { return nil }
+
+        guard auth.shouldRefresh(buffer: startupRefreshBuffer) else {
+            return auth
+        }
+
+        guard let refreshToken = auth.refreshToken, !refreshToken.isEmpty else {
+            try? keychainClient.delete(for: .auth)
+            return nil
+        }
+
+        do {
+            let token = try await reissueToken(refreshToken)
+            let updatedAuth = auth.updating(with: token)
+            try keychainClient.save(updatedAuth, for: .auth)
+            return updatedAuth
+        } catch {
+            try? keychainClient.delete(for: .auth)
+            return nil
+        }
     }
 }
