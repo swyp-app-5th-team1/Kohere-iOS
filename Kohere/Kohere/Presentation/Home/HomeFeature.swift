@@ -2,7 +2,7 @@
 //  HomeFeature.swift
 //  Kohere
 //
-//  Created by Codex on 6/18/26.
+//  Created by mandoo on 6/18/26.
 //
 
 import ComposableArchitecture
@@ -12,6 +12,10 @@ import Foundation
 struct HomeFeature {
     @Dependency(\.listingClient)
     var listingClient
+    @Dependency(\.quizClient)
+    var quizClient
+    @Dependency(\.lifeTipClient)
+    var lifeTipClient
 
     @Reducer
     enum Path {
@@ -19,6 +23,7 @@ struct HomeFeature {
         case recentlyViewedList(RecentlyViewedFeature)
         case notifications(NotificationsFeature)
         case chatBot(ChatBotFeature)
+        case livingGuideDetail(LivingGuideDetailFeature)
     }
     
     // MARK: - State
@@ -31,7 +36,13 @@ struct HomeFeature {
         var favoriteUpdatingIDs: Set<String> = []
         var recentlyViewedErrorMessage: String?
         var quiz: QuizModel
+        var isQuizLoading: Bool = false
+        var isQuizLoaded: Bool = false
+        var isQuizAnswerSubmitting: Bool = false
+        var quizErrorMessage: String?
         var livingGuides: [LivingGuide] = []
+        var isLivingGuidesLoading: Bool = false
+        var livingGuidesErrorMessage: String?
         
         init(
             recentlyViewedItems: [ListingItemModel] = [],
@@ -39,7 +50,7 @@ struct HomeFeature {
             livingGuides: [LivingGuide] = LivingGuide.mockLivingGuide
         ) {
             self.recentlyViewedItems = recentlyViewedItems
-            self.quiz = QuizModel(entity: quiz, selectedAnswerIndex: nil)
+            self.quiz = QuizModel(entity: quiz, selectedChoiceKey: nil)
             self.livingGuides = livingGuides
         }
     }
@@ -51,6 +62,8 @@ struct HomeFeature {
         case mapTabRequested(diagnosisID: String?)
         case onAppear
         case recentListingsResponse(Result<[Listing], DataError>)
+        case randomQuizResponse(Result<Quiz, DataError>)
+        case lifeTipTopicsResponse(Result<[LivingGuide], DataError>)
         
         case navigationSearchTapped
         case navigationHeartTapped
@@ -64,6 +77,7 @@ struct HomeFeature {
         case favoriteStatusResponse(listingID: String, Result<ListingFavoriteStatus, DataError>)
         
         case quizOptionTapped(index: Int)
+        case quizAnswerResponse(Result<QuizAnswerResult, DataError>)
         case livingGuideItemTapped(id: Int)
     }
     
@@ -73,18 +87,100 @@ struct HomeFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard !state.isRecentlyViewedLoading else { return .none }
-                state.isRecentlyViewedLoading = true
-                state.recentlyViewedErrorMessage = nil
+                var effects: [Effect<Action>] = []
 
-                return .run { [listingClient] send in
+                if !state.isRecentlyViewedLoading {
+                    state.isRecentlyViewedLoading = true
+                    state.recentlyViewedErrorMessage = nil
+
+                    effects.append(.run { [listingClient] send in
+                        do {
+                            let listings = try await listingClient.fetchRecentListings()
+                            await send(.recentListingsResponse(.success(listings)))
+                        } catch {
+                            await send(.recentListingsResponse(.failure(.from(error))))
+                        }
+                    })
+                }
+
+                if !state.isQuizLoading {
+                    state.isQuizLoading = true
+                    state.quizErrorMessage = nil
+
+                    effects.append(.run { [quizClient] send in
+                        do {
+                            let quiz = try await quizClient.fetchRandomQuiz()
+                            await send(.randomQuizResponse(.success(quiz)))
+                        } catch {
+                            let dataError = DataError.from(error)
+                            print("[HomeFeature] random quiz failed. error=\(dataError.debugDescription)")
+                            await send(.randomQuizResponse(.failure(dataError)))
+                        }
+                    })
+                }
+
+                if !state.isLivingGuidesLoading {
+                    state.isLivingGuidesLoading = true
+                    state.livingGuidesErrorMessage = nil
+
+                    effects.append(.run { [lifeTipClient] send in
+                        do {
+                            let topics = try await lifeTipClient.fetchTopics()
+                            await send(.lifeTipTopicsResponse(.success(topics)))
+                        } catch {
+                            await send(.lifeTipTopicsResponse(.failure(.from(error))))
+                        }
+                    })
+                }
+
+                return .merge(effects)
+                
+            case let .randomQuizResponse(.success(quiz)):
+                state.quiz = QuizModel(entity: quiz)
+                state.isQuizLoading = false
+                state.isQuizLoaded = true
+                state.quizErrorMessage = nil
+                return .none
+
+            case let .randomQuizResponse(.failure(error)):
+                state.isQuizLoading = false
+                state.isQuizLoaded = false
+                state.quizErrorMessage = error.localizedDescription
+                return .none
+
+            case let .quizOptionTapped(index):
+                guard state.isQuizLoaded,
+                      !state.quiz.hasAnswered,
+                      !state.isQuizAnswerSubmitting,
+                      let selectedChoiceKey = state.quiz.choiceKey(for: index)
+                else { return .none }
+
+                state.quiz.selectedChoiceKey = selectedChoiceKey
+                state.isQuizAnswerSubmitting = true
+                state.quizErrorMessage = nil
+
+                return .run { [quizClient, quizID = state.quiz.id] send in
                     do {
-                        let listings = try await listingClient.fetchRecentListings()
-                        await send(.recentListingsResponse(.success(listings)))
+                        let result = try await quizClient.submitAnswer(quizID, selectedChoiceKey)
+                        await send(.quizAnswerResponse(.success(result)))
                     } catch {
-                        await send(.recentListingsResponse(.failure(.from(error))))
+                        let dataError = DataError.from(error)
+                        print("[HomeFeature] quiz answer failed. quizID=\(quizID), selectedChoice=\(selectedChoiceKey), error=\(dataError.debugDescription)")
+                        await send(.quizAnswerResponse(.failure(dataError)))
                     }
                 }
+
+            case let .quizAnswerResponse(.success(result)):
+                state.quiz.apply(answerResult: result)
+                state.isQuizAnswerSubmitting = false
+                state.quizErrorMessage = nil
+                return .none
+
+            case let .quizAnswerResponse(.failure(error)):
+                state.quiz.selectedChoiceKey = nil
+                state.isQuizAnswerSubmitting = false
+                state.quizErrorMessage = error.localizedDescription
+                return .none
 
             case let .recentListingsResponse(.success(listings)):
                 state.recentlyViewedItems = listings.map(ListingItemModel.init(listing:))
@@ -95,6 +191,19 @@ struct HomeFeature {
             case let .recentListingsResponse(.failure(error)):
                 state.isRecentlyViewedLoading = false
                 state.recentlyViewedErrorMessage = error.localizedDescription
+                return .none
+
+            case let .lifeTipTopicsResponse(.success(guides)):
+                state.isLivingGuidesLoading = false
+                state.livingGuidesErrorMessage = nil
+                if !guides.isEmpty {
+                    state.livingGuides = guides
+                }
+                return .none
+
+            case let .lifeTipTopicsResponse(.failure(error)):
+                state.isLivingGuidesLoading = false
+                state.livingGuidesErrorMessage = error.localizedDescription
                 return .none
 
             case .path(.element(id: _, action: .savedListings(.backButtonTapped))):
@@ -111,6 +220,10 @@ struct HomeFeature {
                 
             case .path(.element(id: _, action: .chatBot(.backButtonTapped))):
                 _ = state.path.popLast() 
+                return .none
+
+            case .path(.element(id: _, action: .livingGuideDetail(.backButtonTapped))):
+                _ = state.path.popLast()
                 return .none
 
             case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
@@ -184,13 +297,11 @@ struct HomeFeature {
                 state.recentlyViewedErrorMessage = error.localizedDescription
                 return .none
                 
-            case let .quizOptionTapped(index):
-                guard !state.quiz.hasAnswered else { return .none }
-                state.quiz.selectedAnswerIndex = index
-                return .none
-                
             case let .livingGuideItemTapped(id):
-                print("선택 콘텐츠 \(id)")
+                guard let guide = state.livingGuides.first(where: { $0.id == id }) else {
+                    return .none
+                }
+                state.path.append(.livingGuideDetail(LivingGuideDetailFeature.State(guide: guide)))
                 return .none
 
             case .mapTabRequested:
