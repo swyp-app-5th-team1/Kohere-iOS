@@ -47,7 +47,7 @@ struct HomeFeature {
         init(
             recentlyViewedItems: [ListingItemModel] = [],
             quiz: Quiz = Quiz.mockQuiz,
-            livingGuides: [LivingGuide] = LivingGuide.mockLivingGuide
+            livingGuides: [LivingGuide] = []
         ) {
             self.recentlyViewedItems = recentlyViewedItems
             self.quiz = QuizModel(entity: quiz, selectedChoiceKey: nil)
