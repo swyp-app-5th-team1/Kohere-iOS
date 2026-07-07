@@ -6,9 +6,13 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 @Reducer
 struct HomeFeature {
+    @Dependency(\.listingClient)
+    var listingClient
+
     @Reducer
     enum Path {
         case savedListings(SavedListingsFeature)
@@ -23,6 +27,9 @@ struct HomeFeature {
     struct State: Equatable {
         var path = StackState<Path.State>()
         var recentlyViewedItems: [ListingItemModel] = []
+        var isRecentlyViewedLoading: Bool = false
+        var favoriteUpdatingIDs: Set<String> = []
+        var recentlyViewedErrorMessage: String?
         var quiz: QuizModel
         var livingGuides: [LivingGuide] = []
         
@@ -42,6 +49,8 @@ struct HomeFeature {
     enum Action {
         case path(StackActionOf<Path>)
         case mapTabRequested(diagnosisID: String?)
+        case onAppear
+        case recentListingsResponse(Result<[Listing], DataError>)
         
         case navigationSearchTapped
         case navigationHeartTapped
@@ -52,6 +61,7 @@ struct HomeFeature {
         case browseListingsTapped
         case cardTapped(id: String)
         case likeButtonTapped(id: String)
+        case favoriteStatusResponse(listingID: String, Result<ListingFavoriteStatus, DataError>)
         
         case quizOptionTapped(index: Int)
         case livingGuideItemTapped(id: Int)
@@ -62,6 +72,31 @@ struct HomeFeature {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            case .onAppear:
+                guard !state.isRecentlyViewedLoading else { return .none }
+                state.isRecentlyViewedLoading = true
+                state.recentlyViewedErrorMessage = nil
+
+                return .run { [listingClient] send in
+                    do {
+                        let listings = try await listingClient.fetchRecentListings()
+                        await send(.recentListingsResponse(.success(listings)))
+                    } catch {
+                        await send(.recentListingsResponse(.failure(.from(error))))
+                    }
+                }
+
+            case let .recentListingsResponse(.success(listings)):
+                state.recentlyViewedItems = listings.map(ListingItemModel.init(listing:))
+                state.isRecentlyViewedLoading = false
+                state.recentlyViewedErrorMessage = nil
+                return .none
+
+            case let .recentListingsResponse(.failure(error)):
+                state.isRecentlyViewedLoading = false
+                state.recentlyViewedErrorMessage = error.localizedDescription
+                return .none
+
             case .path(.element(id: _, action: .savedListings(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
@@ -113,9 +148,40 @@ struct HomeFeature {
                 return .none
                 
             case let .likeButtonTapped(id):
-                if let index = state.recentlyViewedItems.firstIndex(where: { $0.id == id }) {
-                    state.recentlyViewedItems[index].isLiked.toggle()
+                guard let item = state.recentlyViewedItems.first(where: { $0.id == id }),
+                      !state.favoriteUpdatingIDs.contains(id)
+                else { return .none }
+
+                state.favoriteUpdatingIDs.insert(id)
+                state.recentlyViewedErrorMessage = nil
+
+                return .run { [listingClient, isLiked = item.isLiked] send in
+                    do {
+                        let status: ListingFavoriteStatus
+                        if isLiked {
+                            status = try await listingClient.removeFavorite(id)
+                        } else {
+                            status = try await listingClient.addFavorite(id)
+                        }
+                        await send(.favoriteStatusResponse(listingID: id, .success(status)))
+                    } catch {
+                        await send(.favoriteStatusResponse(listingID: id, .failure(.from(error))))
+                    }
                 }
+
+            case let .favoriteStatusResponse(listingID, .success(status)):
+                state.favoriteUpdatingIDs.remove(listingID)
+                state.recentlyViewedErrorMessage = nil
+
+                if let index = state.recentlyViewedItems.firstIndex(where: { $0.id == listingID }) {
+                    state.recentlyViewedItems[index].isLiked = status.isFavorited
+                    state.recentlyViewedItems[index].favoriteCount = status.favoriteCount
+                }
+                return .none
+
+            case let .favoriteStatusResponse(listingID, .failure(error)):
+                state.favoriteUpdatingIDs.remove(listingID)
+                state.recentlyViewedErrorMessage = error.localizedDescription
                 return .none
                 
             case let .quizOptionTapped(index):
