@@ -15,6 +15,7 @@ struct HomeFeature {
         case recentlyViewedList(RecentlyViewedFeature)
         case notifications(NotificationsFeature)
         case chatBot(ChatBotFeature)
+        case search(SearchFeature)
     }
     
     // MARK: - State
@@ -78,6 +79,10 @@ struct HomeFeature {
                 _ = state.path.popLast() 
                 return .none
 
+            case .path(.element(id: _, action: .search(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
             case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
                 return .send(.mapTabRequested(diagnosisID: diagnosisID))
                 
@@ -85,7 +90,7 @@ struct HomeFeature {
                 return .none
                 
             case .navigationSearchTapped:
-                // TODO: 검색으로 네비게이션
+                state.path.append(.search(SearchFeature.State()))
                 return .none
                 
             case .navigationHeartTapped:

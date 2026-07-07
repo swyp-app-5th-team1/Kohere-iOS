@@ -72,6 +72,7 @@ extension MapFeature {
         case locationPermissionDialogSettingsButtonTapped
         case cameraMoveRequestHandled
         case markerTapped(String)
+        case searchButtonTapped
         case researchButtonTapped
         case viewportChanged(MapViewport)
         case listingRowAppeared(String)

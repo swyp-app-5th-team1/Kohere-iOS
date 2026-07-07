@@ -90,10 +90,16 @@ struct MapView: View {
             )
             .ignoresSafeArea()
 
-            if store.showsResearchButton {
-                researchButton
-                    .padding(.top, 12)
-            }
+            MapTopControlsView(
+                showsResearchButton: store.showsResearchButton,
+                onSearchTapped: {
+                    store.send(.searchButtonTapped)
+                },
+                onResearchTapped: {
+                    store.send(.researchButtonTapped)
+                }
+            )
+                .padding(.top, 12)
         }
     }
 
@@ -170,32 +176,6 @@ struct MapView: View {
 
     private var mapFloatingControlSheetSpacing: CGFloat {
         16
-    }
-
-    private var researchButton: some View {
-        Button {
-            store.send(.researchButtonTapped)
-        } label: {
-            HStack(spacing: 12) {
-                Image("refresh_16")
-                    .renderingMode(.template)
-                    .resizable()
-                    .frame(width: 16, height: 16)
-                    .foregroundStyle(.blue100)
-
-                Text("이 지역 검색하기")
-                    .kohereTextStyle(.label2Medium)
-                    .foregroundStyle(.blue100)
-            }
-            .padding(.horizontal, 16)
-            .frame(height: 36)
-            .kohereSurface(
-                background: .common0,
-                shape: .capsule,
-                elevation: .normalXSmall
-            )
-        }
-        .buttonStyle(.plain)
     }
 
     private func mapListingSheet(containerHeight: CGFloat) -> some View {

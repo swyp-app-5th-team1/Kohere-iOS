@@ -42,6 +42,10 @@ struct HomeFlowView: View {
                 case let .chatBot(chatBotStore):
                     ChatBotView(store: chatBotStore)
                         .navigationBarHidden(true)
+
+                case let .search(searchStore):
+                    SearchView(store: searchStore)
+                        .navigationBarHidden(true)
                 }
             } 
             .toolbar(.hidden, for: .tabBar)

@@ -29,6 +29,7 @@ struct MapFeature {
     enum Path {
         case listingDetail(ListingDetailFeature)
         case chatBot(ChatBotFeature)
+        case search(SearchFeature)
     }
 
     var body: some Reducer<State, Action> {
@@ -266,6 +267,10 @@ struct MapFeature {
                 state.sheetMode = .selectedListing
                 return .none
 
+            case .searchButtonTapped:
+                state.path.append(.search(SearchFeature.State()))
+                return .none
+
             case .researchButtonTapped:
                 guard let viewport = state.currentViewport else { return .none }
                 state.listingSource = .locationSearch
@@ -299,6 +304,10 @@ struct MapFeature {
                 return .none
 
             case .path(.element(id: _, action: .chatBot(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case .path(.element(id: _, action: .search(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
 
