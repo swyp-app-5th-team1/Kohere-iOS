@@ -302,22 +302,8 @@ struct MapFeature {
                 state.listingSearchErrorMessage = error.localizedDescription
                 return .none
 
-            case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case .path(.element(id: _, action: .chatBot(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case .path(.element(id: _, action: .search(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-            case let .path(.element(id: _, action: .search(.placeResultTapped(placeResult)))):
-                _ = state.path.popLast()
-                return .send(.placeSearchResultSelected(placeResult))
-            case .path:
-                return .none
+            case let .path(pathAction):
+                return handlePathAction(pathAction, state: &state)
 
             case let .listingTapped(id):
                 state.selectedMarkerID = id

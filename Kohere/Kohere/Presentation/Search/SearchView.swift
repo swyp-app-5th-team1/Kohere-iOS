@@ -91,23 +91,31 @@ struct SearchView: View {
     }
 
     private var searchBanner: some View {
-        ZStack(alignment: .trailing) {
-            Image("search_banner_background")
-                .resizable()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        Button {
+            isSearchFocused = false
+            store.send(.bannerTapped)
+        } label: {
+            ZStack(alignment: .trailing) {
+                Image(.searchBannerBackground)
+                    .resizable()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            Text("딱 맞는 방,\n1분 만에 모아보기")
-                .kohereTextStyle(.heading3Semibold)
-                .foregroundStyle(.neutral5)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, 16)
+                Text("딱 맞는 방,\n1분 만에 모아보기")
+                    .kohereTextStyle(.heading3Semibold)
+                    .foregroundStyle(.neutral5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 16)
 
-            Image("search_banner_icon")
-                .resizable()
-                .frame(width: 145.4, height: 80)
+                Image(.searchBannerIcon)
+                    .resizable()
+                    .frame(width: 145.4, height: 80)
+            }
+            .frame(height: 80)
+            .clipped()
+            .contentShape(Rectangle())
         }
-        .frame(height: 80)
-        .clipped()
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("딱 맞는 방 1분 만에 모아보기"))
     }
 
     @ViewBuilder private var searchContent: some View {

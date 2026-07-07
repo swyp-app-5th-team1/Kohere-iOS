@@ -87,6 +87,10 @@ struct HomeFeature {
             case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
                 return .send(.mapTabRequested(diagnosisID: diagnosisID))
 
+            case .path(.element(id: _, action: .search(.bannerTapped))):
+                state.path.append(.chatBot(ChatBotFeature.State()))
+                return .none
+
             case let .path(.element(id: _, action: .search(.placeResultTapped(placeResult)))):
                 state.path.removeAll()
                 return .send(.mapPlaceSearchRequested(placeResult))

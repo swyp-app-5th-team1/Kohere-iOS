@@ -11,6 +11,8 @@ import Foundation
 @Reducer
 struct SearchFeature {
     private static let recentSearchLimit = 10
+    @Dependency(\.placeSearchClient)
+    var placeSearchClient
 
     @ObservableState
     struct State: Equatable {
@@ -28,6 +30,7 @@ struct SearchFeature {
         case recentSearchTapped(String)
         case recentSearchDeleteButtonTapped(String)
         case clearRecentSearchesButtonTapped
+        case bannerTapped
         case placeResultTapped(SearchPlaceResult)
         case placeSearchSucceeded(requestedKeyword: String, results: [SearchPlaceResult])
         case placeSearchFailed(requestedKeyword: String, message: String)
@@ -44,28 +47,42 @@ struct SearchFeature {
                 state.searchText = text
                 state.placeResults = []
                 state.contentState = text.isEmpty ? .recentSearches : .typing
-                return .none
+                return .cancel(id: SearchFeatureCancelID.placeSearch)
 
             case .clearButtonTapped:
                 state.searchText = ""
                 state.placeResults = []
                 state.contentState = .recentSearches
-                return .none
+                return .cancel(id: SearchFeatureCancelID.placeSearch)
 
             case .searchSubmitted:
                 let keyword = state.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !keyword.isEmpty else { return .none }
+                let placeSearchClient = placeSearchClient
+                state.placeResults = []
                 state.contentState = .searching
-                return .send(.placeSearchSucceeded(
-                    requestedKeyword: keyword,
-                    results: SearchPlaceResult.mockResults(for: keyword)
-                ))
+                return .run { send in
+                    do {
+                        let results = try await placeSearchClient.searchPlaces(keyword)
+                        await send(.placeSearchSucceeded(
+                            requestedKeyword: keyword,
+                            results: results.map(SearchPlaceResult.init)
+                        ))
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        await send(.placeSearchFailed(
+                            requestedKeyword: keyword,
+                            message: placeSearchFailureMessage(for: error)
+                        ))
+                    }
+                }
+                .cancellable(id: SearchFeatureCancelID.placeSearch, cancelInFlight: true)
 
             case let .recentSearchTapped(keyword):
                 state.searchText = keyword
                 state.placeResults = []
                 state.contentState = .typing
-                return .none
+                return .cancel(id: SearchFeatureCancelID.placeSearch)
 
             case let .recentSearchDeleteButtonTapped(keyword):
                 state.recentSearches.removeAll { $0.keyword == keyword }
@@ -73,6 +90,9 @@ struct SearchFeature {
 
             case .clearRecentSearchesButtonTapped:
                 state.recentSearches.removeAll()
+                return .none
+
+            case .bannerTapped:
                 return .none
 
             case .placeResultTapped:
@@ -118,7 +138,11 @@ private extension SearchFeature {
     }
 }
 
-enum SearchContentState: Equatable {
+private nonisolated enum SearchFeatureCancelID: Hashable, Sendable {
+    case placeSearch
+}
+
+nonisolated enum SearchContentState: Equatable {
     case recentSearches
     case typing
     case searching
@@ -126,7 +150,7 @@ enum SearchContentState: Equatable {
     case emptyResult
 }
 
-struct SearchRecentSearch: Equatable, Identifiable {
+nonisolated struct SearchRecentSearch: Equatable, Identifiable, Sendable {
     let keyword: String
 
     var id: String {
@@ -134,7 +158,7 @@ struct SearchRecentSearch: Equatable, Identifiable {
     }
 }
 
-struct SearchPlaceResult: Equatable, Identifiable {
+nonisolated struct SearchPlaceResult: Equatable, Identifiable, Sendable {
     let id: String
     let title: String
     let roadAddress: String
@@ -147,47 +171,39 @@ struct SearchPlaceResult: Equatable, Identifiable {
 }
 
 extension SearchPlaceResult {
-    static func mockResults(for keyword: String) -> [Self] {
-        let normalizedKeyword = keyword.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !normalizedKeyword.isEmpty else { return [] }
-
-        return mockPlaces.filter { place in
-            place.searchableText.contains(normalizedKeyword)
-        }
-    }
-
-    private static let mockPlaces: [Self] = [
-        Self(
-            id: "hongdae-station-line-2",
-            title: "홍대입구역 2호선",
-            roadAddress: "서울 마포구 양화로 160",
-            address: "서울 마포구 동교동 165",
-            coordinate: MapCoordinate(latitude: 37.5572, longitude: 126.9254)
-        ),
-        Self(
-            id: "yonsei-university",
-            title: "연세대학교",
-            roadAddress: "서울 서대문구 연세로 50",
-            address: "서울 서대문구 신촌동 134",
-            coordinate: MapCoordinate(latitude: 37.5658, longitude: 126.9386)
-        ),
-        Self(
-            id: "korea-university",
-            title: "고려대학교",
-            roadAddress: "서울 성북구 안암로 145",
-            address: "서울 성북구 안암동5가 1-2",
-            coordinate: MapCoordinate(latitude: 37.5894, longitude: 127.0323)
-        ),
-        Self(
-            id: "sinchon-station",
-            title: "신촌역",
-            roadAddress: "서울 서대문구 신촌로 90",
-            address: "서울 서대문구 창천동 30-16",
-            coordinate: MapCoordinate(latitude: 37.5552, longitude: 126.9369)
+    nonisolated init(_ placeSearchResult: PlaceSearchResult) {
+        self.init(
+            id: placeSearchResult.id,
+            title: placeSearchResult.title,
+            roadAddress: placeSearchResult.roadAddress,
+            address: placeSearchResult.address,
+            coordinate: placeSearchResult.coordinate
         )
-    ]
+    }
+}
 
-    private var searchableText: String {
-        "\(title) \(roadAddress) \(address)".lowercased()
+private func placeSearchFailureMessage(for error: Error) -> String {
+    let dataError = (error as? DataError) ?? .underlying(message: error.localizedDescription)
+    switch dataError {
+    case .missingNaverSearchCredentials:
+        return "장소 검색 설정이 필요해요.\n네이버 검색 API 키를 확인해주세요."
+
+    case let .httpStatus(code, _) where code == 403:
+        return "장소 검색 권한을 확인해주세요.\n네이버 개발자센터의 검색 API 설정이 필요해요."
+
+    case let .serverError(code, _):
+        switch code {
+        case "SE01", "SE06":
+            return "검색어를 확인해주세요.\n다시 입력해 주세요."
+
+        case "SE99":
+            return "네이버 장소 검색이 잠시 불안정해요.\n조금 뒤 다시 시도해주세요."
+
+        default:
+            return "장소 검색에 실패했어요.\n다시 시도해주세요."
+        }
+
+    default:
+        return "장소 검색에 실패했어요.\n다시 시도해주세요."
     }
 }

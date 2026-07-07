@@ -1,23 +1,26 @@
 //
-//  CurrencyNetworkService.swift
+//  ExternalNetworkService.swift
 //  Kohere
 //
-//  Created by Codex on 7/6/26.
+//  Created by Codex on 7/8/26.
 //
 
 import Alamofire
 import Foundation
 
-nonisolated final class CurrencyNetworkService: @unchecked Sendable {
+nonisolated final class ExternalNetworkService: @unchecked Sendable {
     private let session: URLSession
     private let decoder: JSONDecoder
+    private let errorParser: (@Sendable (Data) -> DataError?)?
 
     init(
         session: URLSession = .shared,
-        decoder: JSONDecoder = JSONDecoder()
+        decoder: JSONDecoder = JSONDecoder(),
+        errorParser: (@Sendable (Data) -> DataError?)? = nil
     ) {
         self.session = session
         self.decoder = decoder
+        self.errorParser = errorParser
     }
 
     func request<Response: Decodable>(
@@ -30,7 +33,8 @@ nonisolated final class CurrencyNetworkService: @unchecked Sendable {
 
             if let httpResponse = response as? HTTPURLResponse,
                !(200..<300).contains(httpResponse.statusCode) {
-                throw DataError.httpStatus(code: httpResponse.statusCode, message: nil)
+                throw errorParser?(data)
+                    ?? DataError.httpStatus(code: httpResponse.statusCode, message: nil)
             }
 
             guard !data.isEmpty else {
