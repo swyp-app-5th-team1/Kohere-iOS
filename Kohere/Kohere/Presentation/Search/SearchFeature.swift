@@ -17,6 +17,7 @@ struct SearchFeature {
         var searchText = ""
         var contentState: SearchContentState = .recentSearches
         var recentSearches: [SearchRecentSearch] = []
+        var placeResults: [SearchPlaceResult] = []
     }
 
     enum Action {
@@ -27,6 +28,7 @@ struct SearchFeature {
         case recentSearchTapped(String)
         case recentSearchDeleteButtonTapped(String)
         case clearRecentSearchesButtonTapped
+        case placeResultTapped(SearchPlaceResult)
     }
 
     var body: some Reducer<State, Action> {
@@ -37,11 +39,13 @@ struct SearchFeature {
 
             case let .searchTextChanged(text):
                 state.searchText = text
+                state.placeResults = []
                 state.contentState = text.isEmpty ? .recentSearches : .typing
                 return .none
 
             case .clearButtonTapped:
                 state.searchText = ""
+                state.placeResults = []
                 state.contentState = .recentSearches
                 return .none
 
@@ -49,11 +53,13 @@ struct SearchFeature {
                 let keyword = state.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !keyword.isEmpty else { return .none }
                 state.addRecentSearch(keyword)
-                state.contentState = .emptyResult
+                state.placeResults = SearchPlaceResult.mockResults(for: keyword)
+                state.contentState = state.placeResults.isEmpty ? .emptyResult : .placeResults
                 return .none
 
             case let .recentSearchTapped(keyword):
                 state.searchText = keyword
+                state.placeResults = []
                 state.contentState = .typing
                 return .none
 
@@ -63,6 +69,9 @@ struct SearchFeature {
 
             case .clearRecentSearchesButtonTapped:
                 state.recentSearches.removeAll()
+                return .none
+
+            case .placeResultTapped:
                 return .none
             }
         }
@@ -90,5 +99,63 @@ struct SearchRecentSearch: Equatable, Identifiable {
 
     var id: String {
         keyword
+    }
+}
+
+struct SearchPlaceResult: Equatable, Identifiable {
+    let id: String
+    let title: String
+    let roadAddress: String
+    let address: String
+    let coordinate: MapCoordinate
+
+    var displayAddress: String {
+        roadAddress.isEmpty ? address : roadAddress
+    }
+}
+
+extension SearchPlaceResult {
+    static func mockResults(for keyword: String) -> [Self] {
+        let normalizedKeyword = keyword.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !normalizedKeyword.isEmpty else { return [] }
+
+        return mockPlaces.filter { place in
+            place.searchableText.contains(normalizedKeyword)
+        }
+    }
+
+    private static let mockPlaces: [Self] = [
+        Self(
+            id: "hongdae-station-line-2",
+            title: "홍대입구역 2호선",
+            roadAddress: "서울 마포구 양화로 160",
+            address: "서울 마포구 동교동 165",
+            coordinate: MapCoordinate(latitude: 37.5572, longitude: 126.9254)
+        ),
+        Self(
+            id: "yonsei-university",
+            title: "연세대학교",
+            roadAddress: "서울 서대문구 연세로 50",
+            address: "서울 서대문구 신촌동 134",
+            coordinate: MapCoordinate(latitude: 37.5658, longitude: 126.9386)
+        ),
+        Self(
+            id: "korea-university",
+            title: "고려대학교",
+            roadAddress: "서울 성북구 안암로 145",
+            address: "서울 성북구 안암동5가 1-2",
+            coordinate: MapCoordinate(latitude: 37.5894, longitude: 127.0323)
+        ),
+        Self(
+            id: "sinchon-station",
+            title: "신촌역",
+            roadAddress: "서울 서대문구 신촌로 90",
+            address: "서울 서대문구 창천동 30-16",
+            coordinate: MapCoordinate(latitude: 37.5552, longitude: 126.9369)
+        )
+    ]
+
+    private var searchableText: String {
+        "\(title) \(roadAddress) \(address)".lowercased()
     }
 }

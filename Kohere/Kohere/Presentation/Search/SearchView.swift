@@ -13,9 +13,10 @@ struct SearchView: View {
     @FocusState private var isSearchFocused: Bool
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 0) {
             searchHeader
             searchBanner
+                .padding(.top, 20)
             searchContent
         }
         .background(.coolNeutral5)
@@ -113,13 +114,19 @@ struct SearchView: View {
         switch store.contentState {
         case .recentSearches:
             recentSearchSection
+                .padding(.top, 20)
             Spacer(minLength: 0)
 
-        case .typing, .searching, .placeResults:
+        case .typing, .searching:
+            Spacer(minLength: 0)
+
+        case .placeResults:
+            placeResultList
             Spacer(minLength: 0)
 
         case .emptyResult:
             emptyResultView
+                .padding(.top, 20)
             Spacer(minLength: 0)
         }
     }
@@ -161,13 +168,12 @@ struct SearchView: View {
                     .overlay(alignment: .bottom) {
                         if recentSearch.id != store.recentSearches.last?.id {
                             Divider()
-                                .overlay(.lineNormal)
+                                .overlay(.lineAlternative)
                         }
                     }
             }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 8)
         .padding(.bottom, 12)
     }
 
@@ -203,6 +209,53 @@ struct SearchView: View {
             .buttonStyle(.plain)
         }
         .frame(height: 36)
+    }
+
+    private var placeResultList: some View {
+        VStack(spacing: 4) {
+            ForEach(store.placeResults) { placeResult in
+                placeResultRow(placeResult)
+                    .overlay(alignment: .bottom) {
+                        if placeResult.id != store.placeResults.last?.id {
+                            Divider()
+                                .overlay(.lineNormal)
+                        }
+                    }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 12)
+    }
+
+    private func placeResultRow(_ placeResult: SearchPlaceResult) -> some View {
+        Button {
+            store.send(.placeResultTapped(placeResult))
+        } label: {
+            HStack(alignment: .top, spacing: 8) {
+                Image(.location16)
+                    .renderingMode(.template)
+                    .foregroundStyle(.labelAlternative)
+                    .frame(width: 16, height: 16)
+                    .padding(.top, 2)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(placeResult.title)
+                        .kohereTextStyle(.label2Medium)
+                        .foregroundStyle(.labelNormal)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Text(placeResult.displayAddress)
+                        .kohereTextStyle(.body3Regular)
+                        .foregroundStyle(.labelAlternative)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var emptyResultView: some View {
