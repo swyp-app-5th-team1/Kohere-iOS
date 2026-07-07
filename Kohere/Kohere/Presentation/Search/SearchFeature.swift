@@ -18,6 +18,7 @@ struct SearchFeature {
         var contentState: SearchContentState = .recentSearches
         var recentSearches: [SearchRecentSearch] = []
         var placeResults: [SearchPlaceResult] = []
+        var searchErrorMessage: String?
     }
 
     enum Action {
@@ -29,6 +30,9 @@ struct SearchFeature {
         case recentSearchDeleteButtonTapped(String)
         case clearRecentSearchesButtonTapped
         case placeResultTapped(SearchPlaceResult)
+        case placeSearchSucceeded(requestedKeyword: String, results: [SearchPlaceResult])
+        case placeSearchFailed(requestedKeyword: String, message: String)
+        case searchErrorDismissed
     }
 
     var body: some Reducer<State, Action> {
@@ -40,26 +44,31 @@ struct SearchFeature {
             case let .searchTextChanged(text):
                 state.searchText = text
                 state.placeResults = []
+                state.searchErrorMessage = nil
                 state.contentState = text.isEmpty ? .recentSearches : .typing
                 return .none
 
             case .clearButtonTapped:
                 state.searchText = ""
                 state.placeResults = []
+                state.searchErrorMessage = nil
                 state.contentState = .recentSearches
                 return .none
 
             case .searchSubmitted:
                 let keyword = state.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !keyword.isEmpty else { return .none }
-                state.addRecentSearch(keyword)
-                state.placeResults = SearchPlaceResult.mockResults(for: keyword)
-                state.contentState = state.placeResults.isEmpty ? .emptyResult : .placeResults
-                return .none
+                state.searchErrorMessage = nil
+                state.contentState = .searching
+                return .send(.placeSearchSucceeded(
+                    requestedKeyword: keyword,
+                    results: SearchPlaceResult.mockResults(for: keyword)
+                ))
 
             case let .recentSearchTapped(keyword):
                 state.searchText = keyword
                 state.placeResults = []
+                state.searchErrorMessage = nil
                 state.contentState = .typing
                 return .none
 
@@ -72,6 +81,29 @@ struct SearchFeature {
                 return .none
 
             case .placeResultTapped:
+                return .none
+
+            case let .placeSearchSucceeded(requestedKeyword, results):
+                guard state.searchText.trimmingCharacters(in: .whitespacesAndNewlines) == requestedKeyword else {
+                    return .none
+                }
+                state.addRecentSearch(requestedKeyword)
+                state.placeResults = results
+                state.searchErrorMessage = nil
+                state.contentState = results.isEmpty ? .emptyResult : .placeResults
+                return .none
+
+            case let .placeSearchFailed(requestedKeyword, message):
+                guard state.searchText.trimmingCharacters(in: .whitespacesAndNewlines) == requestedKeyword else {
+                    return .none
+                }
+                state.placeResults = []
+                state.searchErrorMessage = message
+                state.contentState = .typing
+                return .none
+
+            case .searchErrorDismissed:
+                state.searchErrorMessage = nil
                 return .none
             }
         }
