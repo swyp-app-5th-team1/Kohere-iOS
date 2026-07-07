@@ -83,7 +83,7 @@ struct MoreView: View {
                 Image(profileIconName)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 36, height: 36)
+                    .frame(width: 24, height: 24)
 
                 VStack(alignment: .leading, spacing: 0) {
                     Text(profileNameText)
