@@ -1,15 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "circle_more_fill_24.pdf",
+      "filename" : "tenantProfileBackground.pdf",
       "idiom" : "universal"
     }
   ],
   "info" : {
     "author" : "xcode",
     "version" : 1
-  },
-  "properties" : {
-    "preserves-vector-representation" : true
   }
 }
