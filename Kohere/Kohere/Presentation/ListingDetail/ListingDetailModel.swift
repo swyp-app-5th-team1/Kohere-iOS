@@ -31,7 +31,7 @@ struct ListingDetailOverviewModel: Equatable, Identifiable {
     let imageCountText: String
     let reviewCount: Int
     var isLiked: Bool
-    var favoriteCount: Int? = nil
+    var favoriteCount: Int?
 }
 
 struct ListingRoomOfferModel: Equatable, Identifiable {

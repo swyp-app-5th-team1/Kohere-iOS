@@ -64,7 +64,7 @@ struct MapListingFilterChipItem: Identifiable {
         for filter: MapFilterState,
         source: MapFilterApplicationSource
     ) -> MapListingFilterChipItem {
-        guard filter.hasSelectedPriceRange else {
+        guard filter.hasSelectedPriceRange || source == .diagnosis else {
             return MapListingFilterChipItem(
                 kind: .price,
                 title: "가격",
@@ -75,7 +75,7 @@ struct MapListingFilterChipItem: Identifiable {
 
         return MapListingFilterChipItem(
             kind: .price,
-            title: priceTitle(for: filter),
+            title: priceTitle(for: filter, source: source),
             style: style(for: source),
             showsChevron: false
         )
@@ -114,20 +114,41 @@ struct MapListingFilterChipItem: Identifiable {
         }
     }
 
-    private static func priceTitle(for filter: MapFilterState) -> String {
-        let monthlyRentTitle = MapFilterPriceFormatter.chipTitle(
-            prefix: "월세",
-            selection: filter.monthlyRentRange,
-            defaultSelection: MapFilterPriceRange.defaultMonthlyRent
-        )
+    private static func priceTitle(
+        for filter: MapFilterState,
+        source: MapFilterApplicationSource
+    ) -> String {
+        let monthlyRentTitle = monthlyRentTitle(for: filter, source: source)
         let depositTitle = MapFilterPriceFormatter.chipTitle(
             prefix: "보증금",
             selection: filter.depositRange,
             defaultSelection: MapFilterPriceRange.defaultDeposit
         )
 
-        return [monthlyRentTitle, depositTitle]
+        let title = [monthlyRentTitle, depositTitle]
             .compactMap { $0 }
             .joined(separator: ", ")
+
+        return title.isEmpty ? "가격" : title
+    }
+
+    private static func monthlyRentTitle(
+        for filter: MapFilterState,
+        source: MapFilterApplicationSource
+    ) -> String? {
+        switch source {
+        case .manual:
+            MapFilterPriceFormatter.chipTitle(
+                prefix: "월세",
+                selection: filter.monthlyRentRange,
+                defaultSelection: MapFilterPriceRange.defaultMonthlyRent
+            )
+        case .diagnosis:
+            MapFilterPriceFormatter.chipTitle(
+                prefix: "월세",
+                selection: filter.monthlyRentRange,
+                bounds: MapFilterPriceRange.monthlyRent
+            )
+        }
     }
 }

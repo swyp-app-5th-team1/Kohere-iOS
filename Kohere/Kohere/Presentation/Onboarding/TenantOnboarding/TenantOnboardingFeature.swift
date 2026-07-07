@@ -129,6 +129,9 @@ struct TenantOnboardingFeature {
                 state.emailMessage = nil
                 state.isEmailVerified = false
                 state.emailVerificationCodeErrorMessage = nil
+                Self.debugLogEmailVerification(
+                    "send code requested. email=\(Self.maskedEmail(trimmedEmail))"
+                )
 
                 return .run { send in
                     do {
@@ -150,13 +153,19 @@ struct TenantOnboardingFeature {
                 state.isEmailVerified = false
                 state.emailMessage = response.message ?? "Verification code sent to your email."
                 state.emailVerificationCodeErrorMessage = nil
+                Self.debugLogEmailVerification(
+                    "send code succeeded. email=\(Self.maskedEmail(requestedEmail)), message=\(response.message ?? "nil")"
+                )
                 return .none
 
-            case let .sendVerificationCodeResponse(requestedEmail, .failure):
+            case let .sendVerificationCodeResponse(requestedEmail, .failure(error)):
                 guard state.email == requestedEmail else {
                     return .none
                 }
                 state.isEmailVerificationCodeRequesting = false
+                Self.debugLogEmailVerification(
+                    "send code failed. email=\(Self.maskedEmail(requestedEmail)), error=\(error.localizedDescription)"
+                )
                 return .none
 
             case .confirmVerificationCodeTapped:
@@ -216,5 +225,23 @@ struct TenantOnboardingFeature {
                 return .none
             }
         }
+    }
+}
+
+private extension TenantOnboardingFeature {
+    static func debugLogEmailVerification(_ message: String) {
+#if DEBUG
+        print("[TenantOnboarding][EmailVerification] \(message)")
+#endif
+    }
+
+    static func maskedEmail(_ email: String) -> String {
+        let parts = email.split(separator: "@", maxSplits: 1)
+        guard parts.count == 2 else { return "***" }
+
+        let name = String(parts[0])
+        let domain = String(parts[1])
+        let prefix = name.prefix(2)
+        return "\(prefix)***@\(domain)"
     }
 }

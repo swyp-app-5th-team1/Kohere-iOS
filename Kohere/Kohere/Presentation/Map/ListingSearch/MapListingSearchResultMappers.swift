@@ -12,7 +12,7 @@ extension ListingItemModel {
         self.init(
             id: listing.id,
             title: listing.title,
-            formattedPrice: Self.monthlyRentTitle(
+            formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: listing.minMonthlyRent,
                 max: listing.maxMonthlyRent
             ),
@@ -25,21 +25,50 @@ extension ListingItemModel {
             ),
             locationDescription: Self.locationTitle(from: listing),
             typeTag: Self.typeTitle(from: listing.type),
-            period: Self.stayPeriodTitle(
-                min: listing.minStayMonths,
-                max: listing.maxStayMonths
-            ),
+            period: Self.minimumStayPeriodTitle(months: listing.minStayMonths),
             isLiked: listing.isFavorited,
             favoriteCount: listing.favoriteCount
         )
     }
 
-    nonisolated private static func monthlyRentTitle(min: Int?, max: Int?) -> String {
-        guard let rangeTitle = wonRangeTitle(min: min, max: max) else {
-            return "월세 정보 없음"
+    nonisolated init(
+        listing: Listing,
+        exchangeRate: KRWToUSDExchangeRate?,
+        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase
+    ) {
+        let convertedMonthlyRentText: String
+        if let exchangeRate {
+            convertedMonthlyRentText = MonthlyRentPriceFormatter.usdTitle(
+                min: listing.minMonthlyRent.map {
+                    convertMonthlyRentCurrencyUseCase.execute($0, exchangeRate)
+                },
+                max: listing.maxMonthlyRent.map {
+                    convertMonthlyRentCurrencyUseCase.execute($0, exchangeRate)
+                }
+            )
+        } else {
+            convertedMonthlyRentText = ""
         }
 
-        return "월세 \(rangeTitle)"
+        self.init(
+            id: listing.id,
+            title: listing.title,
+            formattedPrice: MonthlyRentPriceFormatter.wonTitle(
+                min: listing.minMonthlyRent,
+                max: listing.maxMonthlyRent
+            ),
+            formattedUsdPrice: convertedMonthlyRentText,
+            detailsDescription: Self.detailsTitle(
+                minDeposit: listing.minDeposit,
+                maxDeposit: listing.maxDeposit,
+                minMaintenanceFee: listing.minMaintenanceFee,
+                maxMaintenanceFee: listing.maxMaintenanceFee
+            ),
+            locationDescription: Self.locationTitle(from: listing),
+            typeTag: Self.typeTitle(from: listing.type),
+            period: Self.minimumStayPeriodTitle(months: listing.minStayMonths),
+            isLiked: listing.isFavorited
+        )
     }
 
     nonisolated private static func detailsTitle(
@@ -77,19 +106,11 @@ extension ListingItemModel {
         return listing.address ?? ""
     }
 
-    nonisolated private static func stayPeriodTitle(min: Int?, max: Int?) -> String {
-        switch (min, max) {
-        case let (min?, max?) where min == max:
-            return "\(min)개월"
-        case let (min?, max?):
-            return "\(min)~\(max)개월"
-        case let (min?, nil):
-            return "\(min)개월 이상"
-        case let (nil, max?):
-            return "최대 \(max)개월"
-        case (nil, nil):
-            return ""
-        }
+    nonisolated private static func minimumStayPeriodTitle(months: Int?) -> String {
+        guard let months, months > 0 else { return "" }
+        guard months != 1 else { return "한달 이상" }
+
+        return "\(months)개월 이상"
     }
 
     nonisolated private static func typeTitle(from type: String) -> String {

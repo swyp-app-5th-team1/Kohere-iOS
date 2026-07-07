@@ -10,6 +10,7 @@ import SwiftUI
 
 struct MapListingSheetView: View {
     let store: StoreOf<MapFeature>
+    let contentBottomPadding: CGFloat
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -89,21 +90,76 @@ struct MapListingSheetView: View {
 
     private var listingRows: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 0) {
-                ForEach(store.listings) { item in
-                    ListingCardView(
-                        item: item,
-                        onCardTapped: {
-                            store.send(.listingTapped(item.listingID))
-                        },
-                        onLikeTapped: {
-                            store.send(.listingLikeButtonTapped(item.listingID))
-                        }
-                    )
+            LazyVStack(spacing: 0) {
+                if shouldShowEmptyState {
+                    emptyListingView
+                } else {
+                    listingCardListView
                 }
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 104)
+            .padding(.bottom, contentBottomPadding)
+        }
+    }
+
+    private var shouldShowEmptyState: Bool {
+        guard store.listings.isEmpty,
+              !store.isListingSearchLoading,
+              !store.isRecommendationsLoading
+        else { return false }
+
+        switch store.listingSource {
+        case .idle:
+            return false
+
+        case .locationSearch:
+            return store.lastSearchedViewport != nil
+
+        case .diagnosis:
+            return true
+        }
+    }
+
+    private var listingCardListView: some View {
+        ForEach(store.listings) { item in
+            ListingCardView(
+                item: item,
+                onCardTapped: {
+                    store.send(.listingTapped(item.listingID))
+                },
+                onLikeTapped: {
+                    store.send(.listingLikeButtonTapped(item.listingID))
+                }
+            )
+            .onAppear {
+                store.send(.listingRowAppeared(item.listingID))
+            }
+        }
+    }
+
+    private var emptyListingView: some View {
+        VStack(spacing: 10) {
+            Image(.circleInfo24)
+                .foregroundStyle(.coolNeutral70)
+
+            Text(emptyStateTitle)
+                .kohereTextStyle(.body2Regular)
+                .foregroundStyle(.labelNormal)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 176)
+        .padding(.top, 18)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var emptyStateTitle: String {
+        switch store.listingSource {
+        case .diagnosis:
+            return "조건에 맞는 집이 아직 없어요"
+
+        case .idle, .locationSearch:
+            return "이 지역에는 매물이 없어요"
         }
     }
 }

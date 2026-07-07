@@ -29,19 +29,23 @@ final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
         completion: @escaping (Result<URLRequest, any Error>) -> Void
     ) {
         var request = urlRequest
+        let path = requestPath(request)
         
         if request.value(forHTTPHeaderField: "Authorization") != nil {
+            debugLog("adapt skipped. authorization already set. path=\(path)")
             completion(.success(request))
             return
         }
         
         if isAuthRequest(request) {
+            debugLog("adapt skipped. auth endpoint. path=\(path)")
             completion(.success(request))
             return
         }
         
         do {
             guard let auth = try keychainClient.load(for: .auth) else {
+                debugLog("adapt skipped. no auth in keychain. authorization not attached. path=\(path)")
                 completion(.success(request))
                 return
             }
@@ -51,6 +55,7 @@ final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
                 "\(tokenType) \(auth.accessToken)",
                 forHTTPHeaderField: "Authorization"
             )
+            debugLog("adapt attached authorization. path=\(path), accessToken=\(maskedToken(auth.accessToken))")
             
             completion(.success(request))
         } catch {
@@ -130,14 +135,7 @@ final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
     }
     
     private func merge(_ auth: Auth, with token: AuthToken) -> Auth {
-        Auth(
-            onboardingRequired: auth.onboardingRequired,
-            status: auth.status,
-            tokenType: token.tokenType,
-            accessToken: token.accessToken,
-            refreshToken: token.refreshToken,
-            expiresIn: token.expiresIn
-        )
+        auth.updating(with: token)
     }
     
     private func notifySessionExpired() {

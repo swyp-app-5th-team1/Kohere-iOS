@@ -32,18 +32,18 @@ enum RoomCondition: String, CaseIterable, Hashable {
             self = .mealsIncluded
         case "DOUBLE_ROOM":
             self = .doubleRoom
-        case "PRIVATE_BATHROOM":
+        case "PRIVATE_BATH":
             self = .privateBathroom
-        case "ENGLISH_SUPPORT":
+        case "ENGLISH_OK":
             self = .englishSupport
         case "ADDRESS_REGISTRATION":
             self = .addressRegistration
         case "NO_MAINT_FEE":
             self = .noMaintenanceFee
-        case "NO_ARC_REQUIRED":
+        case "NO_ARC":
             self = .noARCRequired
         default:
-            self.init(rawValue: conditionCode)
+            return nil
         }
     }
 
@@ -58,15 +58,15 @@ enum RoomCondition: String, CaseIterable, Hashable {
         case .doubleRoom:
             "DOUBLE_ROOM"
         case .privateBathroom:
-            "PRIVATE_BATHROOM"
+            "PRIVATE_BATH"
         case .englishSupport:
-            "ENGLISH_SUPPORT"
+            "ENGLISH_OK"
         case .addressRegistration:
             "ADDRESS_REGISTRATION"
         case .noMaintenanceFee:
             "NO_MAINT_FEE"
         case .noARCRequired:
-            "NO_ARC_REQUIRED"
+            "NO_ARC"
         }
     }
 }

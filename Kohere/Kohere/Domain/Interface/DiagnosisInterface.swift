@@ -34,7 +34,7 @@ extension DiagnosisClient {
             },
             submit: {
                 try await repository.submit()
-			},
+            },
             fetchDetail: { diagnosisID in
                 try await repository.fetchDetail(diagnosisID: diagnosisID)
             },

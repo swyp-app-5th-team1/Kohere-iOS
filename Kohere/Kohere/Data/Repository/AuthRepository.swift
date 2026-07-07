@@ -221,7 +221,8 @@ private extension SocialLoginResponseDTO {
             tokenType: tokenType,
             accessToken: accessToken,
             refreshToken: refreshToken,
-            expiresIn: expiresIn
+            expiresIn: expiresIn,
+            expiresAt: Auth.expirationDate(expiresIn: expiresIn)
         )
     }
 }
@@ -295,7 +296,8 @@ private extension AuthOnboardingResponseDTO {
             tokenType: tokenType,
             accessToken: accessToken,
             refreshToken: refreshToken,
-            expiresIn: expiresIn
+            expiresIn: expiresIn,
+            expiresAt: Auth.expirationDate(expiresIn: expiresIn)
         )
     }
 }

@@ -202,7 +202,10 @@ struct MapView: View {
         let maximumHeight = listingSheetHeight(for: .maximum, containerHeight: containerHeight)
         let displayedOffset = displayedListingSheetOffset(containerHeight: containerHeight)
 
-        return MapListingSheetView(store: store)
+        return MapListingSheetView(
+            store: store,
+            contentBottomPadding: listingSheetContentBottomPadding
+        )
             .frame(height: maximumHeight)
             .offset(
                 y: store.sheetMode == .selectedListing
@@ -248,6 +251,19 @@ struct MapView: View {
 
     private var tabBarCoveredHeight: CGFloat {
         78
+    }
+
+    private var listingSheetBaseContentBottomPadding: CGFloat {
+        104
+    }
+
+    private var listingSheetContentBottomPadding: CGFloat {
+        switch listingSheetDetent {
+        case .minimum, .maximum:
+            listingSheetBaseContentBottomPadding
+        case .medium:
+            listingSheetBaseContentBottomPadding + tabBarCoveredHeight * 2
+        }
     }
 
     private var sheetAnimation: Animation {
