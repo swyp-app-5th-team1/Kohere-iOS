@@ -175,14 +175,21 @@ struct RootFeature {
                 state.popup = popup
                 return .none
 
-            case .popupNoticeConfirmButtonTapped, .popupActionSecondaryButtonTapped:
+            case .popupNoticeConfirmButtonTapped:
                 state.popup = nil
                 return .none
 
             case .popupActionPrimaryButtonTapped:
                 guard case let .action(popup) = state.popup else { return .none }
                 state.popup = nil
-                return handlePopupRoute(popup.route)
+                guard let route = popup.primaryRoute else { return .none }
+                return handlePopupRoute(route)
+
+            case .popupActionSecondaryButtonTapped:
+                guard case let .action(popup) = state.popup else { return .none }
+                state.popup = nil
+                guard let route = popup.secondaryRoute else { return .none }
+                return handlePopupRoute(route)
 
             case let .map(.path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID))))):
                 state.map.path.removeAll()

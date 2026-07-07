@@ -15,7 +15,7 @@ struct KohereActionPopup: View {
     let onSecondaryTapped: () -> Void
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 16) {
             Text(message)
                 .kohereTextStyle(.body2Regular)
                 .foregroundStyle(.coolNeutral70)
