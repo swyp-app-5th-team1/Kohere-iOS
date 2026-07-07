@@ -63,16 +63,12 @@ final class DiagnosisRepository: DiagnosisInterface {
         return responseDTO.toEntity()
     }
 
-	func fetchRecommendations(diagnosisID: Int) async throws -> DiagnosisRecommendations {
+	func fetchRecommendations(input: DiagnosisRecommendationsInput) async throws -> DiagnosisRecommendations {
         let environment = try environmentProvider()
-        let queryDTO = DiagnosisRecommendationsQueryDTO(
-            page: 0,
-            size: 20,
-            sort: nil
-        )
+        let queryDTO = DiagnosisRecommendationsQueryDTO(input)
         let responseDTO: DiagnosisRecommendationsResponseDTO = try await networkService.request(
             DiagnosisRouter.recommendations(
-                diagnosisID: diagnosisID,
+                diagnosisID: input.diagnosisID,
                 query: queryDTO,
                 environment
             )
@@ -177,7 +173,9 @@ private extension DiagnosisRecommendationsResponseDTO {
 
         return DiagnosisRecommendations(
             listings: listingEntities,
-            markers: markerEntities.isEmpty ? fallbackMarkers : markerEntities
+            markers: markerEntities.isEmpty ? fallbackMarkers : markerEntities,
+            page: page?.toEntity(),
+            suggestions: suggestions?.toEntity()
         )
     }
 }
@@ -195,8 +193,10 @@ private extension DiagnosisRecommendedListingResponseDTO {
             listingID: listingId,
             title: title ?? "",
             type: type ?? "",
-            monthlyRent: monthlyRent,
-            deposit: deposit,
+            minMonthlyRent: monthlyRentMin,
+            maxMonthlyRent: monthlyRentMax,
+            minDeposit: minDeposit,
+            maxDeposit: maxDeposit,
             thumbnailURL: thumbnailUrl,
             coordinate: coordinate,
             conditions: (conditions ?? []).compactMap(RoomCondition.init(conditionCode:))
@@ -210,6 +210,37 @@ private extension DiagnosisRecommendationMarkerResponseDTO {
         return MapMarkerItem(
             id: listingId,
             coordinate: MapCoordinate(latitude: lat, longitude: lng)
+        )
+    }
+}
+
+private extension DiagnosisRecommendationPageResponseDTO {
+    func toEntity() -> DiagnosisRecommendationPage {
+        DiagnosisRecommendationPage(
+            number: number,
+            size: size,
+            totalElements: totalElements,
+            totalPages: totalPages,
+            hasNext: hasNext
+        )
+    }
+}
+
+private extension DiagnosisSuggestionsResponseDTO {
+    func toEntity() -> DiagnosisRecommendationSuggestions {
+        DiagnosisRecommendationSuggestions(
+            reason: reason,
+            message: message,
+            actions: (actions ?? []).map { $0.toEntity() }
+        )
+    }
+}
+
+private extension DiagnosisSuggestionActionResponseDTO {
+    func toEntity() -> DiagnosisRecommendationSuggestionAction {
+        DiagnosisRecommendationSuggestionAction(
+            type: type,
+            detail: detail
         )
     }
 }

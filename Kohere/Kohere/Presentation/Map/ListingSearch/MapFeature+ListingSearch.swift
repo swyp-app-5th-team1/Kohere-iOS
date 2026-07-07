@@ -158,6 +158,70 @@ extension MapFeature {
         .cancellable(id: "MapFeature.listingSearch", cancelInFlight: true)
     }
 
+    func startNextPageEffect(
+        appearedListingID: String,
+        state: inout State
+    ) -> Effect<Action> {
+        switch state.listingSource {
+        case .locationSearch:
+            return startNextListingPageEffect(appearedListingID: appearedListingID, state: &state)
+
+        case .diagnosis:
+            return startNextDiagnosisRecommendationPageEffect(appearedListingID: appearedListingID, state: &state)
+
+        case .idle:
+            return .none
+        }
+    }
+
+    func clearDiagnosisRecommendationState(state: inout State) {
+        state.isRecommendationsLoading = false
+        state.recommendationsErrorMessage = nil
+        state.diagnosisRecommendedListings = []
+        state.diagnosisRecommendationSuggestions = nil
+        state.diagnosisRecommendationPageInfo = nil
+    }
+
+    func cancelDiagnosisRequestEffects() -> Effect<Action> {
+        .merge(
+            .cancel(id: "MapFeature.diagnosisDetail"),
+            .cancel(id: "MapFeature.diagnosisRecommendations")
+        )
+    }
+
+    func startNextDiagnosisRecommendationPageEffect(
+        appearedListingID: String,
+        state: inout State
+    ) -> Effect<Action> {
+        guard state.listings.last?.listingID == appearedListingID,
+              !state.isRecommendationsLoading,
+              state.listingSource == .diagnosis,
+              state.diagnosisRecommendationPageInfo?.hasNext == true,
+              let diagnosisID = state.activeDiagnosisID
+        else { return .none }
+
+        let nextPage = (state.diagnosisRecommendationPageInfo?.number ?? 0) + 1
+        let pageSize = state.diagnosisRecommendationPageInfo?.size ?? DiagnosisRecommendationsInput.defaultPageSize
+        state.isRecommendationsLoading = true
+        state.recommendationsErrorMessage = nil
+
+        let input = DiagnosisRecommendationsInput(
+            diagnosisID: diagnosisID,
+            page: nextPage,
+            size: pageSize
+        )
+
+        return .run { [diagnosisClient] send in
+            do {
+                let recommendations = try await diagnosisClient.fetchRecommendations(input)
+                await send(.diagnosisRecommendationsResponse(.success(recommendations)))
+            } catch {
+                await send(.diagnosisRecommendationsResponse(.failure(error)))
+            }
+        }
+        .cancellable(id: "MapFeature.diagnosisRecommendations", cancelInFlight: true)
+    }
+
     func applyListingSearchPage(_ page: ListingSearchPage, to state: inout State) {
         state.listingPageInfo = page.page
 
@@ -182,6 +246,35 @@ extension MapFeature {
         }
     }
 
+    func applyDiagnosisRecommendations(_ recommendations: DiagnosisRecommendations, to state: inout State) {
+        let pageNumber = recommendations.page?.number ?? 0
+        let shouldAppendPage = pageNumber > 0 && !state.diagnosisRecommendedListings.isEmpty
+        state.diagnosisRecommendationPageInfo = recommendations.page
+
+        if shouldAppendPage {
+            appendUniqueRecommendations(recommendations.listings, to: &state.diagnosisRecommendedListings)
+            appendUniqueMarkers(recommendations.markers, to: &state.markers)
+        } else {
+            state.selectedMarkerID = nil
+            state.sheetMode = .listingList
+            state.diagnosisRecommendedListings = recommendations.listings
+            state.diagnosisRecommendationSuggestions = recommendations.suggestions
+            state.markers = recommendations.markers
+
+            let cameraCoordinate = recommendations.listings.compactMap(\.coordinate).first
+                ?? recommendations.markers.first?.coordinate
+            state.cameraMoveRequest = cameraCoordinate
+            if cameraCoordinate == nil {
+                state.lastSearchedViewport = state.currentViewport
+            }
+        }
+
+        state.listings = listingItemModels(
+            from: state.diagnosisRecommendedListings,
+            exchangeRate: state.krwToUSDExchangeRate
+        )
+    }
+
     private func appendUniqueListings(
         _ newListings: [Listing],
         to listings: inout [Listing]
@@ -189,6 +282,24 @@ extension MapFeature {
         var existingIDs = Set(listings.map(\.id))
         let uniqueListings = newListings.filter { existingIDs.insert($0.id).inserted }
         listings.append(contentsOf: uniqueListings)
+    }
+
+    private func appendUniqueRecommendations(
+        _ newRecommendations: [DiagnosisRecommendedListing],
+        to recommendations: inout [DiagnosisRecommendedListing]
+    ) {
+        var existingIDs = Set(recommendations.map(\.listingID))
+        let uniqueRecommendations = newRecommendations.filter { existingIDs.insert($0.listingID).inserted }
+        recommendations.append(contentsOf: uniqueRecommendations)
+    }
+
+    private func appendUniqueMarkers(
+        _ newMarkers: [MapMarkerItem],
+        to markers: inout [MapMarkerItem]
+    ) {
+        var existingIDs = Set(markers.map(\.id))
+        let uniqueMarkers = newMarkers.filter { existingIDs.insert($0.id).inserted }
+        markers.append(contentsOf: uniqueMarkers)
     }
 
     private func isViewport(

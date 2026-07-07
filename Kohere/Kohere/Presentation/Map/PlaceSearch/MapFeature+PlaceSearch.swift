@@ -26,10 +26,16 @@ extension MapFeature {
         state.lastSearchedViewport = nil
         state.listingPageInfo = nil
         state.listingSearchErrorMessage = nil
+        state.isDiagnosisDetailLoading = false
+        state.diagnosisErrorMessage = nil
         state.listingSearchResults = []
+        clearDiagnosisRecommendationState(state: &state)
         state.listings = []
         state.markers = []
 
-        return .cancel(id: "MapFeature.listingSearch")
+        return .merge(
+            .cancel(id: "MapFeature.listingSearch"),
+            cancelDiagnosisRequestEffects()
+        )
     }
 }

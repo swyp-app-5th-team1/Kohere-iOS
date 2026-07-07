@@ -12,9 +12,15 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
-            formattedPrice: Self.monthlyRentTitle(from: recommendation.monthlyRent),
+            formattedPrice: MonthlyRentPriceFormatter.wonTitle(
+                min: recommendation.minMonthlyRent,
+                max: recommendation.maxMonthlyRent
+            ),
             formattedUsdPrice: "",
-            detailsDescription: Self.depositTitle(from: recommendation.deposit),
+            detailsDescription: Self.depositTitle(
+                min: recommendation.minDeposit,
+                max: recommendation.maxDeposit
+            ),
             locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
             typeTag: Self.typeTitle(from: recommendation.type),
             period: "1 mo~",
@@ -28,9 +34,15 @@ extension ListingItemModel {
         convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase
     ) {
         let convertedMonthlyRentText: String
-        if let exchangeRate, let monthlyRent = recommendation.monthlyRent {
-            let convertedMonthlyRent = convertMonthlyRentCurrencyUseCase.execute(monthlyRent, exchangeRate)
-            convertedMonthlyRentText = MonthlyRentPriceFormatter.usdTitle(from: convertedMonthlyRent)
+        if let exchangeRate {
+            convertedMonthlyRentText = MonthlyRentPriceFormatter.usdTitle(
+                min: recommendation.minMonthlyRent.map {
+                    convertMonthlyRentCurrencyUseCase.execute($0, exchangeRate)
+                },
+                max: recommendation.maxMonthlyRent.map {
+                    convertMonthlyRentCurrencyUseCase.execute($0, exchangeRate)
+                }
+            )
         } else {
             convertedMonthlyRentText = ""
         }
@@ -38,9 +50,15 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
-            formattedPrice: Self.monthlyRentTitle(from: recommendation.monthlyRent),
+            formattedPrice: MonthlyRentPriceFormatter.wonTitle(
+                min: recommendation.minMonthlyRent,
+                max: recommendation.maxMonthlyRent
+            ),
             formattedUsdPrice: convertedMonthlyRentText,
-            detailsDescription: Self.depositTitle(from: recommendation.deposit),
+            detailsDescription: Self.depositTitle(
+                min: recommendation.minDeposit,
+                max: recommendation.maxDeposit
+            ),
             locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
             typeTag: Self.typeTitle(from: recommendation.type),
             period: "1 mo~",
@@ -48,14 +66,9 @@ extension ListingItemModel {
         )
     }
 
-    nonisolated private static func monthlyRentTitle(from monthlyRent: Int?) -> String {
-        guard let monthlyRent else { return "가격 문의" }
-        return "₩\(monthlyRent / 1000)K/mo"
-    }
-
-    nonisolated private static func depositTitle(from deposit: Int?) -> String {
-        guard let deposit else { return "Dep. 문의" }
-        return "Dep. ₩\(deposit / 1000)K"
+    nonisolated private static func depositTitle(min: Int?, max: Int?) -> String {
+        guard let rangeTitle = wonRangeTitle(min: min, max: max) else { return "" }
+        return "보증금 \(rangeTitle)"
     }
 
     nonisolated private static func typeTitle(from type: String) -> String {
@@ -72,6 +85,39 @@ extension ListingItemModel {
                 .lowercased()
                 .capitalized
         }
+    }
+
+    nonisolated private static func wonRangeTitle(min: Int?, max: Int?) -> String? {
+        switch (min, max) {
+        case let (min?, max?) where min == max:
+            return wonTitle(min)
+        case let (min?, max?):
+            return "\(wonNumberTitle(min))~\(wonTitle(max))"
+        case let (min?, nil):
+            return "\(wonTitle(min))~"
+        case let (nil, max?):
+            return "~\(wonTitle(max))"
+        case (nil, nil):
+            return nil
+        }
+    }
+
+    nonisolated private static func wonTitle(_ amount: Int) -> String {
+        guard amount != 0 else { return "0원" }
+        guard amount >= 10_000 else { return "\(amount)원" }
+
+        return "\(wonNumberTitle(amount))만원"
+    }
+
+    nonisolated private static func wonNumberTitle(_ amount: Int) -> String {
+        guard amount >= 10_000 else { return "\(amount)원" }
+
+        let tenths = amount / 1_000
+        if tenths % 10 == 0 {
+            return "\(tenths / 10)"
+        }
+
+        return "\(Double(tenths) / 10)"
     }
 
 }

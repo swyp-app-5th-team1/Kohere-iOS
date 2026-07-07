@@ -139,15 +139,17 @@ struct MapFeature {
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
                 state.isDiagnosisDetailLoading = false
-                state.isRecommendationsLoading = false
                 state.diagnosisErrorMessage = nil
-                state.recommendationsErrorMessage = nil
-                state.diagnosisRecommendedListings = []
+                clearDiagnosisRecommendationState(state: &state)
+                let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
                 guard let viewport = state.currentViewport,
                       canStartListingSearch(state: state)
-                else { return .none }
+                else { return cancelDiagnosisRequests }
 
-                return startListingSearchEffect(state: &state, viewport: viewport)
+                return .merge(
+                    cancelDiagnosisRequests,
+                    startListingSearchEffect(state: &state, viewport: viewport)
+                )
 
             case let .diagnosisResultRequested(diagnosisID):
                 state.path = StackState<Path.State>()
@@ -165,7 +167,7 @@ struct MapFeature {
                 state.markers = []
                 state.listings = []
                 state.listingSearchResults = []
-                state.diagnosisRecommendedListings = []
+                clearDiagnosisRecommendationState(state: &state)
                 state.isListingSearchLoading = false
                 state.isDiagnosisDetailLoading = true
                 state.isRecommendationsLoading = true
@@ -190,7 +192,8 @@ struct MapFeature {
                     .cancellable(id: "MapFeature.diagnosisDetail", cancelInFlight: true),
                     .run { send in
                         do {
-                            let recommendations = try await diagnosisClient.fetchRecommendations(diagnosisID)
+                            let input = DiagnosisRecommendationsInput(diagnosisID: diagnosisID)
+                            let recommendations = try await diagnosisClient.fetchRecommendations(input)
                             await send(.diagnosisRecommendationsResponse(.success(recommendations)))
                         } catch {
                             await send(.diagnosisRecommendationsResponse(.failure(error)))
@@ -210,6 +213,7 @@ struct MapFeature {
                 return .none
 
             case let .diagnosisDetailResponse(.failure(error)):
+                guard state.listingSource == .diagnosis else { return .none }
                 debugLogDiagnosisError("detail", error)
                 state.isDiagnosisDetailLoading = false
                 state.diagnosisErrorMessage = error.localizedDescription
@@ -225,27 +229,17 @@ struct MapFeature {
             case let .diagnosisRecommendationsResponse(.success(recommendations)):
                 guard state.listingSource == .diagnosis else { return .none }
                 debugLogDiagnosisRecommendations(recommendations)
-                state.selectedMarkerID = nil
-                state.sheetMode = .listingList
-                state.diagnosisRecommendedListings = recommendations.listings
-                state.listings = listingItemModels(
-                    from: recommendations.listings,
-                    exchangeRate: state.krwToUSDExchangeRate
-                )
-                state.markers = recommendations.markers
-                let cameraCoordinate = recommendations.listings.compactMap(\.coordinate).first ?? recommendations.markers.first?.coordinate
-                state.cameraMoveRequest = cameraCoordinate
-                if cameraCoordinate == nil {
-                    state.lastSearchedViewport = state.currentViewport
-                }
+                applyDiagnosisRecommendations(recommendations, to: &state)
                 state.isRecommendationsLoading = false
                 state.recommendationsErrorMessage = nil
                 return .none
 
             case let .diagnosisRecommendationsResponse(.failure(error)):
+                guard state.listingSource == .diagnosis else { return .none }
                 debugLogDiagnosisError("recommendations", error)
                 state.isRecommendationsLoading = false
                 state.recommendationsErrorMessage = error.localizedDescription
+                state.diagnosisRecommendationSuggestions = nil
                 return .none
 
             case .locationPermissionDialogCloseButtonTapped:
@@ -276,16 +270,23 @@ struct MapFeature {
             case .researchButtonTapped:
                 guard let viewport = state.currentViewport else { return .none }
                 state.listingSource = .locationSearch
+                state.activeDiagnosisID = nil
                 state.placeSearchTarget = nil
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
-                return startListingSearchEffect(state: &state, viewport: viewport)
+                state.isDiagnosisDetailLoading = false
+                state.diagnosisErrorMessage = nil
+                clearDiagnosisRecommendationState(state: &state)
+                return .merge(
+                    cancelDiagnosisRequestEffects(),
+                    startListingSearchEffect(state: &state, viewport: viewport)
+                )
 
             case let .viewportChanged(viewport):
                 return handleViewportChanged(viewport, state: &state)
 
             case let .listingRowAppeared(listingID):
-                return startNextListingPageEffect(appearedListingID: listingID, state: &state)
+                return startNextPageEffect(appearedListingID: listingID, state: &state)
 
             case let .listingSearchResponse(.success(page)):
                 guard state.listingSource == .locationSearch else { return .none }
@@ -369,11 +370,19 @@ struct MapFeature {
                 state.isDiagnosisMatchesButtonExpanded = true
                 state.isFilterPresented = false
                 state.listingSource = .locationSearch
+                state.activeDiagnosisID = nil
                 state.placeSearchTarget = nil
+                state.isDiagnosisDetailLoading = false
+                state.diagnosisErrorMessage = nil
+                clearDiagnosisRecommendationState(state: &state)
+                let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
                 guard let viewport = state.currentViewport,
                       canStartListingSearch(state: state)
-                else { return .none }
-                return startListingSearchEffect(state: &state, viewport: viewport)
+                else { return cancelDiagnosisRequests }
+                return .merge(
+                    cancelDiagnosisRequests,
+                    startListingSearchEffect(state: &state, viewport: viewport)
+                )
             case .filterResetButtonTapped:
                 state.editingFilter = MapFilterState()
                 return .none

@@ -19,6 +19,8 @@ extension MapFeature {
         var listings: [ListingItemModel] = []
         var listingSearchResults: [Listing] = []
         var diagnosisRecommendedListings: [DiagnosisRecommendedListing] = []
+        var diagnosisRecommendationSuggestions: DiagnosisRecommendationSuggestions?
+        var diagnosisRecommendationPageInfo: DiagnosisRecommendationPage?
         var listingSource: MapListingSource = .idle
         var krwToUSDExchangeRate: KRWToUSDExchangeRate?
         var isListingSearchLoading = false

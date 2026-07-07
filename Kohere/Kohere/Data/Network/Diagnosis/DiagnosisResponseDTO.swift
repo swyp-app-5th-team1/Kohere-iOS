@@ -46,14 +46,18 @@ struct DiagnosisDetailResponseDTO: Decodable {
 struct DiagnosisRecommendationsResponseDTO: Decodable {
     let content: [DiagnosisRecommendedListingResponseDTO]?
     let markers: [DiagnosisRecommendationMarkerResponseDTO]?
+    let page: DiagnosisRecommendationPageResponseDTO?
+    let suggestions: DiagnosisSuggestionsResponseDTO?
 }
 
 struct DiagnosisRecommendedListingResponseDTO: Decodable {
     let listingId: String
     let title: String?
     let type: String?
-    let monthlyRent: Int?
-    let deposit: Int?
+    let monthlyRentMin: Int?
+    let monthlyRentMax: Int?
+    let minDeposit: Int?
+    let maxDeposit: Int?
     let thumbnailUrl: String?
     let lat: Double?
     let lng: Double?
@@ -64,4 +68,23 @@ struct DiagnosisRecommendationMarkerResponseDTO: Decodable {
     let listingId: String
     let lat: Double?
     let lng: Double?
+}
+
+struct DiagnosisRecommendationPageResponseDTO: Decodable {
+    let number: Int?
+    let size: Int?
+    let totalElements: Int?
+    let totalPages: Int?
+    let hasNext: Bool?
+}
+
+struct DiagnosisSuggestionsResponseDTO: Decodable {
+    let reason: String?
+    let message: String?
+    let actions: [DiagnosisSuggestionActionResponseDTO]?
+}
+
+struct DiagnosisSuggestionActionResponseDTO: Decodable {
+    let type: String?
+    let detail: String?
 }
