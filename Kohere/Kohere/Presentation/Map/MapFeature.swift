@@ -135,6 +135,7 @@ struct MapFeature {
                 state.listingSource = .locationSearch
                 state.activeDiagnosisID = nil
                 state.appliedFilterSource = .manual
+                state.placeSearchTarget = nil
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
                 state.isDiagnosisDetailLoading = false
@@ -142,7 +143,6 @@ struct MapFeature {
                 state.diagnosisErrorMessage = nil
                 state.recommendationsErrorMessage = nil
                 state.diagnosisRecommendedListings = []
-
                 guard let viewport = state.currentViewport,
                       canStartListingSearch(state: state)
                 else { return .none }
@@ -157,6 +157,7 @@ struct MapFeature {
                 state.sheetMode = .listingList
                 state.isFilterPresented = false
                 state.appliedFilterSource = .diagnosis
+                state.placeSearchTarget = nil
                 state.isDiagnosisButtonExpanded = false
                 state.isDiagnosisMatchesButtonExpanded = true
                 state.showsResearchButton = false
@@ -270,10 +271,12 @@ struct MapFeature {
             case .searchButtonTapped:
                 state.path.append(.search(SearchFeature.State()))
                 return .none
-
+            case let .placeSearchResultSelected(placeResult):
+                return handlePlaceSearchResultSelected(placeResult, state: &state)
             case .researchButtonTapped:
                 guard let viewport = state.currentViewport else { return .none }
                 state.listingSource = .locationSearch
+                state.placeSearchTarget = nil
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
                 return startListingSearchEffect(state: &state, viewport: viewport)
@@ -310,7 +313,9 @@ struct MapFeature {
             case .path(.element(id: _, action: .search(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
-
+            case let .path(.element(id: _, action: .search(.placeResultTapped(placeResult)))):
+                _ = state.path.popLast()
+                return .send(.placeSearchResultSelected(placeResult))
             case .path:
                 return .none
 
@@ -378,7 +383,7 @@ struct MapFeature {
                 state.isDiagnosisMatchesButtonExpanded = true
                 state.isFilterPresented = false
                 state.listingSource = .locationSearch
-
+                state.placeSearchTarget = nil
                 guard let viewport = state.currentViewport,
                       canStartListingSearch(state: state)
                 else { return .none }

@@ -32,6 +32,7 @@ extension MapFeature {
         // 지도 viewport / 재검색 상태
         var currentViewport: MapViewport?
         var lastSearchedViewport: MapViewport?
+        var placeSearchTarget: MapPlaceSearchTarget?
         var showsResearchButton = false
 
         // 바텀시트 / 필터 상태
@@ -73,6 +74,7 @@ extension MapFeature {
         case cameraMoveRequestHandled
         case markerTapped(String)
         case searchButtonTapped
+        case placeSearchResultSelected(SearchPlaceResult)
         case researchButtonTapped
         case viewportChanged(MapViewport)
         case listingRowAppeared(String)
@@ -94,4 +96,8 @@ extension MapFeature {
         case filterApplyButtonTapped
         case filterResetButtonTapped
     }
+}
+
+struct MapPlaceSearchTarget: Equatable {
+    let coordinate: MapCoordinate
 }

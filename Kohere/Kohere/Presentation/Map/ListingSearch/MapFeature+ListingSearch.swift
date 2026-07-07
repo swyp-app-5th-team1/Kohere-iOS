@@ -65,6 +65,15 @@ extension MapFeature {
             return .none
 
         case .locationSearch:
+            if let placeSearchTarget = state.placeSearchTarget {
+                state.showsResearchButton = false
+                guard isViewport(viewport, centeredNear: placeSearchTarget.coordinate) else {
+                    return .none
+                }
+                state.placeSearchTarget = nil
+                return startListingSearchEffect(state: &state, viewport: viewport)
+            }
+
             guard let lastSearchedViewport = state.lastSearchedViewport else {
                 state.showsResearchButton = false
                 guard canStartFirstListingSearch(state: state) else { return .none }
@@ -180,5 +189,14 @@ extension MapFeature {
         var existingIDs = Set(listings.map(\.id))
         let uniqueListings = newListings.filter { existingIDs.insert($0.id).inserted }
         listings.append(contentsOf: uniqueListings)
+    }
+
+    private func isViewport(
+        _ viewport: MapViewport,
+        centeredNear coordinate: MapCoordinate
+    ) -> Bool {
+        let tolerance = 0.0001
+        return abs(viewport.center.latitude - coordinate.latitude) < tolerance
+            && abs(viewport.center.longitude - coordinate.longitude) < tolerance
     }
 }

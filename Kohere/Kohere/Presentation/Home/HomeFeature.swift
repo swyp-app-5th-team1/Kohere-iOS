@@ -43,6 +43,7 @@ struct HomeFeature {
     enum Action {
         case path(StackActionOf<Path>)
         case mapTabRequested(diagnosisID: String?)
+        case mapPlaceSearchRequested(SearchPlaceResult)
         
         case navigationSearchTapped
         case navigationHeartTapped
@@ -85,6 +86,10 @@ struct HomeFeature {
 
             case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
                 return .send(.mapTabRequested(diagnosisID: diagnosisID))
+
+            case let .path(.element(id: _, action: .search(.placeResultTapped(placeResult)))):
+                state.path.removeAll()
+                return .send(.mapPlaceSearchRequested(placeResult))
                 
             case .path:
                 return .none
@@ -132,7 +137,7 @@ struct HomeFeature {
                 print("선택 콘텐츠 \(id)")
                 return .none
 
-            case .mapTabRequested:
+            case .mapTabRequested, .mapPlaceSearchRequested:
                 return .none
             }
         }

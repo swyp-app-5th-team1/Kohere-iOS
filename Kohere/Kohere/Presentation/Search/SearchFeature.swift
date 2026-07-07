@@ -18,7 +18,6 @@ struct SearchFeature {
         var contentState: SearchContentState = .recentSearches
         var recentSearches: [SearchRecentSearch] = []
         var placeResults: [SearchPlaceResult] = []
-        var searchErrorMessage: String?
     }
 
     enum Action {
@@ -32,7 +31,7 @@ struct SearchFeature {
         case placeResultTapped(SearchPlaceResult)
         case placeSearchSucceeded(requestedKeyword: String, results: [SearchPlaceResult])
         case placeSearchFailed(requestedKeyword: String, message: String)
-        case searchErrorDismissed
+        case popupRequested(AppPopup)
     }
 
     var body: some Reducer<State, Action> {
@@ -44,21 +43,18 @@ struct SearchFeature {
             case let .searchTextChanged(text):
                 state.searchText = text
                 state.placeResults = []
-                state.searchErrorMessage = nil
                 state.contentState = text.isEmpty ? .recentSearches : .typing
                 return .none
 
             case .clearButtonTapped:
                 state.searchText = ""
                 state.placeResults = []
-                state.searchErrorMessage = nil
                 state.contentState = .recentSearches
                 return .none
 
             case .searchSubmitted:
                 let keyword = state.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !keyword.isEmpty else { return .none }
-                state.searchErrorMessage = nil
                 state.contentState = .searching
                 return .send(.placeSearchSucceeded(
                     requestedKeyword: keyword,
@@ -68,7 +64,6 @@ struct SearchFeature {
             case let .recentSearchTapped(keyword):
                 state.searchText = keyword
                 state.placeResults = []
-                state.searchErrorMessage = nil
                 state.contentState = .typing
                 return .none
 
@@ -89,7 +84,6 @@ struct SearchFeature {
                 }
                 state.addRecentSearch(requestedKeyword)
                 state.placeResults = results
-                state.searchErrorMessage = nil
                 state.contentState = results.isEmpty ? .emptyResult : .placeResults
                 return .none
 
@@ -98,12 +92,10 @@ struct SearchFeature {
                     return .none
                 }
                 state.placeResults = []
-                state.searchErrorMessage = message
                 state.contentState = .typing
-                return .none
+                return .send(.popupRequested(placeSearchFailurePopup(message: message)))
 
-            case .searchErrorDismissed:
-                state.searchErrorMessage = nil
+            case .popupRequested:
                 return .none
             }
         }
@@ -115,6 +107,14 @@ extension SearchFeature.State {
         recentSearches.removeAll { $0.keyword == keyword }
         recentSearches.insert(SearchRecentSearch(keyword: keyword), at: 0)
         recentSearches = Array(recentSearches.prefix(SearchFeature.recentSearchLimit))
+    }
+}
+
+private extension SearchFeature {
+    func placeSearchFailurePopup(message: String) -> AppPopup {
+        let fallbackMessage = "장소 검색에 실패했어요.\n다시 시도해주세요."
+        let resolvedMessage = message.isEmpty ? fallbackMessage : message
+        return .notice(AppPopup.Notice(message: resolvedMessage))
     }
 }
 

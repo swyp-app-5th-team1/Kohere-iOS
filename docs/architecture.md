@@ -162,6 +162,30 @@ RootView
 일반 View는 navigation path를 직접 수정하지 않는다.
 사용자 액션은 TCA Action으로 Feature에 전달하고, push/pop 같은 화면 전환 상태 변경은 Feature reducer 또는 Flow 계층에서 처리한다.
 
+### Global Popup
+
+전역 팝업은 `RootFeature`와 `RootView`에서 관리한다.
+
+UIKit처럼 각 화면에서 현재 ViewController를 찾아 `present`하지 않는다.
+SwiftUI + TCA에서는 팝업 표시 여부와 내용을 `RootFeature.State`에 상태로 두고, `RootView`가 그 상태를 보고 화면 최상단에 팝업 오버레이를 그린다.
+
+팝업은 성격에 따라 구분해서 사용한다.
+
+- `notice`: 사용자에게 정보를 알리고 `확인` 버튼으로 닫는 팝업. 별도 기능 동작 없이 dismiss만 필요할 때 사용한다.
+- `action`: 사용자의 확인이 필요한 동작 팝업. 예: 로그아웃, 회원 탈퇴. 취소 버튼은 dismiss만 하고, 주요 버튼은 해당 feature의 실제 동작으로 이어진다.
+
+사용 규칙:
+
+- 하위 feature는 전역 팝업을 직접 그리거나 UIKit presentation을 호출하지 않는다.
+- 하위 feature는 `AppPopup`을 완성한 뒤 delegate 성격의 action으로 Root에 팝업 표시를 요청한다.
+- feature 문맥별 팝업 문구와 `notice` / `action` 선택은 해당 feature가 결정한다.
+- 네트워크 또는 비즈니스 에러를 사용자 메시지로 바꾸는 작업도 해당 feature가 담당한다. 서버 에러 코드별 문구 분기가 필요하면 Root가 아니라 feature 또는 feature 전용 mapper/helper에 둔다.
+- Root는 팝업 표시 상태와 전역 오버레이만 담당하며, feature별 에러 코드나 문구를 해석하지 않는다.
+- `notice` 팝업의 확인 버튼은 Root에서 dismiss한다.
+- `action` 팝업의 실제 비즈니스 동작은 해당 feature에서 처리한다. Root는 주요 버튼 탭을 해당 feature action으로 전달하는 역할만 한다.
+- `action` 팝업을 요청하는 feature는 주요 버튼 이후 실행될 확정 action을 별도로 가진다. 예: 로그아웃 팝업을 요청한 feature는 `logoutConfirmed`, 탈퇴 팝업을 요청한 feature는 `deleteAccountConfirmed` 같은 action에서 실제 동작을 처리한다.
+- 입력, 선택, 다중 버튼처럼 `notice` / `action`으로 표현하기 어려운 팝업 요구사항이 생기면 임의로 새 타입을 만들지 않고 먼저 확인한다.
+
 탭별 Feature는 다음 형태를 기본 골격으로 사용한다.
 
 ```swift
