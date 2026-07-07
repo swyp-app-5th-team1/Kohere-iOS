@@ -29,7 +29,8 @@ extension ListingItemModel {
                 min: listing.minStayMonths,
                 max: listing.maxStayMonths
             ),
-            isLiked: listing.isFavorited
+            isLiked: listing.isFavorited,
+            favoriteCount: listing.favoriteCount
         )
     }
 

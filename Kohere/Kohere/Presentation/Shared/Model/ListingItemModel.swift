@@ -17,6 +17,7 @@ struct ListingItemModel: Equatable, Identifiable {
     let typeTag: String
     let period: String
     var isLiked: Bool
+    var favoriteCount: Int?
 
     var listingID: String { id }
 
@@ -29,7 +30,8 @@ struct ListingItemModel: Equatable, Identifiable {
         locationDescription: String,
         typeTag: String,
         period: String,
-        isLiked: Bool
+        isLiked: Bool,
+        favoriteCount: Int? = nil
     ) {
         self.id = id
         self.title = title
@@ -40,6 +42,7 @@ struct ListingItemModel: Equatable, Identifiable {
         self.typeTag = typeTag
         self.period = period
         self.isLiked = isLiked
+        self.favoriteCount = favoriteCount
     }
 
     nonisolated init(
@@ -51,7 +54,8 @@ struct ListingItemModel: Equatable, Identifiable {
         locationDescription: String,
         typeTag: String,
         period: String,
-        isLiked: Bool
+        isLiked: Bool,
+        favoriteCount: Int? = nil
     ) {
         self.init(
             id: "\(id)",
@@ -62,7 +66,8 @@ struct ListingItemModel: Equatable, Identifiable {
             locationDescription: locationDescription,
             typeTag: typeTag,
             period: period,
-            isLiked: isLiked
+            isLiked: isLiked,
+            favoriteCount: favoriteCount
         )
     }
 }
