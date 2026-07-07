@@ -16,11 +16,19 @@ struct RootFeature {
     var userDefaultsClient
     @Dependency(\.reissueTokenUseCase)
     var reissueTokenUseCase
+    @Dependency(\.logoutUseCase)
+    var logoutUseCase
+    @Dependency(\.fetchCurrentUserUseCase)
+    var fetchCurrentUserUseCase
+    @Dependency(\.deleteCurrentUserUseCase)
+    var deleteCurrentUserUseCase
     
     @ObservableState
     struct State: Equatable {
         var authInfo: Auth?
+        var currentUser: UserProfile?
         var isAuthLoading = true
+        var isCurrentUserLoading = false
         var login = LoginFeature.State()
         var onboarding = OnboardingFeature.State()
         var selectedTab: AppTab = .home
@@ -34,8 +42,10 @@ struct RootFeature {
     
     enum Action {
         case onAppear
+        case mainTabAppeared
         case storedAuthLoaded(Auth?)
         case authSessionExpired
+        case currentUserResponse(Result<UserProfile, Error>)
         case login(LoginFeature.Action)
         case saveAuthResponse(Result<Auth, Error>)
         case onboarding(OnboardingFeature.Action)
@@ -123,6 +133,25 @@ struct RootFeature {
 
             case .authSessionExpired:
                 state = State(isAuthLoading: false)
+                return .cancel(id: "RootFeature.fetchCurrentUser")
+
+            case .mainTabAppeared:
+                return fetchCurrentUserIfNeeded(state: &state)
+
+            case let .currentUserResponse(.success(user)):
+                guard state.authInfo?.onboardingRequired == false else {
+                    state.isCurrentUserLoading = false
+                    return .none
+                }
+
+                state.currentUser = user
+                state.more.userType = user.userType
+                state.more.userProfile = user
+                state.isCurrentUserLoading = false
+                return .none
+
+            case .currentUserResponse(.failure):
+                state.isCurrentUserLoading = false
                 return .none
 
             case let .login(.loginSuccess(auth)):
@@ -198,11 +227,80 @@ struct RootFeature {
             case let .map(.path(.element(id: _, action: .search(.popupRequested(popup))))):
                 state.popup = popup
                 return .none
+
+            case let .more(.popupRequested(popup)):
+                state.popup = popup
+                return .none
+
+            case .more(.logoutConfirmed):
+                userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
+                state = State(isAuthLoading: false)
+
+                let logoutUseCase = logoutUseCase
+                let keychainClient = keychainClient
+
+                return .merge(
+                    .cancel(id: "RootFeature.fetchCurrentUser"),
+                    .run { _ in
+                        defer {
+                            try? keychainClient.delete(for: .auth)
+                        }
+
+                        do {
+                            try await logoutUseCase.execute()
+                        } catch {}
+                    }
+                )
+
+            case .more(.deleteAccountConfirmed):
+                userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
+                state = State(isAuthLoading: false)
+
+                let deleteCurrentUserUseCase = deleteCurrentUserUseCase
+                let keychainClient = keychainClient
+
+                return .merge(
+                    .cancel(id: "RootFeature.fetchCurrentUser"),
+                    .run { _ in
+                        defer {
+                            try? keychainClient.delete(for: .auth)
+                        }
+
+                        do {
+                            try await deleteCurrentUserUseCase.execute()
+                        } catch {}
+                    }
+                )
                 
             case .login, .onboarding, .home, .community, .map, .chat, .more:
                 return .none
             }
         }
+    }
+
+    private func fetchCurrentUserIfNeeded(state: inout State) -> Effect<Action> {
+        guard state.authInfo?.onboardingRequired == false,
+              state.currentUser == nil,
+              !state.isCurrentUserLoading
+        else {
+            return .none
+        }
+
+        state.isCurrentUserLoading = true
+        let fetchCurrentUserUseCase = fetchCurrentUserUseCase
+
+        return .run { send in
+            do {
+                let user = try await fetchCurrentUserUseCase.execute()
+                await send(.currentUserResponse(.success(user)))
+            } catch {
+                await send(.currentUserResponse(.failure(error)))
+            }
+        }
+        .cancellable(
+            id: "RootFeature.fetchCurrentUser",
+            cancelInFlight: true
+        )
     }
 
     private func openMap(diagnosisID: String?, state: inout State) -> Effect<Action> {

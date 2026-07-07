@@ -21,11 +21,17 @@ struct MoreFlowView: View {
             MoreView(store: store)
         } destination: { store in
             switch store.case {
+            case let .account(accountStore):
+                AccountView(store: accountStore)
+                    .navigationBarHidden(true)
             case let .profileEdit(profileEditStore):
                 ProfileEditView(store: profileEditStore)
                     .navigationBarHidden(true)
             case let .promoteRoomWeb(promoteRoomWebStore):
                 PromoteRoomWebView(store: promoteRoomWebStore)
+                    .navigationBarHidden(true)
+            case let .setting(settingStore):
+                SettingView(store: settingStore)
                     .navigationBarHidden(true)
             }
         }

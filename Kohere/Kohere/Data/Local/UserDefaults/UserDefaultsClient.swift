@@ -70,6 +70,12 @@ extension UserDefaultsClient {
         
         return try JSONDecoder().decode(Value.self, from: data)
     }
+
+    nonisolated func delete<Value: Codable & Sendable>(
+        for key: UserDefaultsKey<Value>
+    ) {
+        delete(key.rawValue)
+    }
 }
 
 extension UserDefaultsStoredValue {

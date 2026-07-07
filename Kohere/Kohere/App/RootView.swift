@@ -93,6 +93,9 @@ struct RootView: View {
             .tag(AppTab.more)
         }
         .tint(.primary50)
+        .onAppear {
+            store.send(.mainTabAppeared)
+        }
     }
 
     private func popupOverlay(_ popup: AppPopup) -> some View {

@@ -30,6 +30,11 @@ struct ProfileEditView: View {
 // MARK: - Subviews
 
 private extension ProfileEditView {
+    func dismissKeyboard() {
+        activeField = nil
+        keyboardField = nil
+    }
+
     var navigationBar: some View {
         KohereNavigationBar(
             left: .backButton({ store.send(.backButtonTapped) }),
@@ -60,6 +65,13 @@ private extension ProfileEditView {
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
             }
+            .background {
+                Color.backgroundNormalAlternative
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        dismissKeyboard()
+                    }
+            }
             .onChange(of: activeField) { _, newValue in
                 scrollToActiveField(newValue, proxy: proxy)
             }
@@ -68,18 +80,10 @@ private extension ProfileEditView {
 
     var profileHeader: some View {
         VStack(spacing: 3) {
-            Circle()
-                .fill(.primary50)
+            Image("tenantProfileIcon")
+                .resizable()
+                .scaledToFit()
                 .frame(width: 73, height: 73)
-                .overlay(
-                    Image(.person24)
-                        .renderingMode(.template)
-                        .foregroundStyle(.staticWhite)
-                )
-                .overlay(
-                    Circle()
-                        .stroke(.primary50, lineWidth: 1.5)
-                )
 
             Text(store.nickname)
                 .kohereTextStyle(.label1Semibold)
