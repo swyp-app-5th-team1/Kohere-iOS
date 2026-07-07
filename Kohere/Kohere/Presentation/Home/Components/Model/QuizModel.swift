@@ -8,29 +8,49 @@
 import SwiftUI
 
 struct QuizModel: Equatable {
+    let id: Int
     let question: String
-    let options: [String]
-    let correctAnswerIndex: Int
-    var selectedAnswerIndex: Int?
-    var hasAnswered: Bool { selectedAnswerIndex != nil }
+    let choices: [QuizChoice]
+    var selectedChoiceKey: String?
+    var correctChoiceKey: String?
+    var explanation: String?
+    var options: [String] { choices.map(\.text) }
+    var hasAnswered: Bool { selectedChoiceKey != nil && correctChoiceKey != nil }
+    var shouldShowExplanation: Bool {
+        guard let selectedChoiceKey, let correctChoiceKey else { return false }
+        return selectedChoiceKey != correctChoiceKey && !(explanation ?? "").isEmpty
+    }
     
-    init(entity: Quiz, selectedAnswerIndex: Int? = nil) {
+    init(entity: Quiz, selectedChoiceKey: String? = nil) {
+        self.id = entity.id
         self.question = entity.question
-        self.options = entity.options
-        self.correctAnswerIndex = entity.correctAnswerIndex
-        self.selectedAnswerIndex = selectedAnswerIndex
+        self.choices = entity.choices
+        self.selectedChoiceKey = selectedChoiceKey
+        self.correctChoiceKey = entity.correctChoiceKey
+        self.explanation = entity.explanation
+    }
+
+    func choiceKey(for index: Int) -> String? {
+        guard choices.indices.contains(index) else { return nil }
+        return choices[index].key
+    }
+
+    mutating func apply(answerResult: QuizAnswerResult) {
+        selectedChoiceKey = answerResult.selectedChoiceKey
+        correctChoiceKey = answerResult.correctChoiceKey
+        explanation = answerResult.explanation
     }
     
     func optionStyle(for index: Int) -> UIStyle {
-        guard let selectedIndex = selectedAnswerIndex else {
+        guard let selectedChoiceKey, let correctChoiceKey, let choiceKey = choiceKey(for: index) else {
             return UIStyle(textColor: .labelNeutral, tintColor: .clear, backgroundColor: .backgroundNormalNormal, iconName: nil)
         }
         
-        if index == correctAnswerIndex {
+        if choiceKey == correctChoiceKey {
             return UIStyle(textColor: .statusGreen70, tintColor: .statusPositive, backgroundColor: .statusGreen5, iconName: "check_16")
         }
         
-        if index == selectedIndex {
+        if choiceKey == selectedChoiceKey {
             return UIStyle(textColor: .statusDanger, tintColor: .statusDanger, backgroundColor: .statusRed5, iconName: "close_16")
         }
         
