@@ -24,6 +24,11 @@ struct ListingListQueryDTO {
     let size: Int
 }
 
+struct ListingFavoriteListQueryDTO {
+    let page: Int
+    let size: Int
+}
+
 extension ListingListQueryDTO {
     init(_ input: ListingSearchInput) {
         self.init(
@@ -88,5 +93,14 @@ extension ListingListQueryDTO {
     ) {
         guard let value else { return }
         items.append(URLQueryItem(name: name, value: String(value)))
+    }
+}
+
+extension ListingFavoriteListQueryDTO {
+    var queryItems: [URLQueryItem] {
+        [
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "size", value: String(size))
+        ]
     }
 }
