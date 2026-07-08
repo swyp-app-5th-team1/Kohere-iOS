@@ -12,7 +12,7 @@ final class ListingRepository: ListingInterface {
     private let environmentProvider: () throws -> APIEnvironment
 
     init(
-        authenticatedNetworkService: NetworkService = .authenticated(),
+        authenticatedNetworkService: NetworkService = LiveNetworkServiceFactory.authenticated(),
         environmentProvider: @escaping () throws -> APIEnvironment = { try APIEnvironment.live() }
     ) {
         self.authenticatedNetworkService = authenticatedNetworkService
