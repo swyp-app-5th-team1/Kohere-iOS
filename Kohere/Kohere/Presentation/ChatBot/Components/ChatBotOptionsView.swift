@@ -9,14 +9,19 @@ import ComposableArchitecture
 import SwiftUI
 
 struct ChatBotOptionsView: View {
-    
+
     // MARK: - Properties
-    
+
     let store: StoreOf<ChatBotFeature>
     let diagnosis: Diagnosis
-    
+
+    private let multiSelectColumns = [
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8)
+    ]
+
     // MARK: - Body
-    
+
     var body: some View {
         Group {
             switch diagnosis.step {
@@ -50,7 +55,7 @@ extension ChatBotOptionsView {
             }
         }
     }
-    
+
     private var verticalOptionsView: some View {
         VStack(alignment: .trailing, spacing: 8) {
             ForEach(diagnosis.options, id: \.id) { option in
@@ -63,14 +68,15 @@ extension ChatBotOptionsView {
             }
         }
     }
-    
+
     private var multiSelectOptionsView: some View {
         VStack(alignment: .trailing, spacing: 8) {
-            HStack(spacing: 8) {
-                ForEach(diagnosis.options.prefix(3), id: \.id) { option in
+            LazyVGrid(columns: multiSelectColumns, alignment: .trailing, spacing: 8) {
+                ForEach(diagnosis.options, id: \.id) { option in
                     UserBubbleButton(
                         title: option.title,
-                        isSelected: store.selectedOptionCodes.contains(option.id)
+                        isSelected: store.selectedOptionCodes.contains(option.id),
+                        fillsAvailableWidth: true
                     ) {
                         withAnimation(.easeInOut(duration: 0.15)) {
                             _ = store.send(.optionTapped(option))
@@ -79,34 +85,8 @@ extension ChatBotOptionsView {
                     .disabled(store.isAnswerSaving)
                 }
             }
-            
-            HStack(spacing: 8) {
-                ForEach(diagnosis.options.dropFirst(3).prefix(2), id: \.id) { option in
-                    UserBubbleButton(
-                        title: option.title,
-                        isSelected: store.selectedOptionCodes.contains(option.id)
-                    ) {
-                        withAnimation(.easeInOut(duration: 0.15)) {
-                            _ = store.send(.optionTapped(option))
-                        }
-                    }
-                    .disabled(store.isAnswerSaving)
-                }
-            }
-            
-            HStack(spacing: 8) {
-                ForEach(diagnosis.options.dropFirst(5).prefix(3), id: \.id) { option in
-                    UserBubbleButton(
-                        title: option.title,
-                        isSelected: store.selectedOptionCodes.contains(option.id)
-                    ) {
-                        withAnimation(.easeInOut(duration: 0.15)) {
-                            _ = store.send(.optionTapped(option))
-                        }
-                    }
-                    .disabled(store.isAnswerSaving)
-                }
-            }
+            .frame(maxWidth: 352)
+
             confirmButton
         }
     }
@@ -177,7 +157,7 @@ extension ChatBotOptionsView {
             .disabled(store.isAnswerSaving)
         }
     }
-    
+
     private var confirmButton: some View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) {

@@ -146,7 +146,7 @@ extension KohereNavigationBar {
                         .frame(width: 24, height: 24)
                 }
                 Button(action: onNotice) {
-                    Image(.bellPlus24)
+                    Image(.bell24)
                         .frame(width: 24, height: 24)
                 }
             }

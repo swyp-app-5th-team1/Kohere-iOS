@@ -8,22 +8,26 @@
 import SwiftUI
 
 struct UserBubbleButton: View {
-    
+
     // MARK: - Properties
-    
+
     let title: String
     let isSelected: Bool
+    var fillsAvailableWidth = false
     let action: () -> Void
-    
+
     // MARK: - Body
-    
+
     var body: some View {
         Button(action: action) {
             Text(title)
                 .kohereTextStyle(.label2Semibold)
                 .foregroundColor(isSelected ? .primaryNormal : .labelNeutral)
+                .lineLimit(1)
+                .minimumScaleFactor(0.82)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
+                .frame(maxWidth: fillsAvailableWidth ? .infinity : nil)
                 .background(.secondary5)
                 .cornerRadius(12)
                 .overlay(

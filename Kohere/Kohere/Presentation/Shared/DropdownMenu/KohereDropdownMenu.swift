@@ -17,7 +17,7 @@ struct KohereDropdownMenu<Field: Hashable>: View {
     let equals: Field
     let options: [DropdownMenuOption]
     let listHeight: CGFloat
-    var backgroundColor: Color = .clear
+    var backgroundColor: Color = .backgroundNormalNormal
     var onExpand: (() -> Void)?
 
     private var isOptionsPresented: Bool {

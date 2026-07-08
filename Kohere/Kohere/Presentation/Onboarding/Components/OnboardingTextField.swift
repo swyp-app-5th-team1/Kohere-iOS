@@ -80,6 +80,8 @@ struct OnboardingTextField: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 40)
+        .background(.backgroundNormalNormal)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(
