@@ -26,10 +26,16 @@ struct Listing: Equatable, Identifiable {
     let conditions: [RoomCondition]
     let distanceMeters: Double?
     let isFavorited: Bool
+    let favoriteCount: Int?
 }
 
 struct ListingNearestTransit: Equatable {
     let type: String
     let name: String
     let walkMinutes: Int?
+}
+
+struct ListingFavoriteStatus: Equatable {
+    let isFavorited: Bool
+    let favoriteCount: Int
 }

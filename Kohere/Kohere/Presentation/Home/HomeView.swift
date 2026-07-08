@@ -53,6 +53,9 @@ struct HomeView: View {
                 }
             }
         }
+        .onAppear {
+            store.send(.onAppear)
+        }
     }
     
     // MARK: - Subview
