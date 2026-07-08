@@ -16,6 +16,8 @@ struct HomeFeature {
     var quizClient
     @Dependency(\.lifeTipClient)
     var lifeTipClient
+    @Dependency(\.userDefaultsClient)
+    var userDefaultsClient
 
     @Reducer
     enum Path {
@@ -24,6 +26,7 @@ struct HomeFeature {
         case notifications(NotificationsFeature)
         case chatBot(ChatBotFeature)
         case livingGuideDetail(LivingGuideDetailFeature)
+        case search(SearchFeature)
     }
     
     // MARK: - State
@@ -64,6 +67,7 @@ struct HomeFeature {
     enum Action {
         case path(StackActionOf<Path>)
         case mapTabRequested(diagnosisID: String?)
+        case mapPlaceSearchRequested(SearchPlaceResult)
         case onAppear
         case recentListingsResponse(Result<[Listing], DataError>)
         case randomQuizResponse(Result<Quiz, DataError>)
@@ -231,14 +235,26 @@ struct HomeFeature {
                 _ = state.path.popLast()
                 return .none
 
+			case .path(.element(id: _, action: .search(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
             case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
                 return .send(.mapTabRequested(diagnosisID: diagnosisID))
+
+            case .path(.element(id: _, action: .search(.bannerTapped))):
+                state.path.append(.chatBot(ChatBotFeature.State()))
+                return .none
+
+            case let .path(.element(id: _, action: .search(.placeResultTapped(placeResult)))):
+                state.path.removeAll()
+                return .send(.mapPlaceSearchRequested(placeResult))
                 
             case .path:
                 return .none
                 
             case .navigationSearchTapped:
-                // TODO: 검색으로 네비게이션
+                state.path.append(.search(SearchFeature.initialState(userDefaultsClient: userDefaultsClient)))
                 return .none
                 
             case .navigationHeartTapped:
@@ -309,7 +325,7 @@ struct HomeFeature {
                 state.path.append(.livingGuideDetail(LivingGuideDetailFeature.State(guide: guide)))
                 return .none
 
-            case .mapTabRequested:
+            case .mapTabRequested, .mapPlaceSearchRequested:
                 return .none
             }
         }

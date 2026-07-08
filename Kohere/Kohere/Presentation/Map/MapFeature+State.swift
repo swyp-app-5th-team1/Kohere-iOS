@@ -19,6 +19,8 @@ extension MapFeature {
         var listings: [ListingItemModel] = []
         var listingSearchResults: [Listing] = []
         var diagnosisRecommendedListings: [DiagnosisRecommendedListing] = []
+        var diagnosisRecommendationSuggestions: DiagnosisRecommendationSuggestions?
+        var diagnosisRecommendationPageInfo: DiagnosisRecommendationPage?
         var listingSource: MapListingSource = .idle
         var krwToUSDExchangeRate: KRWToUSDExchangeRate?
         var isListingSearchLoading = false
@@ -32,6 +34,7 @@ extension MapFeature {
         // 지도 viewport / 재검색 상태
         var currentViewport: MapViewport?
         var lastSearchedViewport: MapViewport?
+        var placeSearchTarget: MapPlaceSearchTarget?
         var showsResearchButton = false
 
         // 바텀시트 / 필터 상태
@@ -72,6 +75,8 @@ extension MapFeature {
         case locationPermissionDialogSettingsButtonTapped
         case cameraMoveRequestHandled
         case markerTapped(String)
+        case searchButtonTapped
+        case placeSearchResultSelected(SearchPlaceResult)
         case researchButtonTapped
         case viewportChanged(MapViewport)
         case listingRowAppeared(String)
@@ -93,4 +98,8 @@ extension MapFeature {
         case filterApplyButtonTapped
         case filterResetButtonTapped
     }
+}
+
+struct MapPlaceSearchTarget: Equatable {
+    let coordinate: MapCoordinate
 }

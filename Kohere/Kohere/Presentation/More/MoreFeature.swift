@@ -26,6 +26,8 @@ struct MoreFeature {
         case navigationSettingTapped
         case editProfileTapped
         case promoteRoomTapped
+        case logoutConfirmed
+        case deleteAccountConfirmed
     }
 
     var body: some Reducer<State, Action> {
@@ -48,6 +50,9 @@ struct MoreFeature {
 
             case .promoteRoomTapped:
                 state.path.append(.promoteRoomWeb(PromoteRoomWebFeature.State()))
+                return .none
+
+            case .logoutConfirmed, .deleteAccountConfirmed:
                 return .none
 
             case .path:

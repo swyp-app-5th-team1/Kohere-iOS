@@ -46,6 +46,10 @@ struct HomeFlowView: View {
                 case let .livingGuideDetail(livingGuideDetailStore):
                     LivingGuideDetailView(store: livingGuideDetailStore)
                         .navigationBarHidden(true)
+
+				case let .search(searchStore):
+                    SearchView(store: searchStore)
+                        .navigationBarHidden(true)
                 }
             } 
             .toolbar(.hidden, for: .tabBar)

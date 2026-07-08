@@ -8,6 +8,11 @@
 import Foundation
 
 enum MonthlyRentPriceFormatter {
+    nonisolated static func rangeTitle(prefix: String, min: Int?, max: Int?) -> String {
+        guard let rangeTitle = wonRangeTitle(min: min, max: max) else { return "" }
+        return "\(prefix) \(rangeTitle)"
+    }
+
     nonisolated static func wonTitle(min: Int?, max: Int?) -> String {
         guard let rangeTitle = wonRangeTitle(min: min, max: max) else {
             return "월세 정보 없음"
@@ -38,7 +43,7 @@ enum MonthlyRentPriceFormatter {
         "≈\(usdTitle(amount))/mo"
     }
 
-    nonisolated private static func wonRangeTitle(min: Int?, max: Int?) -> String? {
+    nonisolated static func wonRangeTitle(min: Int?, max: Int?) -> String? {
         switch (min, max) {
         case let (min?, max?) where min == max:
             return wonTitle(min)

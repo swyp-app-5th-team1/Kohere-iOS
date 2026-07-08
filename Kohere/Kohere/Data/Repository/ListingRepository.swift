@@ -112,27 +112,32 @@ private extension ListingListItemResponseDTO {
         guard let listingId else { return nil }
 
         let coordinate: MapCoordinate?
-        if let lat, let lng {
+        if let lat = location?.lat, let lng = location?.lng {
             coordinate = MapCoordinate(latitude: lat, longitude: lng)
         } else {
             coordinate = nil
         }
 
+        let pricings = (roomOffers ?? []).compactMap(\.pricing)
+        let monthlyRents = pricings.compactMap(\.monthlyRent)
+        let deposits = pricings.compactMap(\.deposit)
+        let maintenanceFees = pricings.compactMap(\.maintenanceFee)
+
         return Listing(
             listingID: listingId,
             title: title ?? "",
             type: type ?? "",
-            minMonthlyRent: minMonthlyRent,
-            maxMonthlyRent: maxMonthlyRent,
-            minDeposit: minDeposit,
-            maxDeposit: maxDeposit,
-            minMaintenanceFee: minMaintenanceFee,
-            maxMaintenanceFee: maxMaintenanceFee,
-            minStayMonths: minStayMonths,
-            maxStayMonths: maxStayMonths,
-            thumbnailURL: thumbnailUrl,
+            minMonthlyRent: monthlyRents.min(),
+            maxMonthlyRent: monthlyRents.max(),
+            minDeposit: deposits.min(),
+            maxDeposit: deposits.max(),
+            minMaintenanceFee: maintenanceFees.min(),
+            maxMaintenanceFee: maintenanceFees.max(),
+            minStayMonths: contract?.minStayMonths,
+            maxStayMonths: contract?.maxStayMonths,
+            thumbnailURL: imageUrls?.first,
             coordinate: coordinate,
-            address: address,
+            address: address?.fullAddress,
             nearestTransit: nearestTransit?.toEntity(),
             conditions: (conditions ?? []).compactMap(RoomCondition.init(conditionCode:)),
             distanceMeters: distanceMeters,

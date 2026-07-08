@@ -28,20 +28,13 @@ struct ListingListItemResponseDTO: Decodable {
     let listingId: String?
     let title: String?
     let type: String?
-    let minMonthlyRent: Int?
-    let maxMonthlyRent: Int?
-    let minDeposit: Int?
-    let maxDeposit: Int?
-    let minMaintenanceFee: Int?
-    let maxMaintenanceFee: Int?
-    let minStayMonths: Int?
-    let maxStayMonths: Int?
-    let thumbnailUrl: String?
-    let lat: Double?
-    let lng: Double?
-    let address: String?
+    let contract: ListingContractResponseDTO?
+    let location: ListingLocationResponseDTO?
+    let address: ListingAddressResponseDTO?
     let nearestTransit: ListingNearestTransitResponseDTO?
     let conditions: [String]?
+    let roomOffers: [ListingRoomOfferResponseDTO]?
+    let imageUrls: [String]?
     let distanceMeters: Double?
     let favorited: Bool?
     let favoriteCount: Int?
@@ -92,6 +85,30 @@ struct ListingNearestTransitResponseDTO: Decodable {
     let type: String?
     let name: String?
     let walkMinutes: Int?
+}
+
+struct ListingLocationResponseDTO: Decodable {
+    let lat: Double?
+    let lng: Double?
+}
+
+struct ListingAddressResponseDTO: Decodable {
+    let fullAddress: String?
+}
+
+struct ListingContractResponseDTO: Decodable {
+    let minStayMonths: Int?
+    let maxStayMonths: Int?
+}
+
+struct ListingRoomOfferResponseDTO: Decodable {
+    let pricing: ListingRoomPricingResponseDTO?
+}
+
+struct ListingRoomPricingResponseDTO: Decodable {
+    let monthlyRent: Int?
+    let deposit: Int?
+    let maintenanceFee: Int?
 }
 
 struct ListingPageResponseDTO: Decodable {

@@ -24,6 +24,7 @@ struct RootFeature {
         var login = LoginFeature.State()
         var onboarding = OnboardingFeature.State()
         var selectedTab: AppTab = .home
+        var popup: AppPopup?
         var home = HomeFeature.State()
         var community = CommunityFeature.State()
         var map = MapFeature.State()
@@ -39,6 +40,10 @@ struct RootFeature {
         case saveAuthResponse(Result<Auth, Error>)
         case onboarding(OnboardingFeature.Action)
         case selectedTabChanged(AppTab)
+        case popupPresented(AppPopup)
+        case popupNoticeConfirmButtonTapped
+        case popupActionPrimaryButtonTapped
+        case popupActionSecondaryButtonTapped
         case home(HomeFeature.Action)
         case community(CommunityFeature.Action)
         case map(MapFeature.Action)
@@ -152,14 +157,47 @@ struct RootFeature {
             case let .home(.mapTabRequested(diagnosisID)):
                 state.home.path.removeAll()
                 return openMap(diagnosisID: diagnosisID, state: &state)
+
+            case let .home(.mapPlaceSearchRequested(placeResult)):
+                state.home.path.removeAll()
+                state.selectedTab = .map
+                return .send(.map(.placeSearchResultSelected(placeResult)))
+
+            case let .home(.path(.element(id: _, action: .search(.popupRequested(popup))))):
+                state.popup = popup
+                return .none
                 
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
                 return .none
 
+            case let .popupPresented(popup):
+                state.popup = popup
+                return .none
+
+            case .popupNoticeConfirmButtonTapped:
+                state.popup = nil
+                return .none
+
+            case .popupActionPrimaryButtonTapped:
+                guard case let .action(popup) = state.popup else { return .none }
+                state.popup = nil
+                guard let route = popup.primaryRoute else { return .none }
+                return handlePopupRoute(route)
+
+            case .popupActionSecondaryButtonTapped:
+                guard case let .action(popup) = state.popup else { return .none }
+                state.popup = nil
+                guard let route = popup.secondaryRoute else { return .none }
+                return handlePopupRoute(route)
+
             case let .map(.path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID))))):
                 state.map.path.removeAll()
                 return openMap(diagnosisID: diagnosisID, state: &state)
+
+            case let .map(.path(.element(id: _, action: .search(.popupRequested(popup))))):
+                state.popup = popup
+                return .none
                 
             case .login, .onboarding, .home, .community, .map, .chat, .more:
                 return .none
@@ -178,6 +216,17 @@ struct RootFeature {
 
         return .send(.map(.diagnosisResultRequested(diagnosisID: diagnosisID)))
     }
+
+    private func handlePopupRoute(_ route: AppPopup.Route) -> Effect<Action> {
+        switch route {
+        case .logout:
+            return .send(.more(.logoutConfirmed))
+
+        case .deleteAccount:
+            return .send(.more(.deleteAccountConfirmed))
+        }
+    }
+
 }
 
 private extension RootFeature {
