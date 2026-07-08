@@ -55,9 +55,7 @@ struct LivingGuideDetailFeature {
             case let .lifeTipsResponse(.success(tips)):
                 state.isTipsLoading = false
                 state.tipsErrorMessage = nil
-                if !tips.isEmpty {
-                    state.guide.tips = tips
-                }
+                state.guide.tips = tips
                 return .none
 
             case let .lifeTipsResponse(.failure(error)):

@@ -33,6 +33,7 @@ struct HomeFeature {
         var path = StackState<Path.State>()
         var recentlyViewedItems: [ListingItemModel] = []
         var isRecentlyViewedLoading: Bool = false
+        var isRecentlyViewedLoaded: Bool = false
         var favoriteUpdatingIDs: Set<String> = []
         var recentlyViewedErrorMessage: String?
         var quiz: QuizModel
@@ -42,6 +43,7 @@ struct HomeFeature {
         var quizErrorMessage: String?
         var livingGuides: [LivingGuide] = []
         var isLivingGuidesLoading: Bool = false
+        var isLivingGuidesLoaded: Bool = false
         var livingGuidesErrorMessage: String?
         
         init(
@@ -50,8 +52,10 @@ struct HomeFeature {
             livingGuides: [LivingGuide] = []
         ) {
             self.recentlyViewedItems = recentlyViewedItems
+            self.isRecentlyViewedLoaded = !recentlyViewedItems.isEmpty
             self.quiz = QuizModel(entity: quiz, selectedChoiceKey: nil)
             self.livingGuides = livingGuides
+            self.isLivingGuidesLoaded = !livingGuides.isEmpty
         }
     }
     
@@ -89,7 +93,7 @@ struct HomeFeature {
             case .onAppear:
                 var effects: [Effect<Action>] = []
 
-                if !state.isRecentlyViewedLoading {
+                if !state.isRecentlyViewedLoading && !state.isRecentlyViewedLoaded {
                     state.isRecentlyViewedLoading = true
                     state.recentlyViewedErrorMessage = nil
 
@@ -103,7 +107,7 @@ struct HomeFeature {
                     })
                 }
 
-                if !state.isQuizLoading {
+                if !state.isQuizLoading && !state.isQuizLoaded {
                     state.isQuizLoading = true
                     state.quizErrorMessage = nil
 
@@ -119,7 +123,7 @@ struct HomeFeature {
                     })
                 }
 
-                if !state.isLivingGuidesLoading {
+                if !state.isLivingGuidesLoading && !state.isLivingGuidesLoaded {
                     state.isLivingGuidesLoading = true
                     state.livingGuidesErrorMessage = nil
 
@@ -144,7 +148,6 @@ struct HomeFeature {
 
             case let .randomQuizResponse(.failure(error)):
                 state.isQuizLoading = false
-                state.isQuizLoaded = false
                 state.quizErrorMessage = error.localizedDescription
                 return .none
 
@@ -185,24 +188,26 @@ struct HomeFeature {
             case let .recentListingsResponse(.success(listings)):
                 state.recentlyViewedItems = listings.map(ListingItemModel.init(listing:))
                 state.isRecentlyViewedLoading = false
+                state.isRecentlyViewedLoaded = true
                 state.recentlyViewedErrorMessage = nil
                 return .none
 
             case let .recentListingsResponse(.failure(error)):
                 state.isRecentlyViewedLoading = false
+                state.isRecentlyViewedLoaded = false
                 state.recentlyViewedErrorMessage = error.localizedDescription
                 return .none
 
             case let .lifeTipTopicsResponse(.success(guides)):
                 state.isLivingGuidesLoading = false
+                state.isLivingGuidesLoaded = true
                 state.livingGuidesErrorMessage = nil
-                if !guides.isEmpty {
-                    state.livingGuides = guides
-                }
+                state.livingGuides = guides
                 return .none
 
             case let .lifeTipTopicsResponse(.failure(error)):
                 state.isLivingGuidesLoading = false
+                state.isLivingGuidesLoaded = false
                 state.livingGuidesErrorMessage = error.localizedDescription
                 return .none
 
