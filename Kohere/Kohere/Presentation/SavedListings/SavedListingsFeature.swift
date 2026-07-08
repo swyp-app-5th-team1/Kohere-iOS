@@ -46,7 +46,8 @@ struct SavedListingsFeature {
 
                 return .run { [listingClient] send in
                     do {
-                        let page = try await listingClient.fetchFavoriteListings(0, 20)
+                        //TODO: 고도화 때 페이지네이션 처리
+                        let page = try await listingClient.fetchFavoriteListings(0, 30)
                         await send(.favoriteListingsResponse(.success(page)))
                     } catch {
                         await send(.favoriteListingsResponse(.failure(.from(error))))
