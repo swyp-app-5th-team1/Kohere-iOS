@@ -54,6 +54,9 @@ extension DataError: CustomDebugStringConvertible {
         case .missingBaseURL:
             "missingBaseURL"
 
+        case .missingNaverSearchCredentials:
+            "missingNaverSearchCredentials"
+
         case .invalidURL:
             "invalidURL"
 

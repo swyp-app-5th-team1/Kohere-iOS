@@ -21,6 +21,9 @@ extension MapFeature {
         var diagnosisRecommendedListings: [DiagnosisRecommendedListing] = []
         var diagnosisRecommendationSuggestions: DiagnosisRecommendationSuggestions?
         var diagnosisRecommendationPageInfo: DiagnosisRecommendationPage?
+        var favoriteUpdatingIDs: Set<String> = []
+        var favoriteStatusesByListingID: [String: ListingFavoriteStatus] = [:]
+        var favoriteErrorMessage: String?
         var listingSource: MapListingSource = .idle
         var krwToUSDExchangeRate: KRWToUSDExchangeRate?
         var isListingSearchLoading = false
@@ -83,6 +86,7 @@ extension MapFeature {
         case path(StackActionOf<Path>)
         case listingTapped(String)
         case listingLikeButtonTapped(String)
+        case favoriteStatusResponse(listingID: String, Result<ListingFavoriteStatus, DataError>)
         case selectedListingCardTapped
         case selectedListingCloseButtonTapped
 

@@ -34,6 +34,30 @@ extension MapFeature {
         }
     }
 
+    func rebuildListingItems(to state: inout State) {
+        switch state.listingSource {
+        case .locationSearch:
+            state.listings = listingItemModels(
+                from: state.listingSearchResults,
+                exchangeRate: state.krwToUSDExchangeRate
+            )
+
+        case .diagnosis:
+            state.listings = listingItemModels(
+                from: state.diagnosisRecommendedListings,
+                exchangeRate: state.krwToUSDExchangeRate
+            )
+
+        case .idle:
+            return
+        }
+
+        applyFavoriteStatusOverrides(
+            to: &state.listings,
+            statusByID: state.favoriteStatusesByListingID
+        )
+    }
+
     func canStartListingSearch(state: State) -> Bool {
         if state.lastSearchedViewport != nil {
             return true
@@ -231,10 +255,7 @@ extension MapFeature {
             state.listingSearchResults = page.content
         }
 
-        state.listings = listingItemModels(
-            from: state.listingSearchResults,
-            exchangeRate: state.krwToUSDExchangeRate
-        )
+        rebuildListingItems(to: &state)
         state.markers = state.listingSearchResults.compactMap { listing in
             guard let coordinate = listing.coordinate else { return nil }
             return MapMarkerItem(id: listing.id, coordinate: coordinate)
@@ -269,10 +290,7 @@ extension MapFeature {
             }
         }
 
-        state.listings = listingItemModels(
-            from: state.diagnosisRecommendedListings,
-            exchangeRate: state.krwToUSDExchangeRate
-        )
+        rebuildListingItems(to: &state)
     }
 
     private func appendUniqueListings(
