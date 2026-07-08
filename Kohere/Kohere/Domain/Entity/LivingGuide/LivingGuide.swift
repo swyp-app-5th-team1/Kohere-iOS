@@ -7,16 +7,45 @@
 
 struct LivingGuide: Equatable, Identifiable {
     let id: Int
+    let code: String
     let title: String
     let subtitle: String
     let iconName: String
+    let theme: LivingGuideTheme
+    var tips: [LivingGuideTip]
+}
+
+struct LivingGuideTip: Equatable, Identifiable {
+    let id: String
+    let title: String
+    let content: String
+    let imageURL: String?
+}
+
+enum LivingGuideTheme: Equatable {
+    case housingScams
+    case bankAccount
+    case publicTransit
+    case healthInsurance
 }
 
 extension LivingGuide {
-    static let mockLivingGuide: [LivingGuide] = [
-        LivingGuide(id: 1, title: "How to Open a Bank Account", subtitle: "Best within 3 days of getting your ARC", iconName: "bankAccountGuide"),
-        LivingGuide(id: 2, title: "Top 3 Seoul Subway Apps", subtitle: "Highly Rated by Foreigners", iconName: "train"),
-        LivingGuide(id: 3, title: "Goshiwon Checklist", subtitle: "What to check before you sign", iconName: "contractChecklist"),
-        LivingGuide(id: 4, title: "Health Insurance Guide", subtitle: "Mandatory for stays of 6+ months", iconName: "healthInsurance")
-    ]
+    init(
+        id: Int,
+        code: String,
+        name: String,
+        iconName: String,
+        theme: LivingGuideTheme,
+        tips: [LivingGuideTip] = []
+    ) {
+        let titleParts = name.split(separator: "\n", maxSplits: 1, omittingEmptySubsequences: false)
+
+        self.id = id
+        self.code = code
+        self.title = titleParts.first.map(String.init) ?? name
+        self.subtitle = titleParts.dropFirst().first.map(String.init) ?? ""
+        self.iconName = iconName
+        self.theme = theme
+        self.tips = tips
+    }
 }

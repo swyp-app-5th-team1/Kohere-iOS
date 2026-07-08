@@ -43,3 +43,30 @@ extension DataError: LocalizedError {
         }
     }
 }
+
+extension DataError: CustomDebugStringConvertible {
+    var debugDescription: String {
+        switch self {
+        case .missingBaseURL:
+            "missingBaseURL"
+
+        case .invalidURL:
+            "invalidURL"
+
+        case .emptyResponse:
+            "emptyResponse"
+
+        case .decodingFailed:
+            "decodingFailed"
+
+        case let .httpStatus(code, message):
+            "httpStatus(code: \(code), message: \(message ?? "nil"))"
+
+        case let .serverError(code, message):
+            "serverError(code: \(code), message: \(message))"
+
+        case let .underlying(message):
+            "underlying(message: \(message))"
+        }
+    }
+}
