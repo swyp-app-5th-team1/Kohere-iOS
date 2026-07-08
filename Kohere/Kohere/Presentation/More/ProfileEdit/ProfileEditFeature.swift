@@ -44,7 +44,7 @@ struct ProfileEditFeature {
             email = userProfile?.email ?? ""
             firstName = userProfile?.firstName ?? ""
             lastName = userProfile?.lastName ?? ""
-            selectedNationality = userProfile?.countryName.map(DropdownMenuOption.init(option:))
+            selectedNationality = Self.nationalityOption(from: userProfile?.country)
             selectedGender = Self.genderOption(from: userProfile?.gender)
             selectedVisa = Self.visaOption(from: userProfile?.visaType)
             selectedOccupation = Self.occupationOption(from: userProfile?.occupation)
@@ -53,7 +53,7 @@ struct ProfileEditFeature {
         private var hasChanges: Bool {
             Self.normalizedText(firstName) != Self.normalizedText(userProfile?.firstName ?? "")
             || Self.normalizedText(lastName) != Self.normalizedText(userProfile?.lastName ?? "")
-            || selectedNationality != userProfile?.countryName.map(DropdownMenuOption.init(option:))
+            || selectedNationality != Self.nationalityOption(from: userProfile?.country)
             || selectedGender != Self.genderOption(from: userProfile?.gender)
             || selectedVisa != Self.visaOption(from: userProfile?.visaType)
             || selectedOccupation != Self.occupationOption(from: userProfile?.occupation)
@@ -85,6 +85,10 @@ struct ProfileEditFeature {
             else { return nil }
 
             return DropdownMenuOption(occupation)
+        }
+
+        private static func nationalityOption(from countryCode: String?) -> DropdownMenuOption? {
+            DropdownMenuOption.nationalityOption(countryCode: countryCode)
         }
     }
 
