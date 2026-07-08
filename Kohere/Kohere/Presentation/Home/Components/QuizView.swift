@@ -62,8 +62,12 @@ struct QuizView: View {
                             )
                             .cornerRadius(8)
                         }
-                        .disabled(store.quiz.hasAnswered)
+                        .disabled(!store.isQuizLoaded || store.quiz.hasAnswered || store.isQuizAnswerSubmitting)
                     }
+                }
+
+                if store.quiz.shouldShowExplanation {
+                    explanationView
                 }
             }
             .padding(20)
@@ -73,5 +77,22 @@ struct QuizView: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 32)
+    }
+
+    private var explanationView: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Image(.circleInfo24)
+                .renderingMode(.template)
+                .resizable()
+                .frame(width: 16, height: 16)
+                .foregroundStyle(.labelNeutral)
+
+            Text(store.quiz.explanation ?? "")
+                .kohereTextStyle(.caption1Regular)
+                .foregroundStyle(.labelNeutral)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

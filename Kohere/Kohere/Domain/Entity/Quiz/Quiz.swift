@@ -8,36 +8,37 @@
 struct Quiz: Equatable, Identifiable {
     let id: Int
     let question: String
-    let options: [String]
-    let correctAnswerIndex: Int
+    let choices: [QuizChoice]
+    let correctChoiceKey: String?
+    let explanation: String?
 }
 
-extension Quiz {
-    enum OptionResultState {
-        case normal
-        case correct
-        case wrong
-        case unselected
-    }
-    
-    func resultState(for index: Int, selected: Int?) -> OptionResultState {
-        guard let selectedIndex = selected else { return .normal }
-        if index == correctAnswerIndex { return .correct }
-        if index == selectedIndex { return .wrong }
-        return .unselected
-    }
+struct QuizChoice: Equatable, Identifiable {
+    nonisolated var id: String { key }
+
+    let key: String
+    let text: String
+}
+
+struct QuizAnswerResult: Equatable {
+    let quizID: Int
+    let selectedChoiceKey: String
+    let isCorrect: Bool
+    let correctChoiceKey: String
+    let explanation: String
 }
 
 extension Quiz {
     static let mockQuiz = Quiz(
         id: 1,
         question: "What’s usually NOT covered by Goshiwon maintenance fees?",
-        options: [
-            "Internet & Wi-Fi",
-            "Personal Electricity Bill",
-            "Cleaning of common areas",
-            "Water Bill"
+        choices: [
+            QuizChoice(key: "A", text: "Internet & Wi-Fi"),
+            QuizChoice(key: "B", text: "Personal Electricity Bill"),
+            QuizChoice(key: "C", text: "Cleaning of common areas"),
+            QuizChoice(key: "D", text: "Water Bill")
         ],
-        correctAnswerIndex: 1
+        correctChoiceKey: "B",
+        explanation: "Electricity bills are usually charged separately based on how much you use in your own room."
     )
 }

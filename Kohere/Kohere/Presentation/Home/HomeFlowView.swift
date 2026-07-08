@@ -2,7 +2,7 @@
 //  HomeFlowView.swift
 //  Kohere
 //
-//  Created by Codex on 6/18/26.
+//  Created by mandoo on 6/18/26.
 //
 
 import ComposableArchitecture
@@ -43,7 +43,11 @@ struct HomeFlowView: View {
                     ChatBotView(store: chatBotStore)
                         .navigationBarHidden(true)
 
-                case let .search(searchStore):
+                case let .livingGuideDetail(livingGuideDetailStore):
+                    LivingGuideDetailView(store: livingGuideDetailStore)
+                        .navigationBarHidden(true)
+
+				case let .search(searchStore):
                     SearchView(store: searchStore)
                         .navigationBarHidden(true)
                 }
