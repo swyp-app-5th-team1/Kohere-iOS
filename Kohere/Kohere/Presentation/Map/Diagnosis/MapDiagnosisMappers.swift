@@ -12,9 +12,15 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
-            formattedPrice: Self.monthlyRentTitle(from: recommendation.monthlyRent),
+            formattedPrice: MonthlyRentPriceFormatter.wonTitle(
+                min: recommendation.minMonthlyRent,
+                max: recommendation.maxMonthlyRent
+            ),
             formattedUsdPrice: "",
-            detailsDescription: Self.depositTitle(from: recommendation.deposit),
+            detailsDescription: Self.depositTitle(
+                min: recommendation.minDeposit,
+                max: recommendation.maxDeposit
+            ),
             locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
             typeTag: Self.typeTitle(from: recommendation.type),
             period: "1 mo~",
@@ -28,9 +34,15 @@ extension ListingItemModel {
         convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase
     ) {
         let convertedMonthlyRentText: String
-        if let exchangeRate, let monthlyRent = recommendation.monthlyRent {
-            let convertedMonthlyRent = convertMonthlyRentCurrencyUseCase.execute(monthlyRent, exchangeRate)
-            convertedMonthlyRentText = MonthlyRentPriceFormatter.usdTitle(from: convertedMonthlyRent)
+        if let exchangeRate {
+            convertedMonthlyRentText = MonthlyRentPriceFormatter.usdTitle(
+                min: recommendation.minMonthlyRent.map {
+                    convertMonthlyRentCurrencyUseCase.execute($0, exchangeRate)
+                },
+                max: recommendation.maxMonthlyRent.map {
+                    convertMonthlyRentCurrencyUseCase.execute($0, exchangeRate)
+                }
+            )
         } else {
             convertedMonthlyRentText = ""
         }
@@ -38,9 +50,15 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
-            formattedPrice: Self.monthlyRentTitle(from: recommendation.monthlyRent),
+            formattedPrice: MonthlyRentPriceFormatter.wonTitle(
+                min: recommendation.minMonthlyRent,
+                max: recommendation.maxMonthlyRent
+            ),
             formattedUsdPrice: convertedMonthlyRentText,
-            detailsDescription: Self.depositTitle(from: recommendation.deposit),
+            detailsDescription: Self.depositTitle(
+                min: recommendation.minDeposit,
+                max: recommendation.maxDeposit
+            ),
             locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
             typeTag: Self.typeTitle(from: recommendation.type),
             period: "1 mo~",
@@ -48,14 +66,8 @@ extension ListingItemModel {
         )
     }
 
-    nonisolated private static func monthlyRentTitle(from monthlyRent: Int?) -> String {
-        guard let monthlyRent else { return "가격 문의" }
-        return "₩\(monthlyRent / 1000)K/mo"
-    }
-
-    nonisolated private static func depositTitle(from deposit: Int?) -> String {
-        guard let deposit else { return "Dep. 문의" }
-        return "Dep. ₩\(deposit / 1000)K"
+    nonisolated private static func depositTitle(min: Int?, max: Int?) -> String {
+        MonthlyRentPriceFormatter.rangeTitle(prefix: "보증금", min: min, max: max)
     }
 
     nonisolated private static func typeTitle(from type: String) -> String {

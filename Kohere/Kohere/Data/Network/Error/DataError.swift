@@ -9,6 +9,7 @@ import Foundation
 
 enum DataError: Error, Equatable {
     case missingBaseURL
+    case missingNaverSearchCredentials
     case invalidURL
     case emptyResponse
     case decodingFailed
@@ -22,6 +23,9 @@ extension DataError: LocalizedError {
         switch self {
         case .missingBaseURL:
             "API Base URL이 설정되지 않았습니다."
+
+        case .missingNaverSearchCredentials:
+            "네이버 검색 API 키가 설정되지 않았습니다."
 
         case .invalidURL:
             "요청 URL을 만들 수 없습니다."
@@ -40,6 +44,36 @@ extension DataError: LocalizedError {
 
         case let .underlying(message):
             message
+        }
+    }
+}
+
+extension DataError: CustomDebugStringConvertible {
+    var debugDescription: String {
+        switch self {
+        case .missingBaseURL:
+            "missingBaseURL"
+
+        case .missingNaverSearchCredentials:
+            "missingNaverSearchCredentials"
+
+        case .invalidURL:
+            "invalidURL"
+
+        case .emptyResponse:
+            "emptyResponse"
+
+        case .decodingFailed:
+            "decodingFailed"
+
+        case let .httpStatus(code, message):
+            "httpStatus(code: \(code), message: \(message ?? "nil"))"
+
+        case let .serverError(code, message):
+            "serverError(code: \(code), message: \(message))"
+
+        case let .underlying(message):
+            "underlying(message: \(message))"
         }
     }
 }

@@ -16,14 +16,23 @@ struct RootFeature {
     var userDefaultsClient
     @Dependency(\.reissueTokenUseCase)
     var reissueTokenUseCase
+    @Dependency(\.logoutUseCase)
+    var logoutUseCase
+    @Dependency(\.fetchCurrentUserUseCase)
+    var fetchCurrentUserUseCase
+    @Dependency(\.deleteCurrentUserUseCase)
+    var deleteCurrentUserUseCase
     
     @ObservableState
     struct State: Equatable {
         var authInfo: Auth?
+        var currentUser: UserProfile?
         var isAuthLoading = true
+        var isCurrentUserLoading = false
         var login = LoginFeature.State()
         var onboarding = OnboardingFeature.State()
         var selectedTab: AppTab = .home
+        var popup: AppPopup?
         var home = HomeFeature.State()
         var community = CommunityFeature.State()
         var map = MapFeature.State()
@@ -33,12 +42,18 @@ struct RootFeature {
     
     enum Action {
         case onAppear
+        case mainTabAppeared
         case storedAuthLoaded(Auth?)
         case authSessionExpired
+        case currentUserResponse(Result<UserProfile, Error>)
         case login(LoginFeature.Action)
         case saveAuthResponse(Result<Auth, Error>)
         case onboarding(OnboardingFeature.Action)
         case selectedTabChanged(AppTab)
+        case popupPresented(AppPopup)
+        case popupNoticeConfirmButtonTapped
+        case popupActionPrimaryButtonTapped
+        case popupActionSecondaryButtonTapped
         case home(HomeFeature.Action)
         case community(CommunityFeature.Action)
         case map(MapFeature.Action)
@@ -118,6 +133,27 @@ struct RootFeature {
 
             case .authSessionExpired:
                 state = State(isAuthLoading: false)
+                return .cancel(id: "RootFeature.fetchCurrentUser")
+
+            case .mainTabAppeared:
+                return fetchCurrentUserIfNeeded(state: &state)
+
+            case let .currentUserResponse(.success(user)):
+                guard state.authInfo?.onboardingRequired == false else {
+                    state.isCurrentUserLoading = false
+                    return .none
+                }
+
+                state.currentUser = user
+                state.home.userType = user.userType
+                state.map.userType = user.userType
+                state.more.userType = user.userType
+                state.more.userProfile = user
+                state.isCurrentUserLoading = false
+                return .none
+
+            case .currentUserResponse(.failure):
+                state.isCurrentUserLoading = false
                 return .none
 
             case let .login(.loginSuccess(auth)):
@@ -152,19 +188,121 @@ struct RootFeature {
             case let .home(.mapTabRequested(diagnosisID)):
                 state.home.path.removeAll()
                 return openMap(diagnosisID: diagnosisID, state: &state)
+
+            case let .home(.mapPlaceSearchRequested(placeResult)):
+                state.home.path.removeAll()
+                state.selectedTab = .map
+                return .send(.map(.placeSearchResultSelected(placeResult)))
+
+            case let .home(.path(.element(id: _, action: .search(.popupRequested(popup))))):
+                state.popup = popup
+                return .none
                 
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
                 return .none
 
+            case let .popupPresented(popup):
+                state.popup = popup
+                return .none
+
+            case .popupNoticeConfirmButtonTapped:
+                state.popup = nil
+                return .none
+
+            case .popupActionPrimaryButtonTapped:
+                guard case let .action(popup) = state.popup else { return .none }
+                state.popup = nil
+                guard let route = popup.primaryRoute else { return .none }
+                return handlePopupRoute(route)
+
+            case .popupActionSecondaryButtonTapped:
+                guard case let .action(popup) = state.popup else { return .none }
+                state.popup = nil
+                guard let route = popup.secondaryRoute else { return .none }
+                return handlePopupRoute(route)
+
             case let .map(.path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID))))):
                 state.map.path.removeAll()
                 return openMap(diagnosisID: diagnosisID, state: &state)
+
+            case let .map(.path(.element(id: _, action: .search(.popupRequested(popup))))):
+                state.popup = popup
+                return .none
+
+            case let .more(.popupRequested(popup)):
+                state.popup = popup
+                return .none
+
+            case .more(.logoutConfirmed):
+                userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
+                state = State(isAuthLoading: false)
+
+                let logoutUseCase = logoutUseCase
+                let keychainClient = keychainClient
+
+                return .merge(
+                    .cancel(id: "RootFeature.fetchCurrentUser"),
+                    .run { _ in
+                        defer {
+                            try? keychainClient.delete(for: .auth)
+                        }
+
+                        do {
+                            try await logoutUseCase.execute()
+                        } catch {}
+                    }
+                )
+
+            case .more(.deleteAccountConfirmed):
+                userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
+                state = State(isAuthLoading: false)
+
+                let deleteCurrentUserUseCase = deleteCurrentUserUseCase
+                let keychainClient = keychainClient
+
+                return .merge(
+                    .cancel(id: "RootFeature.fetchCurrentUser"),
+                    .run { _ in
+                        defer {
+                            try? keychainClient.delete(for: .auth)
+                        }
+
+                        do {
+                            try await deleteCurrentUserUseCase.execute()
+                        } catch {}
+                    }
+                )
                 
             case .login, .onboarding, .home, .community, .map, .chat, .more:
                 return .none
             }
         }
+    }
+
+    private func fetchCurrentUserIfNeeded(state: inout State) -> Effect<Action> {
+        guard state.authInfo?.onboardingRequired == false,
+              state.currentUser == nil,
+              !state.isCurrentUserLoading
+        else {
+            return .none
+        }
+
+        state.isCurrentUserLoading = true
+        let fetchCurrentUserUseCase = fetchCurrentUserUseCase
+
+        return .run { send in
+            do {
+                let user = try await fetchCurrentUserUseCase.execute()
+                await send(.currentUserResponse(.success(user)))
+            } catch {
+                await send(.currentUserResponse(.failure(error)))
+            }
+        }
+        .cancellable(
+            id: "RootFeature.fetchCurrentUser",
+            cancelInFlight: true
+        )
     }
 
     private func openMap(diagnosisID: String?, state: inout State) -> Effect<Action> {
@@ -178,6 +316,17 @@ struct RootFeature {
 
         return .send(.map(.diagnosisResultRequested(diagnosisID: diagnosisID)))
     }
+
+    private func handlePopupRoute(_ route: AppPopup.Route) -> Effect<Action> {
+        switch route {
+        case .logout:
+            return .send(.more(.logoutConfirmed))
+
+        case .deleteAccount:
+            return .send(.more(.deleteAccountConfirmed))
+        }
+    }
+
 }
 
 private extension RootFeature {

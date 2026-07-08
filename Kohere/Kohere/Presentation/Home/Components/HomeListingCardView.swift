@@ -12,6 +12,7 @@ struct HomeListingCardView: View {
     // MARK: - Properties
     
     let item: ListingItemModel
+    let showsLikeButton: Bool
     
     let onCardTapped: (String) -> Void
     let onLikeTapped: (String) -> Void
@@ -27,13 +28,15 @@ struct HomeListingCardView: View {
                     .frame(width: 156, height: 120)
                     .cornerRadius(16)
                 
-                Button {
-                    onLikeTapped(item.id)
-                } label: {
-                    Image(item.isLiked ? .heartFill24 : .heart24)
-                        .renderingMode(.template)
-                        .foregroundColor(item.isLiked ? .primary50 : .white)
-                        .padding(8)
+                if showsLikeButton {
+                    Button {
+                        onLikeTapped(item.id)
+                    } label: {
+                        Image(item.isLiked ? .heartFill24 : .heart24)
+                            .renderingMode(.template)
+                            .foregroundColor(item.isLiked ? .primary50 : .white)
+                            .padding(8)
+                    }
                 }
             }
             

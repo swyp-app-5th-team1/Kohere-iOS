@@ -10,6 +10,7 @@ import SwiftUI
 struct MapSelectedListingSheetView: View {
     let title: String
     let item: ListingItemModel
+    let showsLikeButton: Bool
     let onCardTapped: () -> Void
     let onLikeTapped: () -> Void
     let onCloseButtonTapped: () -> Void
@@ -52,17 +53,19 @@ struct MapSelectedListingSheetView: View {
 
             Spacer()
 
-            Button {
-                onLikeTapped()
-            } label: {
-                Image(item.isLiked ? .heartFill24 : .heart24)
-                    .renderingMode(.template)
-                    .foregroundStyle(item.isLiked ? .primary50 : .labelAlternative)
+            if showsLikeButton {
+                Button {
+                    onLikeTapped()
+                } label: {
+                    Image(item.isLiked ? .heartFill24 : .heart24)
+                        .renderingMode(.template)
+                        .foregroundStyle(item.isLiked ? .primary50 : .labelAlternative)
+                }
+                .buttonStyle(.plain)
+                .frame(width: 24, height: 24)
+                .contentShape(Rectangle())
+                .accessibilityLabel(Text(item.isLiked ? "찜 해제" : "찜하기"))
             }
-            .buttonStyle(.plain)
-            .frame(width: 24, height: 24)
-            .contentShape(Rectangle())
-            .accessibilityLabel(Text(item.isLiked ? "찜 해제" : "찜하기"))
 
             Button {
                 onCloseButtonTapped()

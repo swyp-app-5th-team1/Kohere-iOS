@@ -24,6 +24,10 @@ extension UserDefaultsKey where Value == Date {
     nonisolated static let mapDiagnosisButtonLastExpandedAt = Self(rawValue: "mapDiagnosisButtonLastExpandedAt")
 }
 
+extension UserDefaultsKey where Value == [String] {
+    nonisolated static let recentSearchKeywords = Self(rawValue: "recentSearchKeywords")
+}
+
 enum UserDefaultsStoredValue: Sendable {
     case bool(Bool)
     case integer(Int)
@@ -69,6 +73,12 @@ extension UserDefaultsClient {
         }
         
         return try JSONDecoder().decode(Value.self, from: data)
+    }
+
+    nonisolated func delete<Value: Codable & Sendable>(
+        for key: UserDefaultsKey<Value>
+    ) {
+        delete(key.rawValue)
     }
 }
 

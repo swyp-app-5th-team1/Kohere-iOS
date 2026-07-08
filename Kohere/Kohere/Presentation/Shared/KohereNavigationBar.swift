@@ -23,8 +23,8 @@ enum NavigationCenter {
 
 enum NavigationRight {
     case none
-    case homeTab(onSearch: () -> Void, onHeart: () -> Void, onNotice: () -> Void)
-    case moreTab(onLanguage: () -> Void, onSetting: () -> Void)
+    case homeTab(showsHeart: Bool = true, onSearch: () -> Void, onHeart: () -> Void, onNotice: () -> Void)
+    case moreTab(showsLanguage: Bool = true, onLanguage: () -> Void, onSetting: () -> Void)
     case detailInfo(onHeart: () -> Void, onShare: () -> Void)
     case searchButton(() -> Void)
     case checkButton(isEnabled: Bool, action: () -> Void)
@@ -131,7 +131,7 @@ extension KohereNavigationBar {
         case .none:
             EmptyView()
             
-        case .homeTab(let onSearch, let onHeart, let onNotice):
+        case .homeTab(let showsHeart, let onSearch, let onHeart, let onNotice):
             HStack(spacing: 18) {
                 Button(action: onSearch) {
                     Image(.search24)
@@ -139,11 +139,13 @@ extension KohereNavigationBar {
                         .foregroundColor(rightColor)
                         .frame(width: 24, height: 24)
                 }
-                Button(action: onHeart) {
-                    Image(.heart24)
-                        .renderingMode(.template)
-                        .foregroundColor(rightColor)
-                        .frame(width: 24, height: 24)
+                if showsHeart {
+                    Button(action: onHeart) {
+                        Image(.heart24)
+                            .renderingMode(.template)
+                            .foregroundColor(rightColor)
+                            .frame(width: 24, height: 24)
+                    }
                 }
                 Button(action: onNotice) {
                     Image(.bell24)
@@ -151,13 +153,15 @@ extension KohereNavigationBar {
                 }
             }
             
-        case .moreTab(let onLanguage, let onSetting):
+        case .moreTab(let showsLanguage, let onLanguage, let onSetting):
             HStack(spacing: 8) {
-                Button(action: onLanguage) {
-                    Image(.globe24)
-                        .renderingMode(.template)
-                        .foregroundColor(rightColor)
-                        .frame(width: 24, height: 24)
+                if showsLanguage {
+                    Button(action: onLanguage) {
+                        Image(.globe24)
+                            .renderingMode(.template)
+                            .foregroundColor(rightColor)
+                            .frame(width: 24, height: 24)
+                    }
                 }
                 Button(action: onSetting) {
                     Image(.setting24)

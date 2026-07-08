@@ -35,7 +35,12 @@ struct RootView: View {
             } else {
                 tabView
             }
+
+            if let popup = store.popup {
+                popupOverlay(popup)
+            }
         }
+        .animation(.easeInOut(duration: 0.2), value: store.popup)
         .onAppear {
             store.send(.onAppear)
         }
@@ -88,6 +93,46 @@ struct RootView: View {
             .tag(AppTab.more)
         }
         .tint(.primary50)
+        .onAppear {
+            store.send(.mainTabAppeared)
+        }
+    }
+
+    private func popupOverlay(_ popup: AppPopup) -> some View {
+        ZStack {
+            Color.materialDimmer
+                .ignoresSafeArea()
+
+            popupContent(popup)
+            .padding(.horizontal, 24)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .transition(.opacity)
+        .zIndex(10)
+    }
+
+    @ViewBuilder
+    private func popupContent(_ popup: AppPopup) -> some View {
+        switch popup {
+        case let .notice(notice):
+            KohereNoticePopup(
+                message: notice.message,
+                confirmTitle: notice.confirmTitle
+            ) {
+                store.send(.popupNoticeConfirmButtonTapped)
+            }
+
+        case let .action(action):
+            KohereActionPopup(
+                message: action.message,
+                primaryTitle: action.primaryTitle,
+                secondaryTitle: action.secondaryTitle
+            ) {
+                store.send(.popupActionPrimaryButtonTapped)
+            } onSecondaryTapped: {
+                store.send(.popupActionSecondaryButtonTapped)
+            }
+        }
     }
     
     private func tabIcon(_ tab: AppTab) -> some View {

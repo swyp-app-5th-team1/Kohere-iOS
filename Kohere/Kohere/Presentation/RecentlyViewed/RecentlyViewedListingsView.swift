@@ -32,6 +32,7 @@ struct RecentlyViewedListingsView: View {
                         ForEach(store.items) { item in
                             ListingCardView(
                                 item: item,
+                                showsLikeButton: store.canUseFavoriteFeatures,
                                 onCardTapped: { store.send(.cardTapped(id: item.id)) },
                                 onLikeTapped: { store.send(.likeButtonTapped(id: item.id)) }
                             )

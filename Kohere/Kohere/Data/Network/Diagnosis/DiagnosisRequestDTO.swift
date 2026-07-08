@@ -11,6 +11,16 @@ nonisolated struct DiagnosisRecommendationsQueryDTO: Encodable {
     let sort: String?
 }
 
+extension DiagnosisRecommendationsQueryDTO {
+    init(_ input: DiagnosisRecommendationsInput) {
+        self.init(
+            page: input.page,
+            size: input.size,
+            sort: input.sort?.queryValue
+        )
+    }
+}
+
 nonisolated enum DiagnosisAnswerRequestDTO: Encodable, Sendable {
     case single(field: String, code: String)
     case multiple(field: String, codes: [String])

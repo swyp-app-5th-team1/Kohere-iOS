@@ -46,12 +46,24 @@ struct TenantOnboardingView: View {
                     .padding(.horizontal, 20)
             }
         }
+        .background {
+            Color.backgroundNormalAlternative
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    dismissKeyboard()
+                }
+        }
     }
 }
 
 // MARK: - Subviews
 
 private extension TenantOnboardingView {
+    func dismissKeyboard() {
+        activeField = nil
+        keyboardField = nil
+    }
+
     var topProgressBar: some View {
         HStack(spacing: 8) {
             ForEach(1...store.totalStepCount, id: \.self) { index in

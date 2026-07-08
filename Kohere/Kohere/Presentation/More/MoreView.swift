@@ -17,9 +17,11 @@ struct MoreView: View {
                 left: .smallLogo,
                 center: .text("More"),
                 right: .moreTab(
+                    showsLanguage: store.userType != .landlord,
                     onLanguage: { store.send(.navigationLanguageTapped) },
                     onSetting: { store.send(.navigationSettingTapped) }
-                )
+                ),
+                backgroundColor: .backgroundNormalAlternative
             )
 
             ScrollView(showsIndicators: false) {
@@ -28,50 +30,14 @@ struct MoreView: View {
                         .padding(.horizontal, 16)
 
                     VStack(spacing: 12) {
-                        MoreMenuSection(
-                            title: "내 활동",
-                            items: [
-                                .init(title: "Saved Listings", iconName: "heart_24"),
-                                .init(title: "Recently viewed", iconName: "thunder_24"),
-                                .init(title: "My Posts", iconName: "pencil_24")
-                            ],
-                            horizontalPadding: 16
-                        )
+                        if store.userType == .tenant {
+                            tenantActivitySection
+                            tenantLivingGuideSection
+                        } else if store.userType == .landlord {
+                            landlordServiceSection
+                        }
 
-                        MoreMenuSection(
-                            title: "Korea Living Guide",
-                            items: [
-                                .init(title: "Korean Contract Checklist", iconName: "contractChecklist", rendersAsTemplate: false),
-                                .init(title: "Bank Account Guide", iconName: "bankAccountGuide", rendersAsTemplate: false),
-                                .init(title: "Top 3 Seoul Subway Apps", iconName: "train", rendersAsTemplate: false),
-                                .init(title: "Health Insurance Guide", iconName: "healthInsurance", rendersAsTemplate: false)
-                            ],
-                            horizontalPadding: 16
-                        )
-
-                        MoreMenuSection(
-                            title: "사장님 서비스",
-                            items: [
-                                .init(
-                                    title: "무료로 방 홍보하기",
-                                    subtitle: "고시원 · 쉐어하우스 · 코리빙 등",
-                                    iconName: "external_link_24",
-                                    action: .promoteRoom
-                                )
-                            ],
-                            horizontalPadding: 16,
-                            onItemTapped: handleMenuItemTapped
-                        )
-
-                        MoreMenuSection(
-                            title: "Customer Support",
-                            items: [
-                                .init(title: "Announcements", iconName: "megaphone_24"),
-                                .init(title: "Send Feedback", iconName: "mail_24"),
-                                .init(title: "Partner With Kohere", iconName: "send_24")
-                            ],
-                            horizontalPadding: 16
-                        )
+                        customerSupportSection
                     }
                     .padding(16)
                     .background(.neutral5)
@@ -93,52 +59,146 @@ struct MoreView: View {
         }
     }
 
-    private var profileCard: some View {
-        Button {
-            store.send(.editProfileTapped)
-        } label: {
-            ZStack {
-                Image("profileBackground")
+    @ViewBuilder private var profileCard: some View {
+        if store.userType == .landlord {
+            profileCardContent
+        } else {
+            Button {
+                store.send(.editProfileTapped)
+            } label: {
+                profileCardContent
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var profileCardContent: some View {
+        ZStack {
+            Image(profileBackgroundName)
+                .resizable()
+                .scaledToFill()
+                .frame(height: 76)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+
+            HStack(spacing: 8) {
+                Image(profileIconName)
                     .resizable()
-                    .scaledToFill()
-                    .frame(height: 76)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
 
-                HStack(spacing: 8) {
-                    Circle()
-                        .fill(.secondary5)
-                        .frame(width: 36, height: 36)
-                        .overlay(
-                            Image("person_24")
-                                .renderingMode(.template)
-                                .foregroundStyle(.primary50)
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(.secondary5, lineWidth: 1.5)
-                        )
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(profileNameText)
+                        .kohereTextStyle(.label1Medium)
+                        .foregroundStyle(profileNameColor)
 
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("Nickname")
-                            .kohereTextStyle(.label1Medium)
-                            .foregroundStyle(.neutral5)
+                    Text(profileNicknameText)
+                        .kohereTextStyle(.caption2Regular)
+                        .foregroundStyle(profileNicknameColor)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                        Text("@user_code")
-                            .kohereTextStyle(.caption2Regular)
-                            .foregroundStyle(.primary5)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
+                if store.userType != .landlord {
                     Image("pencil_write_24")
                         .renderingMode(.template)
                         .foregroundStyle(.staticWhite)
                         .frame(width: 24, height: 24)
                 }
-                .padding(.horizontal, 16)
             }
-            .frame(height: 76)
+            .padding(.horizontal, 16)
         }
-        .buttonStyle(.plain)
+        .frame(height: 76)
+    }
+
+    private var profileBackgroundName: String {
+        store.userType == .landlord ? "landlordProfileBackground" : "tenantProfileBackground"
+    }
+
+    private var profileIconName: String {
+        store.userType == .landlord ? "landlordProfileIcon" : "tenantProfileIcon"
+    }
+
+    private var profileNameText: String {
+        guard let profile = store.userProfile else {
+            return store.userType == .landlord ? "집주인 이름" : "닉네임"
+        }
+
+        switch profile.userType {
+        case .tenant:
+            let fullName = [profile.firstName, profile.lastName]
+                .compactMap { $0 }
+                .joined(separator: " ")
+            return fullName.isEmpty ? profile.nickname : fullName
+
+        case .landlord:
+            return profile.name ?? profile.nickname
+
+        case .unknown:
+            return profile.nickname
+        }
+    }
+
+    private var profileNicknameText: String {
+        store.userProfile?.nickname ?? ""
+    }
+
+    private var profileNameColor: Color {
+        store.userType == .landlord ? .neutral85 : .neutral5
+    }
+
+    private var profileNicknameColor: Color {
+        store.userType == .landlord ? .neutral75 : .primary5
+    }
+
+    private var tenantActivitySection: some View {
+        MoreMenuSection(
+            title: "내 활동",
+            items: [
+                .init(title: "찜한 매물", iconName: "heart_24"),
+                .init(title: "최근 본 매물", iconName: "thunder_24")
+            ],
+            horizontalPadding: 16
+        )
+    }
+
+    private var tenantLivingGuideSection: some View {
+        MoreMenuSection(
+            title: "한국 생활 팁",
+            items: [
+                .init(title: "조심해야할 사기 유형", iconName: "contractChecklist", rendersAsTemplate: false),
+                .init(title: "은행 계좌 개설 방법", iconName: "bankAccountGuide", rendersAsTemplate: false),
+                .init(title: "대중교통 이용 안내", iconName: "train", rendersAsTemplate: false),
+                .init(title: "건강 보험 등록", iconName: "healthInsurance", rendersAsTemplate: false)
+            ],
+            horizontalPadding: 16
+        )
+    }
+
+    private var landlordServiceSection: some View {
+        MoreMenuSection(
+            title: "사장님 서비스",
+            items: [
+                .init(
+                    title: "무료로 방 등록하기",
+                    subtitle: "고시원 · 쉐어하우스 · 코리빙 등",
+                    iconName: "external_link_24",
+                    action: .promoteRoom
+                )
+            ],
+            horizontalPadding: 16,
+            onItemTapped: handleMenuItemTapped
+        )
+    }
+
+    private var customerSupportSection: some View {
+        MoreMenuSection(
+            title: "고객지원",
+            items: [
+                .init(title: "공지사항", iconName: "megaphone_24"),
+                .init(title: "피드백 보내기", iconName: "mail_24"),
+                .init(title: "협업 신청하기", iconName: "send_24")
+            ],
+            horizontalPadding: 16
+        )
     }
 }
 

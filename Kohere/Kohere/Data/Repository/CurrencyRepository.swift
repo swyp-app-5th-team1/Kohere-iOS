@@ -8,11 +8,11 @@
 import ComposableArchitecture
 
 actor CurrencyRepository: CurrencyInterface {
-    private let networkService: CurrencyNetworkService
+    private let networkService: ExternalNetworkService
     private var cachedKRWToUSDExchangeRate: KRWToUSDExchangeRate?
     private var inFlightKRWToUSDExchangeRateTask: Task<KRWToUSDExchangeRate, Error>?
 
-    init(networkService: CurrencyNetworkService = CurrencyNetworkService()) {
+    init(networkService: ExternalNetworkService = ExternalNetworkService()) {
         self.networkService = networkService
     }
 

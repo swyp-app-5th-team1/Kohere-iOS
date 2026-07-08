@@ -12,6 +12,7 @@ extension MapFeature {
     struct State: Equatable {
         // navigation
         var path = StackState<Path.State>()
+        var userType: UserType?
 
         // 매물/마커 표시 상태
         var markers: [MapMarkerItem] = []
@@ -19,6 +20,11 @@ extension MapFeature {
         var listings: [ListingItemModel] = []
         var listingSearchResults: [Listing] = []
         var diagnosisRecommendedListings: [DiagnosisRecommendedListing] = []
+        var diagnosisRecommendationSuggestions: DiagnosisRecommendationSuggestions?
+        var diagnosisRecommendationPageInfo: DiagnosisRecommendationPage?
+        var favoriteUpdatingIDs: Set<String> = []
+        var favoriteStatusesByListingID: [String: ListingFavoriteStatus] = [:]
+        var favoriteErrorMessage: String?
         var listingSource: MapListingSource = .idle
         var krwToUSDExchangeRate: KRWToUSDExchangeRate?
         var isListingSearchLoading = false
@@ -32,6 +38,7 @@ extension MapFeature {
         // 지도 viewport / 재검색 상태
         var currentViewport: MapViewport?
         var lastSearchedViewport: MapViewport?
+        var placeSearchTarget: MapPlaceSearchTarget?
         var showsResearchButton = false
 
         // 바텀시트 / 필터 상태
@@ -72,12 +79,15 @@ extension MapFeature {
         case locationPermissionDialogSettingsButtonTapped
         case cameraMoveRequestHandled
         case markerTapped(String)
+        case searchButtonTapped
+        case placeSearchResultSelected(SearchPlaceResult)
         case researchButtonTapped
         case viewportChanged(MapViewport)
         case listingRowAppeared(String)
         case path(StackActionOf<Path>)
         case listingTapped(String)
         case listingLikeButtonTapped(String)
+        case favoriteStatusResponse(listingID: String, Result<ListingFavoriteStatus, DataError>)
         case selectedListingCardTapped
         case selectedListingCloseButtonTapped
 
@@ -92,5 +102,15 @@ extension MapFeature {
         case depositMaximumChanged(Int)
         case filterApplyButtonTapped
         case filterResetButtonTapped
+    }
+}
+
+struct MapPlaceSearchTarget: Equatable {
+    let coordinate: MapCoordinate
+}
+
+extension MapFeature.State {
+    var canUseFavoriteFeatures: Bool {
+        userType == .tenant
     }
 }

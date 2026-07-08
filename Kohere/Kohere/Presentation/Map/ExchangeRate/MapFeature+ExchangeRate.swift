@@ -22,16 +22,6 @@ extension MapFeature {
 
     func applyExchangeRate(_ exchangeRate: KRWToUSDExchangeRate, to state: inout State) {
         state.krwToUSDExchangeRate = exchangeRate
-
-        switch state.listingSource {
-        case .locationSearch:
-            state.listings = listingItemModels(from: state.listingSearchResults, exchangeRate: exchangeRate)
-
-        case .diagnosis:
-            state.listings = listingItemModels(from: state.diagnosisRecommendedListings, exchangeRate: exchangeRate)
-
-        case .idle:
-            break
-        }
+        rebuildListingItems(to: &state)
     }
 }
