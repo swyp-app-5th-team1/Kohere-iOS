@@ -55,7 +55,7 @@ private extension ChatDetailView {
                     .foregroundStyle(.labelNormal)
                 
                 Text(store.chatRoom.location)
-                    .kohereTextStyle(.label2Medium)
+                    .kohereTextStyle(.caption2Regular)
                     .foregroundColor(.neutral50)
             }
             .lineLimit(1)
@@ -122,7 +122,7 @@ private extension ChatDetailView {
             
             HStack(alignment: .bottom, spacing: 8) {
                 Color.clear
-                    .frame(width: 40, height: 1)
+                    .frame(width: 32, height: 1)
                 
                 MoveInApplicationCardView(
                     item: store.chatRoom,
@@ -217,7 +217,7 @@ private extension ChatDetailView {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .frame(width: 270, alignment: .leading)
-        .background(.common0)
+        .background(.backgroundNormalAlternative)
         .clipShape(
             UnevenRoundedRectangle(
                 topLeadingRadius: 0,

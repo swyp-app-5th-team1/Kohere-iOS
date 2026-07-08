@@ -51,7 +51,7 @@ struct MoveInApplicationCardView: View {
             .padding(.top, 20)
             .padding(.bottom, 24)
         }
-        .frame(width: 270)
+        .frame(width: 255)
         .background(Color.white)
         .cornerRadius(20)
         .overlay(
@@ -82,7 +82,7 @@ struct MoveInApplicationCardView: View {
                 placeholderImage
             }
         }
-        .frame(width: 270, height: 173)
+        .frame(width: 255, height: 173)
         .clipped()
         .clipShape(
             UnevenRoundedRectangle(
