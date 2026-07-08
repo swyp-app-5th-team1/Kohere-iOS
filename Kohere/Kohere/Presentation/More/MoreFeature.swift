@@ -11,13 +11,17 @@ import ComposableArchitecture
 struct MoreFeature {
     @Reducer
     enum Path {
+        case account(AccountFeature)
         case profileEdit(ProfileEditFeature)
         case promoteRoomWeb(PromoteRoomWebFeature)
+        case setting(SettingFeature)
     }
 
     @ObservableState
     struct State: Equatable {
         var path = StackState<Path.State>()
+        var userType: UserType?
+        var userProfile: UserProfile?
     }
 
     enum Action {
@@ -26,6 +30,7 @@ struct MoreFeature {
         case navigationSettingTapped
         case editProfileTapped
         case promoteRoomTapped
+        case popupRequested(AppPopup)
         case logoutConfirmed
         case deleteAccountConfirmed
     }
@@ -33,6 +38,13 @@ struct MoreFeature {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            case .path(.element(id: _, action: .account(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case let .path(.element(id: _, action: .account(.popupRequested(popup)))):
+                return .send(.popupRequested(popup))
+
             case .path(.element(id: _, action: .profileEdit(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
@@ -41,18 +53,40 @@ struct MoreFeature {
                 _ = state.path.popLast()
                 return .none
 
-            case .navigationLanguageTapped, .navigationSettingTapped:
+            case .path(.element(id: _, action: .setting(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case let .path(.element(id: _, action: .setting(.popupRequested(popup)))):
+                return .send(.popupRequested(popup))
+
+            case .path(.element(id: _, action: .setting(.settingItemTapped(.account)))):
+                state.path.append(
+                    .account(
+                        AccountFeature.State(
+                            userType: state.userType ?? .unknown,
+                            userProfile: state.userProfile
+                        )
+                    )
+                )
+                return .none
+
+            case .navigationLanguageTapped:
+                return .none
+
+            case .navigationSettingTapped:
+                state.path.append(.setting(SettingFeature.State()))
                 return .none
 
             case .editProfileTapped:
-                state.path.append(.profileEdit(ProfileEditFeature.State()))
+                state.path.append(.profileEdit(ProfileEditFeature.State(userProfile: state.userProfile)))
                 return .none
 
             case .promoteRoomTapped:
                 state.path.append(.promoteRoomWeb(PromoteRoomWebFeature.State()))
                 return .none
 
-            case .logoutConfirmed, .deleteAccountConfirmed:
+            case .popupRequested, .logoutConfirmed, .deleteAccountConfirmed:
                 return .none
 
             case .path:

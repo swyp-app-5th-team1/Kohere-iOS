@@ -15,21 +15,76 @@ struct ProfileEditFeature {
 
     @ObservableState
     struct State: Equatable {
-        var nickname: String = "Nickname"
-        var email: String = "user@example.com"
+        var nickname: String
+        var email: String
 
-        var firstName: String = ""
-        var lastName: String = ""
+        var firstName: String
+        var lastName: String
         var selectedNationality: DropdownMenuOption?
         var selectedGender: DropdownMenuOption?
         var selectedVisa: DropdownMenuOption?
         var selectedOccupation: DropdownMenuOption?
+        private let userProfile: UserProfile?
 
         var isSaveButtonEnabled: Bool {
-            !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            hasRequiredFields
+            && hasChanges
+        }
+
+        private var hasRequiredFields: Bool {
+            !Self.normalizedText(firstName).isEmpty
+            && !Self.normalizedText(lastName).isEmpty
             && selectedVisa != nil
             && selectedOccupation != nil
+        }
+
+        init(userProfile: UserProfile? = nil) {
+            self.userProfile = userProfile
+            nickname = userProfile?.nickname ?? ""
+            email = userProfile?.email ?? ""
+            firstName = userProfile?.firstName ?? ""
+            lastName = userProfile?.lastName ?? ""
+            selectedNationality = userProfile?.countryName.map(DropdownMenuOption.init(option:))
+            selectedGender = Self.genderOption(from: userProfile?.gender)
+            selectedVisa = Self.visaOption(from: userProfile?.visaType)
+            selectedOccupation = Self.occupationOption(from: userProfile?.occupation)
+        }
+
+        private var hasChanges: Bool {
+            Self.normalizedText(firstName) != Self.normalizedText(userProfile?.firstName ?? "")
+            || Self.normalizedText(lastName) != Self.normalizedText(userProfile?.lastName ?? "")
+            || selectedNationality != userProfile?.countryName.map(DropdownMenuOption.init(option:))
+            || selectedGender != Self.genderOption(from: userProfile?.gender)
+            || selectedVisa != Self.visaOption(from: userProfile?.visaType)
+            || selectedOccupation != Self.occupationOption(from: userProfile?.occupation)
+        }
+
+        private static func normalizedText(_ text: String) -> String {
+            text.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        private static func genderOption(from rawValue: String?) -> DropdownMenuOption? {
+            guard let rawValue,
+                  let gender = Gender(rawValue: rawValue)
+            else { return nil }
+
+            return DropdownMenuOption(gender)
+        }
+
+        private static func visaOption(from rawValue: String?) -> DropdownMenuOption? {
+            guard let rawValue,
+                  let visaType = VisaType(rawValue: rawValue)
+            else { return nil }
+
+            return DropdownMenuOption(visaType)
+        }
+
+        private static func occupationOption(from rawValue: String?) -> DropdownMenuOption? {
+            guard let rawValue,
+                  let occupation = Occupation(rawValue: rawValue)
+            else { return nil }
+
+            return DropdownMenuOption(occupation)
         }
     }
 

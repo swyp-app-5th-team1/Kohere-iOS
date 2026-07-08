@@ -275,7 +275,7 @@ struct SearchView: View {
                 .renderingMode(.template)
                 .resizable()
                 .frame(width: 80, height: 80)
-                .foregroundStyle(.labelAlternative)
+                .foregroundStyle(.labelAssistive)
 
             Text("검색 결과가 없습니다")
                 .kohereTextStyle(.label2Medium)

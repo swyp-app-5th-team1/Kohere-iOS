@@ -24,7 +24,7 @@ enum NavigationCenter {
 enum NavigationRight {
     case none
     case homeTab(onSearch: () -> Void, onHeart: () -> Void, onNotice: () -> Void)
-    case moreTab(onLanguage: () -> Void, onSetting: () -> Void)
+    case moreTab(showsLanguage: Bool = true, onLanguage: () -> Void, onSetting: () -> Void)
     case detailInfo(onHeart: () -> Void, onShare: () -> Void)
     case searchButton(() -> Void)
     case checkButton(isEnabled: Bool, action: () -> Void)
@@ -151,13 +151,15 @@ extension KohereNavigationBar {
                 }
             }
             
-        case .moreTab(let onLanguage, let onSetting):
+        case .moreTab(let showsLanguage, let onLanguage, let onSetting):
             HStack(spacing: 8) {
-                Button(action: onLanguage) {
-                    Image(.globe24)
-                        .renderingMode(.template)
-                        .foregroundColor(rightColor)
-                        .frame(width: 24, height: 24)
+                if showsLanguage {
+                    Button(action: onLanguage) {
+                        Image(.globe24)
+                            .renderingMode(.template)
+                            .foregroundColor(rightColor)
+                            .frame(width: 24, height: 24)
+                    }
                 }
                 Button(action: onSetting) {
                     Image(.setting24)
