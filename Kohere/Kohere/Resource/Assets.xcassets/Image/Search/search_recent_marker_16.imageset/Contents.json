@@ -1,15 +1,17 @@
 {
   "images" : [
     {
+      "filename" : "Marker.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "search_recent_marker_16@2x.png",
+      "filename" : "Marker@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "Marker@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

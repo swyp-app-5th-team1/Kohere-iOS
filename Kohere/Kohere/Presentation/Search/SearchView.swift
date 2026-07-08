@@ -17,7 +17,10 @@ struct SearchView: View {
             searchHeader
             searchBanner
                 .padding(.top, 20)
-            searchContent
+            ScrollView(.vertical, showsIndicators: false) {
+                searchContent
+                    .frame(maxWidth: .infinity, alignment: .top)
+            }
         }
         .background(.coolNeutral5)
         .navigationBarHidden(true)
