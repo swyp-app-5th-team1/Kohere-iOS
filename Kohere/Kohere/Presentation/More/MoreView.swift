@@ -20,7 +20,8 @@ struct MoreView: View {
                     showsLanguage: store.userType != .landlord,
                     onLanguage: { store.send(.navigationLanguageTapped) },
                     onSetting: { store.send(.navigationSettingTapped) }
-                )
+                ),
+                backgroundColor: .backgroundNormalAlternative
             )
 
             ScrollView(showsIndicators: false) {
