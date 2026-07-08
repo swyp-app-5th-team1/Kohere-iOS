@@ -149,6 +149,8 @@ extension KohereNavigationBar {
                 }
                 Button(action: onNotice) {
                     Image(.bell24)
+                        .renderingMode(.template)
+                        .foregroundColor(rightColor)
                         .frame(width: 24, height: 24)
                 }
             }
