@@ -13,6 +13,8 @@ struct SearchFeature {
     private static let recentSearchLimit = 10
     @Dependency(\.placeSearchClient)
     var placeSearchClient
+    @Dependency(\.userDefaultsClient)
+    var userDefaultsClient
 
     @ObservableState
     struct State: Equatable {
@@ -86,10 +88,12 @@ struct SearchFeature {
 
             case let .recentSearchDeleteButtonTapped(keyword):
                 state.recentSearches.removeAll { $0.keyword == keyword }
+                saveRecentSearches(state.recentSearches, userDefaultsClient: userDefaultsClient)
                 return .none
 
             case .clearRecentSearchesButtonTapped:
                 state.recentSearches.removeAll()
+                saveRecentSearches(state.recentSearches, userDefaultsClient: userDefaultsClient)
                 return .none
 
             case .bannerTapped:
@@ -103,6 +107,7 @@ struct SearchFeature {
                     return .none
                 }
                 state.addRecentSearch(requestedKeyword)
+                saveRecentSearches(state.recentSearches, userDefaultsClient: userDefaultsClient)
                 state.placeResults = results
                 state.contentState = results.isEmpty ? .emptyResult : .placeResults
                 return .none
@@ -122,6 +127,12 @@ struct SearchFeature {
     }
 }
 
+extension SearchFeature {
+    static func initialState(userDefaultsClient: UserDefaultsClient) -> State {
+        State(recentSearches: loadRecentSearches(userDefaultsClient: userDefaultsClient))
+    }
+}
+
 extension SearchFeature.State {
     mutating func addRecentSearch(_ keyword: String) {
         recentSearches.removeAll { $0.keyword == keyword }
@@ -131,10 +142,38 @@ extension SearchFeature.State {
 }
 
 private extension SearchFeature {
+    static func loadRecentSearches(userDefaultsClient: UserDefaultsClient) -> [SearchRecentSearch] {
+        let keywords = (try? userDefaultsClient.load(for: .recentSearchKeywords)) ?? []
+        return Array(
+            keywords
+                .filter { !$0.isEmpty }
+                .uniqued()
+                .prefix(recentSearchLimit)
+        )
+        .map(SearchRecentSearch.init)
+    }
+
+    func saveRecentSearches(
+        _ recentSearches: [SearchRecentSearch],
+        userDefaultsClient: UserDefaultsClient
+    ) {
+        try? userDefaultsClient.save(
+            recentSearches.map(\.keyword),
+            for: .recentSearchKeywords
+        )
+    }
+
     func placeSearchFailurePopup(message: String) -> AppPopup {
         let fallbackMessage = "장소 검색에 실패했어요.\n다시 시도해주세요."
         let resolvedMessage = message.isEmpty ? fallbackMessage : message
         return .notice(AppPopup.Notice(message: resolvedMessage))
+    }
+}
+
+private extension Array where Element: Hashable {
+    func uniqued() -> [Element] {
+        var seen: Set<Element> = []
+        return filter { seen.insert($0).inserted }
     }
 }
 
