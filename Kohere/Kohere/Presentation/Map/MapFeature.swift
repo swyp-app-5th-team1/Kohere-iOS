@@ -263,7 +263,7 @@ struct MapFeature {
                 return .none
 
             case .searchButtonTapped:
-                state.path.append(.search(SearchFeature.State()))
+                state.path.append(.search(SearchFeature.initialState(userDefaultsClient: userDefaultsClient)))
                 return .none
             case let .placeSearchResultSelected(placeResult):
                 return handlePlaceSearchResultSelected(placeResult, state: &state)

@@ -24,6 +24,10 @@ extension UserDefaultsKey where Value == Date {
     nonisolated static let mapDiagnosisButtonLastExpandedAt = Self(rawValue: "mapDiagnosisButtonLastExpandedAt")
 }
 
+extension UserDefaultsKey where Value == [String] {
+    nonisolated static let recentSearchKeywords = Self(rawValue: "recentSearchKeywords")
+}
+
 enum UserDefaultsStoredValue: Sendable {
     case bool(Bool)
     case integer(Int)

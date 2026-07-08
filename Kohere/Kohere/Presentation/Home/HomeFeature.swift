@@ -9,6 +9,9 @@ import ComposableArchitecture
 
 @Reducer
 struct HomeFeature {
+    @Dependency(\.userDefaultsClient)
+    var userDefaultsClient
+
     @Reducer
     enum Path {
         case savedListings(SavedListingsFeature)
@@ -99,7 +102,7 @@ struct HomeFeature {
                 return .none
                 
             case .navigationSearchTapped:
-                state.path.append(.search(SearchFeature.State()))
+                state.path.append(.search(SearchFeature.initialState(userDefaultsClient: userDefaultsClient)))
                 return .none
                 
             case .navigationHeartTapped:

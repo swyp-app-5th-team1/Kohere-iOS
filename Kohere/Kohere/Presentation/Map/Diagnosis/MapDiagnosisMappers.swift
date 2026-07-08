@@ -67,8 +67,7 @@ extension ListingItemModel {
     }
 
     nonisolated private static func depositTitle(min: Int?, max: Int?) -> String {
-        guard let rangeTitle = wonRangeTitle(min: min, max: max) else { return "" }
-        return "보증금 \(rangeTitle)"
+        MonthlyRentPriceFormatter.rangeTitle(prefix: "보증금", min: min, max: max)
     }
 
     nonisolated private static func typeTitle(from type: String) -> String {
@@ -85,39 +84,6 @@ extension ListingItemModel {
                 .lowercased()
                 .capitalized
         }
-    }
-
-    nonisolated private static func wonRangeTitle(min: Int?, max: Int?) -> String? {
-        switch (min, max) {
-        case let (min?, max?) where min == max:
-            return wonTitle(min)
-        case let (min?, max?):
-            return "\(wonNumberTitle(min))~\(wonTitle(max))"
-        case let (min?, nil):
-            return "\(wonTitle(min))~"
-        case let (nil, max?):
-            return "~\(wonTitle(max))"
-        case (nil, nil):
-            return nil
-        }
-    }
-
-    nonisolated private static func wonTitle(_ amount: Int) -> String {
-        guard amount != 0 else { return "0원" }
-        guard amount >= 10_000 else { return "\(amount)원" }
-
-        return "\(wonNumberTitle(amount))만원"
-    }
-
-    nonisolated private static func wonNumberTitle(_ amount: Int) -> String {
-        guard amount >= 10_000 else { return "\(amount)원" }
-
-        let tenths = amount / 1_000
-        if tenths % 10 == 0 {
-            return "\(tenths / 10)"
-        }
-
-        return "\(Double(tenths) / 10)"
     }
 
 }
