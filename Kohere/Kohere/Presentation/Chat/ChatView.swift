@@ -49,13 +49,19 @@ struct ChatView: View {
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 4) {
                         ForEach(store.chatRooms) { room in
-                            ChatRoomRowCell(item: room) { id in
+                            ChatRoomRowCell(
+                                item: room,
+                                participantRole: store.participantRole
+                            ) { id in
                                 store.send(.chatRoomTapped(id: id))
                             }
                         }
                     }
                 }
             }
+        }
+        .onAppear {
+            store.send(.onAppear)
         }
     }
 }

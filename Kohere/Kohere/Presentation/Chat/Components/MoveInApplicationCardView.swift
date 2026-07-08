@@ -7,82 +7,49 @@
 
 import SwiftUI
 
+enum MoveInApplicationCardMode {
+    case tenant
+    case landlord
+}
+
 struct MoveInApplicationCardView: View {
     
     // MARK: - Properties
     
     let item: ChatRoomModel
-    let onViewDetailsTapped: () -> Void
+    var mode: MoveInApplicationCardMode = .tenant
     
     // MARK: - Body
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Image(.roomPlaceholder)
-                .resizable()
-                .frame(width: 270, height: 173)
-                .clipped()
-                .clipShape(
-                    UnevenRoundedRectangle(
-                        cornerRadii: RectangleCornerRadii(
-                            topLeading: 20,
-                            bottomLeading: 0,
-                            bottomTrailing: 0,
-                            topTrailing: 20
-                        )
-                    )
-                )
+            thumbnailImage
             
             VStack(alignment: .leading, spacing: 0) {
                 Text(item.listingName)
                     .kohereTextStyle(.label2Medium)
-                    .foregroundColor(.neutral70)
+                    .foregroundColor(.neutral80)
                     .padding(.bottom, 4)
                 
                 Text(item.location)
                     .kohereTextStyle(.caption1Regular)
-                    .foregroundColor(.coolNeutral30)
+                    .foregroundColor(.labelAlternative)
                 
-                Text(item.pricePerMonth)
-                    .kohereTextStyle(.caption1Regular)
-                    .foregroundColor(.coolNeutral30)
+                if !item.pricePerMonth.isEmpty {
+                    Text(item.pricePerMonth)
+                        .kohereTextStyle(.caption1Regular)
+                        .foregroundColor(.labelAlternative)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(.coolNeutral7)
             
-            VStack(spacing: 4) {
-                infoRow(label: "Applicant", value: item.applicantName)
-                infoRow(label: "Move-in Date", value: item.moveInDate)
-                infoRow(label: "Lease Term", value: item.leaseTerm)
-                infoRow(label: "Deposit", value: item.deposit)
-                infoRow(label: "Total Cost", value: item.totalCost)
-            }
+            cardInfo
             .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .padding(.bottom, 8)
-            
-            VStack {
-                Button(action: onViewDetailsTapped) {
-                    Text("View Details")
-                        .kohereTextStyle(.label1Semibold)
-                        .frame(maxWidth: .infinity)
-                        .foregroundColor(.statusInfo)
-                }
-            }
-            .padding(.vertical, 14)
-            .background(Color.statusBlue5)
-            .clipShape(
-                UnevenRoundedRectangle(
-                    cornerRadii: RectangleCornerRadii(
-                        topLeading: 0,
-                        bottomLeading: 20,
-                        bottomTrailing: 20,
-                        topTrailing: 0
-                    )
-                )
-            )
+            .padding(.top, 20)
+            .padding(.bottom, 24)
         }
         .frame(width: 270)
         .background(Color.white)
@@ -96,6 +63,94 @@ struct MoveInApplicationCardView: View {
     
     // MARK: - SubView
     
+    private var thumbnailImage: some View {
+        Group {
+            if let thumbnailURL = item.thumbnailURL {
+                AsyncImage(url: thumbnailURL) { phase in
+                    switch phase {
+                    case let .success(image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    case .empty, .failure:
+                        placeholderImage
+                    @unknown default:
+                        placeholderImage
+                    }
+                }
+            } else {
+                placeholderImage
+            }
+        }
+        .frame(width: 270, height: 173)
+        .clipped()
+        .clipShape(
+            UnevenRoundedRectangle(
+                cornerRadii: RectangleCornerRadii(
+                    topLeading: 20,
+                    bottomLeading: 0,
+                    bottomTrailing: 0,
+                    topTrailing: 20
+                )
+            )
+        )
+    }
+    
+    private var placeholderImage: some View {
+        Image(.roomPlaceholder)
+            .resizable()
+            .scaledToFill()
+    }
+    
+    @ViewBuilder private var cardInfo: some View {
+        switch mode {
+        case .tenant:
+            VStack(spacing: 4) {
+                infoRow(label: "Applicant", value: item.applicantName)
+                infoRow(label: "Move-in Date", value: item.moveInDate)
+                infoRow(label: "Lease Term", value: item.leaseTerm)
+                infoRow(label: "Deposit", value: item.deposit)
+                infoRow(label: "Total Cost", value: item.totalCost)
+            }
+            
+        case .landlord:
+            VStack(spacing: 4) {
+                infoRow(label: "이름", value: item.applicantName)
+                infoRow(label: "성별", value: item.applicantGender)
+                infoRow(label: "국적", value: item.applicantNationality)
+                emailRow
+                infoRow(label: "객실 타입", value: item.roomType)
+                infoRow(label: "입주희망일", value: item.moveInDate)
+                infoRow(label: "희망입주기간", value: item.leaseTerm)
+                infoRow(label: "보증금", value: item.deposit)
+                infoRow(label: "총 초기비용", value: item.totalCost)
+            }
+        }
+    }
+    
+    private var emailRow: some View {
+        HStack {
+            Text("이메일")
+                .kohereTextStyle(.caption1Regular)
+                .foregroundColor(.neutral50)
+            
+            Spacer()
+            
+            HStack(spacing: 4) {
+                Text(item.applicantEmail)
+                    .kohereTextStyle(.label3Medium)
+                    .foregroundColor(.statusInfo)
+                
+                Image(.copy24)
+                    .resizable()
+                    .renderingMode(.template)
+                    .foregroundStyle(.statusInfo)
+                    .frame(width: 16, height: 16)
+            }
+        }
+        .frame(height: 24)
+    }
+    
     private func infoRow(label: String, value: String) -> some View {
         HStack {
             Text(label)
@@ -106,7 +161,7 @@ struct MoveInApplicationCardView: View {
             
             Text(value)
                 .kohereTextStyle(.label3Medium)
-                .foregroundColor(.coolNeutral77)
+                .foregroundColor(.neutral70)
         }
         .frame(height: 24)
     }
