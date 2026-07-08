@@ -27,6 +27,7 @@ struct EmailVerificationStepView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("E-mail")
                     .kohereTextStyle(.label2Semibold)
+                    .foregroundStyle(.coolNeutral90)
 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {

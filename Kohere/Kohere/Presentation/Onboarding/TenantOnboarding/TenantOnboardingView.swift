@@ -19,27 +19,32 @@ struct TenantOnboardingView: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 0) {
-            topProgressBar
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
+        ZStack {
+            Color.backgroundNormalAlternative
+                .ignoresSafeArea()
 
-            VStack(alignment: .leading, spacing: 0) {
-                switch store.currentStep {
-                case .nameAndBirth:
-                    NameAndBirthStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
-                case .details:
-                    DetailsStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
-                case .emailVerification:
-                    EmailVerificationStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
+            VStack(spacing: 0) {
+                topProgressBar
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+
+                VStack(alignment: .leading, spacing: 0) {
+                    switch store.currentStep {
+                    case .nameAndBirth:
+                        NameAndBirthStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
+                    case .details:
+                        DetailsStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
+                    case .emailVerification:
+                        EmailVerificationStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
+                    }
                 }
-            }
-            .padding(.horizontal, 20)
-
-            Spacer()
-
-            bottomButtonArea
                 .padding(.horizontal, 20)
+
+                Spacer()
+
+                bottomButtonArea
+                    .padding(.horizontal, 20)
+            }
         }
         .background {
             Color.backgroundNormalAlternative
