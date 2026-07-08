@@ -34,6 +34,7 @@ struct HomeFeature {
     @ObservableState
     struct State: Equatable {
         var path = StackState<Path.State>()
+        var userType: UserType?
         var recentlyViewedItems: [ListingItemModel] = []
         var isRecentlyViewedLoading: Bool = false
         var isRecentlyViewedLoaded: Bool = false
@@ -50,10 +51,12 @@ struct HomeFeature {
         var livingGuidesErrorMessage: String?
         
         init(
+            userType: UserType? = nil,
             recentlyViewedItems: [ListingItemModel] = [],
             quiz: Quiz = Quiz.mockQuiz,
             livingGuides: [LivingGuide] = []
         ) {
+            self.userType = userType
             self.recentlyViewedItems = recentlyViewedItems
             self.isRecentlyViewedLoaded = !recentlyViewedItems.isEmpty
             self.quiz = QuizModel(entity: quiz, selectedChoiceKey: nil)
@@ -258,7 +261,8 @@ struct HomeFeature {
                 return .none
                 
             case .navigationHeartTapped:
-                state.path.append(.savedListings(SavedListingsFeature.State()))
+                guard state.canUseFavoriteFeatures else { return .none }
+                state.path.append(.savedListings(SavedListingsFeature.State(userType: state.userType)))
                 return .none
                 
             case .navigationNoticeTapped:
@@ -270,7 +274,7 @@ struct HomeFeature {
                 return .none
                 
             case .seeAllListingsTapped:
-                state.path.append(.recentlyViewedList(RecentlyViewedFeature.State()))
+                state.path.append(.recentlyViewedList(RecentlyViewedFeature.State(userType: state.userType)))
                 return .none
                 
             case .browseListingsTapped:
@@ -282,7 +286,8 @@ struct HomeFeature {
                 return .none
                 
             case let .likeButtonTapped(id):
-                guard let item = state.recentlyViewedItems.first(where: { $0.id == id }),
+                guard state.canUseFavoriteFeatures,
+                      let item = state.recentlyViewedItems.first(where: { $0.id == id }),
                       !state.favoriteUpdatingIDs.contains(id)
                 else { return .none }
 
@@ -334,3 +339,9 @@ struct HomeFeature {
 }
 
 extension HomeFeature.Path.State: Equatable {}
+
+extension HomeFeature.State {
+    var canUseFavoriteFeatures: Bool {
+        userType == .tenant
+    }
+}

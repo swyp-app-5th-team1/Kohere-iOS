@@ -12,6 +12,7 @@ extension MapFeature {
     struct State: Equatable {
         // navigation
         var path = StackState<Path.State>()
+        var userType: UserType?
 
         // 매물/마커 표시 상태
         var markers: [MapMarkerItem] = []
@@ -21,6 +22,9 @@ extension MapFeature {
         var diagnosisRecommendedListings: [DiagnosisRecommendedListing] = []
         var diagnosisRecommendationSuggestions: DiagnosisRecommendationSuggestions?
         var diagnosisRecommendationPageInfo: DiagnosisRecommendationPage?
+        var favoriteUpdatingIDs: Set<String> = []
+        var favoriteStatusesByListingID: [String: ListingFavoriteStatus] = [:]
+        var favoriteErrorMessage: String?
         var listingSource: MapListingSource = .idle
         var krwToUSDExchangeRate: KRWToUSDExchangeRate?
         var isListingSearchLoading = false
@@ -83,6 +87,7 @@ extension MapFeature {
         case path(StackActionOf<Path>)
         case listingTapped(String)
         case listingLikeButtonTapped(String)
+        case favoriteStatusResponse(listingID: String, Result<ListingFavoriteStatus, DataError>)
         case selectedListingCardTapped
         case selectedListingCloseButtonTapped
 
@@ -102,4 +107,10 @@ extension MapFeature {
 
 struct MapPlaceSearchTarget: Equatable {
     let coordinate: MapCoordinate
+}
+
+extension MapFeature.State {
+    var canUseFavoriteFeatures: Bool {
+        userType == .tenant
+    }
 }

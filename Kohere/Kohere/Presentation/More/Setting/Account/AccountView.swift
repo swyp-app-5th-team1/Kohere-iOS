@@ -79,7 +79,6 @@ private extension AccountView {
         case .landlord:
             return [
                 .init(title: "연결된 이메일", value: store.userProfile?.email ?? ""),
-                .init(title: "사업자 등록 번호", value: store.userProfile?.businessRegistrationNumber ?? ""),
                 .init(title: "생년월일", value: formattedBirthDate)
             ]
 

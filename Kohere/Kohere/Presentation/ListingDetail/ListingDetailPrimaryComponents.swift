@@ -94,27 +94,30 @@ struct ListingDetailOverviewSection: View {
 
 struct ListingDetailBottomBar: View {
     let isLiked: Bool
+    let showsLikeButton: Bool
     let onLikeTap: () -> Void
     let onContactTap: () -> Void
     let onApplyTap: () -> Void
 
     var body: some View {
         HStack(spacing: 8) {
-            Button(action: onLikeTap) {
-                Image(isLiked ? "heart_fill_24" : "heart_24")
-                    .renderingMode(.template)
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                    .foregroundStyle(isLiked ? .primary50 : .labelAlternative)
-                    .frame(width: 48, height: 48)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(.lineNormal, lineWidth: 1)
-                    }
+            if showsLikeButton {
+                Button(action: onLikeTap) {
+                    Image(isLiked ? "heart_fill_24" : "heart_24")
+                        .renderingMode(.template)
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(isLiked ? .primary50 : .labelAlternative)
+                        .frame(width: 48, height: 48)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(.lineNormal, lineWidth: 1)
+                        }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isLiked ? "찜 해제" : "찜하기")
+                .accessibilityValue(isLiked ? "찜한 매물" : "찜하지 않은 매물")
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(isLiked ? "찜 해제" : "찜하기")
-            .accessibilityValue(isLiked ? "찜한 매물" : "찜하지 않은 매물")
 
             Button(action: onContactTap) {
                 Text("문의 하기")

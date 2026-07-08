@@ -45,14 +45,3 @@ struct KohereNoticePopup: View {
         }
     }
 }
-
-#Preview {
-    ZStack {
-        Color.materialDimmer
-            .ignoresSafeArea()
-
-        KohereNoticePopup(
-            message: "요청을 처리하지 못했어요.\n다시 시도해주세요."
-        ) {}
-    }
-}

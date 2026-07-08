@@ -12,6 +12,7 @@ struct RecentlyViewedView: View {
     // MARK: - Properties
     
     let items: [ListingItemModel]
+    let showsLikeButtons: Bool
     
     let onSeeAllTapped: () -> Void
     let onBrowseTapped: () -> Void
@@ -79,7 +80,12 @@ struct RecentlyViewedView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 16) {
                 ForEach(items) { item in
-                    HomeListingCardView(item: item, onCardTapped: onCardTapped, onLikeTapped: onLikeTapped)
+                    HomeListingCardView(
+                        item: item,
+                        showsLikeButton: showsLikeButtons,
+                        onCardTapped: onCardTapped,
+                        onLikeTapped: onLikeTapped
+                    )
                 }
             }
             .padding(.horizontal, 20)

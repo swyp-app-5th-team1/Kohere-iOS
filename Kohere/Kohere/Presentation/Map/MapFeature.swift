@@ -313,13 +313,16 @@ struct MapFeature {
                 return .none
 
             case let .listingLikeButtonTapped(listingID):
-                guard let index = state.listings.firstIndex(where: { $0.listingID == listingID }) else { return .none }
-                state.listings[index].isLiked.toggle()
-                return .none
+                return startFavoriteUpdateEffect(listingID: listingID, state: &state)
+
+            case let .favoriteStatusResponse(listingID, result):
+                return handleFavoriteStatusResponse(listingID: listingID, result: result, state: &state)
 
             case .selectedListingCardTapped:
                 guard let selectedMarkerID = state.selectedMarkerID else { return .none }
-                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: selectedMarkerID)))
+                state.path.append(
+                    .listingDetail(ListingDetailFeature.State(listingID: selectedMarkerID, userType: state.userType))
+                )
                 return .none
 
             case .selectedListingCloseButtonTapped:

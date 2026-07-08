@@ -335,6 +335,7 @@ struct ListingDetailView: View {
     private var bottomBar: some View {
         ListingDetailBottomBar(
             isLiked: store.detail.overview.isLiked,
+            showsLikeButton: store.canUseFavoriteFeatures,
             onLikeTap: { store.send(.likeButtonTapped) },
             onContactTap: { store.send(.contactButtonTapped) },
             onApplyTap: { store.send(.applyButtonTapped) }

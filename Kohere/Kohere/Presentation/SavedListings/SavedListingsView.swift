@@ -23,8 +23,13 @@ struct SavedListingsView: View {
             Rectangle()
                 .foregroundStyle(.lineNeutral)
                 .frame(height: 1)
-            
-            if store.items.isEmpty {
+
+            if store.isLoading && store.items.isEmpty {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let errorMessage = store.errorMessage, store.items.isEmpty {
+                KohereEmptyView(title: errorMessage)
+            } else if store.items.isEmpty {
                 KohereEmptyView(title: "No saved listings yet")
             } else {
                 ScrollView {
@@ -32,6 +37,7 @@ struct SavedListingsView: View {
                         ForEach(store.items) { item in
                             ListingCardView(
                                 item: item,
+                                showsLikeButton: store.canUseFavoriteFeatures,
                                 onCardTapped: { store.send(.cardTapped(id: item.id)) },
                                 onLikeTapped: { store.send(.likeButtonTapped(id: item.id)) }
                             )

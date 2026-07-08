@@ -17,6 +17,7 @@ struct SavedListingsFeature {
     
     @ObservableState
     struct State: Equatable {
+        var userType: UserType?
         var items: [ListingItemModel] = []
         var isLoading: Bool = false
         var favoriteUpdatingIDs: Set<String> = []
@@ -40,13 +41,15 @@ struct SavedListingsFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard !state.isLoading else { return .none }
+                guard state.canUseFavoriteFeatures,
+                      !state.isLoading
+                else { return .none }
                 state.isLoading = true
                 state.errorMessage = nil
 
                 return .run { [listingClient] send in
                     do {
-                        //TODO: 고도화 때 페이지네이션 처리
+                        // TODO: 고도화 때 페이지네이션 처리
                         let page = try await listingClient.fetchFavoriteListings(0, 30)
                         await send(.favoriteListingsResponse(.success(page)))
                     } catch {
@@ -71,7 +74,8 @@ struct SavedListingsFeature {
                 return .none
                 
             case let .likeButtonTapped(id):
-                guard let item = state.items.first(where: { $0.id == id }),
+                guard state.canUseFavoriteFeatures,
+                      let item = state.items.first(where: { $0.id == id }),
                       !state.favoriteUpdatingIDs.contains(id)
                 else { return .none }
 
@@ -115,5 +119,11 @@ struct SavedListingsFeature {
                 return .none
             }
         }
+    }
+}
+
+extension SavedListingsFeature.State {
+    var canUseFavoriteFeatures: Bool {
+        userType == .tenant
     }
 }

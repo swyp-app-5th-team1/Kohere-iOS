@@ -62,15 +62,3 @@ struct KohereActionPopup: View {
         }
     }
 }
-
-#Preview {
-    ZStack {
-        Color.materialDimmer
-            .ignoresSafeArea()
-
-        KohereActionPopup(
-            message: "로그아웃하시겠어요?",
-            primaryTitle: "로그아웃"
-        ) {} onSecondaryTapped: {}
-    }
-}
