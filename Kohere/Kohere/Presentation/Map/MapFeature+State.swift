@@ -12,6 +12,7 @@ extension MapFeature {
     struct State: Equatable {
         // navigation
         var path = StackState<Path.State>()
+        var userType: UserType?
 
         // 매물/마커 표시 상태
         var markers: [MapMarkerItem] = []
@@ -106,4 +107,10 @@ extension MapFeature {
 
 struct MapPlaceSearchTarget: Equatable {
     let coordinate: MapCoordinate
+}
+
+extension MapFeature.State {
+    var canUseFavoriteFeatures: Bool {
+        userType == .tenant
+    }
 }

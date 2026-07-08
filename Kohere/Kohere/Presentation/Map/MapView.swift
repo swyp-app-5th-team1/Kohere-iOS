@@ -204,6 +204,7 @@ struct MapView: View {
         MapSelectedListingSheetView(
             title: store.selectedListingTitle,
             item: item,
+            showsLikeButton: store.canUseFavoriteFeatures,
             onCardTapped: {
                 store.send(.selectedListingCardTapped)
             },

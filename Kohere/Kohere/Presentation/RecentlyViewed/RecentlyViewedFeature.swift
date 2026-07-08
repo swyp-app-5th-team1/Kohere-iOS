@@ -17,6 +17,7 @@ struct RecentlyViewedFeature {
     
     @ObservableState
     struct State: Equatable {
+        var userType: UserType?
         var items: [ListingItemModel] = []
         var isLoading: Bool = false
         var favoriteUpdatingIDs: Set<String> = []
@@ -70,7 +71,8 @@ struct RecentlyViewedFeature {
                 return .none
                 
             case let .likeButtonTapped(id):
-                guard let item = state.items.first(where: { $0.id == id }),
+                guard state.canUseFavoriteFeatures,
+                      let item = state.items.first(where: { $0.id == id }),
                       !state.favoriteUpdatingIDs.contains(id)
                 else { return .none }
 
@@ -110,5 +112,11 @@ struct RecentlyViewedFeature {
                 return .none
             }
         }
+    }
+}
+
+extension RecentlyViewedFeature.State {
+    var canUseFavoriteFeatures: Bool {
+        userType == .tenant
     }
 }

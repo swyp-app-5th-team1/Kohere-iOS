@@ -145,6 +145,8 @@ struct RootFeature {
                 }
 
                 state.currentUser = user
+                state.home.userType = user.userType
+                state.map.userType = user.userType
                 state.more.userType = user.userType
                 state.more.userProfile = user
                 state.isCurrentUserLoading = false

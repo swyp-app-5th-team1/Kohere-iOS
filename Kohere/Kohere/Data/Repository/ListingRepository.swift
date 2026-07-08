@@ -147,41 +147,6 @@ private extension ListingListItemResponseDTO {
     }
 }
 
-private extension ListingFavoriteListItemResponseDTO {
-    func toEntity() -> Listing? {
-        guard let listingId else { return nil }
-
-        let coordinate: MapCoordinate?
-        if let lat, let lng {
-            coordinate = MapCoordinate(latitude: lat, longitude: lng)
-        } else {
-            coordinate = nil
-        }
-
-        return Listing(
-            listingID: listingId,
-            title: title ?? "",
-            type: type ?? "",
-            minMonthlyRent: monthlyRent,
-            maxMonthlyRent: monthlyRent,
-            minDeposit: deposit,
-            maxDeposit: deposit,
-            minMaintenanceFee: maintenanceFee,
-            maxMaintenanceFee: maintenanceFee,
-            minStayMonths: nil,
-            maxStayMonths: nil,
-            thumbnailURL: thumbnailUrl,
-            coordinate: coordinate,
-            address: address,
-            nearestTransit: nil,
-            conditions: (conditions ?? []).compactMap(RoomCondition.init(conditionCode:)),
-            distanceMeters: nil,
-            isFavorited: favorited ?? true,
-            favoriteCount: favoriteCount
-        )
-    }
-}
-
 private extension ListingRecentListItemResponseDTO {
     func toEntity() -> Listing? {
         guard let listingId else { return nil }

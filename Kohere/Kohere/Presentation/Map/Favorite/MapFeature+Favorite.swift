@@ -13,7 +13,8 @@ extension MapFeature {
         listingID: String,
         state: inout State
     ) -> Effect<Action> {
-        guard let item = state.listings.first(where: { $0.listingID == listingID }),
+        guard state.canUseFavoriteFeatures,
+              let item = state.listings.first(where: { $0.listingID == listingID }),
               !state.favoriteUpdatingIDs.contains(listingID)
         else { return .none }
 

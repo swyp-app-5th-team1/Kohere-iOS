@@ -320,7 +320,9 @@ struct MapFeature {
 
             case .selectedListingCardTapped:
                 guard let selectedMarkerID = state.selectedMarkerID else { return .none }
-                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: selectedMarkerID)))
+                state.path.append(
+                    .listingDetail(ListingDetailFeature.State(listingID: selectedMarkerID, userType: state.userType))
+                )
                 return .none
 
             case .selectedListingCloseButtonTapped:
