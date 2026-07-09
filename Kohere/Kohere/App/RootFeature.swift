@@ -238,7 +238,7 @@ struct RootFeature {
                 state.currentUser = userProfile
                 state.home.userType = userProfile.userType
                 state.map.userType = userProfile.userType
-                return .none
+                return .send(.home(.onAppear))
 
             case .more(.logoutConfirmed):
                 userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)

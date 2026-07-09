@@ -47,11 +47,13 @@ struct HomeView: View {
                     
                     homeDivider
                     
-                    QuizView(store: store)
-                    
-                    homeDivider
-                    
-                    LivingInKoreaView(store: store)
+                    if store.canShowTenantLivingContent {
+                        QuizView(store: store)
+
+                        homeDivider
+
+                        LivingInKoreaView(store: store)
+                    }
                 }
                 .background(.backgroundNormalNormal)
             }

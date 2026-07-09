@@ -5,11 +5,15 @@
 //  Created by Codex on 7/8/26.
 //
 
+import Foundation
+
 extension ListingDetailResponseDTO {
     func toEntity() throws -> ListingDetail {
         guard let listingId else { throw DataError.decodingFailed }
 
         let conditionCodes = conditions ?? []
+
+        let listingImageURLs = nonEmptyImageURLs(imageUrls)
 
         return ListingDetail(
             listingID: listingId,
@@ -29,9 +33,13 @@ extension ListingDetailResponseDTO {
             facilities: facilities?.toDetailEntity(),
             conditionCodes: conditionCodes,
             conditions: conditionCodes.compactMap(RoomCondition.init(conditionCode:)),
-            roomOffers: (roomOffers ?? []).compactMap { $0.toDetailEntity() },
+            roomOffers: (roomOffers ?? []).compactMap {
+                $0.toDetailEntity(listingID: listingId, propertyType: type)
+            },
             descriptions: descriptions?.toDetailEntity(),
-            imageURLs: imageUrls ?? [],
+            imageURLs: listingImageURLs.isEmpty
+                ? MockListingImageProvider.listingImageNames(listingID: listingId, propertyType: type)
+                : listingImageURLs,
             isFavorited: favorited ?? false,
             favoriteCount: favoriteCount ?? 0,
             createdAt: createdAt,
@@ -146,10 +154,11 @@ private extension ListingCommonSpaceResponseDTO {
 }
 
 private extension ListingRoomOfferResponseDTO {
-    func toDetailEntity() -> ListingDetailRoomOffer? {
+    func toDetailEntity(listingID: String, propertyType: String?) -> ListingDetailRoomOffer? {
         guard let roomOfferId else { return nil }
 
         let filterTagCodes = filterTags ?? []
+        let imageURLs = nonEmptyImageURLs(roomImageUrls)
 
         return ListingDetailRoomOffer(
             id: roomOfferId,
@@ -159,7 +168,13 @@ private extension ListingRoomOfferResponseDTO {
             inventory: inventory?.toDetailEntity(),
             filterTagCodes: filterTagCodes,
             filterTags: filterTagCodes.compactMap(RoomCondition.init(conditionCode:)),
-            roomImageURLs: roomImageUrls ?? []
+            roomImageURLs: imageURLs.isEmpty
+                ? MockListingImageProvider.roomImageNames(
+                    listingID: listingID,
+                    roomOfferID: roomOfferId,
+                    propertyType: propertyType
+                )
+                : imageURLs
         )
     }
 }
@@ -173,6 +188,12 @@ private extension ListingRoomPricingResponseDTO {
             currency: currency
         )
     }
+}
+
+private func nonEmptyImageURLs(_ imageURLs: [String]?) -> [String] {
+    (imageURLs ?? [])
+        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        .filter { !$0.isEmpty }
 }
 
 private extension ListingRoomInventoryResponseDTO {

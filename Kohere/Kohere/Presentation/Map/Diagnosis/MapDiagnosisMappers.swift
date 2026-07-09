@@ -12,7 +12,7 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
-            thumbnailURL: recommendation.thumbnailURL,
+            thumbnailURL: Self.thumbnailURL(for: recommendation),
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: recommendation.minMonthlyRent,
                 max: recommendation.maxMonthlyRent
@@ -51,7 +51,7 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
-            thumbnailURL: recommendation.thumbnailURL,
+            thumbnailURL: Self.thumbnailURL(for: recommendation),
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: recommendation.minMonthlyRent,
                 max: recommendation.maxMonthlyRent
@@ -70,6 +70,18 @@ extension ListingItemModel {
 
     nonisolated private static func depositTitle(min: Int?, max: Int?) -> String {
         MonthlyRentPriceFormatter.rangeTitle(prefix: "보증금", min: min, max: max)
+    }
+
+    nonisolated private static func thumbnailURL(for recommendation: DiagnosisRecommendedListing) -> String {
+        let thumbnailURL = recommendation.thumbnailURL?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let thumbnailURL, !thumbnailURL.isEmpty {
+            return thumbnailURL
+        }
+
+        return MockListingImageProvider.listingImageName(
+            listingID: recommendation.listingID,
+            propertyType: recommendation.type
+        )
     }
 
     nonisolated private static func typeTitle(from type: String) -> String {
