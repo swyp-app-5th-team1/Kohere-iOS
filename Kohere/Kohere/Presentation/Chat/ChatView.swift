@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import Foundation
 import SwiftUI
 
 struct ChatView: View {
@@ -24,19 +25,7 @@ struct ChatView: View {
                 right: .searchButton({ store.send(.searchButtonTapped) })
             )
             
-            Image(.chatBanner)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(maxWidth: .infinity)
-                .frame(height: 80)
-                .overlay(
-                    Text("Find your perfect room\nin 1 minute.")
-                        .kohereTextStyle(.heading3Semibold)
-                        .foregroundStyle(.neutral5)
-                        .padding(.leading, 16), alignment: .leading
-                )
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+            roomFinderBanner
             
             if store.chatRooms.isEmpty {
                 KohereEmptyView(
@@ -64,5 +53,41 @@ struct ChatView: View {
         .onAppear {
             store.send(.onAppear)
         }
+    }
+
+    private var roomFinderBanner: some View {
+        Button {
+            store.send(.roomFinderBannerTapped)
+        } label: {
+            Image(.chatBanner)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth: .infinity)
+                .frame(height: 80)
+                .overlay(
+                    Text(ChatLocalizedText.bannerTitle)
+                        .kohereTextStyle(.heading3Semibold)
+                        .foregroundStyle(.neutral5)
+                        .padding(.leading, 16),
+                    alignment: .leading
+                )
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(ChatLocalizedText.bannerAccessibilityLabel))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+}
+
+private enum ChatLocalizedText {
+    static let koreanLocale = Locale(identifier: "ko")
+
+    static var bannerTitle: String {
+        String(localized: "chat.banner.findRoom", locale: koreanLocale)
+    }
+
+    static var bannerAccessibilityLabel: String {
+        bannerTitle.replacingOccurrences(of: "\n", with: " ")
     }
 }

@@ -11,6 +11,7 @@ struct ServiceTermsDetailView: View {
     
     // MARK: - Properties
     
+    let onBackTapped: () -> Void
     let onAgreeTapped: () -> Void
     
     // MARK: - Body
@@ -18,6 +19,7 @@ struct ServiceTermsDetailView: View {
     var body: some View {
         TermsDetailView(
             kind: .service,
+            onBackTapped: onBackTapped,
             onAgreeTapped: onAgreeTapped
         )
     }

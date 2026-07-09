@@ -43,7 +43,7 @@ struct RootFeature {
     enum Action {
         case onAppear
         case mainTabAppeared
-        case storedAuthLoaded(Auth?)
+        case storedAuthLoaded(Auth?, OnboardingUserType?)
         case authSessionExpired
         case currentUserResponse(Result<UserProfile, Error>)
         case login(LoginFeature.Action)
@@ -112,26 +112,43 @@ struct RootFeature {
                             }
 
                             let auth = try keychainClient.load(for: .auth)
+                            let pendingOnboardingUserTypeRawValue = try userDefaultsClient.load(for: .pendingOnboardingUserType)
+                            let pendingOnboardingUserType = pendingOnboardingUserTypeRawValue.flatMap(OnboardingUserType.init(rawValue:))
                             let resolvedAuth = await Self.resolveStoredAuth(
                                 auth,
                                 keychainClient: keychainClient,
                                 reissueToken: reissueTokenUseCase.execute
                             )
-                            await send(.storedAuthLoaded(resolvedAuth))
+                            await send(.storedAuthLoaded(resolvedAuth, pendingOnboardingUserType))
                         } catch: { _, send in
-                            await send(.storedAuthLoaded(nil))
+                            await send(.storedAuthLoaded(nil, nil))
                         }
                     )
                 }
                 
                 return .merge(effects)
                 
-            case let .storedAuthLoaded(auth):
+            case let .storedAuthLoaded(auth, pendingOnboardingUserType):
                 state.authInfo = auth
                 state.isAuthLoading = false
+
+                guard auth?.onboardingRequired == true else {
+                    userDefaultsClient.delete(for: .pendingOnboardingUserType)
+                    return .none
+                }
+
+                if let pendingOnboardingUserType {
+                    state.onboarding = OnboardingFeature.State(userType: pendingOnboardingUserType)
+                } else {
+                    state.authInfo = nil
+                    state.login.authInfo = auth
+                    state.login.currentSheet = .userTypeSelect
+                }
+
                 return .none
 
             case .authSessionExpired:
+                userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 state = State(isAuthLoading: false)
                 return .cancel(id: "RootFeature.fetchCurrentUser")
 
@@ -153,12 +170,14 @@ struct RootFeature {
 
             case let .login(.loginSuccess(auth)):
                 guard !auth.onboardingRequired else { return .none }
+                userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 state.authInfo = auth
                 return .none
                 
             case let .login(.userTypeSelected(userType)):
                 guard state.login.isRequiredTermsAgreed,
                       let authInfo = state.login.authInfo else { return .none }
+                try? userDefaultsClient.save(userType.rawValue, for: .pendingOnboardingUserType)
                 state.authInfo = authInfo
                 state.onboarding = OnboardingFeature.State(userType: userType)
                 return .none
@@ -174,6 +193,7 @@ struct RootFeature {
                 }
             
             case let .saveAuthResponse(.success(updatedAuthInfo)):
+                userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 state.authInfo = updatedAuthInfo
                 return .none
 
@@ -230,6 +250,10 @@ struct RootFeature {
                 state.popup = popup
                 return .none
 
+            case let .chat(.mapTabRequested(diagnosisID)):
+                state.chat.path.removeAll()
+                return openMap(diagnosisID: diagnosisID, state: &state)
+
             case let .more(.popupRequested(popup)):
                 state.popup = popup
                 return .none
@@ -238,10 +262,13 @@ struct RootFeature {
                 state.currentUser = userProfile
                 state.home.userType = userProfile.userType
                 state.map.userType = userProfile.userType
-                return .send(.home(.onAppear))
+                let didUpdateChatRole = state.chat.applyUserType(userProfile.userType)
+                guard didUpdateChatRole, state.selectedTab == .chat else { return .none }
+                return .send(.chat(.onAppear))
 
             case .more(.logoutConfirmed):
                 userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
+                userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 state = State(isAuthLoading: false)
 
                 let logoutUseCase = logoutUseCase
@@ -262,6 +289,7 @@ struct RootFeature {
 
             case .more(.deleteAccountConfirmed):
                 userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
+                userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 state = State(isAuthLoading: false)
 
                 let deleteCurrentUserUseCase = deleteCurrentUserUseCase

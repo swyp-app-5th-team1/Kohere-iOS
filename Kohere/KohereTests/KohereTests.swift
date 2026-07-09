@@ -121,6 +121,21 @@ final class ListingApplicationFeatureTests: XCTestCase {
         )
     }
 
+    func testSettingDocumentsUseNotionLinks() {
+        XCTAssertEqual(
+            SettingDocument.termsOfService.url.absoluteString,
+            "https://jewel-humor-b3e.notion.site/39777dadb98580ad9a47eda58626c047?source=copy_link"
+        )
+        XCTAssertEqual(
+            SettingDocument.privacyPolicy.url.absoluteString,
+            "https://jewel-humor-b3e.notion.site/39777dadb9858039b2aedef03251cdf4?source=copy_link"
+        )
+        XCTAssertEqual(
+            SettingDocument.marketingAgreement.url.absoluteString,
+            "https://jewel-humor-b3e.notion.site/39077dadb985802ba1a8ffb0472238e4?source=copy_link"
+        )
+    }
+
     func testOnAppearLoadsApplicantProfileAndPrefillsPhoneNumber() async {
         let profile = makeUserProfile(
             firstName: "Song",

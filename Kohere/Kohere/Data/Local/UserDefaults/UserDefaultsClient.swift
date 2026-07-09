@@ -28,6 +28,10 @@ extension UserDefaultsKey where Value == [String] {
     nonisolated static let recentSearchKeywords = Self(rawValue: "recentSearchKeywords")
 }
 
+extension UserDefaultsKey where Value == String {
+    nonisolated static let pendingOnboardingUserType = Self(rawValue: "pendingOnboardingUserType")
+}
+
 enum UserDefaultsStoredValue: Sendable {
     case bool(Bool)
     case integer(Int)

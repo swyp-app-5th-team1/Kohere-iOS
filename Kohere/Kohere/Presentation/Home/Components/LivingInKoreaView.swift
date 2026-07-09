@@ -18,7 +18,7 @@ struct LivingInKoreaView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Living in Korea")
+            Text("home.livingGuide.title")
                 .kohereTextStyle(.heading3Semibold)
                 .foregroundColor(.coolNeutral90)
                 .padding(.leading, 8)

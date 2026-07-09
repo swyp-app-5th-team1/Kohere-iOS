@@ -19,10 +19,6 @@ struct TermsAgreementBottomSheet: View {
     private var isRequiredTermsAgreed: Bool {
         isServiceTermsAgreed && isPrivacyTermsAgreed
     }
-    private var isAllTermsAgreed: Bool {
-        isServiceTermsAgreed && isPrivacyTermsAgreed && isMarketingCommunicationsAgreed
-    }
-    
     let onTermsDetailTapped: (TermsDetailKind) -> Void
     let onServiceTermsAgreementTapped: () -> Void
     let onPrivacyTermsAgreementTapped: () -> Void
@@ -40,7 +36,7 @@ struct TermsAgreementBottomSheet: View {
                 .padding(.top, 12)
             
             VStack(alignment: .leading) {
-                Text("Review and agree to the terms\nto get started")
+                Text("코히어 로그인을 위해\n꼭 필요한 동의만 추렸어요")
                     .kohereTextStyle(.heading2Bold)
                     .foregroundColor(.neutral80)
                     .multilineTextAlignment(.leading)
@@ -50,113 +46,66 @@ struct TermsAgreementBottomSheet: View {
             .padding(.horizontal, 40)
             
             VStack(alignment: .leading, spacing: 0) {
-                Text("Required Agreements")
+                Text("코히어 이용 약관 동의")
                     .kohereTextStyle(.caption1Regular)
                     .foregroundColor(.neutral60)
                     .padding(.bottom, 12)
                 
-                HStack(spacing: 12) {
-                    Button {
-                        onAllTermsAgreementTapped()
-                    } label: {
+                Button {
+                    onAllTermsAgreementTapped()
+                } label: {
+                    HStack(spacing: 12) {
                         Image(.checkThick24)
                             .renderingMode(.template)
-                            .foregroundColor(isAllTermsAgreed ? .statusInfo : .labelAssistive)
+                            .foregroundColor(isRequiredTermsAgreed ? .statusInfo : .labelAssistive)
                             .frame(width: 24, height: 24)
+
+                        Text("필수 약관 전체 동의")
+                            .kohereTextStyle(.label1Semibold)
+                            .foregroundColor(.neutral80)
+
+                        Spacer(minLength: 0)
                     }
-                    
-                    Text("Agree to All Terms")
-                        .kohereTextStyle(.label1Semibold)
-                        .foregroundColor(.neutral80)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(height: 24)
+                    .contentShape(Rectangle())
                 }
-                .frame(height: 24)
+                .buttonStyle(.plain)
                 
                 Divider()
                     .background(.lineNeutral)
                     .padding(.vertical, 8)
                     .padding(.bottom, 6)
                 
-                HStack(spacing: 12) {
-                    Button {
-                        onServiceTermsAgreementTapped()
-                    } label: {
-                        Image(.checkThick16)
-                            .renderingMode(.template)
-                            .foregroundColor(isServiceTermsAgreed ? .statusInfo : .labelAssistive)
-                            .frame(width: 16, height: 16)
-                    }
-                    
-                    Text("Terms of Service *")
-                        .kohereTextStyle(.label2Medium)
-                        .foregroundColor(.neutral80)
-                    
-                    Spacer()
-                    
-                    Button {
+                agreementRow(
+                    title: "서비스 이용약관 (필수)",
+                    isAgreed: isServiceTermsAgreed,
+                    bottomHitPadding: 22,
+                    onAgreementTapped: onServiceTermsAgreementTapped,
+                    onDetailTapped: {
                         onTermsDetailTapped(.service)
-                    } label: {
-                        Image(.chevronRight16)
-                            .renderingMode(.template)
-                            .foregroundColor(.neutral20)
-                            .frame(width: 16, height: 16)
                     }
-                }
-                .frame(height: 20)
-                .padding(.bottom, 22)
+                )
                 
-                HStack(spacing: 12) {
-                    Button {
-                        onPrivacyTermsAgreementTapped()
-                    } label: {
-                        Image(.checkThick16)
-                            .renderingMode(.template)
-                            .foregroundColor(isPrivacyTermsAgreed ? .statusInfo : .labelAssistive)
-                            .frame(width: 16, height: 16)
-                    }
-                    
-                    Text("Privacy Policy *")
-                        .kohereTextStyle(.label2Medium)
-                        .foregroundColor(.neutral80)
-                    
-                    Spacer()
-                    Button {
+                agreementRow(
+                    title: "개인정보처리방침 (필수)",
+                    isAgreed: isPrivacyTermsAgreed,
+                    bottomHitPadding: 22,
+                    onAgreementTapped: onPrivacyTermsAgreementTapped,
+                    onDetailTapped: {
                         onTermsDetailTapped(.privacy)
-                    } label: {
-                        Image(.chevronRight16)
-                            .renderingMode(.template)
-                            .foregroundColor(.neutral20)
-                            .frame(width: 16, height: 16)
                     }
-                }
-                .frame(height: 20)
-                .padding(.bottom, 22)
+                )
                 
-                HStack(spacing: 12) {
-                    Button {
-                        onMarketingCommunicationsAgreementTapped()
-                    } label: {
-                        Image(.checkThick16)
-                            .renderingMode(.template)
-                            .foregroundColor(isMarketingCommunicationsAgreed ? .statusInfo : .labelAssistive)
-                            .frame(width: 16, height: 16)
-                    }
-                    
-                    Text("Marketing Communications")
-                        .kohereTextStyle(.label2Medium)
-                        .foregroundColor(.neutral80)
-                    
-                    Spacer()
-                    
-                    Button {
+                agreementRow(
+                    title: "마케팅 정보 수신 동의 (선택)",
+                    isAgreed: isMarketingCommunicationsAgreed,
+                    bottomHitPadding: 12,
+                    onAgreementTapped: onMarketingCommunicationsAgreementTapped,
+                    onDetailTapped: {
                         onTermsDetailTapped(.marketing)
-                    } label: {
-                        Image(.chevronRight16)
-                            .renderingMode(.template)
-                            .foregroundColor(.neutral20)
-                            .frame(width: 16, height: 16)
                     }
-                }
-                .frame(height: 20)
+                )
             }
             .padding(.top, 20)
             .padding(.horizontal, 40)
@@ -169,7 +118,7 @@ struct TermsAgreementBottomSheet: View {
                         onStartTapped()
                     }
                 } label: {
-                    Text("Agree & Get Started")
+                    Text("시작하기")
                         .kohereTextStyle(.label1Semibold)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -183,5 +132,51 @@ struct TermsAgreementBottomSheet: View {
             .padding(.bottom, 32)
         }
         .presentationDragIndicator(.hidden)
+    }
+}
+
+private extension TermsAgreementBottomSheet {
+    func agreementRow(
+        title: String,
+        isAgreed: Bool,
+        bottomHitPadding: CGFloat,
+        onAgreementTapped: @escaping () -> Void,
+        onDetailTapped: @escaping () -> Void
+    ) -> some View {
+        HStack(spacing: 0) {
+            Button {
+                onAgreementTapped()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(.checkThick16)
+                        .renderingMode(.template)
+                        .foregroundColor(isAgreed ? .statusInfo : .labelAssistive)
+                        .frame(width: 16, height: 16)
+
+                    Text(title)
+                        .kohereTextStyle(.label2Medium)
+                        .foregroundColor(.neutral80)
+
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: 20)
+                .padding(.bottom, bottomHitPadding)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                onDetailTapped()
+            } label: {
+                Image(.chevronRight16)
+                    .renderingMode(.template)
+                    .foregroundColor(.neutral20)
+                    .frame(width: 44, height: 20)
+                    .padding(.bottom, bottomHitPadding)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
     }
 }

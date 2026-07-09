@@ -22,6 +22,10 @@ struct TenantOnboardingView: View {
         ZStack {
             Color.backgroundNormalAlternative
                 .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    dismissKeyboard()
+                }
 
             VStack(spacing: 0) {
                 topProgressBar
@@ -45,13 +49,6 @@ struct TenantOnboardingView: View {
                 bottomButtonArea
                     .padding(.horizontal, 20)
             }
-        }
-        .background {
-            Color.backgroundNormalAlternative
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    dismissKeyboard()
-                }
         }
     }
 }

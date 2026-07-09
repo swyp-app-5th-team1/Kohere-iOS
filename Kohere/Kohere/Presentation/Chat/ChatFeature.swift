@@ -11,6 +11,17 @@ import Foundation
 enum ChatParticipantRole: Equatable {
     case tenant
     case landlord
+
+    init?(userType: UserType) {
+        switch userType {
+        case .tenant:
+            self = .tenant
+        case .landlord:
+            self = .landlord
+        case .unknown:
+            return nil
+        }
+    }
 }
 
 @Reducer
@@ -21,6 +32,7 @@ struct ChatFeature {
     @Reducer
     enum Path {
         case chatDetail(ChatDetailFeature)
+        case chatBot(ChatBotFeature)
     }
     
     // MARK: - State
@@ -50,6 +62,8 @@ struct ChatFeature {
         case path(StackActionOf<Path>)
         case chatRoomTapped(id: Int)
         case searchButtonTapped
+        case roomFinderBannerTapped
+        case mapTabRequested(diagnosisID: String?)
     }
     
     // MARK: - Reducer Body
@@ -58,7 +72,7 @@ struct ChatFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard state.participantRole == .landlord else { return .none }
+                guard !state.isLoading else { return .none }
                 state.isLoading = true
                 state.errorMessage = nil
                 let fetchBookings = fetchBookingsUseCase
@@ -98,9 +112,23 @@ struct ChatFeature {
             case .path(.element(id: _, action: .chatDetail(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
+
+            case .path(.element(id: _, action: .chatBot(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
+                return .send(.mapTabRequested(diagnosisID: diagnosisID))
                 
             case .searchButtonTapped:
                 // TODO: 검색 기능 구현 예정
+                return .none
+
+            case .roomFinderBannerTapped:
+                state.path.append(.chatBot(ChatBotFeature.State()))
+                return .none
+
+            case .mapTabRequested:
                 return .none
                 
             case .path:
@@ -108,6 +136,21 @@ struct ChatFeature {
             }
         }
         .forEach(\.path, action: \.path)
+    }
+}
+
+extension ChatFeature.State {
+    mutating func applyUserType(_ userType: UserType) -> Bool {
+        guard let updatedParticipantRole = ChatParticipantRole(userType: userType) else { return false }
+        guard participantRole != updatedParticipantRole else { return false }
+
+        participantRole = updatedParticipantRole
+        path.removeAll()
+        chatRooms = []
+        isLoading = false
+        errorMessage = nil
+
+        return true
     }
 }
 
@@ -148,7 +191,7 @@ struct ChatDetailFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard state.participantRole == .landlord else { return .none }
+                guard !state.isLoading else { return .none }
                 state.isLoading = true
                 state.errorMessage = nil
                 let bookingID = state.chatRoom.id

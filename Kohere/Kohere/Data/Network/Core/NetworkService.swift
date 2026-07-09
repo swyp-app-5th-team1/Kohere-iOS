@@ -22,7 +22,8 @@ final class NetworkService {
     
     func request<Response: Decodable>(
         _ urlRequest: URLRequestConvertible,
-        as responseType: Response.Type = Response.self
+        as responseType: Response.Type = Response.self,
+        debugRawJSONLabel: String? = nil
     ) async throws -> Response {
         let response = await session
             .request(urlRequest)
@@ -32,6 +33,15 @@ final class NetworkService {
         
         let statusCode = response.response?.statusCode
         let data = response.data ?? Data()
+
+        if let debugRawJSONLabel {
+            debugLogRawJSON(
+                data: data,
+                request: response.request,
+                statusCode: statusCode,
+                label: debugRawJSONLabel
+            )
+        }
         
         if let statusCode, !(200..<300).contains(statusCode) {
             throw parseServerError(from: data) ?? DataError.httpStatus(code: statusCode, message: nil)
@@ -62,6 +72,48 @@ final class NetworkService {
         } catch {
             throw DataError.decodingFailed
         }
+    }
+
+    private func debugLogRawJSON(
+        data: Data,
+        request: URLRequest?,
+        statusCode: Int?,
+        label: String
+    ) {
+        #if DEBUG
+        let method = request?.httpMethod ?? "REQUEST"
+        let url = request?.url?.absoluteString ?? "unknown URL"
+        let statusText = statusCode.map(String.init) ?? "unknown"
+        let bodyText = Self.prettyJSONString(from: data)
+
+        print(
+            """
+
+            [RawJSON][\(label)]
+            \(method) \(url)
+            status: \(statusText)
+            body:
+            \(bodyText)
+            [RawJSON][end]
+
+            """
+        )
+        #endif
+    }
+
+    private static func prettyJSONString(from data: Data) -> String {
+        guard !data.isEmpty else { return "<empty body>" }
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              let prettyData = try? JSONSerialization.data(
+                withJSONObject: jsonObject,
+                options: [.prettyPrinted, .sortedKeys]
+              ),
+              let prettyString = String(data: prettyData, encoding: .utf8)
+        else {
+            return String(data: data, encoding: .utf8) ?? "<non-utf8 body: \(data.count) bytes>"
+        }
+
+        return prettyString
     }
     
     func requestVoid(_ urlRequest: URLRequestConvertible) async throws {

@@ -15,6 +15,7 @@ struct MoreFeature {
         case profileEdit(ProfileEditFeature)
         case promoteRoomWeb(PromoteRoomWebFeature)
         case setting(SettingFeature)
+        case settingDocumentWeb(SettingDocumentWebFeature)
     }
 
     @ObservableState
@@ -62,6 +63,10 @@ struct MoreFeature {
                 _ = state.path.popLast()
                 return .none
 
+            case .path(.element(id: _, action: .settingDocumentWeb(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
             case let .path(.element(id: _, action: .setting(.popupRequested(popup)))):
                 return .send(.popupRequested(popup))
 
@@ -73,6 +78,13 @@ struct MoreFeature {
                             userProfile: state.userProfile
                         )
                     )
+                )
+                return .none
+
+            case let .path(.element(id: _, action: .setting(.settingItemTapped(item)))):
+                guard let document = item.document else { return .none }
+                state.path.append(
+                    .settingDocumentWeb(SettingDocumentWebFeature.State(document: document))
                 )
                 return .none
 

@@ -33,6 +33,9 @@ struct MoreFlowView: View {
             case let .setting(settingStore):
                 SettingView(store: settingStore)
                     .navigationBarHidden(true)
+            case let .settingDocumentWeb(settingDocumentWebStore):
+                SettingDocumentWebView(store: settingDocumentWebStore)
+                    .navigationBarHidden(true)
             }
         }
     }
