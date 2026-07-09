@@ -76,4 +76,5 @@ nonisolated struct AuthOnboardingRequestDTO: Encodable, Sendable {
 nonisolated struct LandlordOnboardingRequestDTO: Encodable, Sendable {
     let name: String
     let phoneNumber: String
+    let birthDate: String
 }

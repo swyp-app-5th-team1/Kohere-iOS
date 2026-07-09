@@ -48,10 +48,19 @@ struct MoreView: View {
             .background(.backgroundNormalAlternative)
         }
         .background(.backgroundNormalAlternative)
+        .onAppear {
+            store.send(.onAppear)
+        }
     }
 
     private func handleMenuItemTapped(_ item: MoreMenuItem) {
         switch item.action {
+        case .savedListings:
+            store.send(.savedListingsTapped)
+        case .recentlyViewedListings:
+            store.send(.recentlyViewedListingsTapped)
+        case let .livingGuide(theme):
+            store.send(.livingGuideItemTapped(theme))
         case .promoteRoom:
             store.send(.promoteRoomTapped)
         case nil:
@@ -153,10 +162,11 @@ struct MoreView: View {
         MoreMenuSection(
             title: "내 활동",
             items: [
-                .init(title: "찜한 매물", iconName: "heart_24"),
-                .init(title: "최근 본 매물", iconName: "thunder_24")
+                .init(title: "찜한 매물", iconName: "heart_24", action: .savedListings),
+                .init(title: "최근 본 매물", iconName: "thunder_24", action: .recentlyViewedListings)
             ],
-            horizontalPadding: 16
+            horizontalPadding: 16,
+            onItemTapped: handleMenuItemTapped
         )
     }
 
@@ -164,12 +174,33 @@ struct MoreView: View {
         MoreMenuSection(
             title: "한국 생활 팁",
             items: [
-                .init(title: "조심해야할 사기 유형", iconName: "contractChecklist", rendersAsTemplate: false),
-                .init(title: "은행 계좌 개설 방법", iconName: "bankAccountGuide", rendersAsTemplate: false),
-                .init(title: "대중교통 이용 안내", iconName: "train", rendersAsTemplate: false),
-                .init(title: "건강 보험 등록", iconName: "healthInsurance", rendersAsTemplate: false)
+                .init(
+                    title: "조심해야할 사기 유형",
+                    iconName: "contractChecklist",
+                    rendersAsTemplate: false,
+                    action: .livingGuide(.housingScams)
+                ),
+                .init(
+                    title: "은행 계좌 개설 방법",
+                    iconName: "bankAccountGuide",
+                    rendersAsTemplate: false,
+                    action: .livingGuide(.bankAccount)
+                ),
+                .init(
+                    title: "대중교통 이용 안내",
+                    iconName: "train",
+                    rendersAsTemplate: false,
+                    action: .livingGuide(.publicTransit)
+                ),
+                .init(
+                    title: "건강 보험 등록",
+                    iconName: "healthInsurance",
+                    rendersAsTemplate: false,
+                    action: .livingGuide(.healthInsurance)
+                )
             ],
-            horizontalPadding: 16
+            horizontalPadding: 16,
+            onItemTapped: handleMenuItemTapped
         )
     }
 
@@ -287,5 +318,8 @@ private struct MoreMenuItem: Identifiable, Equatable {
 }
 
 private enum MoreMenuAction: Equatable {
+    case savedListings
+    case recentlyViewedListings
+    case livingGuide(LivingGuideTheme)
     case promoteRoom
 }

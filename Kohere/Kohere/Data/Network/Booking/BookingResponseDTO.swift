@@ -34,6 +34,11 @@ struct BookingDetailResponseDTO: Decodable {
     let createdAt: String?
     let moveInDate: String?
     let contractPeriod: Int?
+    let applicantName: String?
+    let applicantGender: String?
+    let applicantCountry: String?
+    let applicantCountryName: String?
+    let applicantEmail: String?
     let tenantName: String?
     let deposit: Int?
     let totalAmount: Int?

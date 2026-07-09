@@ -29,7 +29,12 @@ struct ChatFlowView: View {
             case let .chatDetail(detailStore):
                 ChatDetailView(store: detailStore)
                     .navigationBarHidden(true)
+
+            case let .chatBot(chatBotStore):
+                ChatBotView(store: chatBotStore)
+                    .navigationBarHidden(true)
             }
         }
+        .toolbar(store.path.isEmpty ? .visible : .hidden, for: .tabBar)
     }
 }

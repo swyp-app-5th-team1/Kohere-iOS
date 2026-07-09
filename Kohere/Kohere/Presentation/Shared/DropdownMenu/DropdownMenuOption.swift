@@ -56,6 +56,24 @@ extension DropdownMenuOption {
 }
 
 extension DropdownMenuOption {
+    static func formattedBirthDate(
+        year selectedYear: DropdownMenuOption?,
+        month selectedMonth: DropdownMenuOption?,
+        day selectedDay: DropdownMenuOption?
+    ) -> String? {
+        guard let selectedYear,
+              let selectedMonth,
+              let selectedDay,
+              let month = monthNumberByOption[selectedMonth.option],
+              let year = Int(selectedYear.option),
+              let day = Int(selectedDay.option),
+              isValidBirthDate(year: year, month: month, day: day) else {
+            return nil
+        }
+
+        return "\(selectedYear.option)-\(String(format: "%02d", month))-\(String(format: "%02d", day))"
+    }
+
     nonisolated init(_ gender: Gender) {
         self.init(option: gender.displayTitle)
     }
@@ -104,6 +122,40 @@ extension DropdownMenuOption {
         "Turkey": "TR",
         "Hungary": "HU"
     ]
+
+    private static let monthNumberByOption: [String: Int] = [
+        "JAN": 1,
+        "FEB": 2,
+        "MAR": 3,
+        "APR": 4,
+        "MAY": 5,
+        "JUN": 6,
+        "JUL": 7,
+        "AUG": 8,
+        "SEP": 9,
+        "OCT": 10,
+        "NOV": 11,
+        "DEC": 12
+    ]
+
+    private static func isValidBirthDate(year: Int, month: Int, day: Int) -> Bool {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? calendar.timeZone
+
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        components.day = day
+
+        guard let date = calendar.date(from: components) else {
+            return false
+        }
+
+        let resolvedComponents = calendar.dateComponents([.year, .month, .day], from: date)
+        return resolvedComponents.year == year
+            && resolvedComponents.month == month
+            && resolvedComponents.day == day
+    }
 }
 
 private extension Gender {

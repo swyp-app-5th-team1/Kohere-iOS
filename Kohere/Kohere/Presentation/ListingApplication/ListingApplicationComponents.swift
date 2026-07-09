@@ -280,11 +280,11 @@ struct ListingApplicationApplicantCard: View {
             return .statusInfo
         }
 
-        return .clear
+        return .lineNormal
     }
 
     private var phoneFieldBorderWidth: CGFloat {
-        showsPhoneNumberError || isPhoneNumberFocused.wrappedValue ? 1 : 0
+        showsPhoneNumberError || isPhoneNumberFocused.wrappedValue || !phoneNumber.isEmpty ? 1 : 0
     }
 }
 

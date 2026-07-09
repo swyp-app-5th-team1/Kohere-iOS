@@ -6,15 +6,23 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 @Reducer
 struct MoreFeature {
+    @Dependency(\.lifeTipClient)
+    var lifeTipClient
+
     @Reducer
     enum Path {
         case account(AccountFeature)
+        case livingGuideDetail(LivingGuideDetailFeature)
         case profileEdit(ProfileEditFeature)
         case promoteRoomWeb(PromoteRoomWebFeature)
+        case savedListings(SavedListingsFeature)
+        case recentlyViewedList(RecentlyViewedFeature)
         case setting(SettingFeature)
+        case settingDocumentWeb(SettingDocumentWebFeature)
     }
 
     @ObservableState
@@ -22,14 +30,23 @@ struct MoreFeature {
         var path = StackState<Path.State>()
         var userType: UserType?
         var userProfile: UserProfile?
+        var livingGuides: [LivingGuide] = []
+        var isLivingGuidesLoading: Bool = false
+        var isLivingGuidesLoaded: Bool = false
+        var livingGuidesErrorMessage: String?
     }
 
     enum Action {
         case path(StackActionOf<Path>)
+        case onAppear
+        case lifeTipTopicsResponse(Result<[LivingGuide], DataError>)
         case navigationLanguageTapped
         case navigationSettingTapped
         case editProfileTapped
+        case livingGuideItemTapped(LivingGuideTheme)
         case promoteRoomTapped
+        case savedListingsTapped
+        case recentlyViewedListingsTapped
         case userProfileUpdated(UserProfile)
         case popupRequested(AppPopup)
         case logoutConfirmed
@@ -50,6 +67,10 @@ struct MoreFeature {
                 _ = state.path.popLast()
                 return .none
 
+            case .path(.element(id: _, action: .livingGuideDetail(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
             case let .path(.element(id: _, action: .profileEdit(.delegate(.profileUpdated(userProfile))))):
                 _ = state.path.popLast()
                 return .send(.userProfileUpdated(userProfile))
@@ -58,7 +79,19 @@ struct MoreFeature {
                 _ = state.path.popLast()
                 return .none
 
+            case .path(.element(id: _, action: .savedListings(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case .path(.element(id: _, action: .recentlyViewedList(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
             case .path(.element(id: _, action: .setting(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case .path(.element(id: _, action: .settingDocumentWeb(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
 
@@ -76,6 +109,44 @@ struct MoreFeature {
                 )
                 return .none
 
+            case let .path(.element(id: _, action: .setting(.settingItemTapped(item)))):
+                guard let document = item.document else { return .none }
+                state.path.append(
+                    .settingDocumentWeb(SettingDocumentWebFeature.State(document: document))
+                )
+                return .none
+
+            case .onAppear:
+                guard state.userType == .tenant,
+                      !state.isLivingGuidesLoading,
+                      !state.isLivingGuidesLoaded
+                else { return .none }
+
+                state.isLivingGuidesLoading = true
+                state.livingGuidesErrorMessage = nil
+
+                return .run { [lifeTipClient] send in
+                    do {
+                        let topics = try await lifeTipClient.fetchTopics()
+                        await send(.lifeTipTopicsResponse(.success(topics)))
+                    } catch {
+                        await send(.lifeTipTopicsResponse(.failure(.from(error))))
+                    }
+                }
+
+            case let .lifeTipTopicsResponse(.success(guides)):
+                state.isLivingGuidesLoading = false
+                state.isLivingGuidesLoaded = true
+                state.livingGuidesErrorMessage = nil
+                state.livingGuides = guides
+                return .none
+
+            case let .lifeTipTopicsResponse(.failure(error)):
+                state.isLivingGuidesLoading = false
+                state.isLivingGuidesLoaded = false
+                state.livingGuidesErrorMessage = error.localizedDescription
+                return .none
+
             case .navigationLanguageTapped:
                 return .none
 
@@ -87,8 +158,25 @@ struct MoreFeature {
                 state.path.append(.profileEdit(ProfileEditFeature.State(userProfile: state.userProfile)))
                 return .none
 
+            case let .livingGuideItemTapped(theme):
+                guard state.userType == .tenant,
+                      let guide = state.livingGuides.first(where: { $0.theme == theme }) else {
+                    return .none
+                }
+                state.path.append(.livingGuideDetail(LivingGuideDetailFeature.State(guide: guide)))
+                return .none
+
             case .promoteRoomTapped:
                 state.path.append(.promoteRoomWeb(PromoteRoomWebFeature.State()))
+                return .none
+
+            case .savedListingsTapped:
+                guard state.canUseFavoriteFeatures else { return .none }
+                state.path.append(.savedListings(SavedListingsFeature.State(userType: state.userType)))
+                return .none
+
+            case .recentlyViewedListingsTapped:
+                state.path.append(.recentlyViewedList(RecentlyViewedFeature.State(userType: state.userType)))
                 return .none
 
             case let .userProfileUpdated(userProfile):
@@ -100,7 +188,8 @@ struct MoreFeature {
                     state.path[id: id, case: \.account]?.userProfile = userProfile
                 }
 
-                return .none
+                guard userProfile.userType == .tenant else { return .none }
+                return .send(.onAppear)
 
             case .popupRequested, .logoutConfirmed, .deleteAccountConfirmed:
                 return .none
@@ -114,3 +203,9 @@ struct MoreFeature {
 }
 
 extension MoreFeature.Path.State: Equatable {}
+
+extension MoreFeature.State {
+    var canUseFavoriteFeatures: Bool {
+        userType == .tenant
+    }
+}

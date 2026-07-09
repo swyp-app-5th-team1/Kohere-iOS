@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 enum MoveInApplicationCardMode {
     case tenant
@@ -18,6 +19,9 @@ struct MoveInApplicationCardView: View {
     
     let item: ChatRoomModel
     var mode: MoveInApplicationCardMode = .tenant
+
+    @State private var isEmailCopied = false
+    @State private var emailCopyResetTask: Task<Void, Never>?
     
     // MARK: - Body
     
@@ -59,6 +63,9 @@ struct MoveInApplicationCardView: View {
                 .stroke(.coolNeutral8, lineWidth: 0.5)
         )
         .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 0)
+        .onDisappear {
+            cancelEmailCopyFeedback()
+        }
     }
     
     // MARK: - SubView
@@ -121,17 +128,24 @@ struct MoveInApplicationCardView: View {
             
             Spacer()
             
-            HStack(spacing: 4) {
-                Text(item.applicantEmail)
-                    .kohereTextStyle(.label3Medium)
-                    .foregroundColor(.statusInfo)
-                
-                Image(.copy24)
-                    .resizable()
-                    .renderingMode(.template)
-                    .foregroundStyle(.statusInfo)
-                    .frame(width: 16, height: 16)
+            Button {
+                copyApplicantEmail()
+            } label: {
+                HStack(spacing: 4) {
+                    Text(item.applicantEmail)
+                        .kohereTextStyle(.label3Medium)
+                        .foregroundColor(.statusInfo)
+
+                    Image(isEmailCopied ? .check24 : .copy24)
+                        .resizable()
+                        .renderingMode(.template)
+                        .foregroundStyle(.statusInfo)
+                        .frame(width: 16, height: 16)
+                }
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isEmailCopied ? "이메일 복사됨" : "이메일 복사")
+            .accessibilityValue(item.applicantEmail)
         }
         .frame(height: 24)
     }
@@ -149,5 +163,32 @@ struct MoveInApplicationCardView: View {
                 .foregroundColor(.neutral70)
         }
         .frame(height: 24)
+    }
+
+    private func copyApplicantEmail() {
+        let email = item.applicantEmail.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !email.isEmpty, email != "N/A" else { return }
+
+        UIPasteboard.general.string = email
+        showEmailCopyFeedback()
+    }
+
+    private func showEmailCopyFeedback() {
+        isEmailCopied = true
+        emailCopyResetTask?.cancel()
+        emailCopyResetTask = Task {
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            guard !Task.isCancelled else { return }
+
+            await MainActor.run {
+                isEmailCopied = false
+                emailCopyResetTask = nil
+            }
+        }
+    }
+
+    private func cancelEmailCopyFeedback() {
+        emailCopyResetTask?.cancel()
+        emailCopyResetTask = nil
     }
 }

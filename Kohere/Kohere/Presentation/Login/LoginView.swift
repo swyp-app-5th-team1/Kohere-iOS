@@ -48,7 +48,6 @@ struct LoginView: View {
             
             if let selectedTermsDetail = store.selectedTermsDetail {
                 termsDetailView(selectedTermsDetail)
-                    .ignoresSafeArea()
                     .transition(.move(edge: .trailing))
                     .zIndex(1)
             }
@@ -134,6 +133,21 @@ extension LoginView {
                     .cornerRadius(16)
                 }
                 .disabled(store.isLoginRequesting)
+
+                #if DEBUG
+                Button {
+                    store.send(.landlordAdminLoginButtonTapped)
+                } label: {
+                    Text("Sign in as Landlord Admin")
+                        .kohereTextStyle(.label1Semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(.primaryNormal)
+                        .cornerRadius(16)
+                }
+                .disabled(store.isLoginRequesting)
+                #endif
             }
             .padding(.horizontal, 40)
             .padding(.bottom, 150)
@@ -200,17 +214,32 @@ extension LoginView {
     private func termsDetailView(_ detail: TermsDetailKind) -> some View {
         switch detail {
         case .service:
-            ServiceTermsDetailView {
-                store.send(.termsDetailAgreementTapped(.service))
-            }
+            ServiceTermsDetailView(
+                onBackTapped: {
+                    store.send(.termsDetailBackButtonTapped)
+                },
+                onAgreeTapped: {
+                    store.send(.termsDetailAgreementTapped(.service))
+                }
+            )
         case .privacy:
-            PrivacyTermsDetailView {
-                store.send(.termsDetailAgreementTapped(.privacy))
-            }
+            PrivacyTermsDetailView(
+                onBackTapped: {
+                    store.send(.termsDetailBackButtonTapped)
+                },
+                onAgreeTapped: {
+                    store.send(.termsDetailAgreementTapped(.privacy))
+                }
+            )
         case .marketing:
-            MarketingTermsDetailView {
-                store.send(.termsDetailAgreementTapped(.marketing))
-            }
+            MarketingTermsDetailView(
+                onBackTapped: {
+                    store.send(.termsDetailBackButtonTapped)
+                },
+                onAgreeTapped: {
+                    store.send(.termsDetailAgreementTapped(.marketing))
+                }
+            )
         }
     }
 }

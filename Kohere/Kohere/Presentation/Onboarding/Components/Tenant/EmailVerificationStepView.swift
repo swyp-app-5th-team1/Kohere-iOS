@@ -40,7 +40,7 @@ struct EmailVerificationStepView: View {
                             keyboardType: .emailAddress,
                             hasError: store.hasEmailFormatError
                         )
-                        .disabled(store.isEmailVerified || store.isEmailVerificationCodeRequesting)
+                        .allowsHitTesting(!store.isEmailVerified && !store.isEmailVerificationCodeRequesting)
 
                         Button {
                             store.send(.sendVerificationCodeTapped)
@@ -64,7 +64,7 @@ struct EmailVerificationStepView: View {
                             keyboardType: .numberPad,
                             hasError: store.emailVerificationCodeErrorMessage != nil
                         )
-                        .disabled(!store.isCodeSent || store.isEmailVerified)
+                        .allowsHitTesting(store.isCodeSent && !store.isEmailVerified)
 
                         Button {
                             store.send(.confirmVerificationCodeTapped)

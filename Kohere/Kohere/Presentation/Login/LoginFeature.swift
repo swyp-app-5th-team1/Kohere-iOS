@@ -47,9 +47,6 @@ struct LoginFeature {
             isServiceTermsAgreed && isPrivacyTermsAgreed
         }
         
-        var isAllTermsAgreed: Bool {
-            isServiceTermsAgreed && isPrivacyTermsAgreed && isMarketingCommunicationsAgreed
-        }
     }
     
     // MARK: - Action
@@ -57,6 +54,9 @@ struct LoginFeature {
     enum Action: Equatable {
         case googleLoginButtonTapped
         case appleLoginButtonTapped
+        #if DEBUG
+        case landlordAdminLoginButtonTapped
+        #endif
         case socialLoginCredentialReceived(SocialLoginCredential)
         case loginSuccess(Auth)
         case loginFailure(String)
@@ -72,6 +72,7 @@ struct LoginFeature {
         case allTermsAgreementToggled
         
         case termsDetailTapped(TermsDetailKind)
+        case termsDetailBackButtonTapped
         case termsDetailAgreementTapped(TermsDetailKind)
         
         case setSheet(LoginSheet?)
@@ -109,6 +110,17 @@ struct LoginFeature {
                         await send(.loginFailure(error.localizedDescription))
                     }
                 }
+
+            #if DEBUG
+            case .landlordAdminLoginButtonTapped:
+                guard let idToken = Self.landlordAdminIDToken else {
+                    state.loginErrorMessage = "임대인 관리자 토큰이 설정되지 않았습니다."
+                    return .none
+                }
+                state.isLoginRequesting = true
+                state.loginErrorMessage = nil
+                return .send(.socialLoginCredentialReceived(.google(idToken: idToken)))
+            #endif
 
             case let .socialLoginCredentialReceived(credential):
                 return .run { send in
@@ -209,14 +221,17 @@ struct LoginFeature {
                 return .none
                 
             case .allTermsAgreementToggled:
-                let targetState = !state.isAllTermsAgreed
+                let targetState = !state.isRequiredTermsAgreed
                 state.isServiceTermsAgreed = targetState
                 state.isPrivacyTermsAgreed = targetState
-                state.isMarketingCommunicationsAgreed = targetState
                 return .none
                 
             case let .termsDetailTapped(detail):
                 state.selectedTermsDetail = detail
+                return .none
+
+            case .termsDetailBackButtonTapped:
+                state.selectedTermsDetail = nil
                 return .none
                 
             case let .termsDetailAgreementTapped(detail):
@@ -240,6 +255,20 @@ struct LoginFeature {
 }
 
 private extension LoginFeature {
+    #if DEBUG
+    static var landlordAdminIDToken: String? {
+        guard let rawValue = Bundle.main.object(
+            forInfoDictionaryKey: "KOHERE_LANDLORD_ADMIN_ID_TOKEN"
+        ) as? String else { return nil }
+
+        let token = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !token.isEmpty,
+              token != "$(KOHERE_LANDLORD_ADMIN_ID_TOKEN)",
+              token != "YOUR_LANDLORD_ADMIN_ID_TOKEN" else { return nil }
+        return token
+    }
+    #endif
+
     static func loginErrorMessage(for error: Error) -> String {
         if let dataError = error as? DataError {
             switch dataError {

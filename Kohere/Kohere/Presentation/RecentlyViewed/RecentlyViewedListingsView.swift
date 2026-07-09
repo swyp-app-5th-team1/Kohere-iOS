@@ -43,6 +43,7 @@ struct RecentlyViewedListingsView: View {
                 }
             }
         }
+        .background(.backgroundNormalNormal)
         .onAppear {
             store.send(.onAppear)
         }

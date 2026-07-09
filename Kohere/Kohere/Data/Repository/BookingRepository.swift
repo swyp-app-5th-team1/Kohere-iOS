@@ -33,7 +33,8 @@ final class BookingRepository: BookingInterface {
     func fetchBookingDetail(bookingID: Int) async throws -> BookingDetail {
         let environment = try environmentProvider()
         let responseDTO: BookingDetailResponseDTO = try await authenticatedNetworkService.request(
-            BookingRouter.detail(bookingID: bookingID, environment)
+            BookingRouter.detail(bookingID: bookingID, environment),
+            debugRawJSONLabel: "ChatDetail.bookingDetail bookingID=\(bookingID)"
         )
         
         return try responseDTO.toEntity()
@@ -90,7 +91,12 @@ private extension BookingDetailResponseDTO {
             createdAt: DateParser.iso8601(from: createdAt),
             moveInDate: DateParser.dateOnly(from: moveInDate),
             contractPeriod: contractPeriod ?? 0,
-            tenantName: tenantName ?? "",
+            applicantName: applicantName ?? tenantName ?? "",
+            applicantGender: applicantGender ?? "",
+            applicantCountry: applicantCountry ?? "",
+            applicantCountryName: applicantCountryName ?? "",
+            applicantEmail: applicantEmail ?? "",
+            tenantName: tenantName ?? applicantName ?? "",
             deposit: deposit ?? 0,
             totalAmount: totalAmount ?? 0
         )

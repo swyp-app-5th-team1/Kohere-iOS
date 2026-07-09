@@ -23,6 +23,7 @@ struct PhoneVerificationStepView: View {
             Text("사장님이 맞는지\n안전하게 확인해볼게요!")
                 .kohereTextStyle(.heading1Bold)
                 .foregroundColor(.coolNeutral90)
+                .padding(.top, 40)
 
             VStack(alignment: .leading, spacing: 16) {
                 Text("전화번호")
@@ -39,7 +40,7 @@ struct PhoneVerificationStepView: View {
                             placeholder: "'-'를 제외하고 숫자만 입력해주세요",
                             keyboardType: .phonePad
                         )
-                        .disabled(store.isPhoneVerified || store.isPhoneVerificationCodeRequesting)
+                        .allowsHitTesting(!store.isPhoneVerified && !store.isPhoneVerificationCodeRequesting)
 
                         Button {
                             store.send(.sendPhoneVerificationCodeTapped)
@@ -63,7 +64,7 @@ struct PhoneVerificationStepView: View {
                             keyboardType: .numberPad,
                             hasError: store.phoneVerificationCodeErrorMessage != nil
                         )
-                        .disabled(!store.isPhoneCodeSent || store.isPhoneVerified)
+                        .allowsHitTesting(store.isPhoneCodeSent && !store.isPhoneVerified)
 
                         Button {
                             store.send(.confirmPhoneVerificationCodeTapped)

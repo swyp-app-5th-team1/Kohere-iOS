@@ -15,7 +15,7 @@ struct ListingDetailRoomOffersSection: View {
             ListingDetailSectionHeader(
                 title: "각 방 정보",
                 count: roomOffers.count,
-                showsChevron: true
+                showsChevron: false
             )
                 .padding(.horizontal, 20)
 

@@ -26,7 +26,7 @@ struct RoomFinderBannerView: View {
                         Button {
                             store.send(.roomFinderBannerTapped)
                         } label: {
-                            Text("Find My Room")
+                            Text("home.roomFinder.button")
                                 .kohereTextStyle(.label1Semibold)
                                 .foregroundColor(.primaryNormal)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -42,13 +42,13 @@ struct RoomFinderBannerView: View {
                     )
                 
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Find your perfect room\nin 1 minute.")
+                    Text("home.roomFinder.title")
                         .kohereTextStyle(.heading2Bold)
                         .foregroundColor(.staticBlack)
                         .lineSpacing(4)
                         .padding(.top, 20)
                     
-                    Text("See curated listings\nmatched to you")
+                    Text("home.roomFinder.subtitle")
                         .kohereTextStyle(.body1Regular)
                         .foregroundColor(.labelNeutral)
                         .lineSpacing(2)

@@ -18,11 +18,17 @@ struct ChatBotView: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
-            KohereNavigationBar(left: .backButton({ store.send(.backButtonTapped) }), center: .text("Find My Room"))
-            
-            Rectangle()
-                .fill(.lineNormal)
-                .frame(height: 1)
+            KohereNavigationBar(
+                left: .backButton({ store.send(.backButtonTapped) }),
+                center: .text("Find My Room"),
+                backgroundColor: .backgroundNormalNormal,
+                height: 48
+            )
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(.lineNeutral)
+                    .frame(height: 1)
+            }
             
             messageScrollView
             
@@ -76,7 +82,7 @@ extension ChatBotView {
     private var bottomButtonArea: some View {
         VStack(alignment: .center, spacing: 8) {
             Rectangle()
-                .fill(.lineNormal)
+                .fill(.lineNeutral)
                 .frame(height: 1)
             
             HStack(spacing: 8) {
@@ -108,7 +114,7 @@ extension ChatBotView {
             }
             .padding(.horizontal, 20)
         }
-        .background(Color.white)
+        .background(.staticWhite)
     }
     
     // MARK: - Methods

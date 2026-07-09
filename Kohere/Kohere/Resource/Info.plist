@@ -41,6 +41,8 @@
 	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
 	<key>KOHERE_API_BASE_URL</key>
 	<string>$(KOHERE_API_BASE_URL)</string>
+	<key>KOHERE_LANDLORD_ADMIN_ID_TOKEN</key>
+	<string>$(KOHERE_LANDLORD_ADMIN_ID_TOKEN)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NMFNcpKeyId</key>

@@ -82,10 +82,13 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         self.thumbnailURL = detail.thumbnailURL?.absoluteString ?? fallback.thumbnailURL
         self.dateText = Self.dateText(detail.createdAt)
         self.timeText = Self.timeText(detail.createdAt)
-        self.applicantName = detail.tenantName.isEmpty ? "N/A" : detail.tenantName
-        self.applicantGender = "N/A"
-        self.applicantNationality = "N/A"
-        self.applicantEmail = "N/A"
+        self.applicantName = Self.displayText(detail.applicantName)
+        self.applicantGender = Self.genderText(detail.applicantGender)
+        self.applicantNationality = Self.nationalityText(
+            countryName: detail.applicantCountryName,
+            countryCode: detail.applicantCountry
+        )
+        self.applicantEmail = Self.displayText(detail.applicantEmail)
         self.roomType = detail.roomOfferName.isEmpty ? "N/A" : detail.roomOfferName
         self.moveInDate = Self.moveInDateText(detail.moveInDate)
         self.leaseTerm = Self.leaseTermText(detail.contractPeriod)
@@ -99,6 +102,30 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         formatter.numberStyle = .decimal
         
         return "₩ \(formatter.string(from: NSNumber(value: value)) ?? "\(value)")"
+    }
+
+    private static func displayText(_ value: String) -> String {
+        let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedValue.isEmpty ? "N/A" : trimmedValue
+    }
+
+    private static func genderText(_ value: String) -> String {
+        let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        switch trimmedValue.uppercased() {
+        case Gender.male.rawValue:
+            return "Male"
+        case Gender.female.rawValue:
+            return "Female"
+        default:
+            return displayText(trimmedValue)
+        }
+    }
+
+    private static func nationalityText(countryName: String, countryCode: String) -> String {
+        let countryNameText = displayText(countryName)
+        guard countryNameText == "N/A" else { return countryNameText }
+        return displayText(countryCode)
     }
     
     private static func dateText(_ date: Date?) -> String {

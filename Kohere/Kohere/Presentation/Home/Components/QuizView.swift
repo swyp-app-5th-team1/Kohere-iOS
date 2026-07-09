@@ -18,7 +18,7 @@ struct QuizView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Today's Korea Living Quiz")
+            Text("home.quiz.title")
                 .kohereTextStyle(.heading3Semibold)
                 .foregroundColor(.coolNeutral90)
                 .padding(.leading, 8)

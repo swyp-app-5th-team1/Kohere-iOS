@@ -8,7 +8,7 @@
 import ComposableArchitecture
 import Foundation
 
-enum OnboardingUserType: Equatable {
+enum OnboardingUserType: String, Equatable {
     case tenant
     case landlord
 }

@@ -19,7 +19,7 @@ extension LandlordOnboardingFeature.State {
     var isNextButtonEnabled: Bool {
         switch currentStep {
         case .nameAndBirth:
-            return !landlordName.isEmpty && selectedMonth != nil && selectedDay != nil && selectedYear != nil
+            return !landlordName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && birthDate != nil
         case .phoneVerification:
             return isPhoneVerified && !isOnboardingSubmitting
         }
@@ -39,6 +39,10 @@ extension LandlordOnboardingFeature.State {
     }
 
     var onboardingProfile: LandlordOnboardingProfile? {
+        guard let birthDate else {
+            return nil
+        }
+
         let trimmedName = landlordName.trimmingCharacters(in: .whitespacesAndNewlines)
         let phoneNumber = normalizedPhoneNumber
 
@@ -48,7 +52,8 @@ extension LandlordOnboardingFeature.State {
 
         return LandlordOnboardingProfile(
             name: trimmedName,
-            phoneNumber: phoneNumber
+            phoneNumber: phoneNumber,
+            birthDate: birthDate
         )
     }
 
@@ -64,5 +69,13 @@ extension LandlordOnboardingFeature.State {
         phoneVerificationCode = ""
         phoneMessage = nil
         phoneVerificationCodeErrorMessage = nil
+    }
+
+    private var birthDate: String? {
+        DropdownMenuOption.formattedBirthDate(
+            year: selectedYear,
+            month: selectedMonth,
+            day: selectedDay
+        )
     }
 }

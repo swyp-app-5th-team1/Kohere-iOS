@@ -27,6 +27,15 @@ struct ChatRoomRowCell: View {
     // MARK: - Body
     
     var body: some View {
+        Button {
+            onTap(item.id)
+        } label: {
+            rowContent
+        }
+        .buttonStyle(ChatRoomRowButtonStyle())
+    }
+
+    private var rowContent: some View {
         HStack(alignment: .center, spacing: 12) {
             Image(.personFill24)
                 .resizable()
@@ -42,24 +51,39 @@ struct ChatRoomRowCell: View {
                 HStack(alignment: .top) {
                     Text(item.listingName)
                         .kohereTextStyle(.label1Semibold)
-                        .foregroundColor(.labelNormal)
+                        .foregroundColor(.labelNeutral)
+                        .lineLimit(1)
                     
                     Spacer()
                     
                     Text(item.timeText)
                         .kohereTextStyle(.caption2Regular)
                         .foregroundColor(.neutral20)
+                        .lineLimit(1)
                 }
                 
                 Text(statusText)
                     .kohereTextStyle(.body3Regular)
                     .foregroundColor(.neutral40)
+                    .lineLimit(1)
             }
+            .padding(.bottom, 2)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .onTapGesture {
-            onTap(item.id)
-        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct ChatRoomRowButtonStyle: ButtonStyle {
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                configuration.isPressed
+                ? Color.backgroundNormalAlternative
+                : Color.backgroundNormalNormal
+            )
+            .contentShape(Rectangle())
     }
 }

@@ -46,7 +46,12 @@ struct OnboardingTextField: View {
 
     var body: some View {
         HStack {
-            TextField("", text: $text, prompt: Text(placeholder ?? ""))
+            TextField(
+                "",
+                text: $text,
+                prompt: Text(placeholder ?? "")
+                    .foregroundStyle(.labelAssistive)
+            )
                 .kohereTextStyle(.label2Medium)
                 .foregroundColor(.labelNeutral)
                 .autocorrectionDisabled()
