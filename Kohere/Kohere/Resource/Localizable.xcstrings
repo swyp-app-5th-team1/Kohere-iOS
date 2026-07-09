@@ -1161,6 +1161,1161 @@
         }
       }
     },
+    "address.city.SEOUL" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서울"
+          }
+        }
+      }
+    },
+    "address.district.DONGDAEMUN_GU" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "동대문구"
+          }
+        }
+      }
+    },
+    "address.district.GWANAK_GU" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "관악구"
+          }
+        }
+      }
+    },
+    "address.district.GWANGJIN_GU" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "광진구"
+          }
+        }
+      }
+    },
+    "address.district.JONGNO_GU" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "종로구"
+          }
+        }
+      }
+    },
+    "address.fullAddressTerms.Gwanak-gu" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "관악구"
+          }
+        }
+      }
+    },
+    "address.fullAddressTerms.Sillim-dong" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "신림동"
+          }
+        }
+      }
+    },
+    "address.fullAddressTerms.Dongdaemun-gu" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "동대문구"
+          }
+        }
+      }
+    },
+    "address.fullAddressTerms.Hoegi-dong" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "회기동"
+          }
+        }
+      }
+    },
+    "address.fullAddressTerms.Jongno-gu" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "종로구"
+          }
+        }
+      }
+    },
+    "address.fullAddressTerms.Hyehwa-dong" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "혜화동"
+          }
+        }
+      }
+    },
+    "address.fullAddressTerms.Gwangjin-gu" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "광진구"
+          }
+        }
+      }
+    },
+    "address.fullAddressTerms.Hwayang-dong" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "화양동"
+          }
+        }
+      }
+    },
+    "building.type.OFFICETEL" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오피스텔"
+          }
+        }
+      }
+    },
+    "building.type.VILLA" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "빌라"
+          }
+        }
+      }
+    },
+    "building.type.OTHER" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상가주택"
+          }
+        }
+      }
+    },
+    "facilities.laundry.COIN_LAUNDRY" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "코인세탁"
+          }
+        }
+      }
+    },
+    "facilities.laundry.DRYER" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "건조기"
+          }
+        }
+      }
+    },
+    "facilities.laundry.PRIVATE_WASHER" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개인세탁기 구비"
+          }
+        }
+      }
+    },
+    "facilities.laundry.SHARED_WASHER" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공용세탁기"
+          }
+        }
+      }
+    },
+    "facilities.kitchen.GAS_STOVE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가스레인지"
+          }
+        }
+      }
+    },
+    "facilities.kitchen.MICROWAVE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전자레인지"
+          }
+        }
+      }
+    },
+    "facilities.kitchen.SHARED_KITCHEN_FULL_OPTION" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공용주방 풀옵션"
+          }
+        }
+      }
+    },
+    "facilities.kitchen.SHARED_REFRIGERATOR" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공용냉장고"
+          }
+        }
+      }
+    },
+    "facilities.livingAmenities.AIR_CONDITIONER" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "에어컨"
+          }
+        }
+      }
+    },
+    "facilities.livingAmenities.GAS_STOVE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가스레인지"
+          }
+        }
+      }
+    },
+    "facilities.livingAmenities.MICROWAVE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전자레인지"
+          }
+        }
+      }
+    },
+    "facilities.livingAmenities.SHARED_KITCHEN_FULL_OPTION" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공용주방 풀옵션"
+          }
+        }
+      }
+    },
+    "facilities.livingAmenities.SHARED_PC" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공용PC"
+          }
+        }
+      }
+    },
+    "facilities.livingAmenities.SHARED_REFRIGERATOR" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공용냉장고"
+          }
+        }
+      }
+    },
+    "facilities.livingAmenities.SOFA" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소파"
+          }
+        }
+      }
+    },
+    "facilities.livingAmenities.TV" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TV"
+          }
+        }
+      }
+    },
+    "facilities.livingAmenities.WIFI" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WIFI"
+          }
+        }
+      }
+    },
+    "facilities.securityFeatures.CCTV" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CCTV"
+          }
+        }
+      }
+    },
+    "facilities.securityFeatures.DOOR_LOCK" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "도어락"
+          }
+        }
+      }
+    },
+    "facilities.securityFeatures.ENTRANCE_DOOR_LOCK" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공동현관 도어락"
+          }
+        }
+      }
+    },
+    "facilities.securityFeatures.FIRE_ALARM" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "화재경보기"
+          }
+        }
+      }
+    },
+    "facilities.securityFeatures.FIRE_EXTINGUISHER" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소화기"
+          }
+        }
+      }
+    },
+    "facilities.securityFeatures.SECURITY_GUARD" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "경비원"
+          }
+        }
+      }
+    },
+    "facilities.commonSpaces.LOUNGE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "휴게실"
+          }
+        }
+      }
+    },
+    "facilities.commonSpaces.SHARED_BATH" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "샤워장"
+          }
+        }
+      }
+    },
+    "facilities.commonSpaces.SHARED_KITCHEN" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공용주방"
+          }
+        }
+      }
+    },
+    "facilities.commonSpaces.SHARED_TOILET" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공용화장실"
+          }
+        }
+      }
+    },
+    "facilities.commonSpaces.STUDY_ROOM" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "독서실"
+          }
+        }
+      }
+    },
+    "facilities.providedSupplies.BEDDING" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "침구류"
+          }
+        }
+      }
+    },
+    "facilities.providedSupplies.LAUNDRY_DETERGENT" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세탁세제"
+          }
+        }
+      }
+    },
+    "facilities.providedSupplies.SEASONING" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "조미료"
+          }
+        }
+      }
+    },
+    "facilities.providedSupplies.SLIPPERS" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실내화"
+          }
+        }
+      }
+    },
+    "facilities.providedSupplies.TISSUE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "휴지"
+          }
+        }
+      }
+    },
+    "facilities.providedSupplies.TOWEL" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "수건"
+          }
+        }
+      }
+    },
+    "facilities.heatingSystem.CENTRAL" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "중앙난방"
+          }
+        }
+      }
+    },
+    "facilities.heatingSystem.DISTRICT" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지역난방"
+          }
+        }
+      }
+    },
+    "facilities.heatingSystem.INDIVIDUAL" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개별난방"
+          }
+        }
+      }
+    },
+    "facilities.heatingSystem.OTHER" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전기난방"
+          }
+        }
+      }
+    },
+    "listing.type.GOSIWON" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고시원"
+          }
+        }
+      }
+    },
+    "listing.type.CO_LIVING" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "코리빙"
+          }
+        }
+      }
+    },
+    "listing.type.SHARE_HOUSE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "쉐어하우스"
+          }
+        }
+      }
+    },
+    "listing.status.PUBLISHED" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공개 중"
+          }
+        }
+      }
+    },
+    "listing.rentalType.MONTHLY_RENT" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "월세"
+          }
+        }
+      }
+    },
+    "listing.genderPolicy.ANY" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "혼성"
+          }
+        }
+      }
+    },
+    "listing.genderPolicy.FEMALE_ONLY" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여성 전용"
+          }
+        }
+      }
+    },
+    "listing.genderPolicy.MALE_ONLY" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "남성 전용"
+          }
+        }
+      }
+    },
+    "listing.genderPolicy.GENDER_SEPARATED" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "남녀분리"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.CAU" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "중앙대학교"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.HUFS" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "한국외국어대학교"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.HYU" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "한양대학교"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.KHU" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "경희대학교"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.KONKUK" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "건국대학교"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.KOREA" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고려대학교"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.SEJONG" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세종대학교"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.SKKU" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "성균관대학교"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.SNU" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서울대학교"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.SOONGSIL" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "숭실대학교"
+          }
+        }
+      }
+    },
+    "nearbyUniversityCodes.SUNGSHIN" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "성신여자대학교"
+          }
+        }
+      }
+    },
+    "nearestTransit.type.SUBWAY" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지하철"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Anguk" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "안국역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Bongcheon" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "봉천역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Cheongnyangni" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "청량리역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Guui" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구의역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Hyehwa" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "혜화역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Jayang" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자양역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Jegi-dong" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "제기동역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Jongno 3-ga" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "종로3가역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Konkuk Univ." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "건대입구역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Nakseongdae" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "낙성대역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Seoul Nat'l Univ." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서울대입구역"
+          }
+        }
+      }
+    },
+    "nearestTransit.name.Sillim" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "신림역"
+          }
+        }
+      }
+    },
+    "roomOffer.status.ACTIVE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운영 중"
+          }
+        }
+      }
+    },
+    "roomOffer.currency.KRW" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "원"
+          }
+        }
+      }
+    },
+    "roomOffer.filterTags.ADDRESS_REGISTRATION" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전입신고 가능"
+          }
+        }
+      }
+    },
+    "roomOffer.filterTags.DOUBLE_ROOM" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2인실 가능"
+          }
+        }
+      }
+    },
+    "roomOffer.filterTags.ENGLISH_OK" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영어 소통 가능"
+          }
+        }
+      }
+    },
+    "roomOffer.filterTags.FEMALE_ONLY" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여성 전용"
+          }
+        }
+      }
+    },
+    "roomOffer.filterTags.MEALS_INCLUDED" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "식사 제공"
+          }
+        }
+      }
+    },
+    "roomOffer.filterTags.MOVE_IN_NOW" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "즉시 입주"
+          }
+        }
+      }
+    },
+    "roomOffer.filterTags.NO_MAINT_FEE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "관리비 없음"
+          }
+        }
+      }
+    },
+    "roomOffer.filterTags.PRIVATE_BATH" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개인 욕실 · 화장실"
+          }
+        }
+      }
+    },
+    "refundPolicy.code.FULL_REFUND_BEFORE_7_DAYS" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "입주 7일 전 취소 시 전액 환불"
+          }
+        }
+      }
+    },
+    "refundPolicy.code.NON_REFUNDABLE" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "입주 당일 취소 시 환불 불가"
+          }
+        }
+      }
+    },
+    "refundPolicy.code.PARTIAL_REFUND" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "부분 환불"
+          }
+        }
+      }
+    },
+    "propertyPolicies.arcRequired" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ARC 필요"
+          }
+        }
+      }
+    },
+    "propertyPolicies.residentRegistrationAvailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전입신고 가능"
+          }
+        }
+      }
+    },
+    "propertyPolicies.studySuitable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "학습 적합"
+          }
+        }
+      }
+    },
+    "propertyPolicies.mealsProvided" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "식사 제공"
+          }
+        }
+      }
+    },
+    "propertyPolicies.englishAvailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영어 소통 가능"
+          }
+        }
+      }
+    },
     "listingDetail.field.elevator" : {
       "extractionState" : "stale",
       "localizations" : {

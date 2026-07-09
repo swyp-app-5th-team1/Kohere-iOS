@@ -78,8 +78,14 @@ extension ListingDetailModel {
     }
 
     private static func roomOfferTags(_ offer: ListingDetailRoomOffer) -> [String] {
-        let mappedTags = offer.filterTags.map(\.displayTitle)
+        let mappedTags = offer.filterTagCodes.compactMap {
+            localizedServerCode($0, namespace: .roomOfferFilterTags)
+        }
         guard mappedTags.isEmpty else { return mappedTags }
+
+        let conditionTitles = offer.filterTags.map(\.displayTitle)
+        guard conditionTitles.isEmpty else { return conditionTitles }
+
         return offer.filterTagCodes
     }
 
@@ -121,7 +127,7 @@ extension ListingDetailModel {
                 ListingDetailInfoRowModel(
                     id: "refund-policy",
                     title: "환불 규정",
-                    value: refundPolicy.description ?? refundPolicy.code
+                    value: refundPolicyTitle(refundPolicy)
                 )
             )
         }
@@ -136,11 +142,13 @@ extension ListingDetailModel {
             rows.append(ListingDetailInfoRowModel(id: "stay", title: "이용 기간", value: contractTitle))
         }
 
-        if let genderPolicy = listingDetail.genderPolicy, !genderPolicy.isEmpty {
+        if let genderPolicy = localizedServerCode(listingDetail.genderPolicy, namespace: .listingGenderPolicy) {
             rows.append(ListingDetailInfoRowModel(id: "gender", title: "남녀구분", value: genderPolicy))
         }
 
-        let conditionTitles = listingDetail.conditions.map(\.displayTitle)
+        let conditionTitles = listingDetail.conditionCodes.compactMap {
+            localizedServerCode($0, namespace: .roomOfferFilterTags)
+        }
         if !conditionTitles.isEmpty {
             rows.append(
                 ListingDetailInfoRowModel(
@@ -162,15 +170,31 @@ extension ListingDetailModel {
         _ policies: ListingDetailPropertyPolicies
     ) -> [ListingDetailInfoRowModel] {
         [
-            booleanRow(id: "arc-required", title: "ARC", value: policies.arcRequired),
+            booleanRow(
+                id: "arc-required",
+                title: localizedPropertyPolicyTitle("arcRequired"),
+                value: policies.arcRequired
+            ),
             booleanRow(
                 id: "resident-registration",
-                title: "전입신고",
+                title: localizedPropertyPolicyTitle("residentRegistrationAvailable"),
                 value: policies.residentRegistrationAvailable
             ),
-            booleanRow(id: "study-suitable", title: "학습 환경", value: policies.studySuitable),
-            booleanRow(id: "meals-provided", title: "식사 제공", value: policies.mealsProvided),
-            booleanRow(id: "english-available", title: "영어 소통", value: policies.englishAvailable)
+            booleanRow(
+                id: "study-suitable",
+                title: localizedPropertyPolicyTitle("studySuitable"),
+                value: policies.studySuitable
+            ),
+            booleanRow(
+                id: "meals-provided",
+                title: localizedPropertyPolicyTitle("mealsProvided"),
+                value: policies.mealsProvided
+            ),
+            booleanRow(
+                id: "english-available",
+                title: localizedPropertyPolicyTitle("englishAvailable"),
+                value: policies.englishAvailable
+            )
         ]
         .compactMap { $0 }
     }
@@ -179,7 +203,11 @@ extension ListingDetailModel {
         guard let building else { return [] }
 
         return [
-            optionalRow(id: "building-type", title: "건물 형태", value: building.type),
+            optionalRow(
+                id: "building-type",
+                title: "건물 형태",
+                value: localizedServerCode(building.type, namespace: .buildingType)
+            ),
             optionalRow(id: "floor", title: "층수", value: floorTitle(building)),
             booleanRow(id: "parking", title: "주차", value: building.parkingAvailable),
             booleanRow(id: "elevator", title: "엘리베이터", value: building.elevatorAvailable)
@@ -191,30 +219,46 @@ extension ListingDetailModel {
         guard let facilities else { return [] }
 
         return [
-            listRow(id: "heating", title: "난방시설", values: facilities.heatingSystem),
-            listRow(id: "laundry", title: "세탁시설", values: facilities.laundry),
-            listRow(id: "kitchen", title: "주방시설", values: facilities.kitchen),
-            listRow(id: "amenities", title: "생활시설", values: facilities.livingAmenities),
-            listRow(id: "security", title: "안전시설", values: facilities.securityFeatures),
+            listRow(
+                id: "heating",
+                title: "난방시설",
+                values: localizedServerCodes(facilities.heatingSystem, namespace: .facilitiesHeatingSystem)
+            ),
+            listRow(
+                id: "laundry",
+                title: "세탁시설",
+                values: localizedServerCodes(facilities.laundry, namespace: .facilitiesLaundry)
+            ),
+            listRow(
+                id: "kitchen",
+                title: "주방시설",
+                values: localizedServerCodes(facilities.kitchen, namespace: .facilitiesKitchen)
+            ),
+            listRow(
+                id: "amenities",
+                title: "생활시설",
+                values: localizedServerCodes(facilities.livingAmenities, namespace: .facilitiesLivingAmenities)
+            ),
+            listRow(
+                id: "security",
+                title: "안전시설",
+                values: localizedServerCodes(facilities.securityFeatures, namespace: .facilitiesSecurityFeatures)
+            ),
             listRow(
                 id: "common-areas",
                 title: "공간시설",
                 values: commonSpaceTitles(facilities.commonSpaces)
             ),
-            listRow(id: "supplies", title: "제공비품", values: facilities.providedSupplies)
+            listRow(
+                id: "supplies",
+                title: "제공비품",
+                values: localizedServerCodes(facilities.providedSupplies, namespace: .facilitiesProvidedSupplies)
+            )
         ]
         .compactMap { $0 }
     }
 
     private static func locationInfo(_ listingDetail: ListingDetail) -> ListingLocationInfoModel {
-        let addressText = [
-            listingDetail.address?.fullAddress,
-            listingDetail.address?.detail
-        ]
-        .compactMap { $0 }
-        .filter { !$0.isEmpty }
-        .joined(separator: " ")
-
         let transits = listingDetail.nearestTransit.map { transit in
             [
                 ListingTransitInfoModel(
@@ -228,36 +272,12 @@ extension ListingDetailModel {
 
         return ListingLocationInfoModel(
             sectionTitle: "위치 및 주변시설",
-            addressText: addressText.isEmpty ? "주소 정보 없음" : addressText,
+            addressText: localizedAddressText(listingDetail.address),
             transits: transits,
             nearbyPlacesTitle: "주변 편의시설",
             nearbyPlacesText: listingDetail.nearestTransit?.nearbyPlacesDescription
                 ?? "주변 편의시설 정보 없음"
         )
-    }
-
-    private static func typeTitle(_ type: String) -> String {
-        switch type.uppercased() {
-        case "GOSHIWON":
-            return "고시원"
-        case "COLIVING":
-            return "코리빙"
-        case "SHARE_HOUSE", "SHAREHOUSE":
-            return "쉐어하우스"
-        default:
-            return type.isEmpty ? "매물" : type
-        }
-    }
-
-    private static func rentalTypeTitle(_ rentalType: String) -> String {
-        switch rentalType.uppercased() {
-        case "MONTHLY_RENT":
-            return "월세"
-        case "JEONSE":
-            return "전세"
-        default:
-            return rentalType.isEmpty ? "임대 유형 정보 없음" : rentalType
-        }
     }
 
     private static func rangeTitle(prefix: String, min: Int?, max: Int?, fallback: String) -> String {
@@ -332,24 +352,6 @@ extension ListingDetailModel {
         return usedFloorTitle
     }
 
-    private static func transitTitle(_ transit: ListingDetailNearestTransit?) -> String {
-        guard let transit else { return "교통 정보 없음" }
-
-        if let walkMinutes = transit.walkMinutes {
-            return "\(transit.name) 도보 \(walkMinutes)분"
-        }
-
-        return transit.name
-    }
-
-    private static func transitTitle(_ transit: ListingDetailNearestTransit) -> String {
-        if let walkMinutes = transit.walkMinutes {
-            return "\(transit.name) 도보 \(walkMinutes)분"
-        }
-
-        return transit.name
-    }
-
     private static func transitLineText(_ transit: ListingDetailNearestTransit) -> String {
         guard let type = transit.type, !type.isEmpty else { return "T" }
         return String(type.prefix(1))
@@ -386,13 +388,4 @@ extension ListingDetailModel {
         return ListingDetailInfoRowModel(id: id, title: title, value: value ? "가능" : "불가능")
     }
 
-    private static func commonSpaceTitles(_ commonSpaces: [ListingDetailCommonSpace]) -> [String] {
-        commonSpaces.map { commonSpace in
-            if let count = commonSpace.count {
-                return "\(commonSpace.type) \(count)개"
-            }
-
-            return commonSpace.type
-        }
-    }
 }
