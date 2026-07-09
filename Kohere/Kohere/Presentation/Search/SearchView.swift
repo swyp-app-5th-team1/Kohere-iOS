@@ -27,6 +27,9 @@ struct SearchView: View {
         .onAppear {
             isSearchFocused = true
         }
+        .onDisappear {
+            isSearchFocused = false
+        }
     }
 
     private var searchHeader: some View {
@@ -61,7 +64,10 @@ struct SearchView: View {
                 "지역, 학교, 지하철역",
                 text: Binding(
                     get: { store.searchText },
-                    set: { store.send(.searchTextChanged($0)) }
+                    set: { text in
+                        guard store.searchText != text else { return }
+                        store.send(.searchTextChanged(text))
+                    }
                 )
             )
                 .kohereTextStyle(.label1Medium)
@@ -240,6 +246,7 @@ struct SearchView: View {
 
     private func placeResultRow(_ placeResult: SearchPlaceResult) -> some View {
         Button {
+            isSearchFocused = false
             store.send(.placeResultTapped(placeResult))
         } label: {
             HStack(alignment: .top, spacing: 8) {
