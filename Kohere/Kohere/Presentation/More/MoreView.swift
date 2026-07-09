@@ -55,6 +55,10 @@ struct MoreView: View {
 
     private func handleMenuItemTapped(_ item: MoreMenuItem) {
         switch item.action {
+        case .savedListings:
+            store.send(.savedListingsTapped)
+        case .recentlyViewedListings:
+            store.send(.recentlyViewedListingsTapped)
         case let .livingGuide(theme):
             store.send(.livingGuideItemTapped(theme))
         case .promoteRoom:
@@ -158,10 +162,11 @@ struct MoreView: View {
         MoreMenuSection(
             title: "내 활동",
             items: [
-                .init(title: "찜한 매물", iconName: "heart_24"),
-                .init(title: "최근 본 매물", iconName: "thunder_24")
+                .init(title: "찜한 매물", iconName: "heart_24", action: .savedListings),
+                .init(title: "최근 본 매물", iconName: "thunder_24", action: .recentlyViewedListings)
             ],
-            horizontalPadding: 16
+            horizontalPadding: 16,
+            onItemTapped: handleMenuItemTapped
         )
     }
 
@@ -313,6 +318,8 @@ private struct MoreMenuItem: Identifiable, Equatable {
 }
 
 private enum MoreMenuAction: Equatable {
+    case savedListings
+    case recentlyViewedListings
     case livingGuide(LivingGuideTheme)
     case promoteRoom
 }

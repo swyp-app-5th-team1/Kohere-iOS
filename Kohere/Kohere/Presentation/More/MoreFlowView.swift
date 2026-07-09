@@ -33,6 +33,12 @@ struct MoreFlowView: View {
             case let .promoteRoomWeb(promoteRoomWebStore):
                 PromoteRoomWebView(store: promoteRoomWebStore)
                     .navigationBarHidden(true)
+            case let .savedListings(savedListingsStore):
+                SavedListingsView(store: savedListingsStore)
+                    .navigationBarHidden(true)
+            case let .recentlyViewedList(recentlyViewedStore):
+                RecentlyViewedListingsView(store: recentlyViewedStore)
+                    .navigationBarHidden(true)
             case let .setting(settingStore):
                 SettingView(store: settingStore)
                     .navigationBarHidden(true)
@@ -41,5 +47,6 @@ struct MoreFlowView: View {
                     .navigationBarHidden(true)
             }
         }
+        .toolbar(store.path.isEmpty ? .visible : .hidden, for: .tabBar)
     }
 }

@@ -19,6 +19,8 @@ struct MoreFeature {
         case livingGuideDetail(LivingGuideDetailFeature)
         case profileEdit(ProfileEditFeature)
         case promoteRoomWeb(PromoteRoomWebFeature)
+        case savedListings(SavedListingsFeature)
+        case recentlyViewedList(RecentlyViewedFeature)
         case setting(SettingFeature)
         case settingDocumentWeb(SettingDocumentWebFeature)
     }
@@ -43,6 +45,8 @@ struct MoreFeature {
         case editProfileTapped
         case livingGuideItemTapped(LivingGuideTheme)
         case promoteRoomTapped
+        case savedListingsTapped
+        case recentlyViewedListingsTapped
         case userProfileUpdated(UserProfile)
         case popupRequested(AppPopup)
         case logoutConfirmed
@@ -72,6 +76,14 @@ struct MoreFeature {
                 return .send(.userProfileUpdated(userProfile))
 
             case .path(.element(id: _, action: .promoteRoomWeb(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case .path(.element(id: _, action: .savedListings(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case .path(.element(id: _, action: .recentlyViewedList(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
 
@@ -158,6 +170,15 @@ struct MoreFeature {
                 state.path.append(.promoteRoomWeb(PromoteRoomWebFeature.State()))
                 return .none
 
+            case .savedListingsTapped:
+                guard state.canUseFavoriteFeatures else { return .none }
+                state.path.append(.savedListings(SavedListingsFeature.State(userType: state.userType)))
+                return .none
+
+            case .recentlyViewedListingsTapped:
+                state.path.append(.recentlyViewedList(RecentlyViewedFeature.State(userType: state.userType)))
+                return .none
+
             case let .userProfileUpdated(userProfile):
                 state.userType = userProfile.userType
                 state.userProfile = userProfile
@@ -182,3 +203,9 @@ struct MoreFeature {
 }
 
 extension MoreFeature.Path.State: Equatable {}
+
+extension MoreFeature.State {
+    var canUseFavoriteFeatures: Bool {
+        userType == .tenant
+    }
+}
