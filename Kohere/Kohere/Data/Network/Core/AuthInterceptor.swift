@@ -11,15 +11,17 @@ import Foundation
 final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
     private let keychainClient: KeychainClient
     private let reissueToken: @Sendable (_ refreshToken: String) async throws -> AuthToken
-    private let refreshManager = RefreshTokenManager()
+    private let refreshManager: RefreshTokenManager
     
     init(
         keychainClient: KeychainClient = .liveValue,
+        refreshManager: RefreshTokenManager,
         reissueToken: @escaping @Sendable (_ refreshToken: String) async throws -> AuthToken = {
             try await ReissueTokenUseCase.liveValue.execute($0)
         }
     ) {
         self.keychainClient = keychainClient
+        self.refreshManager = refreshManager
         self.reissueToken = reissueToken
     }
     

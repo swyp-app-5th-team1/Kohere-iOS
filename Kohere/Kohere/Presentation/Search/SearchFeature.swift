@@ -81,10 +81,10 @@ struct SearchFeature {
                 .cancellable(id: SearchFeatureCancelID.placeSearch, cancelInFlight: true)
 
             case let .recentSearchTapped(keyword):
+                let keyword = keyword.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !keyword.isEmpty else { return .none }
                 state.searchText = keyword
-                state.placeResults = []
-                state.contentState = .typing
-                return .cancel(id: SearchFeatureCancelID.placeSearch)
+                return .send(.searchSubmitted)
 
             case let .recentSearchDeleteButtonTapped(keyword):
                 state.recentSearches.removeAll { $0.keyword == keyword }

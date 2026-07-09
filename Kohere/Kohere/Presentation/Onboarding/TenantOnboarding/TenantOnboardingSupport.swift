@@ -50,7 +50,7 @@ extension TenantOnboardingFeature.State {
     var onboardingProfile: AuthOnboardingProfile? {
         guard let birthDate,
               let gender = selectedGender,
-              let country = selectedNationality?.authOnboardingCountryCode,
+              let country = selectedNationality?.nationalityCountryCode,
               let occupation = selectedOccupation,
               let visaType = selectedVisa else {
             return nil
@@ -129,10 +129,6 @@ private extension DropdownMenuOption {
         Self.monthNumberByOption[option]
     }
 
-    var authOnboardingCountryCode: String? {
-        Self.countryCodeByOption[option]
-    }
-
     private static let monthNumberByOption: [String: Int] = [
         "JAN": 1,
         "FEB": 2,
@@ -148,18 +144,4 @@ private extension DropdownMenuOption {
         "DEC": 12
     ]
 
-    private static let countryCodeByOption: [String: String] = [
-        "Korea, Republic of": "KR",
-        "United States": "US",
-        "Japan": "JP",
-        "China": "CN",
-        "Vietnam": "VN",
-        "Canada": "CA",
-        "United Kingdom": "GB",
-        "France": "FR",
-        "Spain": "ES",
-        "Italy": "IT",
-        "Turkey": "TR",
-        "Hungary": "HU"
-    ]
 }

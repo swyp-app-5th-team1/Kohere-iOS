@@ -13,7 +13,7 @@ final class UserRepository: UserInterface {
     private let environmentProvider: () throws -> APIEnvironment
 
     init(
-        authenticatedNetworkService: NetworkService = .authenticated(),
+        authenticatedNetworkService: NetworkService = LiveNetworkServiceFactory.authenticated(),
         environmentProvider: @escaping () throws -> APIEnvironment = { try APIEnvironment.live() }
     ) {
         self.authenticatedNetworkService = authenticatedNetworkService
@@ -24,6 +24,16 @@ final class UserRepository: UserInterface {
         let environment = try environmentProvider()
         let responseDTO: UserProfileResponseDTO = try await authenticatedNetworkService.request(
             UserRouter.me(environment)
+        )
+
+        return responseDTO.toEntity()
+    }
+
+    func updateProfile(_ update: UserProfileUpdate) async throws -> UserProfile {
+        let environment = try environmentProvider()
+        let requestDTO = UpdateProfileRequestDTO(update)
+        let responseDTO: UserProfileResponseDTO = try await authenticatedNetworkService.request(
+            UserRouter.updateProfile(requestDTO, environment)
         )
 
         return responseDTO.toEntity()

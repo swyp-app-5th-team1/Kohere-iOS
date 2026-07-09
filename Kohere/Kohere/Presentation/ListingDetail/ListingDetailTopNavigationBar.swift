@@ -29,7 +29,7 @@ struct ListingDetailTopNavigationBar: View {
                 action: onShareTap
             )
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 10)
         .padding(.top, 56)
         .frame(maxWidth: .infinity)
         .frame(height: height, alignment: .bottom)

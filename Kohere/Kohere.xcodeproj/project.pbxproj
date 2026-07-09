@@ -12,6 +12,7 @@
 		778F3DF12FDA7D0D00AFF730 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 778F3DF02FDA7D0D00AFF730 /* .swiftlint.yml */; };
 		778F3DF32FDAA3000AFF730 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 778F3DF42FDAA3000AFF730 /* ComposableArchitecture */; };
 		9570E47F2FE45C37002FA6DE /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 9570E47E2FE45C37002FA6DE /* NMapsMap */; };
+		D4A1B2C32FF4A10000AA0001 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D4A1B2C32FF4A10000AA0003 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +81,7 @@
 				772FBCF62FF3A3F200336CF6 /* Alamofire in Frameworks */,
 				772FBCF82FF3A40100336CF6 /* GoogleSignIn in Frameworks */,
 				9570E47F2FE45C37002FA6DE /* NMapsMap in Frameworks */,
+				D4A1B2C32FF4A10000AA0001 /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -156,6 +158,7 @@
 				772FBCF72FF3A3F200336CF6 /* Alamofire */,
 				772FBCF92FF3A40100336CF6 /* GoogleSignIn */,
 				9570E47E2FE45C37002FA6DE /* NMapsMap */,
+				D4A1B2C32FF4A10000AA0003 /* Kingfisher */,
 			);
 			productName = Kohere;
 			productReference = 9570C29A2FD9DA9D002FA6DE /* Kohere.app */;
@@ -250,6 +253,7 @@
 				9570E47D2FE45C37002FA6DE /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 				772FBCF42FF38F2F00336CF6 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				772FBCF52FF3981E00336CF6 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				D4A1B2C32FF4A10000AA0002 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9570C29B2FD9DA9D002FA6DE /* Products */;
@@ -698,6 +702,14 @@
 				minimumVersion = 3.23.2;
 			};
 		};
+		D4A1B2C32FF4A10000AA0002 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -720,6 +732,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9570E47D2FE45C37002FA6DE /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
 			productName = NMapsMap;
+		};
+		D4A1B2C32FF4A10000AA0003 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D4A1B2C32FF4A10000AA0002 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

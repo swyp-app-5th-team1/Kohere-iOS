@@ -60,6 +60,7 @@ struct ChatView: View {
                 }
             }
         }
+        .background(.backgroundNormalNormal)
         .onAppear {
             store.send(.onAppear)
         }

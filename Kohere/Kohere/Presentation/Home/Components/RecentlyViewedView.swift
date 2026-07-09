@@ -46,6 +46,7 @@ struct RecentlyViewedView: View {
                 listView
             }
         }
+        .background(.backgroundNormalNormal)
     }
     
     // MARK: - Subviews

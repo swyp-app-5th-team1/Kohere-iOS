@@ -15,7 +15,7 @@ final class AuthRepository: AuthInterface {
     
     init(
         networkService: NetworkService = .plain(),
-        authenticatedNetworkService: NetworkService = .authenticated(),
+        authenticatedNetworkService: NetworkService = LiveNetworkServiceFactory.authenticated(),
         keychainClient: KeychainClient = .liveValue,
         environmentProvider: @escaping () throws -> APIEnvironment = { try APIEnvironment.live() }
     ) {

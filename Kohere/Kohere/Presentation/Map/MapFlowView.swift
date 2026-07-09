@@ -25,6 +25,14 @@ struct MapFlowView: View {
                 ListingDetailView(store: listingDetailStore)
                     .navigationBarHidden(true)
 
+            case let .listingApplication(listingApplicationStore):
+                ListingApplicationView(store: listingApplicationStore)
+                    .navigationBarHidden(true)
+
+            case let .listingApplicationPrivacyWeb(privacyWebStore):
+                ListingApplicationPrivacyWebView(store: privacyWebStore)
+                    .navigationBarHidden(true)
+
             case let .chatBot(chatBotStore):
                 ChatBotView(store: chatBotStore)
                     .navigationBarHidden(true)

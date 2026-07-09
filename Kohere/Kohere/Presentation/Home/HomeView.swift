@@ -53,8 +53,11 @@ struct HomeView: View {
                     
                     LivingInKoreaView(store: store)
                 }
+                .background(.backgroundNormalNormal)
             }
+            .background(.backgroundNormalNormal)
         }
+        .background(.backgroundNormalNormal)
         .onAppear {
             store.send(.onAppear)
         }

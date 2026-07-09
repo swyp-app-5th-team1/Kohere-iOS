@@ -11,8 +11,8 @@ import ComposableArchitecture
 struct AccountFeature {
     @ObservableState
     struct State: Equatable {
-        let userType: UserType
-        let userProfile: UserProfile?
+        var userType: UserType
+        var userProfile: UserProfile?
     }
 
     enum Action: Equatable {

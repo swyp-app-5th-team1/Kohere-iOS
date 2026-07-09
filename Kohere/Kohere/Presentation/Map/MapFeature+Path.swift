@@ -17,6 +17,69 @@ extension MapFeature {
             _ = state.path.popLast()
             return .none
 
+        case let .element(
+            id: _,
+            action: .listingDetail(
+                .delegate(
+                    .applicationRequested(
+                        listingID,
+                        listingTitle,
+                        roomOfferID,
+                        roomTypeName,
+                        roomPricingText
+                    )
+                )
+            )
+        ):
+            state.path.append(
+                .listingApplication(
+                    ListingApplicationFeature.State(
+                        listingID: listingID,
+                        listingTitle: listingTitle,
+                        roomOfferID: roomOfferID,
+                        roomTypeName: roomTypeName,
+                        roomPricingText: roomPricingText
+                    )
+                )
+            )
+            return .none
+
+        case let .element(
+            id: _,
+            action: .listingApplication(.delegate(.privacyDocumentRequested(section)))
+        ):
+            state.path.append(
+                .listingApplicationPrivacyWeb(
+                    ListingApplicationPrivacyWebFeature.State(section: section)
+                )
+            )
+            return .none
+
+        case let .element(
+            id: _,
+            action: .listingApplication(.delegate(.listingDetailRequested(listingID)))
+        ):
+            state.selectedMarkerID = listingID
+            state.path.removeAll()
+            state.path.append(
+                .listingDetail(
+                    ListingDetailFeature.State(
+                        listingID: listingID,
+                        userType: state.userType,
+                        isApplicationDisabled: true
+                    )
+                )
+            )
+            return .none
+
+        case .element(id: _, action: .listingApplication(.backButtonTapped)):
+            _ = state.path.popLast()
+            return .none
+
+        case .element(id: _, action: .listingApplicationPrivacyWeb(.backButtonTapped)):
+            _ = state.path.popLast()
+            return .none
+
         case .element(id: _, action: .chatBot(.backButtonTapped)):
             _ = state.path.popLast()
             return .none

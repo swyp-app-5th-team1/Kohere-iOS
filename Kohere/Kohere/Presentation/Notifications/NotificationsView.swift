@@ -26,5 +26,6 @@ struct NotificationsView: View {
             
             KohereEmptyView(title: "No notifications yet")
         }
+        .background(.backgroundNormalNormal)
     }
 }

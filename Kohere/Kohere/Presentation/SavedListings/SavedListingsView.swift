@@ -48,6 +48,7 @@ struct SavedListingsView: View {
                 }
             }
         }
+        .background(.backgroundNormalNormal)
         .onAppear {
             store.send(.onAppear)
         }

@@ -10,16 +10,18 @@ import Foundation
 
 enum ListingRouter: URLRequestConvertible {
     case list(query: ListingListQueryDTO, APIEnvironment)
+    case detail(listingID: String, APIEnvironment)
     case favoriteList(query: ListingFavoriteListQueryDTO, APIEnvironment)
     case recentList(APIEnvironment)
     case addFavorite(listingID: String, APIEnvironment)
     case removeFavorite(listingID: String, APIEnvironment)
+    case createBooking(listingID: String, request: ListingBookingCreateRequestDTO, APIEnvironment)
 
     private var method: HTTPMethod {
         switch self {
-        case .list, .favoriteList, .recentList:
+        case .list, .detail, .favoriteList, .recentList:
             .get
-        case .addFavorite:
+        case .addFavorite, .createBooking:
             .post
         case .removeFavorite:
             .delete
@@ -30,18 +32,24 @@ enum ListingRouter: URLRequestConvertible {
         switch self {
         case .list:
             "api/v1/listings"
+        case let .detail(listingID, _):
+            "api/v1/listings/\(listingID)"
         case .favoriteList:
             "api/v1/users/me/favorites"
         case .recentList:
             "api/v1/users/me/recent-listings"
         case let .addFavorite(listingID, _), let .removeFavorite(listingID, _):
             "api/v1/listings/\(listingID)/favorite"
+        case let .createBooking(listingID, _, _):
+            "api/v1/listings/\(listingID)/bookings"
         }
     }
 
     private var environment: APIEnvironment {
         switch self {
         case let .list(_, environment):
+            environment
+        case let .detail(_, environment):
             environment
         case let .favoriteList(_, environment):
             environment
@@ -50,6 +58,8 @@ enum ListingRouter: URLRequestConvertible {
         case let .addFavorite(_, environment):
             environment
         case let .removeFavorite(_, environment):
+            environment
+        case let .createBooking(_, _, environment):
             environment
         }
     }
@@ -82,8 +92,11 @@ enum ListingRouter: URLRequestConvertible {
             }
             request.url = requestURL
 
-        case .recentList, .addFavorite, .removeFavorite:
+        case .detail, .recentList, .addFavorite, .removeFavorite:
             break
+
+        case let .createBooking(_, requestDTO, _):
+            request.httpBody = try JSONEncoder().encode(requestDTO)
         }
 
         return request

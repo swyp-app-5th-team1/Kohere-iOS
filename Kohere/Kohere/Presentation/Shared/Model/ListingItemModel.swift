@@ -10,6 +10,7 @@ import Foundation
 struct ListingItemModel: Equatable, Identifiable {
     let id: String
     let title: String
+    let thumbnailURL: String?
     let formattedPrice: String
     let formattedUsdPrice: String
     let detailsDescription: String
@@ -24,6 +25,7 @@ struct ListingItemModel: Equatable, Identifiable {
     nonisolated init(
         id: String,
         title: String = "",
+        thumbnailURL: String? = nil,
         formattedPrice: String,
         formattedUsdPrice: String,
         detailsDescription: String,
@@ -35,6 +37,7 @@ struct ListingItemModel: Equatable, Identifiable {
     ) {
         self.id = id
         self.title = title
+        self.thumbnailURL = thumbnailURL
         self.formattedPrice = formattedPrice
         self.formattedUsdPrice = formattedUsdPrice
         self.detailsDescription = detailsDescription
@@ -48,6 +51,7 @@ struct ListingItemModel: Equatable, Identifiable {
     nonisolated init(
         id: Int,
         title: String = "",
+        thumbnailURL: String? = nil,
         formattedPrice: String,
         formattedUsdPrice: String,
         detailsDescription: String,
@@ -60,6 +64,7 @@ struct ListingItemModel: Equatable, Identifiable {
         self.init(
             id: "\(id)",
             title: title,
+            thumbnailURL: thumbnailURL,
             formattedPrice: formattedPrice,
             formattedUsdPrice: formattedUsdPrice,
             detailsDescription: detailsDescription,

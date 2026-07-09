@@ -106,28 +106,12 @@ private struct LivingGuideTipCard: View {
     // MARK: - Subview
     
     private var tipImage: some View {
-        Group {
-            if let imageURL = tip.imageURL, let url = URL(string: imageURL) {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case let .success(image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                        
-                    case .failure, .empty:
-                        Color.clear
-
-                    @unknown default:
-                        Color.clear
-                    }
-                }
-            } else {
-                Color.clear
-            }
+        KohereRemoteImageView(urlString: tip.imageURL) {
+            Color.clear
         }
         .frame(height: 188)
         .frame(maxWidth: .infinity)
+        .clipped()
     }
 }
 

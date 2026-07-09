@@ -79,6 +79,31 @@ extension DropdownMenuOption {
     nonisolated var visaType: VisaType? {
         VisaType.allCases.first { $0.displayTitle == option }
     }
+
+    var nationalityCountryCode: String? {
+        Self.countryCodeByNationalityOption[option]
+    }
+
+    static func nationalityOption(countryCode: String?) -> DropdownMenuOption? {
+        guard let countryCode else { return nil }
+
+        return nationalities.first { $0.nationalityCountryCode == countryCode }
+    }
+
+    private static let countryCodeByNationalityOption: [String: String] = [
+        "Korea, Republic of": "KR",
+        "United States": "US",
+        "Japan": "JP",
+        "China": "CN",
+        "Vietnam": "VN",
+        "Canada": "CA",
+        "United Kingdom": "GB",
+        "France": "FR",
+        "Spain": "ES",
+        "Italy": "IT",
+        "Turkey": "TR",
+        "Hungary": "HU"
+    ]
 }
 
 private extension Gender {
