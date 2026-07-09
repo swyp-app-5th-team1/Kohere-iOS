@@ -144,13 +144,8 @@ struct RootFeature {
                     return .none
                 }
 
-                state.currentUser = user
-                state.home.userType = user.userType
-                state.map.userType = user.userType
-                state.more.userType = user.userType
-                state.more.userProfile = user
                 state.isCurrentUserLoading = false
-                return .none
+                return .send(.more(.userProfileUpdated(user)))
 
             case .currentUserResponse(.failure):
                 state.isCurrentUserLoading = false
@@ -226,12 +221,23 @@ struct RootFeature {
                 state.map.path.removeAll()
                 return openMap(diagnosisID: diagnosisID, state: &state)
 
+            case .map(.path(.element(id: _, action: .listingApplication(.delegate(.chatTabRequested))))):
+                state.map.path.removeAll()
+                state.selectedTab = .chat
+                return .none
+
             case let .map(.path(.element(id: _, action: .search(.popupRequested(popup))))):
                 state.popup = popup
                 return .none
 
             case let .more(.popupRequested(popup)):
                 state.popup = popup
+                return .none
+
+            case let .more(.userProfileUpdated(userProfile)):
+                state.currentUser = userProfile
+                state.home.userType = userProfile.userType
+                state.map.userType = userProfile.userType
                 return .none
 
             case .more(.logoutConfirmed):

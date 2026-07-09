@@ -39,6 +39,7 @@ extension MapFeature {
         var currentViewport: MapViewport?
         var lastSearchedViewport: MapViewport?
         var placeSearchTarget: MapPlaceSearchTarget?
+        var selectedPlaceSearchTitle: String?
         var showsResearchButton = false
 
         // 바텀시트 / 필터 상태
@@ -81,6 +82,7 @@ extension MapFeature {
         case markerTapped(String)
         case searchButtonTapped
         case placeSearchResultSelected(SearchPlaceResult)
+        case placeSearchDisplayClearButtonTapped
         case researchButtonTapped
         case viewportChanged(MapViewport)
         case listingRowAppeared(String)

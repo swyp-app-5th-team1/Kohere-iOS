@@ -39,12 +39,22 @@ struct ListingDetailView: View {
                 detailScrollView(scrollProxy: scrollProxy)
 
                 topChromeOverlay(scrollProxy: scrollProxy)
+
+                if store.isApplicationSheetPresented {
+                    applicationSheetOverlay
+                }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                bottomBar
+                if store.showsTenantActionBar && !store.isApplicationSheetPresented {
+                    bottomBar
+                }
             }
             .background(.neutral5)
             .ignoresSafeArea(edges: .top)
+            .animation(.easeInOut(duration: 0.2), value: store.isApplicationSheetPresented)
+            .onAppear {
+                store.send(.onAppear)
+            }
         }
     }
 
@@ -336,8 +346,35 @@ struct ListingDetailView: View {
         ListingDetailBottomBar(
             isLiked: store.detail.overview.isLiked,
             showsLikeButton: store.canUseFavoriteFeatures,
+            isApplyEnabled: store.canUseApplicationFeatures,
             onLikeTap: { store.send(.likeButtonTapped) },
-            onContactTap: { store.send(.contactButtonTapped) },
+            onApplyTap: { store.send(.applyButtonTapped) }
+        )
+    }
+
+    private var applicationSheetOverlay: some View {
+        ZStack(alignment: .bottom) {
+            Color.materialDimmer
+                .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    store.send(.applicationSheetDismissed)
+                }
+
+            applicationSheet
+        }
+        .transition(.opacity)
+        .zIndex(3)
+    }
+
+    private var applicationSheet: some View {
+        ListingDetailApplicationPanel(
+            roomOffers: store.detail.roomOffers,
+            selectedRoomOfferID: store.selectedRoomOfferID,
+            isRoomTypeSelectorPresented: store.isRoomTypeSelectorPresented,
+            validationMessage: store.roomTypeValidationMessage,
+            onRoomTypeSelectorTap: { store.send(.roomTypeSelectorTapped) },
+            onRoomOfferTap: { roomOfferID in store.send(.roomOfferSelected(roomOfferID)) },
             onApplyTap: { store.send(.applyButtonTapped) }
         )
     }

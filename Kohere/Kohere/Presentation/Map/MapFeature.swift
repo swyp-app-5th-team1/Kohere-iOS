@@ -28,6 +28,8 @@ struct MapFeature {
     @Reducer
     enum Path {
         case listingDetail(ListingDetailFeature)
+        case listingApplication(ListingApplicationFeature)
+        case listingApplicationPrivacyWeb(ListingApplicationPrivacyWebFeature)
         case chatBot(ChatBotFeature)
         case search(SearchFeature)
     }
@@ -117,6 +119,7 @@ struct MapFeature {
 
                 guard let userLocation = state.userLocation else { return .none }
                 state.cameraMoveRequest = userLocation
+                state.selectedPlaceSearchTitle = nil
                 return .none
 
             case .diagnosisButtonTapped:
@@ -136,6 +139,7 @@ struct MapFeature {
                 state.activeDiagnosisID = nil
                 state.appliedFilterSource = .manual
                 state.placeSearchTarget = nil
+                state.selectedPlaceSearchTitle = nil
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
                 state.isDiagnosisDetailLoading = false
@@ -160,6 +164,7 @@ struct MapFeature {
                 state.isFilterPresented = false
                 state.appliedFilterSource = .diagnosis
                 state.placeSearchTarget = nil
+                state.selectedPlaceSearchTitle = nil
                 state.isDiagnosisButtonExpanded = false
                 state.isDiagnosisMatchesButtonExpanded = true
                 state.showsResearchButton = false
@@ -267,11 +272,15 @@ struct MapFeature {
                 return .none
             case let .placeSearchResultSelected(placeResult):
                 return handlePlaceSearchResultSelected(placeResult, state: &state)
+            case .placeSearchDisplayClearButtonTapped:
+                state.selectedPlaceSearchTitle = nil
+                return .none
             case .researchButtonTapped:
                 guard let viewport = state.currentViewport else { return .none }
                 state.listingSource = .locationSearch
                 state.activeDiagnosisID = nil
                 state.placeSearchTarget = nil
+                state.selectedPlaceSearchTitle = nil
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
                 state.isDiagnosisDetailLoading = false

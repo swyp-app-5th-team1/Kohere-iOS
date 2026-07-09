@@ -29,6 +29,16 @@ final class UserRepository: UserInterface {
         return responseDTO.toEntity()
     }
 
+    func updateProfile(_ update: UserProfileUpdate) async throws -> UserProfile {
+        let environment = try environmentProvider()
+        let requestDTO = UpdateProfileRequestDTO(update)
+        let responseDTO: UserProfileResponseDTO = try await authenticatedNetworkService.request(
+            UserRouter.updateProfile(requestDTO, environment)
+        )
+
+        return responseDTO.toEntity()
+    }
+
     func deleteCurrentUser() async throws {
         let environment = try environmentProvider()
 

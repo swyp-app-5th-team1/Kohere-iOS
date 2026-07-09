@@ -31,6 +31,19 @@ struct UserProfile: Equatable, Sendable {
     let createdAt: String
 }
 
+struct UserProfileUpdate: Equatable, Sendable {
+    let firstName: String
+    let lastName: String
+    let gender: Gender?
+    let birthDate: String?
+    let country: String?
+    let occupation: Occupation
+    let visaType: VisaType
+    let name: String?
+    let phoneNumber: String?
+    let marketingAgreed: Bool?
+}
+
 enum UserType: String, Equatable, Sendable {
     case tenant = "TENANT"
     case landlord = "LANDLORD"

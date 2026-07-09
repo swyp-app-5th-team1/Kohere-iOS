@@ -30,6 +30,7 @@ struct MoreFeature {
         case navigationSettingTapped
         case editProfileTapped
         case promoteRoomTapped
+        case userProfileUpdated(UserProfile)
         case popupRequested(AppPopup)
         case logoutConfirmed
         case deleteAccountConfirmed
@@ -48,6 +49,10 @@ struct MoreFeature {
             case .path(.element(id: _, action: .profileEdit(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
+
+            case let .path(.element(id: _, action: .profileEdit(.delegate(.profileUpdated(userProfile))))):
+                _ = state.path.popLast()
+                return .send(.userProfileUpdated(userProfile))
 
             case .path(.element(id: _, action: .promoteRoomWeb(.backButtonTapped))):
                 _ = state.path.popLast()
@@ -84,6 +89,17 @@ struct MoreFeature {
 
             case .promoteRoomTapped:
                 state.path.append(.promoteRoomWeb(PromoteRoomWebFeature.State()))
+                return .none
+
+            case let .userProfileUpdated(userProfile):
+                state.userType = userProfile.userType
+                state.userProfile = userProfile
+
+                for id in state.path.ids {
+                    state.path[id: id, case: \.account]?.userType = userProfile.userType
+                    state.path[id: id, case: \.account]?.userProfile = userProfile
+                }
+
                 return .none
 
             case .popupRequested, .logoutConfirmed, .deleteAccountConfirmed:
