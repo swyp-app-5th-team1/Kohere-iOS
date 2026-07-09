@@ -47,12 +47,12 @@ struct HomeFlowView: View {
                     LivingGuideDetailView(store: livingGuideDetailStore)
                         .navigationBarHidden(true)
 
-				case let .search(searchStore):
+                case let .search(searchStore):
                     SearchView(store: searchStore)
                         .navigationBarHidden(true)
                 }
-            } 
-            .toolbar(.hidden, for: .tabBar)
+            }
         }
+        .toolbar(store.path.isEmpty ? .visible : .hidden, for: .tabBar)
     }
 }
