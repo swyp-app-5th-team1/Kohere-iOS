@@ -64,23 +64,8 @@ struct MoveInApplicationCardView: View {
     // MARK: - SubView
     
     private var thumbnailImage: some View {
-        Group {
-            if let thumbnailURL = item.thumbnailURL {
-                AsyncImage(url: thumbnailURL) { phase in
-                    switch phase {
-                    case let .success(image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    case .empty, .failure:
-                        placeholderImage
-                    @unknown default:
-                        placeholderImage
-                    }
-                }
-            } else {
-                placeholderImage
-            }
+        KohereRemoteImageView(urlString: item.thumbnailURL) {
+            placeholderImage
         }
         .frame(width: 255, height: 173)
         .clipped()

@@ -114,7 +114,9 @@ struct HomeFeature {
                     })
                 }
 
-                if !state.isQuizLoading && !state.isQuizLoaded {
+                if state.canShowTenantLivingContent,
+                   !state.isQuizLoading,
+                   !state.isQuizLoaded {
                     state.isQuizLoading = true
                     state.quizErrorMessage = nil
 
@@ -130,7 +132,9 @@ struct HomeFeature {
                     })
                 }
 
-                if !state.isLivingGuidesLoading && !state.isLivingGuidesLoaded {
+                if state.canShowTenantLivingContent,
+                   !state.isLivingGuidesLoading,
+                   !state.isLivingGuidesLoaded {
                     state.isLivingGuidesLoading = true
                     state.livingGuidesErrorMessage = nil
 
@@ -159,7 +163,8 @@ struct HomeFeature {
                 return .none
 
             case let .quizOptionTapped(index):
-                guard state.isQuizLoaded,
+                guard state.canShowTenantLivingContent,
+                      state.isQuizLoaded,
                       !state.quiz.hasAnswered,
                       !state.isQuizAnswerSubmitting,
                       let selectedChoiceKey = state.quiz.choiceKey(for: index)
@@ -324,7 +329,8 @@ struct HomeFeature {
                 return .none
                 
             case let .livingGuideItemTapped(id):
-                guard let guide = state.livingGuides.first(where: { $0.id == id }) else {
+                guard state.canShowTenantLivingContent,
+                      let guide = state.livingGuides.first(where: { $0.id == id }) else {
                     return .none
                 }
                 state.path.append(.livingGuideDetail(LivingGuideDetailFeature.State(guide: guide)))
@@ -342,6 +348,10 @@ extension HomeFeature.Path.State: Equatable {}
 
 extension HomeFeature.State {
     var canUseFavoriteFeatures: Bool {
+        userType == .tenant
+    }
+
+    var canShowTenantLivingContent: Bool {
         userType == .tenant
     }
 }

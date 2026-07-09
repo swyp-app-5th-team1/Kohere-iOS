@@ -11,7 +11,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     let id: Int
     let listingName: String
     let location: String
-    let thumbnailURL: URL?
+    let thumbnailURL: String?
     let dateText: String
     let timeText: String
     let applicantName: String
@@ -29,7 +29,10 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         self.id = entity.id
         self.listingName = entity.listingName
         self.location = "\(entity.regionName) · \(entity.accommodationType)"
-        self.thumbnailURL = nil
+        self.thumbnailURL = MockListingImageProvider.listingImageName(
+            listingID: "\(entity.id)",
+            propertyType: entity.accommodationType
+        )
         self.dateText = Self.dateText(entity.lastMessageAt)
         self.timeText = "2분 전"
         self.applicantName = entity.applicantName
@@ -53,7 +56,11 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         self.id = summary.bookingID
         self.listingName = summary.title
         self.location = ""
-        self.thumbnailURL = summary.thumbnailURL
+        self.thumbnailURL = summary.thumbnailURL?.absoluteString
+            ?? MockListingImageProvider.listingImageName(
+                listingID: summary.listingID,
+                propertyType: nil
+            )
         self.dateText = Self.dateText(summary.createdAt)
         self.timeText = Self.timeText(summary.createdAt)
         self.applicantName = "N/A"
@@ -72,7 +79,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         self.id = detail.bookingID
         self.listingName = detail.title
         self.location = detail.address
-        self.thumbnailURL = detail.thumbnailURL ?? fallback.thumbnailURL
+        self.thumbnailURL = detail.thumbnailURL?.absoluteString ?? fallback.thumbnailURL
         self.dateText = Self.dateText(detail.createdAt)
         self.timeText = Self.timeText(detail.createdAt)
         self.applicantName = detail.tenantName.isEmpty ? "N/A" : detail.tenantName
