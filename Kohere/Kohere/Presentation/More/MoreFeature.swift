@@ -6,12 +6,17 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 @Reducer
 struct MoreFeature {
+    @Dependency(\.lifeTipClient)
+    var lifeTipClient
+
     @Reducer
     enum Path {
         case account(AccountFeature)
+        case livingGuideDetail(LivingGuideDetailFeature)
         case profileEdit(ProfileEditFeature)
         case promoteRoomWeb(PromoteRoomWebFeature)
         case setting(SettingFeature)
@@ -23,13 +28,20 @@ struct MoreFeature {
         var path = StackState<Path.State>()
         var userType: UserType?
         var userProfile: UserProfile?
+        var livingGuides: [LivingGuide] = []
+        var isLivingGuidesLoading: Bool = false
+        var isLivingGuidesLoaded: Bool = false
+        var livingGuidesErrorMessage: String?
     }
 
     enum Action {
         case path(StackActionOf<Path>)
+        case onAppear
+        case lifeTipTopicsResponse(Result<[LivingGuide], DataError>)
         case navigationLanguageTapped
         case navigationSettingTapped
         case editProfileTapped
+        case livingGuideItemTapped(LivingGuideTheme)
         case promoteRoomTapped
         case userProfileUpdated(UserProfile)
         case popupRequested(AppPopup)
@@ -48,6 +60,10 @@ struct MoreFeature {
                 return .send(.popupRequested(popup))
 
             case .path(.element(id: _, action: .profileEdit(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case .path(.element(id: _, action: .livingGuideDetail(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
 
@@ -88,6 +104,37 @@ struct MoreFeature {
                 )
                 return .none
 
+            case .onAppear:
+                guard state.userType == .tenant,
+                      !state.isLivingGuidesLoading,
+                      !state.isLivingGuidesLoaded
+                else { return .none }
+
+                state.isLivingGuidesLoading = true
+                state.livingGuidesErrorMessage = nil
+
+                return .run { [lifeTipClient] send in
+                    do {
+                        let topics = try await lifeTipClient.fetchTopics()
+                        await send(.lifeTipTopicsResponse(.success(topics)))
+                    } catch {
+                        await send(.lifeTipTopicsResponse(.failure(.from(error))))
+                    }
+                }
+
+            case let .lifeTipTopicsResponse(.success(guides)):
+                state.isLivingGuidesLoading = false
+                state.isLivingGuidesLoaded = true
+                state.livingGuidesErrorMessage = nil
+                state.livingGuides = guides
+                return .none
+
+            case let .lifeTipTopicsResponse(.failure(error)):
+                state.isLivingGuidesLoading = false
+                state.isLivingGuidesLoaded = false
+                state.livingGuidesErrorMessage = error.localizedDescription
+                return .none
+
             case .navigationLanguageTapped:
                 return .none
 
@@ -97,6 +144,14 @@ struct MoreFeature {
 
             case .editProfileTapped:
                 state.path.append(.profileEdit(ProfileEditFeature.State(userProfile: state.userProfile)))
+                return .none
+
+            case let .livingGuideItemTapped(theme):
+                guard state.userType == .tenant,
+                      let guide = state.livingGuides.first(where: { $0.theme == theme }) else {
+                    return .none
+                }
+                state.path.append(.livingGuideDetail(LivingGuideDetailFeature.State(guide: guide)))
                 return .none
 
             case .promoteRoomTapped:
@@ -112,7 +167,8 @@ struct MoreFeature {
                     state.path[id: id, case: \.account]?.userProfile = userProfile
                 }
 
-                return .none
+                guard userProfile.userType == .tenant else { return .none }
+                return .send(.onAppear)
 
             case .popupRequested, .logoutConfirmed, .deleteAccountConfirmed:
                 return .none
