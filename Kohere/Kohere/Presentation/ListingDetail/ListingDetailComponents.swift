@@ -78,9 +78,7 @@ struct ListingDetailRoomOfferCard: View {
         .padding(.bottom, 13)
         .frame(width: 285, height: 160, alignment: .bottomLeading)
         .background {
-            Image(.roomPlaceholder)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
+            KohereRemoteImageView(urlString: offer.imageURLs.first)
                 .frame(width: 285, height: 160)
                 .clipped()
                 .overlay {
