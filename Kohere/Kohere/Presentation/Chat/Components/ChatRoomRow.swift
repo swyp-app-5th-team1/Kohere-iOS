@@ -58,6 +58,8 @@ struct ChatRoomRowCell: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
         .onTapGesture {
             onTap(item.id)
         }
