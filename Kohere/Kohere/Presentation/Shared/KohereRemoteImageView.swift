@@ -34,6 +34,10 @@ struct KohereRemoteImageView<Placeholder: View>: View {
                     .fade(duration: 0.2)
                     .resizable()
                     .aspectRatio(contentMode: contentMode)
+            } else if let localAssetName {
+                Image(localAssetName)
+                    .resizable()
+                    .aspectRatio(contentMode: contentMode)
             } else {
                 placeholder()
             }
@@ -51,6 +55,17 @@ struct KohereRemoteImageView<Placeholder: View>: View {
         }
 
         return url
+    }
+
+    private var localAssetName: String? {
+        guard remoteURL == nil,
+              let assetName = urlString?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !assetName.isEmpty
+        else {
+            return nil
+        }
+
+        return assetName
     }
 }
 

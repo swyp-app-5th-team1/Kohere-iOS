@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 final class ListingRepository: ListingInterface {
     private let authenticatedNetworkService: NetworkService
@@ -179,7 +180,8 @@ private extension ListingListItemResponseDTO {
             maxMaintenanceFee: maintenanceFees.max(),
             minStayMonths: contract?.minStayMonths,
             maxStayMonths: contract?.maxStayMonths,
-            thumbnailURL: imageUrls?.first,
+            thumbnailURL: firstImageURL(imageUrls)
+                ?? MockListingImageProvider.listingImageName(listingID: listingId, propertyType: type),
             coordinate: coordinate,
             address: address?.fullAddress,
             nearestTransit: nearestTransit?.toEntity(),
@@ -214,7 +216,8 @@ private extension ListingRecentListItemResponseDTO {
             maxMaintenanceFee: maxMaintenanceFee,
             minStayMonths: minStayMonths,
             maxStayMonths: maxStayMonths,
-            thumbnailURL: thumbnailUrl,
+            thumbnailURL: firstImageURL(thumbnailUrl.map { [$0] })
+                ?? MockListingImageProvider.listingImageName(listingID: listingId, propertyType: type),
             coordinate: coordinate,
             address: address,
             nearestTransit: nearestTransit?.toEntity(),
@@ -224,6 +227,12 @@ private extension ListingRecentListItemResponseDTO {
             favoriteCount: favoriteCount
         )
     }
+}
+
+private func firstImageURL(_ imageURLs: [String]?) -> String? {
+    imageURLs?
+        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        .first { !$0.isEmpty }
 }
 
 private extension ListingNearestTransitResponseDTO {
