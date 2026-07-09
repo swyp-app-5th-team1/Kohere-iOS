@@ -9,18 +9,22 @@ import ComposableArchitecture
 
 protocol ListingInterface {
     func fetchListings(input: ListingSearchInput) async throws -> ListingSearchPage
+    func fetchDetail(listingID: String) async throws -> ListingDetail
     func fetchFavoriteListings(page: Int, size: Int) async throws -> ListingSearchPage
     func fetchRecentListings() async throws -> [Listing]
     func addFavorite(listingID: String) async throws -> ListingFavoriteStatus
     func removeFavorite(listingID: String) async throws -> ListingFavoriteStatus
+    func createBooking(listingID: String, input: ListingBookingCreateInput) async throws -> ListingBooking
 }
 
 struct ListingClient: Sendable {
     var fetchListings: @Sendable (_ input: ListingSearchInput) async throws -> ListingSearchPage
+    var fetchDetail: @Sendable (_ listingID: String) async throws -> ListingDetail
     var fetchFavoriteListings: @Sendable (_ page: Int, _ size: Int) async throws -> ListingSearchPage
     var fetchRecentListings: @Sendable () async throws -> [Listing]
     var addFavorite: @Sendable (_ listingID: String) async throws -> ListingFavoriteStatus
     var removeFavorite: @Sendable (_ listingID: String) async throws -> ListingFavoriteStatus
+    var createBooking: @Sendable (_ listingID: String, _ input: ListingBookingCreateInput) async throws -> ListingBooking
 }
 
 extension ListingClient {
@@ -28,6 +32,9 @@ extension ListingClient {
         self.init(
             fetchListings: { input in
                 try await repository.fetchListings(input: input)
+            },
+            fetchDetail: { listingID in
+                try await repository.fetchDetail(listingID: listingID)
             },
             fetchFavoriteListings: { page, size in
                 try await repository.fetchFavoriteListings(page: page, size: size)
@@ -40,6 +47,9 @@ extension ListingClient {
             },
             removeFavorite: { listingID in
                 try await repository.removeFavorite(listingID: listingID)
+            },
+            createBooking: { listingID, input in
+                try await repository.createBooking(listingID: listingID, input: input)
             }
         )
     }

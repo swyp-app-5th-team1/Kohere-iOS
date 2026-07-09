@@ -108,11 +108,17 @@ extension NetworkService {
     static func plain() -> NetworkService {
         NetworkService(session: .default)
     }
-    
-    static func authenticated(
-        interceptor: AuthInterceptor = AuthInterceptor()
-    ) -> NetworkService {
-        NetworkService(session: Session(interceptor: interceptor))
+}
+
+enum LiveNetworkServiceFactory {
+    private static let authenticatedNetworkService = NetworkService(
+        session: Session(
+            interceptor: AuthInterceptor(refreshManager: RefreshTokenManager())
+        )
+    )
+
+    static func authenticated() -> NetworkService {
+        authenticatedNetworkService
     }
 }
 

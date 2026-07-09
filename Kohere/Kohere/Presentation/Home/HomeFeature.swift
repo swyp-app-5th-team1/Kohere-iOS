@@ -238,7 +238,7 @@ struct HomeFeature {
                 _ = state.path.popLast()
                 return .none
 
-			case .path(.element(id: _, action: .search(.backButtonTapped))):
+            case .path(.element(id: _, action: .search(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
 

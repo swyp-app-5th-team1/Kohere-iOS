@@ -12,6 +12,7 @@ extension ListingItemModel {
         self.init(
             id: listing.id,
             title: listing.title,
+            thumbnailURL: listing.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: listing.minMonthlyRent,
                 max: listing.maxMonthlyRent
@@ -20,8 +21,7 @@ extension ListingItemModel {
             detailsDescription: Self.detailsTitle(
                 minDeposit: listing.minDeposit,
                 maxDeposit: listing.maxDeposit,
-                minMaintenanceFee: listing.minMaintenanceFee,
-                maxMaintenanceFee: listing.maxMaintenanceFee
+                minimumMaintenanceFee: listing.minMaintenanceFee
             ),
             locationDescription: Self.locationTitle(from: listing),
             typeTag: Self.typeTitle(from: listing.type),
@@ -53,6 +53,7 @@ extension ListingItemModel {
         self.init(
             id: listing.id,
             title: listing.title,
+            thumbnailURL: listing.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: listing.minMonthlyRent,
                 max: listing.maxMonthlyRent
@@ -61,8 +62,7 @@ extension ListingItemModel {
             detailsDescription: Self.detailsTitle(
                 minDeposit: listing.minDeposit,
                 maxDeposit: listing.maxDeposit,
-                minMaintenanceFee: listing.minMaintenanceFee,
-                maxMaintenanceFee: listing.maxMaintenanceFee
+                minimumMaintenanceFee: listing.minMaintenanceFee
             ),
             locationDescription: Self.locationTitle(from: listing),
             typeTag: Self.typeTitle(from: listing.type),
@@ -74,8 +74,7 @@ extension ListingItemModel {
     nonisolated private static func detailsTitle(
         minDeposit: Int?,
         maxDeposit: Int?,
-        minMaintenanceFee: Int?,
-        maxMaintenanceFee: Int?
+        minimumMaintenanceFee: Int?
     ) -> String {
         var parts: [String] = []
 
@@ -83,7 +82,7 @@ extension ListingItemModel {
             parts.append("보증금 \(depositTitle)")
         }
 
-        if let maintenanceFeeTitle = wonRangeTitle(min: minMaintenanceFee, max: maxMaintenanceFee) {
+        if let maintenanceFeeTitle = wonRangeTitle(min: minimumMaintenanceFee, max: minimumMaintenanceFee) {
             parts.append("관리비 \(maintenanceFeeTitle)")
         }
 

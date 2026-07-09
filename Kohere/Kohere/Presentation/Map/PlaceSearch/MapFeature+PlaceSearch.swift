@@ -15,6 +15,7 @@ extension MapFeature {
         state.placeSearchTarget = MapPlaceSearchTarget(
             coordinate: placeResult.coordinate
         )
+        state.selectedPlaceSearchTitle = placeResult.title
         state.cameraMoveRequest = placeResult.coordinate
         state.listingSource = .locationSearch
         state.activeDiagnosisID = nil

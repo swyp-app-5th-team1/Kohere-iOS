@@ -12,7 +12,7 @@ final class DiagnosisRepository: DiagnosisInterface {
     private let environmentProvider: () throws -> APIEnvironment
 
     init(
-        networkService: NetworkService = .authenticated(),
+        networkService: NetworkService = LiveNetworkServiceFactory.authenticated(),
         environmentProvider: @escaping () throws -> APIEnvironment = { try APIEnvironment.live() }
     ) {
         self.networkService = networkService

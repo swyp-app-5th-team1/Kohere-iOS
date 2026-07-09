@@ -12,6 +12,7 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
+            thumbnailURL: recommendation.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: recommendation.minMonthlyRent,
                 max: recommendation.maxMonthlyRent
@@ -50,6 +51,7 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
+            thumbnailURL: recommendation.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: recommendation.minMonthlyRent,
                 max: recommendation.maxMonthlyRent

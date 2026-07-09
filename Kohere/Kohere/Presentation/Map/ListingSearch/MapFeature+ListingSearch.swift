@@ -148,6 +148,30 @@ extension MapFeature {
         .cancellable(id: "MapFeature.listingSearch", cancelInFlight: true)
     }
 
+    func handleFilterApplyButtonTapped(state: inout State) -> Effect<Action> {
+        let previousAppliedFilter = state.appliedFilter
+        state.appliedFilter = state.editingFilter
+        if state.appliedFilterSource != .diagnosis || state.appliedFilter != previousAppliedFilter {
+            state.appliedFilterSource = .manual
+        }
+        state.isDiagnosisMatchesButtonExpanded = true
+        state.isFilterPresented = false
+        state.listingSource = .locationSearch
+        state.activeDiagnosisID = nil
+        state.placeSearchTarget = nil
+        state.isDiagnosisDetailLoading = false
+        state.diagnosisErrorMessage = nil
+        clearDiagnosisRecommendationState(state: &state)
+        let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
+        guard let viewport = state.currentViewport,
+              canStartListingSearch(state: state)
+        else { return cancelDiagnosisRequests }
+        return .merge(
+            cancelDiagnosisRequests,
+            startListingSearchEffect(state: &state, viewport: viewport)
+        )
+    }
+
     func startNextListingPageEffect(
         appearedListingID: String,
         state: inout State

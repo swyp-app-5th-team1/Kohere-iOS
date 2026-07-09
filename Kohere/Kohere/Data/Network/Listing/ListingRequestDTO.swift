@@ -29,6 +29,27 @@ struct ListingFavoriteListQueryDTO {
     let size: Int
 }
 
+nonisolated struct ListingBookingCreateRequestDTO: Encodable, Sendable {
+    let roomOfferId: String
+    let moveInDate: String
+    let contractPeriod: Int
+
+    init(_ input: ListingBookingCreateInput) {
+        roomOfferId = input.roomOfferID
+        moveInDate = Self.moveInDateFormatter.string(from: input.moveInDate)
+        contractPeriod = input.contractPeriod
+    }
+
+    private static var moveInDateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }
+}
+
 extension ListingListQueryDTO {
     init(_ input: ListingSearchInput) {
         self.init(

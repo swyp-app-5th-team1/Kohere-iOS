@@ -37,9 +37,11 @@ struct ChatDetailView: View {
                 .padding(.top, 18)
                 .padding(.bottom, 24)
             }
+            .background(.backgroundNormalNormal)
             
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.backgroundNormalNormal)
         .onAppear {
             store.send(.onAppear)
         }
@@ -78,6 +80,7 @@ private extension ChatDetailView {
             .padding(.horizontal, 24)
         }
         .frame(height: 56)
+        .background(.backgroundNormalNormal)
     }
     
     @ViewBuilder var chatContent: some View {

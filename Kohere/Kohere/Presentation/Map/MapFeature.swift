@@ -28,6 +28,8 @@ struct MapFeature {
     @Reducer
     enum Path {
         case listingDetail(ListingDetailFeature)
+        case listingApplication(ListingApplicationFeature)
+        case listingApplicationPrivacyWeb(ListingApplicationPrivacyWebFeature)
         case chatBot(ChatBotFeature)
         case search(SearchFeature)
     }
@@ -117,6 +119,7 @@ struct MapFeature {
 
                 guard let userLocation = state.userLocation else { return .none }
                 state.cameraMoveRequest = userLocation
+                state.selectedPlaceSearchTitle = nil
                 return .none
 
             case .diagnosisButtonTapped:
@@ -136,6 +139,7 @@ struct MapFeature {
                 state.activeDiagnosisID = nil
                 state.appliedFilterSource = .manual
                 state.placeSearchTarget = nil
+                state.selectedPlaceSearchTitle = nil
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
                 state.isDiagnosisDetailLoading = false
@@ -160,6 +164,7 @@ struct MapFeature {
                 state.isFilterPresented = false
                 state.appliedFilterSource = .diagnosis
                 state.placeSearchTarget = nil
+                state.selectedPlaceSearchTitle = nil
                 state.isDiagnosisButtonExpanded = false
                 state.isDiagnosisMatchesButtonExpanded = true
                 state.showsResearchButton = false
@@ -267,11 +272,15 @@ struct MapFeature {
                 return .none
             case let .placeSearchResultSelected(placeResult):
                 return handlePlaceSearchResultSelected(placeResult, state: &state)
+            case .placeSearchDisplayClearButtonTapped:
+                state.selectedPlaceSearchTitle = nil
+                return .none
             case .researchButtonTapped:
                 guard let viewport = state.currentViewport else { return .none }
                 state.listingSource = .locationSearch
                 state.activeDiagnosisID = nil
                 state.placeSearchTarget = nil
+                state.selectedPlaceSearchTitle = nil
                 state.selectedMarkerID = nil
                 state.sheetMode = .listingList
                 state.isDiagnosisDetailLoading = false
@@ -365,27 +374,8 @@ struct MapFeature {
                 return .none
 
             case .filterApplyButtonTapped:
-                let previousAppliedFilter = state.appliedFilter
-                state.appliedFilter = state.editingFilter
-                if state.appliedFilterSource != .diagnosis || state.appliedFilter != previousAppliedFilter {
-                    state.appliedFilterSource = .manual
-                }
-                state.isDiagnosisMatchesButtonExpanded = true
-                state.isFilterPresented = false
-                state.listingSource = .locationSearch
-                state.activeDiagnosisID = nil
-                state.placeSearchTarget = nil
-                state.isDiagnosisDetailLoading = false
-                state.diagnosisErrorMessage = nil
-                clearDiagnosisRecommendationState(state: &state)
-                let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
-                guard let viewport = state.currentViewport,
-                      canStartListingSearch(state: state)
-                else { return cancelDiagnosisRequests }
-                return .merge(
-                    cancelDiagnosisRequests,
-                    startListingSearchEffect(state: &state, viewport: viewport)
-                )
+                return handleFilterApplyButtonTapped(state: &state)
+
             case .filterResetButtonTapped:
                 state.editingFilter = MapFilterState()
                 return .none

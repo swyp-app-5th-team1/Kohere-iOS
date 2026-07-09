@@ -54,7 +54,7 @@ enum ListingSearchSort: String, Equatable {
 }
 
 enum ListingSearchPropertyType: String, Equatable {
-    case goshiwon = "GOSIWON"
+    case goshiwon = "GOSHIWON"
     case coLiving = "CO_LIVING"
     case shareHouse = "SHARE_HOUSE"
 }

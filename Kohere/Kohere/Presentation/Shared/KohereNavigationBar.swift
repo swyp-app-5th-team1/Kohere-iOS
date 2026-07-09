@@ -41,6 +41,7 @@ struct KohereNavigationBar: View {
     let leftColor: Color
     let rightColor: Color
     let backgroundColor: Color
+    let height: CGFloat
     
     // MARK: - Init
     
@@ -50,7 +51,8 @@ struct KohereNavigationBar: View {
         right: NavigationRight = .none,
         leftColor: Color = .neutral70,
         rightColor: Color = .neutral70,
-        backgroundColor: Color = .white
+        backgroundColor: Color = .white,
+        height: CGFloat = 56
     ) {
         self.left = left
         self.center = center
@@ -58,6 +60,7 @@ struct KohereNavigationBar: View {
         self.leftColor = leftColor
         self.rightColor = rightColor
         self.backgroundColor = backgroundColor
+        self.height = height
     }
     
     // MARK: - Body
@@ -73,7 +76,7 @@ struct KohereNavigationBar: View {
             }
         }
         .padding(.horizontal, 20)
-        .frame(height: 56)
+        .frame(height: height)
         .background(backgroundColor)
     }
 }

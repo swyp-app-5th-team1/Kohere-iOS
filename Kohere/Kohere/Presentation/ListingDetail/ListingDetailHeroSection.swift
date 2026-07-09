@@ -19,9 +19,7 @@ struct ListingDetailHeroSection: View {
     }
 
     private var heroImage: some View {
-        Image(.roomPlaceholder)
-            .resizable()
-            .aspectRatio(contentMode: .fill)
+        KohereRemoteImageView(urlString: overview.imageURLs.first)
             .frame(maxWidth: .infinity)
             .frame(height: 267)
             .clipped()

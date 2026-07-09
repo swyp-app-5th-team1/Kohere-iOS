@@ -12,7 +12,7 @@ final class ListingRepository: ListingInterface {
     private let environmentProvider: () throws -> APIEnvironment
 
     init(
-        authenticatedNetworkService: NetworkService = .authenticated(),
+        authenticatedNetworkService: NetworkService = LiveNetworkServiceFactory.authenticated(),
         environmentProvider: @escaping () throws -> APIEnvironment = { try APIEnvironment.live() }
     ) {
         self.authenticatedNetworkService = authenticatedNetworkService
@@ -27,6 +27,15 @@ final class ListingRepository: ListingInterface {
         )
 
         return responseDTO.toEntity()
+    }
+
+    func fetchDetail(listingID: String) async throws -> ListingDetail {
+        let environment = try environmentProvider()
+        let responseDTO: ListingDetailResponseDTO = try await authenticatedNetworkService.request(
+            ListingRouter.detail(listingID: listingID, environment)
+        )
+
+        return try responseDTO.toEntity()
     }
 
     func fetchFavoriteListings(page: Int, size: Int) async throws -> ListingSearchPage {
@@ -64,6 +73,16 @@ final class ListingRepository: ListingInterface {
         )
 
         return responseDTO.toEntity()
+    }
+
+    func createBooking(listingID: String, input: ListingBookingCreateInput) async throws -> ListingBooking {
+        let environment = try environmentProvider()
+        let requestDTO = ListingBookingCreateRequestDTO(input)
+        let responseDTO: ListingBookingResponseDTO = try await authenticatedNetworkService.request(
+            ListingRouter.createBooking(listingID: listingID, request: requestDTO, environment)
+        )
+
+        return try responseDTO.toEntity()
     }
 }
 
@@ -103,6 +122,31 @@ private extension ListingFavoriteStatusResponseDTO {
         ListingFavoriteStatus(
             isFavorited: favorited ?? false,
             favoriteCount: favoriteCount ?? 0
+        )
+    }
+}
+
+private extension ListingBookingResponseDTO {
+    func toEntity() throws -> ListingBooking {
+        guard let bookingId,
+              let status,
+              let listingId,
+              let roomOfferId,
+              let moveInDate,
+              let contractPeriod,
+              let createdAt
+        else {
+            throw DataError.decodingFailed
+        }
+
+        return ListingBooking(
+            bookingID: bookingId,
+            status: status,
+            listingID: listingId,
+            roomOfferID: roomOfferId,
+            moveInDate: moveInDate,
+            contractPeriod: contractPeriod,
+            createdAt: createdAt
         )
     }
 }

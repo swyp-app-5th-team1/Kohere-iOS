@@ -33,12 +33,10 @@ struct ListingCardView: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(.roomPlaceholder)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
+            KohereRemoteImageView(urlString: item.thumbnailURL)
                 .frame(width: 156, height: 120)
-                .cornerRadius(16)
                 .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
