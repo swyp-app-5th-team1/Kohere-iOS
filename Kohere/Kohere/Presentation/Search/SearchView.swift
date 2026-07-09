@@ -192,7 +192,7 @@ struct SearchView: View {
         HStack(spacing: 0) {
             Button {
                 store.send(.recentSearchTapped(recentSearch.keyword))
-                isSearchFocused = true
+                isSearchFocused = false
             } label: {
                 HStack(spacing: 8) {
                     Image(.searchRecentMarker16)

@@ -91,9 +91,13 @@ struct MapView: View {
             .ignoresSafeArea()
 
             MapTopControlsView(
+                searchDisplayText: store.selectedPlaceSearchTitle,
                 showsResearchButton: store.showsResearchButton,
                 onSearchTapped: {
                     store.send(.searchButtonTapped)
+                },
+                onSearchDisplayClearTapped: {
+                    store.send(.placeSearchDisplayClearButtonTapped)
                 },
                 onResearchTapped: {
                     store.send(.researchButtonTapped)
