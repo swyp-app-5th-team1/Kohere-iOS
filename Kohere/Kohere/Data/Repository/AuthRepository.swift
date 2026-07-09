@@ -171,13 +171,15 @@ final class AuthRepository: AuthInterface {
         let environment = try environmentProvider()
         let requestDTO = LandlordOnboardingRequestDTO(
             name: profile.name,
-            phoneNumber: profile.phoneNumber
+            phoneNumber: profile.phoneNumber,
+            birthDate: profile.birthDate
         )
         let responseDTO: AuthOnboardingResponseDTO = try await authenticatedNetworkService.request(
             AuthRouter.completeLandlordOnboarding(
                 requestDTO,
                 environment
-            )
+            ),
+            debugRawJSONLabel: "LandlordOnboarding.complete"
         )
 
         return responseDTO.toEntity()

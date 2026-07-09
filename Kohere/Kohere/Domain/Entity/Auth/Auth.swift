@@ -97,6 +97,7 @@ struct AuthOnboardingProfile: Equatable {
 struct LandlordOnboardingProfile: Equatable {
     let name: String
     let phoneNumber: String
+    let birthDate: String
 }
 
 extension Auth {
