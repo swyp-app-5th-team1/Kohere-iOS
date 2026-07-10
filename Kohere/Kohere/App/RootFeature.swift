@@ -226,6 +226,11 @@ struct RootFeature {
                 state.map.synchronizeFavoriteStatus(status, for: listingID)
                 return .none
 
+            case let .home(.path(.element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))))):
+                guard let listingID = state.home.path[id: id, case: \.listingDetail]?.listingID else { return .none }
+                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                return .none
+
             case let .home(.path(.element(id: _, action: .savedListings(.favoriteStatusResponse(listingID, .success(status)))))):
                 state.map.synchronizeFavoriteStatus(status, for: listingID)
                 return .none
@@ -286,6 +291,11 @@ struct RootFeature {
             case .more(.chatTabRequested):
                 state.more.path.removeAll()
                 state.selectedTab = .chat
+                return .none
+
+            case let .more(.path(.element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))))):
+                guard let listingID = state.more.path[id: id, case: \.listingDetail]?.listingID else { return .none }
+                state.map.synchronizeFavoriteStatus(status, for: listingID)
                 return .none
 
             case let .more(.path(.element(id: _, action: .savedListings(.favoriteStatusResponse(listingID, .success(status)))))):
