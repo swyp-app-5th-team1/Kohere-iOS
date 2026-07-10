@@ -39,4 +39,36 @@ extension MapFeature {
             cancelDiagnosisRequestEffects()
         )
     }
+
+    func handleListingLocationRequested(
+        _ coordinate: MapCoordinate,
+        state: inout State
+    ) -> Effect<Action> {
+        state.path.removeAll()
+        state.placeSearchTarget = MapPlaceSearchTarget(coordinate: coordinate)
+        state.selectedPlaceSearchTitle = nil
+        state.cameraMoveRequest = coordinate
+        state.hasMovedToInitialUserLocation = true
+        state.listingSource = .locationSearch
+        state.activeDiagnosisID = nil
+        state.appliedFilterSource = .manual
+        state.selectedMarkerID = nil
+        state.sheetMode = .listingList
+        state.isFilterPresented = false
+        state.showsResearchButton = false
+        state.lastSearchedViewport = nil
+        state.listingPageInfo = nil
+        state.listingSearchErrorMessage = nil
+        state.isDiagnosisDetailLoading = false
+        state.diagnosisErrorMessage = nil
+        state.listingSearchResults = []
+        clearDiagnosisRecommendationState(state: &state)
+        state.listings = []
+        state.markers = []
+
+        return .merge(
+            .cancel(id: "MapFeature.listingSearch"),
+            cancelDiagnosisRequestEffects()
+        )
+    }
 }

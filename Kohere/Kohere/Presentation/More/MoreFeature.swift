@@ -21,6 +21,9 @@ struct MoreFeature {
         case promoteRoomWeb(PromoteRoomWebFeature)
         case savedListings(SavedListingsFeature)
         case recentlyViewedList(RecentlyViewedFeature)
+        case listingDetail(ListingDetailFeature)
+        case listingApplication(ListingApplicationFeature)
+        case listingApplicationPrivacyWeb(ListingApplicationPrivacyWebFeature)
         case setting(SettingFeature)
         case settingDocumentWeb(SettingDocumentWebFeature)
     }
@@ -49,6 +52,8 @@ struct MoreFeature {
         case recentlyViewedListingsTapped
         case userProfileUpdated(UserProfile)
         case popupRequested(AppPopup)
+        case mapCoordinateRequested(MapCoordinate)
+        case chatTabRequested
         case logoutConfirmed
         case deleteAccountConfirmed
     }
@@ -85,6 +90,84 @@ struct MoreFeature {
 
             case .path(.element(id: _, action: .recentlyViewedList(.backButtonTapped))):
                 _ = state.path.popLast()
+                return .none
+
+            case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case let .path(
+                .element(
+                    id: _,
+                    action: .listingDetail(
+                        .delegate(
+                            .applicationRequested(
+                                listingID,
+                                listingTitle,
+                                roomOfferID,
+                                roomTypeName,
+                                roomPricingText
+                            )
+                        )
+                    )
+                )
+            ):
+                state.path.append(
+                    .listingApplication(
+                        ListingApplicationFeature.State(
+                            listingID: listingID,
+                            listingTitle: listingTitle,
+                            roomOfferID: roomOfferID,
+                            roomTypeName: roomTypeName,
+                            roomPricingText: roomPricingText
+                        )
+                    )
+                )
+                return .none
+
+            case let .path(.element(id: _, action: .listingDetail(.delegate(.mapPreviewRequested(coordinate))))):
+                state.path.removeAll()
+                return .send(.mapCoordinateRequested(coordinate))
+
+            case .path(.element(id: _, action: .listingApplication(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case .path(.element(id: _, action: .listingApplicationPrivacyWeb(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case let .path(.element(id: _, action: .listingApplication(.delegate(.privacyDocumentRequested(section))))):
+                state.path.append(
+                    .listingApplicationPrivacyWeb(
+                        ListingApplicationPrivacyWebFeature.State(section: section)
+                    )
+                )
+                return .none
+
+            case let .path(.element(id: _, action: .listingApplication(.delegate(.listingDetailRequested(listingID))))):
+                state.path.removeAll()
+                state.path.append(
+                    .listingDetail(
+                        ListingDetailFeature.State(
+                            listingID: listingID,
+                            userType: state.userType,
+                            isApplicationDisabled: true
+                        )
+                    )
+                )
+                return .none
+
+            case .path(.element(id: _, action: .listingApplication(.delegate(.chatTabRequested)))):
+                state.path.removeAll()
+                return .send(.chatTabRequested)
+
+            case let .path(.element(id: _, action: .savedListings(.delegate(.listingDetailRequested(listingID))))):
+                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: listingID, userType: state.userType)))
+                return .none
+
+            case let .path(.element(id: _, action: .recentlyViewedList(.delegate(.listingDetailRequested(listingID))))):
+                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: listingID, userType: state.userType)))
                 return .none
 
             case .path(.element(id: _, action: .setting(.backButtonTapped))):
@@ -191,7 +274,7 @@ struct MoreFeature {
                 guard userProfile.userType == .tenant else { return .none }
                 return .send(.onAppear)
 
-            case .popupRequested, .logoutConfirmed, .deleteAccountConfirmed:
+            case .popupRequested, .mapCoordinateRequested, .chatTabRequested, .logoutConfirmed, .deleteAccountConfirmed:
                 return .none
 
             case .path:

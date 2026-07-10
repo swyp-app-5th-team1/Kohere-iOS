@@ -274,6 +274,7 @@ extension ListingDetailModel {
             sectionTitle: "위치 및 주변시설",
             addressText: localizedAddressText(listingDetail.address),
             transits: transits,
+            coordinate: listingDetail.coordinate,
             nearbyPlacesTitle: "주변 편의시설",
             nearbyPlacesText: listingDetail.nearestTransit?.nearbyPlacesDescription
                 ?? "주변 편의시설 정보 없음"

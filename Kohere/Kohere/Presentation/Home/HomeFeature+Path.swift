@@ -1,18 +1,26 @@
 //
-//  MapFeature+Path.swift
+//  HomeFeature+Path.swift
 //  Kohere
 //
-//  Created by Codex on 7/8/26.
+//  Created by Codex on 7/9/26.
 //
 
 import ComposableArchitecture
 
-extension MapFeature {
+extension HomeFeature {
     func handlePathAction(
         _ action: StackActionOf<Path>,
         state: inout State
     ) -> Effect<Action> {
         switch action {
+        case .element(id: _, action: .savedListings(.backButtonTapped)):
+            _ = state.path.popLast()
+            return .none
+
+        case .element(id: _, action: .recentlyViewedList(.backButtonTapped)):
+            _ = state.path.popLast()
+            return .none
+
         case .element(id: _, action: .listingDetail(.backButtonTapped)):
             _ = state.path.popLast()
             return .none
@@ -44,8 +52,20 @@ extension MapFeature {
             )
             return .none
 
-        case let .element(id: _, action: .listingDetail(.delegate(.mapPreviewRequested(coordinate)))):
-            return .send(.listingLocationRequested(coordinate))
+        case let .element(
+            id: _,
+            action: .listingDetail(.delegate(.mapPreviewRequested(coordinate)))
+        ):
+            state.path.removeAll()
+            return .send(.mapCoordinateRequested(coordinate))
+
+        case .element(id: _, action: .listingApplication(.backButtonTapped)):
+            _ = state.path.popLast()
+            return .none
+
+        case .element(id: _, action: .listingApplicationPrivacyWeb(.backButtonTapped)):
+            _ = state.path.popLast()
+            return .none
 
         case let .element(
             id: _,
@@ -62,7 +82,6 @@ extension MapFeature {
             id: _,
             action: .listingApplication(.delegate(.listingDetailRequested(listingID)))
         ):
-            state.selectedMarkerID = listingID
             state.path.removeAll()
             state.path.append(
                 .listingDetail(
@@ -75,11 +94,25 @@ extension MapFeature {
             )
             return .none
 
-        case .element(id: _, action: .listingApplication(.backButtonTapped)):
-            _ = state.path.popLast()
+        case .element(id: _, action: .listingApplication(.delegate(.chatTabRequested))):
+            state.path.removeAll()
+            return .send(.chatTabRequested)
+
+        case let .element(
+            id: _,
+            action: .savedListings(.delegate(.listingDetailRequested(listingID)))
+        ):
+            state.path.append(listingDetailState(listingID, userType: state.userType))
             return .none
 
-        case .element(id: _, action: .listingApplicationPrivacyWeb(.backButtonTapped)):
+        case let .element(
+            id: _,
+            action: .recentlyViewedList(.delegate(.listingDetailRequested(listingID)))
+        ):
+            state.path.append(listingDetailState(listingID, userType: state.userType))
+            return .none
+
+        case .element(id: _, action: .notifications(.backButtonTapped)):
             _ = state.path.popLast()
             return .none
 
@@ -87,20 +120,39 @@ extension MapFeature {
             _ = state.path.popLast()
             return .none
 
+        case .element(id: _, action: .livingGuideDetail(.backButtonTapped)):
+            _ = state.path.popLast()
+            return .none
+
         case .element(id: _, action: .search(.backButtonTapped)):
             _ = state.path.popLast()
             return .none
+
+        case let .element(id: _, action: .chatBot(.mapTabRequested(diagnosisID))):
+            return .send(.mapTabRequested(diagnosisID: diagnosisID))
 
         case .element(id: _, action: .search(.bannerTapped)):
             state.path.append(.chatBot(ChatBotFeature.State()))
             return .none
 
         case let .element(id: _, action: .search(.placeResultTapped(placeResult))):
-            _ = state.path.popLast()
-            return .send(.placeSearchResultSelected(placeResult))
+            state.path.removeAll()
+            return .send(.mapPlaceSearchRequested(placeResult))
 
         default:
             return .none
         }
+    }
+
+    private func listingDetailState(
+        _ listingID: String,
+        userType: UserType?
+    ) -> Path.State {
+        .listingDetail(
+            ListingDetailFeature.State(
+                listingID: listingID,
+                userType: userType
+            )
+        )
     }
 }

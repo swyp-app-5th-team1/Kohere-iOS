@@ -97,6 +97,7 @@ struct ListingLocationInfoModel: Equatable {
     let sectionTitle: String
     let addressText: String
     let transits: [ListingTransitInfoModel]
+    let coordinate: MapCoordinate?
     let nearbyPlacesTitle: String
     let nearbyPlacesText: String
 }
@@ -184,6 +185,7 @@ extension ListingDetailModel {
                 transits: [
                     ListingTransitInfoModel(id: "line-2", lineText: "2", lineColorName: "green60", description: "3 min walk from HUFS Station")
                 ],
+                coordinate: MapCoordinate(latitude: 37.5963, longitude: 127.0528),
                 nearbyPlacesTitle: "Nearby Amenities",
                 nearbyPlacesText: "Convenience Store, Pharmacy, Laundry Service"
             )
@@ -230,6 +232,7 @@ extension ListingDetailModel {
                     ListingTransitInfoModel(id: "sinchon", lineText: "2", lineColorName: "green60", description: "신촌역 도보 3분"),
                     ListingTransitInfoModel(id: "ewha", lineText: "2", lineColorName: "green60", description: "이대역 도보 5분")
                 ],
+                coordinate: MapCoordinate(latitude: 37.5580, longitude: 126.9458),
                 nearbyPlacesTitle: "주변 편의시설",
                 nearbyPlacesText: "대형마트, 세탁소"
             )
@@ -284,6 +287,7 @@ extension ListingDetailModel {
                     ListingTransitInfoModel(id: "mangwon", lineText: "6", lineColorName: "yellow70", description: "망원역 도보 4분"),
                     ListingTransitInfoModel(id: "hapjeong", lineText: "2", lineColorName: "green60", description: "합정역 도보 8분")
                 ],
+                coordinate: MapCoordinate(latitude: 37.5568, longitude: 126.9140),
                 nearbyPlacesTitle: "주변 편의시설",
                 nearbyPlacesText: "편의점(도보 3분), 약국(도보 7분), 세탁소(도보 1분)"
             )

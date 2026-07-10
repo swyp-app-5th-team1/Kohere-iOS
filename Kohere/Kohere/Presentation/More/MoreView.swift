@@ -175,7 +175,7 @@ struct MoreView: View {
             title: "한국 생활 팁",
             items: [
                 .init(
-                    title: "조심해야할 사기 유형",
+                    title: "조심해야 할 사기 유형",
                     iconName: "contractChecklist",
                     rendersAsTemplate: false,
                     action: .livingGuide(.housingScams)

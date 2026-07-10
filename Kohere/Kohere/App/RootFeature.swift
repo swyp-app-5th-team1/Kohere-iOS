@@ -209,8 +209,34 @@ struct RootFeature {
                 state.selectedTab = .map
                 return .send(.map(.placeSearchResultSelected(placeResult)))
 
+            case let .home(.mapCoordinateRequested(coordinate)):
+                state.home.path.removeAll()
+                return openMap(coordinate: coordinate, state: &state)
+
+            case .home(.chatTabRequested):
+                state.home.path.removeAll()
+                state.selectedTab = .chat
+                return .none
+
             case let .home(.path(.element(id: _, action: .search(.popupRequested(popup))))):
                 state.popup = popup
+                return .none
+
+            case let .home(.favoriteStatusResponse(listingID, .success(status))):
+                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                return .none
+
+            case let .home(.path(.element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))))):
+                guard let listingID = state.home.path[id: id, case: \.listingDetail]?.listingID else { return .none }
+                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                return .none
+
+            case let .home(.path(.element(id: _, action: .savedListings(.favoriteStatusResponse(listingID, .success(status)))))):
+                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                return .none
+
+            case let .home(.path(.element(id: _, action: .recentlyViewedList(.favoriteStatusResponse(listingID, .success(status)))))):
+                state.map.synchronizeFavoriteStatus(status, for: listingID)
                 return .none
                 
             case let .selectedTabChanged(tab):
@@ -256,6 +282,28 @@ struct RootFeature {
 
             case let .more(.popupRequested(popup)):
                 state.popup = popup
+                return .none
+
+            case let .more(.mapCoordinateRequested(coordinate)):
+                state.more.path.removeAll()
+                return openMap(coordinate: coordinate, state: &state)
+
+            case .more(.chatTabRequested):
+                state.more.path.removeAll()
+                state.selectedTab = .chat
+                return .none
+
+            case let .more(.path(.element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))))):
+                guard let listingID = state.more.path[id: id, case: \.listingDetail]?.listingID else { return .none }
+                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                return .none
+
+            case let .more(.path(.element(id: _, action: .savedListings(.favoriteStatusResponse(listingID, .success(status)))))):
+                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                return .none
+
+            case let .more(.path(.element(id: _, action: .recentlyViewedList(.favoriteStatusResponse(listingID, .success(status)))))):
+                state.map.synchronizeFavoriteStatus(status, for: listingID)
                 return .none
 
             case let .more(.userProfileUpdated(userProfile)):
@@ -339,57 +387,4 @@ struct RootFeature {
         )
     }
 
-    private func openMap(diagnosisID: String?, state: inout State) -> Effect<Action> {
-        state.selectedTab = .map
-
-        guard let diagnosisID,
-              let diagnosisID = Int(diagnosisID)
-        else {
-            return .send(.map(.locationSearchStarted))
-        }
-
-        return .send(.map(.diagnosisResultRequested(diagnosisID: diagnosisID)))
-    }
-
-    private func handlePopupRoute(_ route: AppPopup.Route) -> Effect<Action> {
-        switch route {
-        case .logout:
-            return .send(.more(.logoutConfirmed))
-
-        case .deleteAccount:
-            return .send(.more(.deleteAccountConfirmed))
-        }
-    }
-
-}
-
-private extension RootFeature {
-    static let startupRefreshBuffer: TimeInterval = 60
-
-    static func resolveStoredAuth(
-        _ auth: Auth?,
-        keychainClient: KeychainClient,
-        reissueToken: (_ refreshToken: String) async throws -> AuthToken
-    ) async -> Auth? {
-        guard let auth else { return nil }
-
-        guard auth.shouldRefresh(buffer: startupRefreshBuffer) else {
-            return auth
-        }
-
-        guard let refreshToken = auth.refreshToken, !refreshToken.isEmpty else {
-            try? keychainClient.delete(for: .auth)
-            return nil
-        }
-
-        do {
-            let token = try await reissueToken(refreshToken)
-            let updatedAuth = auth.updating(with: token)
-            try keychainClient.save(updatedAuth, for: .auth)
-            return updatedAuth
-        } catch {
-            try? keychainClient.delete(for: .auth)
-            return nil
-        }
-    }
 }

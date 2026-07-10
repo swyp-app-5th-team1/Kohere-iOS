@@ -102,7 +102,12 @@ struct ListingDetailView: View {
                         ListingDetailInfoSection(title: "공용 시설", rows: store.detail.facilityInfo)
                     }
                     trackedSection(.location) {
-                        ListingDetailLocationSection(locationInfo: store.detail.locationInfo)
+                        ListingDetailLocationSection(
+                            locationInfo: store.detail.locationInfo,
+                            onMapPreviewTapped: {
+                                store.send(.mapPreviewTapped)
+                            }
+                        )
                     }
                     trackedSection(.review) {
                         ListingDetailReviewSection(reviewCount: store.detail.overview.reviewCount)

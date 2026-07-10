@@ -147,6 +147,7 @@ struct ListingDetailInfoRow: View {
 
 struct ListingDetailLocationSection: View {
     let locationInfo: ListingLocationInfoModel
+    let onMapPreviewTapped: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -170,7 +171,10 @@ struct ListingDetailLocationSection: View {
                 }
             }
 
-            ListingDetailMapPreview()
+            ListingDetailMapPreview(
+                coordinate: locationInfo.coordinate,
+                onTap: onMapPreviewTapped
+            )
 
             ListingDetailInfoRow(
                 row: ListingDetailInfoRowModel(
@@ -205,36 +209,6 @@ struct ListingDetailTransitView: View {
                 .foregroundStyle(.labelNeutral)
                 .lineLimit(1)
         }
-    }
-}
-
-struct ListingDetailMapPreview: View {
-    var body: some View {
-        RoundedRectangle(cornerRadius: 16, style: .continuous)
-            .fill(.neutral5)
-            .aspectRatio(16.0 / 9.0, contentMode: .fit)
-            .overlay {
-                ZStack {
-                    VStack(spacing: 18) {
-                        Rectangle().fill(.common0.opacity(0.8)).frame(height: 8)
-                        Rectangle().fill(.common0.opacity(0.8)).frame(height: 8)
-                        Rectangle().fill(.common0.opacity(0.8)).frame(height: 8)
-                    }
-                    .rotationEffect(.degrees(-12))
-
-                    VStack(spacing: 24) {
-                        Rectangle().fill(.lineNeutral).frame(height: 1)
-                        Rectangle().fill(.lineNeutral).frame(height: 1)
-                        Rectangle().fill(.lineNeutral).frame(height: 1)
-                    }
-
-                    Image("locationMarker")
-                        .resizable()
-                        .frame(width: 36, height: 36)
-                }
-                .padding(18)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 

@@ -8,6 +8,10 @@
 import ComposableArchitecture
 import Foundation
 
+enum SavedListingsDelegate: Equatable {
+    case listingDetailRequested(String)
+}
+
 @Reducer
 struct SavedListingsFeature {
     @Dependency(\.listingClient)
@@ -33,6 +37,7 @@ struct SavedListingsFeature {
         case likeButtonTapped(id: String)
         case favoriteStatusResponse(listingID: String, Result<ListingFavoriteStatus, DataError>)
         case backButtonTapped
+        case delegate(SavedListingsDelegate)
     }
     
     // MARK: - Reducer Body
@@ -69,9 +74,7 @@ struct SavedListingsFeature {
                 return .none
                 
             case let .cardTapped(id):
-                // TODO: 해당 매물 상세 정보 뷰로 네비게이션
-                print("선택 매물\(id)") // never used 방지
-                return .none
+                return .send(.delegate(.listingDetailRequested(id)))
                 
             case let .likeButtonTapped(id):
                 guard state.canUseFavoriteFeatures,
@@ -115,7 +118,7 @@ struct SavedListingsFeature {
                 state.errorMessage = error.localizedDescription
                 return .none
                 
-            case .backButtonTapped:
+            case .backButtonTapped, .delegate:
                 return .none
             }
         }

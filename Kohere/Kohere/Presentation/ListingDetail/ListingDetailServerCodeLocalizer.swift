@@ -225,7 +225,7 @@ extension ListingDetailModel {
         "listing.genderPolicy.ANY": .init(key: "listing.genderPolicy.ANY", fallback: "혼성"),
         "listing.genderPolicy.FEMALE_ONLY": .init(key: "listing.genderPolicy.FEMALE_ONLY", fallback: "여성 전용"),
         "listing.genderPolicy.MALE_ONLY": .init(key: "listing.genderPolicy.MALE_ONLY", fallback: "남성 전용"),
-        "listing.genderPolicy.GENDER_SEPARATED": .init(key: "listing.genderPolicy.GENDER_SEPARATED", fallback: "남녀분리"),
+        "listing.genderPolicy.GENDER_SEPARATED": .init(key: "listing.genderPolicy.GENDER_SEPARATED", fallback: "남녀 분리"),
         "address.city.SEOUL": .init(key: "address.city.SEOUL", fallback: "서울"),
         "address.district.DONGDAEMUN_GU": .init(key: "address.district.DONGDAEMUN_GU", fallback: "동대문구"),
         "address.district.GWANAK_GU": .init(key: "address.district.GWANAK_GU", fallback: "관악구"),

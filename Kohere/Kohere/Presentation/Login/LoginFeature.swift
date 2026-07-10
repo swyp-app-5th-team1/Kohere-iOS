@@ -54,9 +54,7 @@ struct LoginFeature {
     enum Action: Equatable {
         case googleLoginButtonTapped
         case appleLoginButtonTapped
-        #if DEBUG
         case landlordAdminLoginButtonTapped
-        #endif
         case socialLoginCredentialReceived(SocialLoginCredential)
         case loginSuccess(Auth)
         case loginFailure(String)
@@ -111,7 +109,6 @@ struct LoginFeature {
                     }
                 }
 
-            #if DEBUG
             case .landlordAdminLoginButtonTapped:
                 guard let idToken = Self.landlordAdminIDToken else {
                     state.loginErrorMessage = "임대인 관리자 토큰이 설정되지 않았습니다."
@@ -120,7 +117,6 @@ struct LoginFeature {
                 state.isLoginRequesting = true
                 state.loginErrorMessage = nil
                 return .send(.socialLoginCredentialReceived(.google(idToken: idToken)))
-            #endif
 
             case let .socialLoginCredentialReceived(credential):
                 return .run { send in
@@ -255,7 +251,6 @@ struct LoginFeature {
 }
 
 private extension LoginFeature {
-    #if DEBUG
     static var landlordAdminIDToken: String? {
         guard let rawValue = Bundle.main.object(
             forInfoDictionaryKey: "KOHERE_LANDLORD_ADMIN_ID_TOKEN"
@@ -267,7 +262,6 @@ private extension LoginFeature {
               token != "YOUR_LANDLORD_ADMIN_ID_TOKEN" else { return nil }
         return token
     }
-    #endif
 
     static func loginErrorMessage(for error: Error) -> String {
         if let dataError = error as? DataError {

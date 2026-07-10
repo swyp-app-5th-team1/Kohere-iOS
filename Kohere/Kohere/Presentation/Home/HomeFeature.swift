@@ -23,6 +23,9 @@ struct HomeFeature {
     enum Path {
         case savedListings(SavedListingsFeature)
         case recentlyViewedList(RecentlyViewedFeature)
+        case listingDetail(ListingDetailFeature)
+        case listingApplication(ListingApplicationFeature)
+        case listingApplicationPrivacyWeb(ListingApplicationPrivacyWebFeature)
         case notifications(NotificationsFeature)
         case chatBot(ChatBotFeature)
         case livingGuideDetail(LivingGuideDetailFeature)
@@ -71,6 +74,8 @@ struct HomeFeature {
         case path(StackActionOf<Path>)
         case mapTabRequested(diagnosisID: String?)
         case mapPlaceSearchRequested(SearchPlaceResult)
+        case mapCoordinateRequested(MapCoordinate)
+        case chatTabRequested
         case onAppear
         case recentListingsResponse(Result<[Listing], DataError>)
         case randomQuizResponse(Result<Quiz, DataError>)
@@ -223,43 +228,8 @@ struct HomeFeature {
                 state.livingGuidesErrorMessage = error.localizedDescription
                 return .none
 
-            case .path(.element(id: _, action: .savedListings(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-                
-            case .path(.element(id: _, action: .recentlyViewedList(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-                
-            case .path(.element(id: _, action: .notifications(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-                
-            case .path(.element(id: _, action: .chatBot(.backButtonTapped))):
-                _ = state.path.popLast() 
-                return .none
-
-            case .path(.element(id: _, action: .livingGuideDetail(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case .path(.element(id: _, action: .search(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
-                return .send(.mapTabRequested(diagnosisID: diagnosisID))
-
-            case .path(.element(id: _, action: .search(.bannerTapped))):
-                state.path.append(.chatBot(ChatBotFeature.State()))
-                return .none
-
-            case let .path(.element(id: _, action: .search(.placeResultTapped(placeResult)))):
-                state.path.removeAll()
-                return .send(.mapPlaceSearchRequested(placeResult))
-                
-            case .path:
-                return .none
+            case let .path(pathAction):
+                return handlePathAction(pathAction, state: &state)
                 
             case .navigationSearchTapped:
                 state.path.append(.search(SearchFeature.initialState(userDefaultsClient: userDefaultsClient)))
@@ -286,8 +256,7 @@ struct HomeFeature {
                 return .send(.mapTabRequested(diagnosisID: nil))
                 
             case let .cardTapped(id):
-                // TODO: 매물 상세 뷰 네비게이션 (지도)
-                print("선택 매물 \(id)")
+                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: id, userType: state.userType)))
                 return .none
                 
             case let .likeButtonTapped(id):
@@ -336,7 +305,7 @@ struct HomeFeature {
                 state.path.append(.livingGuideDetail(LivingGuideDetailFeature.State(guide: guide)))
                 return .none
 
-            case .mapTabRequested, .mapPlaceSearchRequested:
+            case .mapTabRequested, .mapPlaceSearchRequested, .mapCoordinateRequested, .chatTabRequested:
                 return .none
             }
         }

@@ -16,6 +16,7 @@ enum ListingDetailDelegate: Equatable {
         roomTypeName: String,
         roomPricingText: String
     )
+    case mapPreviewRequested(MapCoordinate)
 }
 
 @Reducer
@@ -64,6 +65,7 @@ struct ListingDetailFeature {
         case roomTypeSelectorTapped
         case roomOfferSelected(String)
         case applyButtonTapped
+        case mapPreviewTapped
         case roomTypeValidationMessageDismissed
         case delegate(ListingDetailDelegate)
     }
@@ -187,6 +189,10 @@ struct ListingDetailFeature {
                         )
                     )
                 )
+
+            case .mapPreviewTapped:
+                guard let coordinate = state.detail.locationInfo.coordinate else { return .none }
+                return .send(.delegate(.mapPreviewRequested(coordinate)))
 
             case .applicationSheetDismissed:
                 state.isApplicationSheetPresented = false
