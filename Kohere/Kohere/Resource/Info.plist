@@ -39,6 +39,8 @@
 	<string>$(GOOGLE_SERVER_CLIENT_ID)</string>
 	<key>GIDClientID</key>
 	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>KOHERE_API_BASE_URL</key>
 	<string>$(KOHERE_API_BASE_URL)</string>
 	<key>KOHERE_LANDLORD_ADMIN_ID_TOKEN</key>

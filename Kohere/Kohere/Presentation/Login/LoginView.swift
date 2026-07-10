@@ -134,7 +134,6 @@ extension LoginView {
                 }
                 .disabled(store.isLoginRequesting)
 
-                #if DEBUG
                 Button {
                     store.send(.landlordAdminLoginButtonTapped)
                 } label: {
@@ -147,7 +146,6 @@ extension LoginView {
                         .cornerRadius(16)
                 }
                 .disabled(store.isLoginRequesting)
-                #endif
             }
             .padding(.horizontal, 40)
             .padding(.bottom, 150)
