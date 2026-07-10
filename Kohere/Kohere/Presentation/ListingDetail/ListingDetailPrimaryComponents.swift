@@ -120,7 +120,7 @@ struct ListingDetailBottomBar: View {
             }
 
             Button(action: onApplyTap) {
-                Text("신청 하기")
+                Text("신청하기")
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.staticWhite)
                     .frame(maxWidth: .infinity)
