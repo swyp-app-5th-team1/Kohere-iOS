@@ -10,6 +10,102 @@ import ComposableArchitecture
 @testable import Kohere
 
 @MainActor
+final class RootAuthRefreshTests: XCTestCase {
+    func testTransientRefreshFailurePreservesStoredAuth() async {
+        let auth = makeAuth()
+        let keychain = KeychainSpy()
+
+        let resolvedAuth = await RootFeature.resolveStoredAuth(
+            auth,
+            keychainClient: keychain.client,
+            reissueToken: { _ in
+                throw DataError.underlying(message: "network unavailable")
+            }
+        )
+
+        XCTAssertEqual(resolvedAuth, auth)
+        XCTAssertEqual(keychain.deleteCount, 0)
+        XCTAssertEqual(keychain.saveCount, 0)
+    }
+
+    func testUnauthorizedRefreshFailureDeletesStoredAuth() async {
+        let auth = makeAuth()
+        let keychain = KeychainSpy()
+
+        let resolvedAuth = await RootFeature.resolveStoredAuth(
+            auth,
+            keychainClient: keychain.client,
+            reissueToken: { _ in
+                throw DataError.httpStatus(code: 401, message: nil)
+            }
+        )
+
+        XCTAssertNil(resolvedAuth)
+        XCTAssertEqual(keychain.deleteCount, 1)
+        XCTAssertEqual(keychain.saveCount, 0)
+    }
+
+    func testKeychainSaveFailurePreservesStoredAuth() async {
+        let auth = makeAuth()
+        let keychain = KeychainSpy(saveError: KeychainError.encodingFailed)
+
+        let resolvedAuth = await RootFeature.resolveStoredAuth(
+            auth,
+            keychainClient: keychain.client,
+            reissueToken: { _ in
+                AuthToken(
+                    tokenType: "Bearer",
+                    accessToken: "new-access-token",
+                    refreshToken: "new-refresh-token",
+                    expiresIn: 3600
+                )
+            }
+        )
+
+        XCTAssertEqual(resolvedAuth, auth)
+        XCTAssertEqual(keychain.deleteCount, 0)
+        XCTAssertEqual(keychain.saveCount, 1)
+    }
+
+    private func makeAuth() -> Auth {
+        Auth(
+            onboardingRequired: false,
+            status: .active,
+            tokenType: "Bearer",
+            accessToken: "old-access-token",
+            refreshToken: "old-refresh-token",
+            expiresIn: 0,
+            expiresAt: Date(timeIntervalSince1970: 0)
+        )
+    }
+
+    private final class KeychainSpy: @unchecked Sendable {
+        var deleteCount = 0
+        var saveCount = 0
+        let saveError: Error?
+
+        init(saveError: Error? = nil) {
+            self.saveError = saveError
+        }
+
+        var client: KeychainClient {
+            KeychainClient(
+                save: { [self] _, _ in
+                    saveCount += 1
+                    if let saveError {
+                        throw saveError
+                    }
+                },
+                read: { _ in nil },
+                delete: { [self] _ in
+                    deleteCount += 1
+                }
+            )
+        }
+    }
+}
+
+@MainActor
 final class MapFavoriteSyncTests: XCTestCase {
     func testSynchronizeFavoriteStatusUpdatesVisibleListingAndOverride() {
         var state = MapFeature.State()
