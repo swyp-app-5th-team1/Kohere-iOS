@@ -82,6 +82,7 @@ extension MapFeature {
         case markerTapped(String)
         case searchButtonTapped
         case placeSearchResultSelected(SearchPlaceResult)
+        case listingLocationRequested(MapCoordinate)
         case placeSearchDisplayClearButtonTapped
         case researchButtonTapped
         case viewportChanged(MapViewport)

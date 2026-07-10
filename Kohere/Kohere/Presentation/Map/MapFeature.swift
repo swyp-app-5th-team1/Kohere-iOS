@@ -272,6 +272,8 @@ struct MapFeature {
                 return .none
             case let .placeSearchResultSelected(placeResult):
                 return handlePlaceSearchResultSelected(placeResult, state: &state)
+            case let .listingLocationRequested(coordinate):
+                return handleListingLocationRequested(coordinate, state: &state)
             case .placeSearchDisplayClearButtonTapped:
                 state.selectedPlaceSearchTitle = nil
                 return .none

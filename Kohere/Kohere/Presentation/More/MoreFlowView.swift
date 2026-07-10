@@ -39,6 +39,15 @@ struct MoreFlowView: View {
             case let .recentlyViewedList(recentlyViewedStore):
                 RecentlyViewedListingsView(store: recentlyViewedStore)
                     .navigationBarHidden(true)
+            case let .listingDetail(listingDetailStore):
+                ListingDetailView(store: listingDetailStore)
+                    .navigationBarHidden(true)
+            case let .listingApplication(listingApplicationStore):
+                ListingApplicationView(store: listingApplicationStore)
+                    .navigationBarHidden(true)
+            case let .listingApplicationPrivacyWeb(listingApplicationPrivacyWebStore):
+                ListingApplicationPrivacyWebView(store: listingApplicationPrivacyWebStore)
+                    .navigationBarHidden(true)
             case let .setting(settingStore):
                 SettingView(store: settingStore)
                     .navigationBarHidden(true)

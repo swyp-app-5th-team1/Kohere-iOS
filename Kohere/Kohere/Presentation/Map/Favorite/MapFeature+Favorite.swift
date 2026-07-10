@@ -60,7 +60,7 @@ extension MapFeature {
         for listingID: String,
         to state: inout State
     ) {
-        state.favoriteStatusesByListingID[listingID] = status
+        state.synchronizeFavoriteStatus(status, for: listingID)
         rebuildListingItems(to: &state)
     }
 
@@ -73,5 +73,21 @@ extension MapFeature {
             listings[index].isLiked = status.isFavorited
             listings[index].favoriteCount = status.favoriteCount
         }
+    }
+}
+
+extension MapFeature.State {
+    mutating func synchronizeFavoriteStatus(
+        _ status: ListingFavoriteStatus,
+        for listingID: String
+    ) {
+        favoriteStatusesByListingID[listingID] = status
+
+        guard let index = listings.firstIndex(where: { $0.listingID == listingID }) else {
+            return
+        }
+
+        listings[index].isLiked = status.isFavorited
+        listings[index].favoriteCount = status.favoriteCount
     }
 }

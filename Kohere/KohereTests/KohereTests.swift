@@ -10,6 +10,56 @@ import ComposableArchitecture
 @testable import Kohere
 
 @MainActor
+final class MapFavoriteSyncTests: XCTestCase {
+    func testSynchronizeFavoriteStatusUpdatesVisibleListingAndOverride() {
+        var state = MapFeature.State()
+        let status = ListingFavoriteStatus(isFavorited: false, favoriteCount: 4)
+
+        state.listings = [
+            makeListingItem(id: "listing-1", isLiked: true, favoriteCount: 5),
+            makeListingItem(id: "listing-2", isLiked: true, favoriteCount: 8)
+        ]
+
+        state.synchronizeFavoriteStatus(status, for: "listing-1")
+
+        XCTAssertEqual(state.favoriteStatusesByListingID["listing-1"], status)
+        XCTAssertFalse(state.listings[0].isLiked)
+        XCTAssertEqual(state.listings[0].favoriteCount, 4)
+        XCTAssertTrue(state.listings[1].isLiked)
+        XCTAssertEqual(state.listings[1].favoriteCount, 8)
+    }
+
+    func testSynchronizeFavoriteStatusStoresOverrideWhenListingIsNotCurrentlyLoaded() {
+        var state = MapFeature.State()
+        let status = ListingFavoriteStatus(isFavorited: false, favoriteCount: 0)
+
+        state.synchronizeFavoriteStatus(status, for: "listing-1")
+
+        XCTAssertEqual(state.favoriteStatusesByListingID["listing-1"], status)
+        XCTAssertTrue(state.listings.isEmpty)
+    }
+
+    private func makeListingItem(
+        id: String,
+        isLiked: Bool,
+        favoriteCount: Int
+    ) -> ListingItemModel {
+        ListingItemModel(
+            id: id,
+            title: "Listing \(id)",
+            formattedPrice: "₩500,000 / month",
+            formattedUsdPrice: "$360 / month",
+            detailsDescription: "Studio",
+            locationDescription: "Seoul",
+            typeTag: "Apartment",
+            period: "6 months",
+            isLiked: isLiked,
+            favoriteCount: favoriteCount
+        )
+    }
+}
+
+@MainActor
 final class ListingApplicationFeatureTests: XCTestCase {
     func testInitialReviewRequirementsKeepSubmitButtonDisabled() {
         let state = ListingApplicationFeature.State(
