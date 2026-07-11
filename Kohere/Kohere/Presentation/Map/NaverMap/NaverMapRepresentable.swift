@@ -14,7 +14,6 @@ struct NaverMapRepresentable: UIViewRepresentable {
     let markers: [MapMarkerItem]
     let selectedMarkerID: String?
     let cameraMoveRequest: MapCoordinate?
-    let userLocation: MapCoordinate?
     let onViewportChanged: (MapViewport) -> Void
     let onCameraMoveRequestHandled: () -> Void
     let onMarkerTapped: (String) -> Void
@@ -29,13 +28,12 @@ struct NaverMapRepresentable: UIViewRepresentable {
 
     func makeUIView(context: Context) -> NMFMapView {
         let mapView = NMFMapView()
+        mapView.addCameraDelegate(delegate: context.coordinator)
         let cameraUpdate = NMFCameraUpdate(
             scrollTo: NMGLatLng(lat: 37.5559, lng: 126.9250),
             zoomTo: 13
         )
         mapView.moveCamera(cameraUpdate)
-        mapView.addCameraDelegate(delegate: context.coordinator)
-        configureLocationOverlay(on: mapView)
         return mapView
     }
 
@@ -43,7 +41,6 @@ struct NaverMapRepresentable: UIViewRepresentable {
         context.coordinator.updateMarkersIfNeeded(markers, on: uiView)
         context.coordinator.updateSelectedMarkerIfNeeded(selectedMarkerID)
         context.coordinator.moveCameraIfNeeded(to: cameraMoveRequest, on: uiView)
-        updateUserLocationOverlay(userLocation, on: uiView)
     }
 
     final class Coordinator: NSObject, NMFMapViewCameraDelegate {

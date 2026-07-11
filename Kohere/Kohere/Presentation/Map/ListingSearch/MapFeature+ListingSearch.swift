@@ -58,25 +58,6 @@ extension MapFeature {
         )
     }
 
-    func canStartListingSearch(state: State) -> Bool {
-        if state.lastSearchedViewport != nil {
-            return true
-        }
-
-        return canStartFirstListingSearch(state: state)
-    }
-
-    func canStartFirstListingSearch(state: State) -> Bool {
-        switch state.locationAuthorization {
-        case .authorized:
-            return state.hasMovedToInitialUserLocation
-        case .denied, .restricted:
-            return true
-        case .notDetermined:
-            return false
-        }
-    }
-
     func handleViewportChanged(
         _ viewport: MapViewport,
         state: inout State
@@ -100,7 +81,6 @@ extension MapFeature {
 
             guard let lastSearchedViewport = state.lastSearchedViewport else {
                 state.showsResearchButton = false
-                guard canStartFirstListingSearch(state: state) else { return .none }
                 return startListingSearchEffect(state: &state, viewport: viewport)
             }
 
@@ -163,9 +143,7 @@ extension MapFeature {
         state.diagnosisErrorMessage = nil
         clearDiagnosisRecommendationState(state: &state)
         let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
-        guard let viewport = state.currentViewport,
-              canStartListingSearch(state: state)
-        else { return cancelDiagnosisRequests }
+        guard let viewport = state.currentViewport else { return cancelDiagnosisRequests }
         return .merge(
             cancelDiagnosisRequests,
             startListingSearchEffect(state: &state, viewport: viewport)

@@ -9,10 +9,6 @@ import ComposableArchitecture
 import SwiftUI
 
 struct MapView: View {
-    @Environment(
-        \.scenePhase
-    )
-    private var scenePhase
     @Bindable var store: StoreOf<MapFeature>
     @State private var listingSheetDetent: MapListingSheetDetent = .minimum
     @GestureState private var listingSheetDragTranslation: CGFloat = 0
@@ -39,23 +35,14 @@ struct MapView: View {
                    let selectedListingItem = store.selectedListingItem {
                     mapSelectedListingSheet(item: selectedListingItem)
                 }
-
-                if store.isLocationPermissionDialogPresented {
-                    locationPermissionDialogOverlay
-                }
             }
             .animation(sheetAnimation, value: store.sheetMode)
-            .animation(.easeInOut(duration: 0.2), value: store.isLocationPermissionDialogPresented)
         }
         .onAppear {
             store.send(.mapAppeared)
         }
         .onDisappear {
             store.send(.mapDismissed)
-        }
-        .onChange(of: scenePhase) {
-            guard scenePhase == .active else { return }
-            store.send(.mapAppeared)
         }
         .fullScreenCover(
             isPresented: Binding(
@@ -77,7 +64,6 @@ struct MapView: View {
                 markers: store.markers,
                 selectedMarkerID: store.selectedMarkerID,
                 cameraMoveRequest: store.cameraMoveRequest,
-                userLocation: store.userLocation,
                 onViewportChanged: { viewport in
                     store.send(.viewportChanged(viewport))
                 },
@@ -116,9 +102,6 @@ struct MapView: View {
                     .padding(.leading, mapFloatingControlHorizontalPadding)
 
                 Spacer()
-
-                myLocationButton
-                    .padding(.trailing, mapFloatingControlHorizontalPadding)
             }
             .padding(.bottom, bottomPadding)
         }
@@ -142,36 +125,6 @@ struct MapView: View {
                 store.send(.diagnosisButtonCloseButtonTapped)
             }
         )
-    }
-
-    private var myLocationButton: some View {
-        Button {
-            store.send(.myLocationButtonTapped)
-        } label: {
-            Image("myLocationButton")
-                .resizable()
-                .frame(width: 40, height: 40)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var locationPermissionDialogOverlay: some View {
-        ZStack {
-            Color.materialDimmer
-                .ignoresSafeArea()
-
-            LocationPermissionDialog(
-                onCloseTapped: {
-                    store.send(.locationPermissionDialogCloseButtonTapped)
-                },
-                onSettingsTapped: {
-                    store.send(.locationPermissionDialogSettingsButtonTapped)
-                }
-            )
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .transition(.opacity)
-        .zIndex(10)
     }
 
     private var mapFloatingControlHorizontalPadding: CGFloat {

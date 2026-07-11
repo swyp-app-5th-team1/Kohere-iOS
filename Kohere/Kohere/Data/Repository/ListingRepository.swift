@@ -52,7 +52,8 @@ final class ListingRepository: ListingInterface {
     func fetchRecentListings() async throws -> [Listing] {
         let environment = try environmentProvider()
         let responseDTO: ListingRecentListResponseDTO = try await authenticatedNetworkService.request(
-            ListingRouter.recentList(environment)
+            ListingRouter.recentList(environment),
+            debugRawJSONLabel: "Listing.fetchRecentListings"
         )
 
         return responseDTO.toEntity()
@@ -184,42 +185,6 @@ private extension ListingListItemResponseDTO {
                 ?? MockListingImageProvider.listingImageName(listingID: listingId, propertyType: type),
             coordinate: coordinate,
             address: address?.fullAddress,
-            nearestTransit: nearestTransit?.toEntity(),
-            conditions: (conditions ?? []).compactMap(RoomCondition.init(conditionCode:)),
-            distanceMeters: distanceMeters,
-            isFavorited: favorited ?? false,
-            favoriteCount: favoriteCount
-        )
-    }
-}
-
-private extension ListingRecentListItemResponseDTO {
-    func toEntity() -> Listing? {
-        guard let listingId else { return nil }
-
-        let coordinate: MapCoordinate?
-        if let lat, let lng {
-            coordinate = MapCoordinate(latitude: lat, longitude: lng)
-        } else {
-            coordinate = nil
-        }
-
-        return Listing(
-            listingID: listingId,
-            title: title ?? "",
-            type: type ?? "",
-            minMonthlyRent: minMonthlyRent,
-            maxMonthlyRent: maxMonthlyRent,
-            minDeposit: minDeposit,
-            maxDeposit: maxDeposit,
-            minMaintenanceFee: minMaintenanceFee,
-            maxMaintenanceFee: maxMaintenanceFee,
-            minStayMonths: minStayMonths,
-            maxStayMonths: maxStayMonths,
-            thumbnailURL: firstImageURL(thumbnailUrl.map { [$0] })
-                ?? MockListingImageProvider.listingImageName(listingID: listingId, propertyType: type),
-            coordinate: coordinate,
-            address: address,
             nearestTransit: nearestTransit?.toEntity(),
             conditions: (conditions ?? []).compactMap(RoomCondition.init(conditionCode:)),
             distanceMeters: distanceMeters,

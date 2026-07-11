@@ -50,12 +50,8 @@ extension MapFeature {
         var activeDiagnosisID: Int?
         var appliedFilterSource: MapFilterApplicationSource = .manual
 
-        // 위치 권한 / 현재 위치 / 카메라 이동 요청 상태
-        var locationAuthorization: MapLocationAuthorization = .notDetermined
-        var userLocation: MapCoordinate?
+        // 카메라 이동 요청 / 진단 버튼 상태
         var cameraMoveRequest: MapCoordinate?
-        var hasMovedToInitialUserLocation = false
-        var isLocationPermissionDialogPresented = false
         var isDiagnosisButtonExpanded = false
         var isDiagnosisMatchesButtonExpanded = true
     }
@@ -64,9 +60,6 @@ extension MapFeature {
     enum Action {
         case mapAppeared
         case mapDismissed
-        case locationAuthorizationChanged(MapLocationAuthorization)
-        case userLocationUpdated(MapCoordinate)
-        case myLocationButtonTapped
         case diagnosisButtonTapped
         case diagnosisButtonCloseButtonTapped
         case diagnosisButtonAutoCollapseDelayFinished
@@ -76,8 +69,6 @@ extension MapFeature {
         case locationSearchStarted
         case exchangeRateResponse(Result<KRWToUSDExchangeRate, Error>)
         case listingSearchResponse(Result<ListingSearchPage, Error>)
-        case locationPermissionDialogCloseButtonTapped
-        case locationPermissionDialogSettingsButtonTapped
         case cameraMoveRequestHandled
         case markerTapped(String)
         case searchButtonTapped

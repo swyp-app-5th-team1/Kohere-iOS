@@ -102,7 +102,8 @@ final class AuthRepository: AuthInterface {
             AuthRouter.sendEmailVerificationCode(
                 requestDTO,
                 environment
-            )
+            ),
+            debugRawJSONLabel: "Auth.sendEmailVerificationCode"
         )
 
         return responseDTO.toEntity()

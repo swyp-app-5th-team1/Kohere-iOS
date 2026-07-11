@@ -67,7 +67,8 @@ extension ListingItemModel {
             locationDescription: Self.locationTitle(from: listing),
             typeTag: Self.typeTitle(from: listing.type),
             period: Self.minimumStayPeriodTitle(months: listing.minStayMonths),
-            isLiked: listing.isFavorited
+            isLiked: listing.isFavorited,
+            favoriteCount: listing.favoriteCount
         )
     }
 

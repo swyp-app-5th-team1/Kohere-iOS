@@ -150,10 +150,14 @@ struct ListingDetailApplicationPanel: View {
     let validationMessage: String?
     let onRoomTypeSelectorTap: () -> Void
     let onRoomOfferTap: (String) -> Void
+    let onApplyTap: () -> Void
 
     var body: some View {
         ZStack(alignment: .top) {
-            sheetBody
+            VStack(spacing: 0) {
+                sheetBody
+                sheetBottomBar
+            }
 
             if isRoomTypeSelectorPresented {
                 roomOfferList
@@ -176,6 +180,7 @@ struct ListingDetailApplicationPanel: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .ignoresSafeArea(.container, edges: .bottom)
         .animation(.easeInOut(duration: 0.2), value: isRoomTypeSelectorPresented)
         .animation(.easeInOut(duration: 0.2), value: validationMessage)
     }
@@ -246,6 +251,24 @@ struct ListingDetailApplicationPanel: View {
             }
         }
         .buttonStyle(.plain)
+    }
+
+    private var sheetBottomBar: some View {
+        VStack(spacing: 0) {
+            Button(action: onApplyTap) {
+                Text("신청하기")
+                    .kohereTextStyle(.label1Semibold)
+                    .foregroundStyle(.staticWhite)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(.primaryNormal)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 24)
+        }
+        .background(.common0)
     }
 
     private var roomOfferList: some View {

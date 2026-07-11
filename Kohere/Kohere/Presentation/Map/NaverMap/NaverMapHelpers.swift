@@ -10,10 +10,6 @@ import NMapsMap
 // MARK: - Marker Images
 
 enum MapMarkerImageFactory {
-    static let locationMarker = NMFOverlayImage(
-        name: "locationMarker",
-        reuseIdentifier: "locationMarker"
-    )
     static let propertyMarker = NMFOverlayImage(
         name: "MapPropertyMarker",
         reuseIdentifier: "MapPropertyMarker"
@@ -26,33 +22,6 @@ enum MapMarkerImageFactory {
         name: "MapClusterMarkerDouble",
         reuseIdentifier: "MapClusterMarkerDouble"
     )
-}
-
-// MARK: - Location Overlay
-
-// 현재 위치 오버레이를 앱의 위치 마커 에셋 기준으로 한 번 설정한다.
-func configureLocationOverlay(on mapView: NMFMapView) {
-    let overlay = mapView.locationOverlay
-    overlay.icon = MapMarkerImageFactory.locationMarker
-    overlay.iconWidth = 36
-    overlay.iconHeight = 36
-    overlay.anchor = CGPoint(x: 0.5, y: 0.5)
-    overlay.subIcon = nil
-    overlay.circleRadius = 0
-    overlay.hidden = true
-}
-
-// 사용자 위치가 있으면 오버레이를 표시하고 좌표를 갱신하며, 없으면 숨긴다.
-func updateUserLocationOverlay(_ coordinate: MapCoordinate?, on mapView: NMFMapView) {
-    let overlay = mapView.locationOverlay
-
-    guard let coordinate else {
-        overlay.hidden = true
-        return
-    }
-
-    overlay.hidden = false
-    overlay.location = makeNaverLatLng(from: coordinate)
 }
 
 // MARK: - Marker Styling

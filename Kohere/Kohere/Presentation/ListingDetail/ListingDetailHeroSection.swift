@@ -26,16 +26,5 @@ struct ListingDetailHeroSection: View {
             .overlay {
                 Color.common100.opacity(0.2)
             }
-            .overlay(alignment: .bottomTrailing) {
-                Text(overview.imageCountText)
-                    .kohereTextStyle(.caption2Regular)
-                    .foregroundStyle(.common0)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.backgroundTransparentAlternative)
-                    .clipShape(Capsule())
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 20)
-            }
     }
 }
