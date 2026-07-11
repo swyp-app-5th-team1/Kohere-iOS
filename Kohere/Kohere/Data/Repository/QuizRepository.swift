@@ -75,9 +75,18 @@ private extension QuizChoiceResponseDTO {
     }
 }
 
-private extension QuizAnswerResponseDTO {
+extension QuizAnswerResponseDTO {
     func toEntity() throws -> QuizAnswerResult {
-        guard let quizId, let selectedChoice, let correct, let correctChoice else {
+        guard let quizId, let selectedChoice, let correct else {
+            throw DataError.decodingFailed
+        }
+
+        let resolvedCorrectChoice: String
+        if let correctChoice {
+            resolvedCorrectChoice = correctChoice
+        } else if correct {
+            resolvedCorrectChoice = selectedChoice
+        } else {
             throw DataError.decodingFailed
         }
 
@@ -85,7 +94,7 @@ private extension QuizAnswerResponseDTO {
             quizID: quizId,
             selectedChoiceKey: selectedChoice,
             isCorrect: correct,
-            correctChoiceKey: correctChoice,
+            correctChoiceKey: resolvedCorrectChoice,
             explanation: explanation ?? ""
         )
     }

@@ -311,8 +311,15 @@ struct RootFeature {
                 state.home.userType = userProfile.userType
                 state.map.userType = userProfile.userType
                 let didUpdateChatRole = state.chat.applyUserType(userProfile.userType)
-                guard didUpdateChatRole, state.selectedTab == .chat else { return .none }
-                return .send(.chat(.onAppear))
+                var effects: [Effect<Action>] = [
+                    .send(.home(.onAppear))
+                ]
+
+                if didUpdateChatRole, state.selectedTab == .chat {
+                    effects.append(.send(.chat(.onAppear)))
+                }
+
+                return .merge(effects)
 
             case .more(.logoutConfirmed):
                 userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)

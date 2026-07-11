@@ -9,6 +9,36 @@ import XCTest
 import ComposableArchitecture
 @testable import Kohere
 
+final class QuizAnswerResponseMappingTests: XCTestCase {
+    func testCorrectAnswerUsesSelectedChoiceWhenCorrectChoiceIsOmitted() throws {
+        let response = QuizAnswerResponseDTO(
+            quizId: 1,
+            selectedChoice: "B",
+            correct: true,
+            correctChoice: nil,
+            explanation: nil
+        )
+
+        let result = try response.toEntity()
+
+        XCTAssertEqual(result.selectedChoiceKey, "B")
+        XCTAssertEqual(result.correctChoiceKey, "B")
+        XCTAssertTrue(result.isCorrect)
+    }
+
+    func testIncorrectAnswerStillRequiresCorrectChoice() {
+        let response = QuizAnswerResponseDTO(
+            quizId: 1,
+            selectedChoice: "A",
+            correct: false,
+            correctChoice: nil,
+            explanation: nil
+        )
+
+        XCTAssertThrowsError(try response.toEntity())
+    }
+}
+
 @MainActor
 final class RootAuthRefreshTests: XCTestCase {
     func testTransientRefreshFailurePreservesStoredAuth() async {

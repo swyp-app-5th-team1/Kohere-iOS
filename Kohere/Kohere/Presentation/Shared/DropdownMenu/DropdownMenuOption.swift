@@ -178,14 +178,14 @@ private extension Occupation {
             "Graduate Student"
         case .exchangeStudent:
             "Exchange Student"
-        case .educationAcademicResearch:
-            "Education/Academic Research"
-        case .itSoftwareEngineering:
-            "IT/Software Engineering"
-        case .developer:
-            "Developer"
-        case .designer:
-            "Designer"
+        case .languageTeaching:
+            "Language Teaching"
+        case .manufacturingProduction:
+            "Manufacturing/Production"
+        case .businessTrade:
+            "Business/Trade"
+        case .etc:
+            "etc"
         }
     }
 }
@@ -193,38 +193,26 @@ private extension Occupation {
 private extension VisaType {
     nonisolated var displayTitle: String {
         switch self {
-        case .diplomaticOfficial:
-            "Diplomatic/Official(A-1,A-2)"
-        case .visaExempted:
-            "Visa Exempted(B)"
-        case .journalismReligiousAffairs:
-            "Journalism/Religious Affairs(C-1, D-5, D-6)"
         case .shortTermVisit:
-            "Short Term Visit(C-2, C-3)"
-        case .study:
-            "Study(D-2)"
-        case .trainee:
-            "Trainee(D-3, D-4)"
-        case .intraCompanyTransfer:
-            "Intra-Company Transfer(D-7)"
-        case .professional:
-            "Professional(C-4, D-1, D-8, D-9, D-10, E-1, E-2, E-3, E-4, E-5, E-6, E-7)"
-        case .nonProfessional:
-            "Non-Professional(E-8, E-9, E-10)"
-        case .workingHoliday:
-            "Working Holiday(H-1)"
-        case .workAndVisit:
-            "Work and Visit(H-2)"
-        case .familyVisitorDependent:
-            "Family Visitor/Dependent Family(F-1, F-2, F-3)"
-        case .overseasKorean:
-            "Overseas Korean(F-4)"
-        case .permanentResidence:
-            "Permanent Residence(F-5)"
-        case .marriageMigrant:
-            "Marriage Migrant(F-6)"
-        case .others:
-            "Others(G-1)"
+            "Short Term Visit(C-1~4, B)"
+        case .studentsTrainees:
+            "Students & Trainees(D-2, D-3, D-4)"
+        case .nonProfessionalWorkers:
+            "Non-Professional Workers(E-8, E-9, E-10, H-2)"
+        case .workingHolidayWorkAndVisit:
+            "Working Holiday/Work and Visit(H-1, H-2)"
+        case .overseasKoreans:
+            "Overseas Koreans(F-4)"
+        case .familyMarriageMigrants:
+            "Family/Marriage Migrants(F-1, F-2, F-3, F-6)"
+        case .permanentResidents:
+            "Permanent Residents(F-5)"
+        case .professionals:
+            "Professionals(C-4, D-1, D-7~10, E-1~7)"
+        case .diplomaticOfficialAndOthers:
+            "Diplomatic/Official & Others(A-1, A-2, G-1)"
+        case .etc:
+            "etc"
         }
     }
 }
