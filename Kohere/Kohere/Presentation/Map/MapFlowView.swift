@@ -42,6 +42,7 @@ struct MapFlowView: View {
                     .navigationBarHidden(true)
             }
         }
+        .toolbar(.hidden, for: .navigationBar)
         .toolbar(store.path.isEmpty ? .visible : .hidden, for: .tabBar)
     }
 }

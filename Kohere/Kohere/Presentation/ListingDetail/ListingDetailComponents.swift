@@ -154,7 +154,7 @@ struct ListingDetailLocationSection: View {
             ListingDetailSectionHeader(
                 title: locationInfo.sectionTitle,
                 count: nil,
-                showsChevron: true
+                showsChevron: false
             )
 
             VStack(alignment: .leading, spacing: 4) {
@@ -220,7 +220,7 @@ struct ListingDetailReviewSection: View {
             ListingDetailSectionHeader(
                 title: "리뷰",
                 count: reviewCount,
-                showsChevron: true
+                showsChevron: false
             )
 
             Text(reviewCount == 0 ? "등록된 리뷰가 없어요" : "리뷰를 확인해보세요")

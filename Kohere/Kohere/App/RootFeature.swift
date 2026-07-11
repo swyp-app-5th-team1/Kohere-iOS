@@ -223,20 +223,20 @@ struct RootFeature {
                 return .none
 
             case let .home(.favoriteStatusResponse(listingID, .success(status))):
-                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
 
             case let .home(.path(.element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))))):
                 guard let listingID = state.home.path[id: id, case: \.listingDetail]?.listingID else { return .none }
-                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
 
             case let .home(.path(.element(id: _, action: .savedListings(.favoriteStatusResponse(listingID, .success(status)))))):
-                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
 
             case let .home(.path(.element(id: _, action: .recentlyViewedList(.favoriteStatusResponse(listingID, .success(status)))))):
-                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
                 
             case let .selectedTabChanged(tab):
@@ -276,6 +276,11 @@ struct RootFeature {
                 state.popup = popup
                 return .none
 
+            case let .map(.path(.element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))))):
+                guard let listingID = state.map.path[id: id, case: \.listingDetail]?.listingID else { return .none }
+                synchronizeFavoriteStatus(status, for: listingID, state: &state)
+                return .none
+
             case let .chat(.mapTabRequested(diagnosisID)):
                 state.chat.path.removeAll()
                 return openMap(diagnosisID: diagnosisID, state: &state)
@@ -295,15 +300,15 @@ struct RootFeature {
 
             case let .more(.path(.element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))))):
                 guard let listingID = state.more.path[id: id, case: \.listingDetail]?.listingID else { return .none }
-                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
 
             case let .more(.path(.element(id: _, action: .savedListings(.favoriteStatusResponse(listingID, .success(status)))))):
-                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
 
             case let .more(.path(.element(id: _, action: .recentlyViewedList(.favoriteStatusResponse(listingID, .success(status)))))):
-                state.map.synchronizeFavoriteStatus(status, for: listingID)
+                synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
 
             case let .more(.userProfileUpdated(userProfile)):

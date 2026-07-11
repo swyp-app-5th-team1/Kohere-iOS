@@ -44,10 +44,12 @@ struct HomeListingCardView: View {
                     .kohereTextStyle(.label1Semibold)
                     .foregroundColor(.neutral80)
                 
-                Text(item.formattedUsdPrice)
-                    .kohereTextStyle(.body2Regular)
-                    .foregroundColor(.labelNormal)
-                    .padding(.top, 4)
+                if !item.formattedUsdPrice.isEmpty {
+                    Text(item.formattedUsdPrice)
+                        .kohereTextStyle(.body2Regular)
+                        .foregroundColor(.labelNormal)
+                        .padding(.top, 4)
+                }
                 
                 Text(item.detailsDescription)
                     .kohereTextStyle(.caption1Regular)

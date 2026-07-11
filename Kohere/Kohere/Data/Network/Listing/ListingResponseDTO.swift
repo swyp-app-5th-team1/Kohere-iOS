@@ -16,7 +16,7 @@ struct ListingFavoriteListResponseDTO: Decodable {
 }
 
 struct ListingRecentListResponseDTO: Decodable {
-    let content: [ListingRecentListItemResponseDTO]?
+    let content: [ListingListItemResponseDTO]?
 }
 
 struct ListingFavoriteStatusResponseDTO: Decodable {
@@ -74,30 +74,6 @@ struct ListingListItemResponseDTO: Decodable {
     let distanceMeters: Double?
     let favorited: Bool?
     let favoriteCount: Int?
-}
-
-struct ListingRecentListItemResponseDTO: Decodable {
-    let listingId: String?
-    let title: String?
-    let type: String?
-    let minMonthlyRent: Int?
-    let maxMonthlyRent: Int?
-    let minDeposit: Int?
-    let maxDeposit: Int?
-    let minMaintenanceFee: Int?
-    let maxMaintenanceFee: Int?
-    let minStayMonths: Int?
-    let maxStayMonths: Int?
-    let thumbnailUrl: String?
-    let lat: Double?
-    let lng: Double?
-    let address: String?
-    let nearestTransit: ListingNearestTransitResponseDTO?
-    let conditions: [String]?
-    let distanceMeters: Double?
-    let favorited: Bool?
-    let favoriteCount: Int?
-    let viewedAt: String?
 }
 
 struct ListingNearestTransitResponseDTO: Decodable {

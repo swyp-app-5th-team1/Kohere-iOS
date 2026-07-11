@@ -10,10 +10,6 @@ import Foundation
 
 @Reducer
 struct MapFeature {
-    @Dependency(\.locationClient)
-    var locationClient
-    @Dependency(\.settingsClient)
-    var settingsClient
     @Dependency(\.userDefaultsClient)
     var userDefaultsClient
     @Dependency(\.listingClient)
@@ -39,19 +35,7 @@ struct MapFeature {
             switch action {
             case .mapAppeared:
                 var effects: [Effect<Action>] = [
-                    startExchangeRateFetchEffect(),
-                    .run { [locationClient] send in
-                        let authorization = await locationClient.requestAuthorization()
-                        await send(.locationAuthorizationChanged(authorization))
-
-                        guard case .authorized = authorization else { return }
-
-                        let updates = await locationClient.locationUpdates()
-                        for await coordinate in updates {
-                            await send(.userLocationUpdated(coordinate))
-                        }
-                    }
-                    .cancellable(id: "MapFeature.locationUpdates", cancelInFlight: true)
+                    startExchangeRateFetchEffect()
                 ]
 
                 if state.appliedFilterSource != .diagnosis,
@@ -69,58 +53,12 @@ struct MapFeature {
             case .mapDismissed:
                 state.isDiagnosisButtonExpanded = false
                 return .merge(
-                    .cancel(id: "MapFeature.locationUpdates"),
                     .cancel(id: "MapFeature.exchangeRate"),
                     .cancel(id: "MapFeature.diagnosisButtonAutoCollapse"),
                     .cancel(id: "MapFeature.diagnosisDetail"),
                     .cancel(id: "MapFeature.diagnosisRecommendations"),
                     .cancel(id: "MapFeature.listingSearch")
                 )
-
-            case let .locationAuthorizationChanged(authorization):
-                state.locationAuthorization = authorization
-
-                switch authorization {
-                case .authorized:
-                    break
-
-                case .notDetermined, .denied, .restricted:
-                    state.userLocation = nil
-                    state.hasMovedToInitialUserLocation = false
-                }
-
-                guard authorization != .notDetermined,
-                      state.listingSource == .locationSearch,
-                      state.lastSearchedViewport == nil,
-                      let viewport = state.currentViewport,
-                      canStartFirstListingSearch(state: state)
-                else { return .none }
-
-                return startListingSearchEffect(state: &state, viewport: viewport)
-
-            case let .userLocationUpdated(coordinate):
-                state.userLocation = coordinate
-                if !state.hasMovedToInitialUserLocation {
-                    state.cameraMoveRequest = coordinate
-                    state.hasMovedToInitialUserLocation = true
-                }
-                return .none
-
-            case .myLocationButtonTapped:
-                switch state.locationAuthorization {
-                case .authorized:
-                    break
-                case .denied, .restricted:
-                    state.isLocationPermissionDialogPresented = true
-                    return .none
-                case .notDetermined:
-                    return .none
-                }
-
-                guard let userLocation = state.userLocation else { return .none }
-                state.cameraMoveRequest = userLocation
-                state.selectedPlaceSearchTitle = nil
-                return .none
 
             case .diagnosisButtonTapped:
                 state.path.append(.chatBot(ChatBotFeature.State()))
@@ -146,9 +84,7 @@ struct MapFeature {
                 state.diagnosisErrorMessage = nil
                 clearDiagnosisRecommendationState(state: &state)
                 let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
-                guard let viewport = state.currentViewport,
-                      canStartListingSearch(state: state)
-                else { return cancelDiagnosisRequests }
+                guard let viewport = state.currentViewport else { return cancelDiagnosisRequests }
 
                 return .merge(
                     cancelDiagnosisRequests,
@@ -246,16 +182,6 @@ struct MapFeature {
                 state.recommendationsErrorMessage = error.localizedDescription
                 state.diagnosisRecommendationSuggestions = nil
                 return .none
-
-            case .locationPermissionDialogCloseButtonTapped:
-                state.isLocationPermissionDialogPresented = false
-                return .none
-
-            case .locationPermissionDialogSettingsButtonTapped:
-                state.isLocationPermissionDialogPresented = false
-                return .run { [settingsClient] _ in
-                    await settingsClient.openApplicationSettings()
-                }
 
             case .cameraMoveRequestHandled:
                 state.cameraMoveRequest = nil

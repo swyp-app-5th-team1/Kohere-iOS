@@ -18,6 +18,10 @@ struct HomeFeature {
     var lifeTipClient
     @Dependency(\.userDefaultsClient)
     var userDefaultsClient
+    @Dependency(\.fetchKRWToUSDExchangeRateUseCase)
+    var fetchKRWToUSDExchangeRateUseCase
+    @Dependency(\.convertMonthlyRentCurrencyUseCase)
+    var convertMonthlyRentCurrencyUseCase
 
     @Reducer
     enum Path {
@@ -38,11 +42,14 @@ struct HomeFeature {
     struct State: Equatable {
         var path = StackState<Path.State>()
         var userType: UserType?
+        var recentListings: [Listing] = []
         var recentlyViewedItems: [ListingItemModel] = []
         var isRecentlyViewedLoading: Bool = false
         var isRecentlyViewedLoaded: Bool = false
         var favoriteUpdatingIDs: Set<String> = []
         var recentlyViewedErrorMessage: String?
+        var krwToUSDExchangeRate: KRWToUSDExchangeRate?
+        var isExchangeRateLoading: Bool = false
         var quiz: QuizModel
         var isQuizLoading: Bool = false
         var isQuizLoaded: Bool = false
@@ -78,6 +85,7 @@ struct HomeFeature {
         case chatTabRequested
         case onAppear
         case recentListingsResponse(Result<[Listing], DataError>)
+        case exchangeRateResponse(Result<KRWToUSDExchangeRate, Error>)
         case randomQuizResponse(Result<Quiz, DataError>)
         case lifeTipTopicsResponse(Result<[LivingGuide], DataError>)
         
@@ -115,6 +123,19 @@ struct HomeFeature {
                             await send(.recentListingsResponse(.success(listings)))
                         } catch {
                             await send(.recentListingsResponse(.failure(.from(error))))
+                        }
+                    })
+                }
+
+                if state.krwToUSDExchangeRate == nil && !state.isExchangeRateLoading {
+                    state.isExchangeRateLoading = true
+
+                    effects.append(.run { [fetchKRWToUSDExchangeRateUseCase] send in
+                        do {
+                            let exchangeRate = try await fetchKRWToUSDExchangeRateUseCase.execute()
+                            await send(.exchangeRateResponse(.success(exchangeRate)))
+                        } catch {
+                            await send(.exchangeRateResponse(.failure(error)))
                         }
                     })
                 }
@@ -203,7 +224,14 @@ struct HomeFeature {
                 return .none
 
             case let .recentListingsResponse(.success(listings)):
-                state.recentlyViewedItems = listings.map(ListingItemModel.init(listing:))
+                state.recentListings = listings
+                state.recentlyViewedItems = listings.map {
+                    ListingItemModel(
+                        listing: $0,
+                        exchangeRate: state.krwToUSDExchangeRate,
+                        convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase
+                    )
+                }
                 state.isRecentlyViewedLoading = false
                 state.isRecentlyViewedLoaded = true
                 state.recentlyViewedErrorMessage = nil
@@ -213,6 +241,33 @@ struct HomeFeature {
                 state.isRecentlyViewedLoading = false
                 state.isRecentlyViewedLoaded = false
                 state.recentlyViewedErrorMessage = error.localizedDescription
+                return .none
+
+            case let .exchangeRateResponse(.success(exchangeRate)):
+                state.krwToUSDExchangeRate = exchangeRate
+                state.isExchangeRateLoading = false
+
+                guard !state.recentListings.isEmpty else { return .none }
+
+                let currentItems = state.recentlyViewedItems
+                state.recentlyViewedItems = state.recentListings.map { listing in
+                    var item = ListingItemModel(
+                        listing: listing,
+                        exchangeRate: exchangeRate,
+                        convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase
+                    )
+
+                    if let currentItem = currentItems.first(where: { $0.id == item.id }) {
+                        item.isLiked = currentItem.isLiked
+                        item.favoriteCount = currentItem.favoriteCount
+                    }
+
+                    return item
+                }
+                return .none
+
+            case .exchangeRateResponse(.failure):
+                state.isExchangeRateLoading = false
                 return .none
 
             case let .lifeTipTopicsResponse(.success(guides)):
@@ -285,11 +340,7 @@ struct HomeFeature {
             case let .favoriteStatusResponse(listingID, .success(status)):
                 state.favoriteUpdatingIDs.remove(listingID)
                 state.recentlyViewedErrorMessage = nil
-
-                if let index = state.recentlyViewedItems.firstIndex(where: { $0.id == listingID }) {
-                    state.recentlyViewedItems[index].isLiked = status.isFavorited
-                    state.recentlyViewedItems[index].favoriteCount = status.favoriteCount
-                }
+                state.synchronizeFavoriteStatus(status, for: listingID)
                 return .none
 
             case let .favoriteStatusResponse(listingID, .failure(error)):
@@ -316,6 +367,15 @@ struct HomeFeature {
 extension HomeFeature.Path.State: Equatable {}
 
 extension HomeFeature.State {
+    mutating func synchronizeFavoriteStatus(
+        _ status: ListingFavoriteStatus,
+        for listingID: String
+    ) {
+        guard let index = recentlyViewedItems.firstIndex(where: { $0.id == listingID }) else { return }
+        recentlyViewedItems[index].isLiked = status.isFavorited
+        recentlyViewedItems[index].favoriteCount = status.favoriteCount
+    }
+
     var canUseFavoriteFeatures: Bool {
         userType == .tenant
     }

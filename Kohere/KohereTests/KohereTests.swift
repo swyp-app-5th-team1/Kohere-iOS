@@ -187,6 +187,22 @@ final class MapFavoriteSyncTests: XCTestCase {
 
 @MainActor
 final class ListingApplicationFeatureTests: XCTestCase {
+    func testPreviousButtonOnDateSelectionRequestsNavigationBack() async {
+        let store = TestStore(
+            initialState: ListingApplicationFeature.State(
+                listingID: "listing-1",
+                listingTitle: "Hongdae Stay",
+                roomOfferID: "room-offer-1",
+                roomTypeName: "Single Room",
+                roomPricingText: "₩500,000 / month"
+            ),
+            reducer: { ListingApplicationFeature() }
+        )
+
+        await store.send(.previousButtonTapped)
+        await store.receive(.backButtonTapped)
+    }
+
     func testInitialReviewRequirementsKeepSubmitButtonDisabled() {
         let state = ListingApplicationFeature.State(
             listingID: "listing-1",
@@ -473,6 +489,135 @@ final class ListingApplicationFeatureTests: XCTestCase {
             privacyPolicyAgreed: true,
             marketingAgreed: false,
             createdAt: "2026-07-04T14:19:29.645714Z"
+        )
+    }
+}
+
+@MainActor
+final class ListingRecentResponseDTOTests: XCTestCase {
+    func testNestedRecentListingResponseDecodesUsingListingListItemShape() throws {
+        let data = Data(
+            #"""
+            {
+              "success": true,
+              "data": {
+                "content": [
+                  {
+                    "listingId": "listing-1",
+                    "title": "회기 고시원",
+                    "type": "GOSIWON",
+                    "contract": {
+                      "minStayMonths": 1,
+                      "maxStayMonths": 3
+                    },
+                    "location": {
+                      "lat": 37.604268,
+                      "lng": 127.046761
+                    },
+                    "address": {
+                      "city": "SEOUL",
+                      "district": "DONGDAEMUN_GU",
+                      "fullAddress": "서울특별시 동대문구 회기동",
+                      "detail": null
+                    },
+                    "roomOffers": [
+                      {
+                        "roomOfferId": "room-1",
+                        "name": "스탠다드 1인실",
+                        "status": "ACTIVE",
+                        "pricing": {
+                          "monthlyRent": 200000,
+                          "deposit": 0,
+                          "maintenanceFee": 0,
+                          "currency": "KRW"
+                        },
+                        "inventory": null,
+                        "filterTags": [],
+                        "roomImageUrls": []
+                      }
+                    ],
+                    "imageUrls": [],
+                    "favorited": true,
+                    "favoriteCount": 3,
+                    "viewedAt": "2026-07-11T14:30:10.882Z"
+                  }
+                ]
+              },
+              "error": null
+            }
+            """#.utf8
+        )
+
+        let response = try JSONDecoder().decode(
+            BaseResponseDTO<ListingRecentListResponseDTO>.self,
+            from: data
+        )
+        let listing = try XCTUnwrap(response.data?.content?.first)
+
+        XCTAssertEqual(listing.address?.fullAddress, "서울특별시 동대문구 회기동")
+        XCTAssertEqual(listing.location?.lat, 37.604268)
+        XCTAssertEqual(listing.roomOffers?.first?.pricing?.monthlyRent, 200000)
+        XCTAssertEqual(listing.favorited, true)
+    }
+}
+
+@MainActor
+final class RootFavoritePropagationTests: XCTestCase {
+    func testMapDetailFavoriteSuccessUpdatesMapCardAndHomeCard() async throws {
+        let status = ListingFavoriteStatus(isFavorited: true, favoriteCount: 7)
+        var state = RootFeature.State(isAuthLoading: false)
+        state.home.recentlyViewedItems = [makeListingItem(isLiked: false, favoriteCount: 6)]
+        state.map.listings = [makeListingItem(isLiked: false, favoriteCount: 6)]
+        state.map.path.append(
+            .listingDetail(
+                ListingDetailFeature.State(
+                    listingID: "listing-1",
+                    userType: .tenant
+                )
+            )
+        )
+        let detailID = try XCTUnwrap(state.map.path.ids.last)
+
+        let store = TestStore(
+            initialState: state,
+            reducer: { RootFeature() }
+        )
+
+        await store.send(
+            .map(
+                .path(
+                    .element(
+                        id: detailID,
+                        action: .listingDetail(.favoriteStatusResponse(.success(status)))
+                    )
+                )
+            )
+        ) {
+            $0.map.path[id: detailID, case: \.listingDetail]?.detail.overview.isLiked = true
+            $0.map.path[id: detailID, case: \.listingDetail]?.detail.overview.favoriteCount = 7
+            $0.home.recentlyViewedItems[0].isLiked = true
+            $0.home.recentlyViewedItems[0].favoriteCount = 7
+            $0.map.listings[0].isLiked = true
+            $0.map.listings[0].favoriteCount = 7
+            $0.map.favoriteStatusesByListingID["listing-1"] = status
+        }
+    }
+
+    private func makeListingItem(
+        isLiked: Bool,
+        favoriteCount: Int
+    ) -> ListingItemModel {
+        ListingItemModel(
+            id: "listing-1",
+            title: "Listing",
+            formattedPrice: "₩500,000 / month",
+            formattedUsdPrice: "$360 / month",
+            detailsDescription: "Studio",
+            locationDescription: "Seoul",
+            typeTag: "Apartment",
+            period: "6 months",
+            isLiked: isLiked,
+            favoriteCount: favoriteCount
         )
     }
 }

@@ -368,9 +368,6 @@ struct ListingDetailView: View {
 
             applicationSheet
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            bottomBar
-        }
         .transition(.opacity)
         .zIndex(3)
     }
@@ -382,7 +379,8 @@ struct ListingDetailView: View {
             isRoomTypeSelectorPresented: store.isRoomTypeSelectorPresented,
             validationMessage: store.roomTypeValidationMessage,
             onRoomTypeSelectorTap: { store.send(.roomTypeSelectorTapped) },
-            onRoomOfferTap: { roomOfferID in store.send(.roomOfferSelected(roomOfferID)) }
+            onRoomOfferTap: { roomOfferID in store.send(.roomOfferSelected(roomOfferID)) },
+            onApplyTap: { store.send(.applyButtonTapped) }
         )
     }
 }

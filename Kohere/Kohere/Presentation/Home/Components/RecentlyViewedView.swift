@@ -79,7 +79,7 @@ struct RecentlyViewedView: View {
     
     private var listView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 16) {
+            HStack(alignment: .top, spacing: 16) {
                 ForEach(items) { item in
                     HomeListingCardView(
                         item: item,

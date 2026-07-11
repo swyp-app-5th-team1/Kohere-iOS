@@ -239,11 +239,15 @@ struct ListingApplicationFeature {
                 return .none
 
             case .previousButtonTapped:
-                if state.step == .review {
+                switch state.step {
+                case .dateSelection:
+                    return .send(.backButtonTapped)
+
+                case .review:
                     state.step = .dateSelection
                     state.isCompletionPopupPresented = false
+                    return .none
                 }
-                return .none
 
             case .previousMonthButtonTapped:
                 let previousMonth = Self.shiftMonth(state.displayedMonth, by: -1)
