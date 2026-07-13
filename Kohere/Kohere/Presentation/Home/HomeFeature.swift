@@ -81,7 +81,7 @@ struct HomeFeature {
         case path(StackActionOf<Path>)
         case mapTabRequested(diagnosisID: String?)
         case mapPlaceSearchRequested(SearchPlaceResult)
-        case mapCoordinateRequested(MapCoordinate)
+        case listingMapPreviewRequested(MapCoordinate)
         case chatTabRequested
         case onAppear
         case recentListingsResponse(Result<[Listing], DataError>)
@@ -356,7 +356,7 @@ struct HomeFeature {
                 state.path.append(.livingGuideDetail(LivingGuideDetailFeature.State(guide: guide)))
                 return .none
 
-            case .mapTabRequested, .mapPlaceSearchRequested, .mapCoordinateRequested, .chatTabRequested:
+            case .mapTabRequested, .mapPlaceSearchRequested, .listingMapPreviewRequested, .chatTabRequested:
                 return .none
             }
         }

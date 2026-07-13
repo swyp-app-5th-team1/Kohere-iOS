@@ -209,9 +209,9 @@ struct RootFeature {
                 state.selectedTab = .map
                 return .send(.map(.placeSearchResultSelected(placeResult)))
 
-            case let .home(.mapCoordinateRequested(coordinate)):
+            case let .home(.listingMapPreviewRequested(coordinate)):
                 state.home.path.removeAll()
-                return openMap(coordinate: coordinate, state: &state)
+                return openListingMapPreview(coordinate: coordinate, state: &state)
 
             case .home(.chatTabRequested):
                 state.home.path.removeAll()
@@ -289,9 +289,9 @@ struct RootFeature {
                 state.popup = popup
                 return .none
 
-            case let .more(.mapCoordinateRequested(coordinate)):
+            case let .more(.listingMapPreviewRequested(coordinate)):
                 state.more.path.removeAll()
-                return openMap(coordinate: coordinate, state: &state)
+                return openListingMapPreview(coordinate: coordinate, state: &state)
 
             case .more(.chatTabRequested):
                 state.more.path.removeAll()

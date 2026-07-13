@@ -13,7 +13,7 @@ import SwiftUI
 struct NaverMapRepresentable: UIViewRepresentable {
     let markers: [MapMarkerItem]
     let selectedMarkerID: String?
-    let cameraMoveRequest: MapCoordinate?
+    let cameraMoveRequest: MapCameraMoveRequest?
     let onViewportChanged: (MapViewport) -> Void
     let onCameraMoveRequestHandled: () -> Void
     let onMarkerTapped: (String) -> Void
@@ -47,7 +47,7 @@ struct NaverMapRepresentable: UIViewRepresentable {
         private let onViewportChanged: (MapViewport) -> Void
         private let onCameraMoveRequestHandled: () -> Void
         private let onMarkerTapped: (String) -> Void
-        private var handledCameraMoveRequest: MapCoordinate?
+        private var handledCameraMoveRequest: MapCameraMoveRequest?
         private var selectedMarkerID: String?
         private var clusterer: NMCClusterer<MapClusteringKey>?
         private var renderedItemsByID: [String: MapMarkerItem] = [:]
@@ -110,20 +110,23 @@ struct NaverMapRepresentable: UIViewRepresentable {
                 }
         }
 
-        // 일회성 카메라 이동 요청을 받아 현재 줌 레벨을 유지한 채 지도 중심만 이동한다.
-        func moveCameraIfNeeded(to coordinate: MapCoordinate?, on mapView: NMFMapView) {
-            guard let coordinate else {
+        // 일회성 카메라 이동 요청을 받아 현재 줌 레벨을 유지한 채 목표 위치로 이동한다.
+        func moveCameraIfNeeded(to request: MapCameraMoveRequest?, on mapView: NMFMapView) {
+            guard let request else {
                 handledCameraMoveRequest = nil
                 return
             }
 
-            guard handledCameraMoveRequest != coordinate else { return }
-            handledCameraMoveRequest = coordinate
+            guard handledCameraMoveRequest != request else { return }
+            handledCameraMoveRequest = request
 
             let cameraUpdate = NMFCameraUpdate(
-                scrollTo: makeNaverLatLng(from: coordinate),
+                scrollTo: makeNaverLatLng(from: request.coordinate),
                 zoomTo: mapView.cameraPosition.zoom
             )
+            if request.targetPosition == .upper {
+                cameraUpdate.pivot = CGPoint(x: 0.5, y: 0.42)
+            }
             mapView.moveCamera(cameraUpdate)
             DispatchQueue.main.async { [onCameraMoveRequestHandled] in
                 onCameraMoveRequestHandled()

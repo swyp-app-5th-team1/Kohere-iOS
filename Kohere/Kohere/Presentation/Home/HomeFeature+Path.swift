@@ -57,7 +57,7 @@ extension HomeFeature {
             action: .listingDetail(.delegate(.mapPreviewRequested(coordinate)))
         ):
             state.path.removeAll()
-            return .send(.mapCoordinateRequested(coordinate))
+            return .send(.listingMapPreviewRequested(coordinate))
 
         case .element(id: _, action: .listingApplication(.backButtonTapped)):
             _ = state.path.popLast()

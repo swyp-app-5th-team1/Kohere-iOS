@@ -45,7 +45,7 @@ extension MapFeature {
             return .none
 
         case let .element(id: _, action: .listingDetail(.delegate(.mapPreviewRequested(coordinate)))):
-            return .send(.listingLocationRequested(coordinate))
+            return .send(.listingMapPreviewRequested(coordinate))
 
         case let .element(
             id: _,

@@ -186,6 +186,67 @@ final class MapFavoriteSyncTests: XCTestCase {
 }
 
 @MainActor
+final class MapListingNavigationTests: XCTestCase {
+    func testListingCardTappedNavigatesDirectlyToDetail() async {
+        let store = TestStore(initialState: MapFeature.State()) {
+            MapFeature()
+        }
+
+        await store.send(.listingCardTapped("listing-1")) {
+            $0.path.append(
+                .listingDetail(ListingDetailFeature.State(listingID: "listing-1"))
+            )
+        }
+    }
+
+    func testMarkerTappedStillPresentsSelectedListingSheet() async {
+        let store = TestStore(initialState: MapFeature.State()) {
+            MapFeature()
+        }
+
+        await store.send(.markerTapped("listing-1")) {
+            $0.selectedMarkerID = "listing-1"
+            $0.sheetMode = .selectedListing
+        }
+    }
+
+    func testListingMapPreviewPreservesResultsAndPreparesLocationSearch() async {
+        let coordinate = MapCoordinate(latitude: 37.5559, longitude: 126.9250)
+        let marker = MapMarkerItem(id: "listing-1", coordinate: coordinate)
+        var initialState = MapFeature.State()
+        initialState.path.append(
+            .listingDetail(ListingDetailFeature.State(listingID: "listing-1"))
+        )
+        initialState.markers = [marker]
+        initialState.selectedMarkerID = marker.id
+        initialState.sheetMode = .selectedListing
+        initialState.listingSource = .diagnosis
+        initialState.activeDiagnosisID = 1
+        initialState.appliedFilterSource = .diagnosis
+
+        let store = TestStore(initialState: initialState) {
+            MapFeature()
+        }
+
+        await store.send(.listingMapPreviewRequested(coordinate)) {
+            $0.path.removeAll()
+            $0.selectedMarkerID = nil
+            $0.sheetMode = .listingList
+            $0.listingSource = .locationSearch
+            $0.activeDiagnosisID = nil
+            $0.appliedFilterSource = .manual
+            $0.placeSearchTarget = MapPlaceSearchTarget(coordinate: coordinate)
+            $0.cameraMoveRequest = MapCameraMoveRequest(
+                coordinate: coordinate,
+                targetPosition: .upper
+            )
+        }
+
+        XCTAssertEqual(store.state.markers, [marker])
+    }
+}
+
+@MainActor
 final class ListingApplicationFeatureTests: XCTestCase {
     func testPreviousButtonOnDateSelectionRequestsNavigationBack() async {
         let store = TestStore(

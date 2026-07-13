@@ -51,7 +51,7 @@ extension MapFeature {
         var appliedFilterSource: MapFilterApplicationSource = .manual
 
         // 카메라 이동 요청 / 진단 버튼 상태
-        var cameraMoveRequest: MapCoordinate?
+        var cameraMoveRequest: MapCameraMoveRequest?
         var isDiagnosisButtonExpanded = false
         var isDiagnosisMatchesButtonExpanded = true
     }
@@ -73,7 +73,7 @@ extension MapFeature {
         case markerTapped(String)
         case searchButtonTapped
         case placeSearchResultSelected(SearchPlaceResult)
-        case listingLocationRequested(MapCoordinate)
+        case listingMapPreviewRequested(MapCoordinate)
         case placeSearchDisplayClearButtonTapped
         case researchButtonTapped
         case viewportChanged(MapViewport)

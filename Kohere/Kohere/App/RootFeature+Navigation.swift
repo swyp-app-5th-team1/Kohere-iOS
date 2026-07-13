@@ -20,9 +20,12 @@ extension RootFeature {
         return .send(.map(.diagnosisResultRequested(diagnosisID: diagnosisID)))
     }
 
-    func openMap(coordinate: MapCoordinate, state: inout State) -> Effect<Action> {
+    func openListingMapPreview(
+        coordinate: MapCoordinate,
+        state: inout State
+    ) -> Effect<Action> {
         state.selectedTab = .map
-        return .send(.map(.listingLocationRequested(coordinate)))
+        return .send(.map(.listingMapPreviewRequested(coordinate)))
     }
 
     func handlePopupRoute(_ route: AppPopup.Route) -> Effect<Action> {
