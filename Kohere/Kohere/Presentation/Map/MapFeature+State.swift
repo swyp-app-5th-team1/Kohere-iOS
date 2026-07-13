@@ -79,7 +79,7 @@ extension MapFeature {
         case viewportChanged(MapViewport)
         case listingRowAppeared(String)
         case path(StackActionOf<Path>)
-        case listingTapped(String)
+        case listingCardTapped(String)
         case listingLikeButtonTapped(String)
         case favoriteStatusResponse(listingID: String, Result<ListingFavoriteStatus, DataError>)
         case selectedListingCardTapped

@@ -126,7 +126,7 @@ struct MapListingSheetView: View {
                 item: item,
                 showsLikeButton: store.canUseFavoriteFeatures,
                 onCardTapped: {
-                    store.send(.listingTapped(item.listingID))
+                    store.send(.listingCardTapped(item.listingID))
                 },
                 onLikeTapped: {
                     store.send(.listingLikeButtonTapped(item.listingID))
