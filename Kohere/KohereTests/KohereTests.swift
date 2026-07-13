@@ -566,7 +566,7 @@ final class ListingRecentResponseDTOTests: XCTestCase {
                   {
                     "listingId": "listing-1",
                     "title": "회기 고시원",
-                    "type": "GOSIWON",
+                    "type": "GOSHIWON",
                     "contract": {
                       "minStayMonths": 1,
                       "maxStayMonths": 3

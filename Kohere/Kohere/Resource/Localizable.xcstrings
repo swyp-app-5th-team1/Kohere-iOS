@@ -1787,7 +1787,7 @@
         }
       }
     },
-    "listing.type.GOSIWON" : {
+    "listing.type.GOSHIWON" : {
       "extractionState" : "stale",
       "localizations" : {
         "ko" : {

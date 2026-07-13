@@ -192,7 +192,7 @@ extension ListingDetailModel {
         case .listingType:
             switch normalizedCode {
             case "GOSHIWON":
-                return "GOSIWON"
+                return "GOSHIWON"
             case "COLIVING":
                 return "CO_LIVING"
             case "SHAREHOUSE":
@@ -217,7 +217,7 @@ extension ListingDetailModel {
     ]
 
     private static let serverCodeLocalizations: [String: ServerCodeLocalization] = [
-        "listing.type.GOSIWON": .init(key: "listing.type.GOSIWON", fallback: "고시원"),
+        "listing.type.GOSHIWON": .init(key: "listing.type.GOSHIWON", fallback: "고시원"),
         "listing.type.CO_LIVING": .init(key: "listing.type.CO_LIVING", fallback: "코리빙"),
         "listing.type.SHARE_HOUSE": .init(key: "listing.type.SHARE_HOUSE", fallback: "쉐어하우스"),
         "listing.status.PUBLISHED": .init(key: "listing.status.PUBLISHED", fallback: "공개 중"),
