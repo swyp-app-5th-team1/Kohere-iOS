@@ -66,6 +66,7 @@ extension MapFeature {
         state.listingSearchErrorMessage = nil
         state.isDiagnosisDetailLoading = false
         state.diagnosisErrorMessage = nil
+        clearDiagnosisRecommendationState(state: &state)
 
         return .merge(
             .cancel(id: "MapFeature.listingSearch"),

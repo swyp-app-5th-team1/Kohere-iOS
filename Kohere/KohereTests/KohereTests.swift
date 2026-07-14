@@ -213,16 +213,29 @@ final class MapListingNavigationTests: XCTestCase {
     func testListingMapPreviewPreservesResultsAndPreparesLocationSearch() async {
         let coordinate = MapCoordinate(latitude: 37.5559, longitude: 126.9250)
         let marker = MapMarkerItem(id: "listing-1", coordinate: coordinate)
+        let listing = ListingItemModel(
+            id: "listing-1",
+            formattedPrice: "₩500,000 / month",
+            formattedUsdPrice: "$360 / month",
+            detailsDescription: "Studio",
+            locationDescription: "Seoul",
+            typeTag: "Apartment",
+            period: "6 months",
+            isLiked: false
+        )
         var initialState = MapFeature.State()
         initialState.path.append(
             .listingDetail(ListingDetailFeature.State(listingID: "listing-1"))
         )
         initialState.markers = [marker]
+        initialState.listings = [listing]
         initialState.selectedMarkerID = marker.id
         initialState.sheetMode = .selectedListing
         initialState.listingSource = .diagnosis
         initialState.activeDiagnosisID = 1
         initialState.appliedFilterSource = .diagnosis
+        initialState.isRecommendationsLoading = true
+        initialState.recommendationsErrorMessage = "이전 추천 오류"
 
         let store = TestStore(initialState: initialState) {
             MapFeature()
@@ -235,6 +248,8 @@ final class MapListingNavigationTests: XCTestCase {
             $0.listingSource = .locationSearch
             $0.activeDiagnosisID = nil
             $0.appliedFilterSource = .manual
+            $0.isRecommendationsLoading = false
+            $0.recommendationsErrorMessage = nil
             $0.placeSearchTarget = MapPlaceSearchTarget(coordinate: coordinate)
             $0.cameraMoveRequest = MapCameraMoveRequest(
                 coordinate: coordinate,
@@ -243,6 +258,7 @@ final class MapListingNavigationTests: XCTestCase {
         }
 
         XCTAssertEqual(store.state.markers, [marker])
+        XCTAssertEqual(store.state.listings, [listing])
     }
 }
 
