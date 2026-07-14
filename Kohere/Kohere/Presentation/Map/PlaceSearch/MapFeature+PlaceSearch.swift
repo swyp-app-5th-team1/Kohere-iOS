@@ -16,7 +16,10 @@ extension MapFeature {
             coordinate: placeResult.coordinate
         )
         state.selectedPlaceSearchTitle = placeResult.title
-        state.cameraMoveRequest = placeResult.coordinate
+        state.cameraMoveRequest = MapCameraMoveRequest(
+            coordinate: placeResult.coordinate,
+            targetPosition: .center
+        )
         state.listingSource = .locationSearch
         state.activeDiagnosisID = nil
         state.appliedFilterSource = .manual
@@ -40,14 +43,17 @@ extension MapFeature {
         )
     }
 
-    func handleListingLocationRequested(
+    func handleListingMapPreviewRequested(
         _ coordinate: MapCoordinate,
         state: inout State
     ) -> Effect<Action> {
         state.path.removeAll()
         state.placeSearchTarget = MapPlaceSearchTarget(coordinate: coordinate)
         state.selectedPlaceSearchTitle = nil
-        state.cameraMoveRequest = coordinate
+        state.cameraMoveRequest = MapCameraMoveRequest(
+            coordinate: coordinate,
+            targetPosition: .upper
+        )
         state.listingSource = .locationSearch
         state.activeDiagnosisID = nil
         state.appliedFilterSource = .manual
@@ -60,10 +66,7 @@ extension MapFeature {
         state.listingSearchErrorMessage = nil
         state.isDiagnosisDetailLoading = false
         state.diagnosisErrorMessage = nil
-        state.listingSearchResults = []
         clearDiagnosisRecommendationState(state: &state)
-        state.listings = []
-        state.markers = []
 
         return .merge(
             .cancel(id: "MapFeature.listingSearch"),

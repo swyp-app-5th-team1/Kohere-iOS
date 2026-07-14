@@ -15,3 +15,13 @@ enum MapListingSource: Equatable {
     case locationSearch
     case diagnosis
 }
+
+struct MapCameraMoveRequest: Equatable {
+    let coordinate: MapCoordinate
+    let targetPosition: MapCameraTargetPosition
+}
+
+enum MapCameraTargetPosition: Equatable {
+    case center
+    case upper
+}

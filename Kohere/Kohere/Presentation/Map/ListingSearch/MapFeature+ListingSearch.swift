@@ -72,7 +72,7 @@ extension MapFeature {
         case .locationSearch:
             if let placeSearchTarget = state.placeSearchTarget {
                 state.showsResearchButton = false
-                guard isViewport(viewport, centeredNear: placeSearchTarget.coordinate) else {
+                guard isCoordinate(placeSearchTarget.coordinate, inside: viewport.visibleBounds) else {
                     return .none
                 }
                 state.placeSearchTarget = nil
@@ -286,7 +286,9 @@ extension MapFeature {
 
             let cameraCoordinate = recommendations.listings.compactMap(\.coordinate).first
                 ?? recommendations.markers.first?.coordinate
-            state.cameraMoveRequest = cameraCoordinate
+            state.cameraMoveRequest = cameraCoordinate.map {
+                MapCameraMoveRequest(coordinate: $0, targetPosition: .center)
+            }
             if cameraCoordinate == nil {
                 state.lastSearchedViewport = state.currentViewport
             }
@@ -322,12 +324,13 @@ extension MapFeature {
         markers.append(contentsOf: uniqueMarkers)
     }
 
-    private func isViewport(
-        _ viewport: MapViewport,
-        centeredNear coordinate: MapCoordinate
+    private func isCoordinate(
+        _ coordinate: MapCoordinate,
+        inside bounds: MapBounds
     ) -> Bool {
-        let tolerance = 0.0001
-        return abs(viewport.center.latitude - coordinate.latitude) < tolerance
-            && abs(viewport.center.longitude - coordinate.longitude) < tolerance
+        coordinate.latitude >= bounds.southWest.latitude
+            && coordinate.latitude <= bounds.northEast.latitude
+            && coordinate.longitude >= bounds.southWest.longitude
+            && coordinate.longitude <= bounds.northEast.longitude
     }
 }

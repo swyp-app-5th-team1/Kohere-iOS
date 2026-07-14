@@ -52,7 +52,7 @@ struct MoreFeature {
         case recentlyViewedListingsTapped
         case userProfileUpdated(UserProfile)
         case popupRequested(AppPopup)
-        case mapCoordinateRequested(MapCoordinate)
+        case listingMapPreviewRequested(MapCoordinate)
         case chatTabRequested
         case logoutConfirmed
         case deleteAccountConfirmed
@@ -127,7 +127,7 @@ struct MoreFeature {
 
             case let .path(.element(id: _, action: .listingDetail(.delegate(.mapPreviewRequested(coordinate))))):
                 state.path.removeAll()
-                return .send(.mapCoordinateRequested(coordinate))
+                return .send(.listingMapPreviewRequested(coordinate))
 
             case .path(.element(id: _, action: .listingApplication(.backButtonTapped))):
                 _ = state.path.popLast()
@@ -274,7 +274,11 @@ struct MoreFeature {
                 guard userProfile.userType == .tenant else { return .none }
                 return .send(.onAppear)
 
-            case .popupRequested, .mapCoordinateRequested, .chatTabRequested, .logoutConfirmed, .deleteAccountConfirmed:
+            case .popupRequested,
+                 .listingMapPreviewRequested,
+                 .chatTabRequested,
+                 .logoutConfirmed,
+                 .deleteAccountConfirmed:
                 return .none
 
             case .path:

@@ -198,8 +198,8 @@ struct MapFeature {
                 return .none
             case let .placeSearchResultSelected(placeResult):
                 return handlePlaceSearchResultSelected(placeResult, state: &state)
-            case let .listingLocationRequested(coordinate):
-                return handleListingLocationRequested(coordinate, state: &state)
+            case let .listingMapPreviewRequested(coordinate):
+                return handleListingMapPreviewRequested(coordinate, state: &state)
             case .placeSearchDisplayClearButtonTapped:
                 state.selectedPlaceSearchTitle = nil
                 return .none
@@ -243,10 +243,10 @@ struct MapFeature {
             case let .path(pathAction):
                 return handlePathAction(pathAction, state: &state)
 
-            case let .listingTapped(id):
-                state.selectedMarkerID = id
-                state.cameraMoveRequest = state.markers.first { $0.id == id }?.coordinate
-                state.sheetMode = .selectedListing
+            case let .listingCardTapped(id):
+                state.path.append(
+                    .listingDetail(ListingDetailFeature.State(listingID: id, userType: state.userType))
+                )
                 return .none
 
             case let .listingLikeButtonTapped(listingID):

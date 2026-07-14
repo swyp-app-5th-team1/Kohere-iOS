@@ -53,6 +53,8 @@
 	<string>$(NAVER_SEARCH_CLIENT_ID)</string>
 	<key>NAVER_SEARCH_CLIENT_SECRET</key>
 	<string>$(NAVER_SEARCH_CLIENT_SECRET)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>지도에서 주변 매물 정보를 제공하기 위해 위치 정보 접근 권한이 필요합니다.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>PretendardJP-Regular.otf</string>
