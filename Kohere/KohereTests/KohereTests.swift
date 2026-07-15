@@ -250,7 +250,7 @@ final class MapListingNavigationTests: XCTestCase {
             $0.appliedFilterSource = .manual
             $0.isRecommendationsLoading = false
             $0.recommendationsErrorMessage = nil
-            $0.placeSearchTarget = MapPlaceSearchTarget(coordinate: coordinate)
+            $0.pendingViewportSearchTarget = MapPendingViewportSearchTarget(coordinate: coordinate)
             $0.cameraMoveRequest = MapCameraMoveRequest(
                 coordinate: coordinate,
                 targetPosition: .upper
@@ -259,6 +259,80 @@ final class MapListingNavigationTests: XCTestCase {
 
         XCTAssertEqual(store.state.markers, [marker])
         XCTAssertEqual(store.state.listings, [listing])
+    }
+}
+
+@MainActor
+final class MapDiagnosisRecommendationTests: XCTestCase {
+    func testDiagnosisMarkersAreRebuiltFromAccumulatedListings() {
+        let firstCoordinate = MapCoordinate(latitude: 37.604268, longitude: 127.046761)
+        let nextCoordinate = MapCoordinate(latitude: 37.595316, longitude: 127.051202)
+        var state = MapFeature.State()
+        let feature = withDependencies {
+            $0.fetchKRWToUSDExchangeRateUseCase = FetchKRWToUSDExchangeRateUseCase {
+                KRWToUSDExchangeRate(usdPerKRW: 0)
+            }
+        } operation: {
+            MapFeature()
+        }
+
+        feature.applyDiagnosisRecommendations(
+            makeRecommendations(
+                listing: makeRecommendation(id: "listing-1", coordinate: firstCoordinate),
+                pageNumber: 0
+            ),
+            to: &state
+        )
+        feature.applyDiagnosisRecommendations(
+            makeRecommendations(
+                listing: makeRecommendation(id: "listing-2", coordinate: nextCoordinate),
+                pageNumber: 1
+            ),
+            to: &state
+        )
+
+        XCTAssertEqual(
+            state.markers,
+            [
+                MapMarkerItem(id: "listing-1", coordinate: firstCoordinate),
+                MapMarkerItem(id: "listing-2", coordinate: nextCoordinate)
+            ]
+        )
+    }
+
+    private func makeRecommendations(
+        listing: DiagnosisRecommendedListing,
+        pageNumber: Int
+    ) -> DiagnosisRecommendations {
+        DiagnosisRecommendations(
+            listings: [listing],
+            page: DiagnosisRecommendationPage(
+                number: pageNumber,
+                size: 1,
+                totalElements: 2,
+                totalPages: 2,
+                hasNext: pageNumber == 0
+            ),
+            suggestions: nil
+        )
+    }
+
+    private func makeRecommendation(
+        id: String,
+        coordinate: MapCoordinate
+    ) -> DiagnosisRecommendedListing {
+        DiagnosisRecommendedListing(
+            listingID: id,
+            title: "Listing \(id)",
+            type: "GOSHIWON",
+            minMonthlyRent: 200_000,
+            maxMonthlyRent: 300_000,
+            minDeposit: 0,
+            maxDeposit: 100_000,
+            thumbnailURL: nil,
+            coordinate: coordinate,
+            conditions: []
+        )
     }
 }
 

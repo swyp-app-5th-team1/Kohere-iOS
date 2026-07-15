@@ -79,7 +79,7 @@ struct HomeFeature {
     
     enum Action {
         case path(StackActionOf<Path>)
-        case mapTabRequested(diagnosisID: String?)
+        case mapRequested(MapEntryRequest)
         case mapPlaceSearchRequested(SearchPlaceResult)
         case listingMapPreviewRequested(MapCoordinate)
         case chatTabRequested
@@ -308,7 +308,7 @@ struct HomeFeature {
                 return .none
                 
             case .browseListingsTapped:
-                return .send(.mapTabRequested(diagnosisID: nil))
+                return .send(.mapRequested(.browseListings))
                 
             case let .cardTapped(id):
                 state.path.append(.listingDetail(ListingDetailFeature.State(listingID: id, userType: state.userType)))
@@ -356,7 +356,7 @@ struct HomeFeature {
                 state.path.append(.livingGuideDetail(LivingGuideDetailFeature.State(guide: guide)))
                 return .none
 
-            case .mapTabRequested, .mapPlaceSearchRequested, .listingMapPreviewRequested, .chatTabRequested:
+            case .mapRequested, .mapPlaceSearchRequested, .listingMapPreviewRequested, .chatTabRequested:
                 return .none
             }
         }

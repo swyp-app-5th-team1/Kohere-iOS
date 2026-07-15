@@ -128,8 +128,8 @@ extension HomeFeature {
             _ = state.path.popLast()
             return .none
 
-        case let .element(id: _, action: .chatBot(.mapTabRequested(diagnosisID))):
-            return .send(.mapTabRequested(diagnosisID: diagnosisID))
+        case let .element(id: _, action: .chatBot(.mapRequested(request))):
+            return .send(.mapRequested(request))
 
         case .element(id: _, action: .search(.bannerTapped)):
             state.path.append(.chatBot(ChatBotFeature.State()))

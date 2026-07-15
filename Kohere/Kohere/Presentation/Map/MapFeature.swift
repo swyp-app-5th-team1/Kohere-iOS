@@ -33,32 +33,48 @@ struct MapFeature {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            // Lifecycle
             case .mapAppeared:
-                var effects: [Effect<Action>] = [
-                    startExchangeRateFetchEffect()
-                ]
-
-                if state.appliedFilterSource != .diagnosis,
-                   shouldExpandDiagnosisButtonToday(userDefaultsClient: userDefaultsClient) {
-                    state.isDiagnosisButtonExpanded = true
-                    effects.append(diagnosisButtonAutoCollapseEffect)
-                }
-
-                if state.listingSource == .idle {
-                    effects.append(.send(.locationSearchStarted))
-                }
-
-                return .merge(effects)
+                return handleMapAppeared(state: &state)
 
             case .mapDismissed:
-                state.isDiagnosisButtonExpanded = false
-                return .merge(
-                    .cancel(id: "MapFeature.exchangeRate"),
-                    .cancel(id: "MapFeature.diagnosisButtonAutoCollapse"),
-                    .cancel(id: "MapFeature.diagnosisDetail"),
-                    .cancel(id: "MapFeature.diagnosisRecommendations"),
-                    .cancel(id: "MapFeature.listingSearch")
-                )
+                return handleMapDismissed(state: &state)
+
+            // 일반 매물 검색
+            case .initialLocationSearchRequested:
+                return beginLocationSearch(.initialEntry, state: &state)
+
+            case .browseListingsRequested:
+                return beginLocationSearch(.browseListings, state: &state)
+
+            case let .placeSearchResultSelected(placeResult):
+                return beginLocationSearch(.placeResult(placeResult), state: &state)
+
+            case let .listingMapPreviewRequested(coordinate):
+                return beginLocationSearch(.listingPreview(coordinate), state: &state)
+
+            case .researchButtonTapped:
+                return beginLocationSearch(.researchCurrentViewport, state: &state)
+
+            case let .listingSearchResponse(result):
+                return handleListingSearchResponse(result, state: &state)
+
+            case let .listingRowAppeared(listingID):
+                return handleListingRowAppeared(listingID, state: &state)
+
+            case .placeSearchDisplayClearButtonTapped:
+                state.selectedPlaceSearchTitle = nil
+                return .none
+
+            // 진단 추천 검색
+            case let .diagnosisResultRequested(diagnosisID):
+                return beginDiagnosisSearch(diagnosisID: diagnosisID, state: &state)
+
+            case let .diagnosisDetailResponse(result):
+                return handleDiagnosisDetailResponse(result, state: &state)
+
+            case let .diagnosisRecommendationsResponse(result):
+                return handleDiagnosisRecommendationsResponse(result, state: &state)
 
             case .diagnosisButtonTapped:
                 state.path.append(.chatBot(ChatBotFeature.State()))
@@ -72,188 +88,20 @@ struct MapFeature {
                 state.isDiagnosisButtonExpanded = false
                 return .none
 
-            case .locationSearchStarted:
-                state.listingSource = .locationSearch
-                state.activeDiagnosisID = nil
-                state.appliedFilterSource = .manual
-                state.placeSearchTarget = nil
-                state.selectedPlaceSearchTitle = nil
-                state.selectedMarkerID = nil
-                state.sheetMode = .listingList
-                state.isDiagnosisDetailLoading = false
-                state.diagnosisErrorMessage = nil
-                clearDiagnosisRecommendationState(state: &state)
-                let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
-                guard let viewport = state.currentViewport else { return cancelDiagnosisRequests }
-
-                return .merge(
-                    cancelDiagnosisRequests,
-                    startListingSearchEffect(state: &state, viewport: viewport)
-                )
-
-            case let .diagnosisResultRequested(diagnosisID):
-                state.path = StackState<Path.State>()
-                state.activeDiagnosisID = diagnosisID
-                state.listingSource = .diagnosis
-                state.selectedMarkerID = nil
-                state.sheetMode = .listingList
-                state.isFilterPresented = false
-                state.appliedFilterSource = .diagnosis
-                state.placeSearchTarget = nil
-                state.selectedPlaceSearchTitle = nil
-                state.isDiagnosisButtonExpanded = false
-                state.isDiagnosisMatchesButtonExpanded = true
-                state.showsResearchButton = false
-                state.lastSearchedViewport = nil
-                state.markers = []
-                state.listings = []
-                state.listingSearchResults = []
-                clearDiagnosisRecommendationState(state: &state)
-                state.isListingSearchLoading = false
-                state.isDiagnosisDetailLoading = true
-                state.isRecommendationsLoading = true
-                state.listingSearchErrorMessage = nil
-                state.diagnosisErrorMessage = nil
-                state.recommendationsErrorMessage = nil
-
-                let diagnosisClient = diagnosisClient
-                return .merge(
-                    .cancel(id: "MapFeature.diagnosisButtonAutoCollapse"),
-                    .cancel(id: "MapFeature.diagnosisDetail"),
-                    .cancel(id: "MapFeature.diagnosisRecommendations"),
-                    .cancel(id: "MapFeature.listingSearch"),
-                    .run { send in
-                        do {
-                            let detail = try await diagnosisClient.fetchDetail(diagnosisID)
-                            await send(.diagnosisDetailResponse(.success(detail)))
-                        } catch {
-                            await send(.diagnosisDetailResponse(.failure(error)))
-                        }
-                    }
-                    .cancellable(id: "MapFeature.diagnosisDetail", cancelInFlight: true),
-                    .run { send in
-                        do {
-                            let input = DiagnosisRecommendationsInput(diagnosisID: diagnosisID)
-                            let recommendations = try await diagnosisClient.fetchRecommendations(input)
-                            await send(.diagnosisRecommendationsResponse(.success(recommendations)))
-                        } catch {
-                            await send(.diagnosisRecommendationsResponse(.failure(error)))
-                        }
-                    }
-                    .cancellable(id: "MapFeature.diagnosisRecommendations", cancelInFlight: true)
-                )
-
-            case let .diagnosisDetailResponse(.success(detail)):
-                guard state.activeDiagnosisID == detail.diagnosisID else { return .none }
-                debugLogDiagnosisDetail(detail)
-                let filter = MapFilterState(diagnosisDetail: detail)
-                state.appliedFilter = filter
-                state.editingFilter = filter
-                state.isDiagnosisDetailLoading = false
-                state.diagnosisErrorMessage = nil
-                return .none
-
-            case let .diagnosisDetailResponse(.failure(error)):
-                guard state.listingSource == .diagnosis else { return .none }
-                debugLogDiagnosisError("detail", error)
-                state.isDiagnosisDetailLoading = false
-                state.diagnosisErrorMessage = error.localizedDescription
-                return .none
-
-            case let .exchangeRateResponse(.success(exchangeRate)):
-                applyExchangeRate(exchangeRate, to: &state)
-                return .none
-
-            case .exchangeRateResponse(.failure):
-                return .none
-
-            case let .diagnosisRecommendationsResponse(.success(recommendations)):
-                guard state.listingSource == .diagnosis else { return .none }
-                debugLogDiagnosisRecommendations(recommendations)
-                applyDiagnosisRecommendations(recommendations, to: &state)
-                state.isRecommendationsLoading = false
-                state.recommendationsErrorMessage = nil
-                return .none
-
-            case let .diagnosisRecommendationsResponse(.failure(error)):
-                guard state.listingSource == .diagnosis else { return .none }
-                debugLogDiagnosisError("recommendations", error)
-                state.isRecommendationsLoading = false
-                state.recommendationsErrorMessage = error.localizedDescription
-                state.diagnosisRecommendationSuggestions = nil
-                return .none
+            // 지도 viewport / 카메라
+            case let .viewportChanged(viewport):
+                return handleViewportChanged(viewport, state: &state)
 
             case .cameraMoveRequestHandled:
                 state.cameraMoveRequest = nil
                 return .none
 
+            // 매물 선택 / Navigation
             case let .markerTapped(id):
                 guard state.selectedMarkerID != id else { return .none }
                 state.selectedMarkerID = id
                 state.sheetMode = .selectedListing
                 return .none
-
-            case .searchButtonTapped:
-                state.path.append(.search(SearchFeature.initialState(userDefaultsClient: userDefaultsClient)))
-                return .none
-            case let .placeSearchResultSelected(placeResult):
-                return handlePlaceSearchResultSelected(placeResult, state: &state)
-            case let .listingMapPreviewRequested(coordinate):
-                return handleListingMapPreviewRequested(coordinate, state: &state)
-            case .placeSearchDisplayClearButtonTapped:
-                state.selectedPlaceSearchTitle = nil
-                return .none
-            case .researchButtonTapped:
-                guard let viewport = state.currentViewport else { return .none }
-                state.listingSource = .locationSearch
-                state.activeDiagnosisID = nil
-                state.placeSearchTarget = nil
-                state.selectedPlaceSearchTitle = nil
-                state.selectedMarkerID = nil
-                state.sheetMode = .listingList
-                state.isDiagnosisDetailLoading = false
-                state.diagnosisErrorMessage = nil
-                clearDiagnosisRecommendationState(state: &state)
-                return .merge(
-                    cancelDiagnosisRequestEffects(),
-                    startListingSearchEffect(state: &state, viewport: viewport)
-                )
-
-            case let .viewportChanged(viewport):
-                return handleViewportChanged(viewport, state: &state)
-
-            case let .listingRowAppeared(listingID):
-                return startNextPageEffect(appearedListingID: listingID, state: &state)
-
-            case let .listingSearchResponse(.success(page)):
-                guard state.listingSource == .locationSearch else { return .none }
-                debugLogListingSearchResponse(page)
-                state.isListingSearchLoading = false
-                state.listingSearchErrorMessage = nil
-                applyListingSearchPage(page, to: &state)
-                return .none
-
-            case let .listingSearchResponse(.failure(error)):
-                guard state.listingSource == .locationSearch else { return .none }
-                debugLogListingSearchError(error)
-                state.isListingSearchLoading = false
-                state.listingSearchErrorMessage = error.localizedDescription
-                return .none
-
-            case let .path(pathAction):
-                return handlePathAction(pathAction, state: &state)
-
-            case let .listingCardTapped(id):
-                state.path.append(
-                    .listingDetail(ListingDetailFeature.State(listingID: id, userType: state.userType))
-                )
-                return .none
-
-            case let .listingLikeButtonTapped(listingID):
-                return startFavoriteUpdateEffect(listingID: listingID, state: &state)
-
-            case let .favoriteStatusResponse(listingID, result):
-                return handleFavoriteStatusResponse(listingID: listingID, result: result, state: &state)
 
             case .selectedListingCardTapped:
                 guard let selectedMarkerID = state.selectedMarkerID else { return .none }
@@ -267,6 +115,20 @@ struct MapFeature {
                 state.sheetMode = .listingList
                 return .none
 
+            case let .listingCardTapped(id):
+                state.path.append(
+                    .listingDetail(ListingDetailFeature.State(listingID: id, userType: state.userType))
+                )
+                return .none
+
+            case .searchButtonTapped:
+                state.path.append(.search(SearchFeature.initialState(userDefaultsClient: userDefaultsClient)))
+                return .none
+
+            case let .path(pathAction):
+                return handlePathAction(pathAction, state: &state)
+
+            // 필터
             case .filterButtonTapped:
                 state.editingFilter = state.appliedFilter
                 state.isFilterPresented = true
@@ -306,6 +168,20 @@ struct MapFeature {
 
             case .filterResetButtonTapped:
                 state.editingFilter = MapFilterState()
+                return .none
+
+            // 즐겨찾기 / 환율
+            case let .listingLikeButtonTapped(listingID):
+                return startFavoriteUpdateEffect(listingID: listingID, state: &state)
+
+            case let .favoriteStatusResponse(listingID, result):
+                return handleFavoriteStatusResponse(listingID: listingID, result: result, state: &state)
+
+            case let .exchangeRateResponse(.success(exchangeRate)):
+                applyExchangeRate(exchangeRate, to: &state)
+                return .none
+
+            case .exchangeRateResponse(.failure):
                 return .none
             }
         }
