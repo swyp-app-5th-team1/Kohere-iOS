@@ -118,7 +118,7 @@ struct LivingGuideDetailView: View {
         .padding(.top, statusBarHeight)
         .frame(maxWidth: .infinity)
         .frame(height: navigationBarHeight, alignment: .bottom)
-        .background(showsOpaqueNavigationBar ? Color.common0 : Color.clear)
+        .background(showsOpaqueNavigationBar ? Color.common0.opacity(0.8) : Color.clear)
         .zIndex(2)
     }
 
