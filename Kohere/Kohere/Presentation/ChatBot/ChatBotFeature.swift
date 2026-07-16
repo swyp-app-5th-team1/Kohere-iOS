@@ -114,7 +114,7 @@ struct ChatBotFeature {
         case findButtonTapped
         case submitResponse(Result<DiagnosisSubmission, Error>)
         case resetButtonTapped
-        case mapTabRequested(diagnosisID: String?)
+        case mapRequested(MapEntryRequest)
     }
     
     // MARK: - Reducer Body
@@ -190,7 +190,7 @@ struct ChatBotFeature {
                         return .send(.onAppear)
 
                     case "NO":
-                        return .send(.mapTabRequested(diagnosisID: nil))
+                        return .send(.mapRequested(.browseListings))
 
                     default:
                         return .none
@@ -298,7 +298,10 @@ struct ChatBotFeature {
 
             case let .submitResponse(.success(submission)):
                 state.isSubmitting = false
-                return .send(.mapTabRequested(diagnosisID: submission.diagnosisID))
+                let request = Int(submission.diagnosisID)
+                    .map(MapEntryRequest.diagnosis(id:))
+                    ?? .browseListings
+                return .send(.mapRequested(request))
 
             case .submitResponse(.failure):
                 state.isSubmitting = false
@@ -308,7 +311,7 @@ struct ChatBotFeature {
                 state.resetConversation()
                 return .send(.onAppear)
 
-            case .mapTabRequested:
+            case .mapRequested:
                 return .none
             }
         }

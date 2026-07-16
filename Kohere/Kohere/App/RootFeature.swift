@@ -200,9 +200,9 @@ struct RootFeature {
             case .saveAuthResponse(.failure):
                 return .none
 
-            case let .home(.mapTabRequested(diagnosisID)):
+            case let .home(.mapRequested(request)):
                 state.home.path.removeAll()
-                return openMap(diagnosisID: diagnosisID, state: &state)
+                return openMap(request: request, state: &state)
 
             case let .home(.mapPlaceSearchRequested(placeResult)):
                 state.home.path.removeAll()
@@ -263,9 +263,9 @@ struct RootFeature {
                 guard let route = popup.secondaryRoute else { return .none }
                 return handlePopupRoute(route)
 
-            case let .map(.path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID))))):
+            case let .map(.path(.element(id: _, action: .chatBot(.mapRequested(request))))):
                 state.map.path.removeAll()
-                return openMap(diagnosisID: diagnosisID, state: &state)
+                return openMap(request: request, state: &state)
 
             case .map(.path(.element(id: _, action: .listingApplication(.delegate(.chatTabRequested))))):
                 state.map.path.removeAll()
@@ -281,9 +281,9 @@ struct RootFeature {
                 synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
 
-            case let .chat(.mapTabRequested(diagnosisID)):
+            case let .chat(.mapRequested(request)):
                 state.chat.path.removeAll()
-                return openMap(diagnosisID: diagnosisID, state: &state)
+                return openMap(request: request, state: &state)
 
             case let .more(.popupRequested(popup)):
                 state.popup = popup

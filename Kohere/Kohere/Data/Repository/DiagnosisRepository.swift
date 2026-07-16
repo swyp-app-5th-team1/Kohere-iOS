@@ -71,7 +71,8 @@ final class DiagnosisRepository: DiagnosisInterface {
                 diagnosisID: input.diagnosisID,
                 query: queryDTO,
                 environment
-            )
+            ),
+            debugRawJSONLabel: "DiagnosisRecommendations"
         )
 
         return responseDTO.toEntity()
@@ -164,16 +165,8 @@ private extension DiagnosisDetailResponseDTO {
 
 private extension DiagnosisRecommendationsResponseDTO {
     func toEntity() -> DiagnosisRecommendations {
-        let listingEntities = (content ?? []).map { $0.toEntity() }
-        let markerEntities = (markers ?? []).compactMap { $0.toEntity() }
-        let fallbackMarkers = listingEntities.compactMap { listing -> MapMarkerItem? in
-            guard let coordinate = listing.coordinate else { return nil }
-            return MapMarkerItem(id: listing.listingID, coordinate: coordinate)
-        }
-
         return DiagnosisRecommendations(
-            listings: listingEntities,
-            markers: markerEntities.isEmpty ? fallbackMarkers : markerEntities,
+            listings: (content ?? []).map { $0.toEntity() },
             page: page?.toEntity(),
             suggestions: suggestions?.toEntity()
         )
@@ -200,16 +193,6 @@ private extension DiagnosisRecommendedListingResponseDTO {
             thumbnailURL: thumbnailUrl,
             coordinate: coordinate,
             conditions: (conditions ?? []).compactMap(RoomCondition.init(conditionCode:))
-        )
-    }
-}
-
-private extension DiagnosisRecommendationMarkerResponseDTO {
-    func toEntity() -> MapMarkerItem? {
-        guard let lat, let lng else { return nil }
-        return MapMarkerItem(
-            id: listingId,
-            coordinate: MapCoordinate(latitude: lat, longitude: lng)
         )
     }
 }

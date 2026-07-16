@@ -8,16 +8,16 @@
 import ComposableArchitecture
 
 extension RootFeature {
-    func openMap(diagnosisID: String?, state: inout State) -> Effect<Action> {
+    func openMap(request: MapEntryRequest, state: inout State) -> Effect<Action> {
         state.selectedTab = .map
 
-        guard let diagnosisID,
-              let diagnosisID = Int(diagnosisID)
-        else {
-            return .send(.map(.locationSearchStarted))
-        }
+        switch request {
+        case .browseListings:
+            return .send(.map(.browseListingsRequested))
 
-        return .send(.map(.diagnosisResultRequested(diagnosisID: diagnosisID)))
+        case let .diagnosis(id):
+            return .send(.map(.diagnosisResultRequested(diagnosisID: id)))
+        }
     }
 
     func openListingMapPreview(

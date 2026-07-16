@@ -63,7 +63,7 @@ struct ChatFeature {
         case chatRoomTapped(id: Int)
         case searchButtonTapped
         case roomFinderBannerTapped
-        case mapTabRequested(diagnosisID: String?)
+        case mapRequested(MapEntryRequest)
     }
     
     // MARK: - Reducer Body
@@ -117,8 +117,8 @@ struct ChatFeature {
                 _ = state.path.popLast()
                 return .none
 
-            case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
-                return .send(.mapTabRequested(diagnosisID: diagnosisID))
+            case let .path(.element(id: _, action: .chatBot(.mapRequested(request)))):
+                return .send(.mapRequested(request))
                 
             case .searchButtonTapped:
                 // TODO: 검색 기능 구현 예정
@@ -128,7 +128,7 @@ struct ChatFeature {
                 state.path.append(.chatBot(ChatBotFeature.State()))
                 return .none
 
-            case .mapTabRequested:
+            case .mapRequested:
                 return .none
                 
             case .path:

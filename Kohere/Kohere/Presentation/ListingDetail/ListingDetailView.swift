@@ -17,7 +17,6 @@ struct ListingDetailView: View {
     @State private var showsPinnedTabs = false
     @State private var selectedSection: ListingDetailSection = .roomOffers
     @State private var pendingProgrammaticScrollSection: ListingDetailSection?
-    @State private var programmaticScrollSelectionRevision = 0
     @State private var sectionMinYBySection: [ListingDetailSection: CGFloat] = [:]
     @State private var resolvedScrollView: UIScrollView?
 
@@ -26,7 +25,6 @@ struct ListingDetailView: View {
     private let sectionTabsPinOffset: CGFloat = 356
     private let sectionTabsHeight: CGFloat = 44
     private let bottomContentPadding: CGFloat = 20
-    private let programmaticScrollSelectionFallbackDelay: TimeInterval = 0.6
     private let detailScrollCoordinateSpace = "ListingDetailScrollCoordinateSpace"
 
     private var stickyHeaderHeight: CGFloat {
@@ -165,11 +163,10 @@ struct ListingDetailView: View {
             topActivatedSection: topActivatedSection
         ) ?? topActivatedSection
 
-        if let pendingProgrammaticScrollSection {
-            if activeSection == pendingProgrammaticScrollSection {
-                finishProgrammaticScrollSelection(for: pendingProgrammaticScrollSection)
-            }
-            return
+        // 탭으로 이동한 뒤 보이는 후행 섹션이 선택값을 덮지 않도록, 손 스크롤 전까지 선택을 유지한다.
+        if pendingProgrammaticScrollSection != nil {
+            guard isUserDrivenScroll else { return }
+            pendingProgrammaticScrollSection = nil
         }
 
         if selectedSection != activeSection {
@@ -257,28 +254,16 @@ struct ListingDetailView: View {
     }
 
     private func beginProgrammaticScrollSelection(to section: ListingDetailSection) {
-        programmaticScrollSelectionRevision += 1
-        let revision = programmaticScrollSelectionRevision
-
         pendingProgrammaticScrollSection = section
 
         if selectedSection != section {
             selectedSection = section
         }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + programmaticScrollSelectionFallbackDelay) {
-            guard programmaticScrollSelectionRevision == revision,
-                  pendingProgrammaticScrollSection == section else { return }
-            finishProgrammaticScrollSelection(for: section)
-        }
     }
 
-    private func finishProgrammaticScrollSelection(for section: ListingDetailSection) {
-        pendingProgrammaticScrollSection = nil
-
-        if selectedSection != section {
-            selectedSection = section
-        }
+    private var isUserDrivenScroll: Bool {
+        guard let scrollView = resolvedScrollView else { return false }
+        return scrollView.isTracking || scrollView.isDragging || scrollView.isDecelerating
     }
 
     private func topChromeOverlay(scrollProxy: ScrollViewProxy) -> some View {

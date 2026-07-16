@@ -63,7 +63,6 @@ nonisolated struct DiagnosisRecommendationSort: Equatable {
 
 struct DiagnosisRecommendations: Equatable {
     let listings: [DiagnosisRecommendedListing]
-    let markers: [MapMarkerItem]
     let page: DiagnosisRecommendationPage?
     let suggestions: DiagnosisRecommendationSuggestions?
 }
