@@ -234,6 +234,7 @@ final class MapListingNavigationTests: XCTestCase {
         initialState.listingSource = .diagnosis
         initialState.activeDiagnosisID = 1
         initialState.appliedFilterSource = .diagnosis
+        initialState.isListingSearchLoading = true
         initialState.isRecommendationsLoading = true
         initialState.recommendationsErrorMessage = "이전 추천 오류"
 
@@ -248,6 +249,7 @@ final class MapListingNavigationTests: XCTestCase {
             $0.listingSource = .locationSearch
             $0.activeDiagnosisID = nil
             $0.appliedFilterSource = .manual
+            $0.isListingSearchLoading = false
             $0.isRecommendationsLoading = false
             $0.recommendationsErrorMessage = nil
             $0.pendingViewportSearchTarget = MapPendingViewportSearchTarget(coordinate: coordinate)

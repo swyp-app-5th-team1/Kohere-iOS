@@ -28,6 +28,7 @@ extension MapFeature {
 
     func handleMapDismissed(state: inout State) -> Effect<Action> {
         state.isDiagnosisButtonExpanded = false
+        state.isListingSearchLoading = false
         return .merge(
             .cancel(id: MapEffectID.exchangeRate),
             .cancel(id: MapEffectID.diagnosisButtonAutoCollapse),

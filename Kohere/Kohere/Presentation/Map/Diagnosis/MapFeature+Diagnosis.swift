@@ -48,6 +48,7 @@ extension MapFeature {
                     let detail = try await diagnosisClient.fetchDetail(diagnosisID)
                     await send(.diagnosisDetailResponse(.success(detail)))
                 } catch {
+                    guard !isDiagnosisRequestCancellation(error) else { return }
                     await send(.diagnosisDetailResponse(.failure(error)))
                 }
             }
@@ -58,6 +59,7 @@ extension MapFeature {
                     let recommendations = try await diagnosisClient.fetchRecommendations(input)
                     await send(.diagnosisRecommendationsResponse(.success(recommendations)))
                 } catch {
+                    guard !isDiagnosisRequestCancellation(error) else { return }
                     await send(.diagnosisRecommendationsResponse(.failure(error)))
                 }
             }
@@ -140,6 +142,7 @@ extension MapFeature {
                 let recommendations = try await diagnosisClient.fetchRecommendations(input)
                 await send(.diagnosisRecommendationsResponse(.success(recommendations)))
             } catch {
+                guard !isDiagnosisRequestCancellation(error) else { return }
                 await send(.diagnosisRecommendationsResponse(.failure(error)))
             }
         }
@@ -202,4 +205,10 @@ extension MapFeature {
         recommendations.append(contentsOf: uniqueRecommendations)
     }
 
+}
+
+nonisolated private func isDiagnosisRequestCancellation(_ error: Error) -> Bool {
+    Task.isCancelled
+        || error is CancellationError
+        || (error as? URLError)?.code == .cancelled
 }

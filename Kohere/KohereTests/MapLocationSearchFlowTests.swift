@@ -11,6 +11,27 @@ import XCTest
 
 @MainActor
 final class MapLocationSearchFlowTests: XCTestCase {
+    func testMapDismissedStopsListingSearchLoadingWithoutClearingResults() async {
+        let listing = makeListingItem()
+        var initialState = MapFeature.State()
+        initialState.listingSource = .locationSearch
+        initialState.listings = [listing]
+        initialState.listingSearchErrorMessage = "이전 검색 오류"
+        initialState.isListingSearchLoading = true
+
+        let store = TestStore(initialState: initialState) {
+            MapFeature()
+        }
+
+        await store.send(.mapDismissed) {
+            $0.isListingSearchLoading = false
+        }
+
+        XCTAssertEqual(store.state.listingSource, .locationSearch)
+        XCTAssertEqual(store.state.listings, [listing])
+        XCTAssertEqual(store.state.listingSearchErrorMessage, "이전 검색 오류")
+    }
+
     func testBrowseListingsLeavesDiagnosisModeWithoutClearingVisibleResults() async {
         let coordinate = MapCoordinate(latitude: 37.5559, longitude: 126.9250)
         let marker = MapMarkerItem(id: "listing-1", coordinate: coordinate)
@@ -69,6 +90,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
         initialState.appliedFilterSource = .diagnosis
         initialState.markers = [MapMarkerItem(id: "listing-1", coordinate: coordinate)]
         initialState.listings = [makeListingItem()]
+        initialState.isListingSearchLoading = true
 
         let store = TestStore(initialState: initialState) {
             MapFeature()
@@ -84,6 +106,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
                 coordinate: coordinate,
                 targetPosition: .center
             )
+            $0.isListingSearchLoading = false
             $0.listings = []
             $0.markers = []
         }

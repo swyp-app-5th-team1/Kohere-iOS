@@ -88,6 +88,7 @@ extension MapFeature {
             state.showsResearchButton = false
             state.lastSearchedViewport = nil
             state.listingPageInfo = nil
+            state.isListingSearchLoading = false
             state.listingSearchErrorMessage = nil
             state.listingSearchResults = []
             state.listings = []
@@ -113,6 +114,7 @@ extension MapFeature {
             state.showsResearchButton = false
             state.lastSearchedViewport = nil
             state.listingPageInfo = nil
+            state.isListingSearchLoading = false
             state.listingSearchErrorMessage = nil
             return .merge(
                 .cancel(id: MapEffectID.listingSearch),
