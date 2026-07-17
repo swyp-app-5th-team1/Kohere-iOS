@@ -5,6 +5,7 @@
 //  Created by Codex on 7/9/26.
 //
 
+import ComposableArchitecture
 import Foundation
 import OSLog
 
@@ -166,6 +167,31 @@ extension RootFeature {
         let path = context?.requestPath ?? "unknown"
         RootAuthLogger.value.notice(
             "event=route_login attemptID=\(attemptID, privacy: .public) path=\(path, privacy: .public) reason=\(reason, privacy: .public)"
+        )
+    }
+
+    func fetchCurrentUserIfNeeded(state: inout State) -> Effect<Action> {
+        guard state.authInfo?.onboardingRequired == false,
+              state.currentUser == nil,
+              !state.isCurrentUserLoading
+        else {
+            return .none
+        }
+
+        state.isCurrentUserLoading = true
+        let fetchCurrentUserUseCase = fetchCurrentUserUseCase
+
+        return .run { send in
+            do {
+                let user = try await fetchCurrentUserUseCase.execute()
+                await send(.currentUserResponse(.success(user)))
+            } catch {
+                await send(.currentUserResponse(.failure(error)))
+            }
+        }
+        .cancellable(
+            id: "RootFeature.fetchCurrentUser",
+            cancelInFlight: true
         )
     }
 
