@@ -151,7 +151,7 @@ struct TenantOnboardingFeature {
                 state.lastVerificationCodeSentEmail = requestedEmail
                 state.verificationCode = ""
                 state.isEmailVerified = false
-                state.emailMessage = response.message ?? "Verification code sent to your email."
+                state.emailMessage = String(localized: "onboarding.verification.emailSent")
                 state.emailVerificationCodeErrorMessage = nil
                 Self.debugLogEmailVerification(
                     "send code succeeded. email=\(Self.maskedEmail(requestedEmail)), message=\(response.message ?? "nil")"
@@ -191,13 +191,17 @@ struct TenantOnboardingFeature {
                 state.isEmailVerificationRequesting = false
                 state.isEmailVerified = response.verified
                 state.emailMessage = nil
-                state.emailVerificationCodeErrorMessage = response.verified ? nil : "This code is incorrect - Please try again"
+                state.emailVerificationCodeErrorMessage = response.verified
+                    ? nil
+                    : String(localized: "onboarding.verification.codeIncorrect")
                 return .none
 
             case let .confirmVerificationCodeResponse(.failure(error)):
                 state.isEmailVerificationRequesting = false
                 if case let .serverError(code, _) = error, code == "AUTH_EMAIL_VERIFICATION_FAILED" {
-                    state.emailVerificationCodeErrorMessage = "This code is incorrect or expired - Please try again"
+                    state.emailVerificationCodeErrorMessage = String(
+                        localized: "onboarding.verification.codeIncorrectOrExpired"
+                    )
                 }
                 return .none
 

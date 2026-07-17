@@ -122,7 +122,7 @@ struct LandlordOnboardingFeature {
                     }
                 }
 
-            case let .sendPhoneVerificationCodeResponse(requestedPhoneNumber, .success(response)):
+            case let .sendPhoneVerificationCodeResponse(requestedPhoneNumber, .success):
                 guard state.phoneNumber == requestedPhoneNumber else {
                     return .none
                 }
@@ -131,7 +131,7 @@ struct LandlordOnboardingFeature {
                 state.lastVerificationCodeSentPhoneNumber = requestedPhoneNumber
                 state.phoneVerificationCode = ""
                 state.isPhoneVerified = false
-                state.phoneMessage = response.message ?? "Verification code sent to your phone."
+                state.phoneMessage = "휴대폰으로 인증 코드를 보냈어요."
                 state.phoneVerificationCodeErrorMessage = nil
                 return .none
 
@@ -165,13 +165,15 @@ struct LandlordOnboardingFeature {
                 state.isPhoneVerificationRequesting = false
                 state.isPhoneVerified = response.verified
                 state.phoneMessage = nil
-                state.phoneVerificationCodeErrorMessage = response.verified ? nil : "This code is incorrect - Please try again"
+                state.phoneVerificationCodeErrorMessage = response.verified
+                    ? nil
+                    : "인증 코드가 올바르지 않아요. 다시 시도해주세요."
                 return .none
 
             case let .confirmPhoneVerificationCodeResponse(.failure(error)):
                 state.isPhoneVerificationRequesting = false
                 if case let .serverError(code, _) = error, code == "AUTH_PHONE_VERIFICATION_FAILED" {
-                    state.phoneVerificationCodeErrorMessage = "This code is incorrect or expired - Please try again"
+                    state.phoneVerificationCodeErrorMessage = "인증 코드가 올바르지 않거나 만료됐어요. 다시 시도해주세요."
                 }
                 return .none
 

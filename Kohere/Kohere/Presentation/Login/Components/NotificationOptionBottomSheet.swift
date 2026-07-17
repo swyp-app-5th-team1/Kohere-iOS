@@ -30,12 +30,12 @@ struct NotificationOptionBottomSheet: View {
                 .padding(.bottom, 20)
             
             VStack(alignment: .leading, spacing: 20) {
-                Text("좋은 매물을 놓치지 않도록\n알림을 드릴게요")
+                Text("login.notification.title")
                     .kohereTextStyle(.heading2Bold)
                     .foregroundColor(.neutral80)
                     .multilineTextAlignment(.leading)
                 
-                Text("‘설정 > 앱 > 코히어’에서 알림설정 변경이 가능합니다.")
+                Text("login.notification.description")
                     .kohereTextStyle(.caption2Regular)
                     .foregroundColor(.neutral60)
             }
@@ -48,7 +48,7 @@ struct NotificationOptionBottomSheet: View {
                 Button {
                     onAllowTapped()
                 } label: {
-                    Text("알림 받기")
+                    Text("login.notification.allowButton")
                         .kohereTextStyle(.label1Semibold)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -60,7 +60,7 @@ struct NotificationOptionBottomSheet: View {
                 Button {
                     onSkipTapped()
                 } label: {
-                    Text("건너뛰기")
+                    Text("common.skip")
                         .kohereTextStyle(.label2Medium)
                         .foregroundColor(.labelAlternative)
                 }

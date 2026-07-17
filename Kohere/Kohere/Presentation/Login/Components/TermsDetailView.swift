@@ -18,11 +18,11 @@ enum TermsDetailKind: String, Equatable, Identifiable {
     var title: String {
         switch self {
         case .service:
-            "서비스 이용약관"
+            String(localized: "login.terms.service.title")
         case .privacy:
-            "개인정보처리방침"
+            String(localized: "login.terms.privacy.title")
         case .marketing:
-            "마케팅 정보 수신 동의"
+            String(localized: "login.terms.marketing.title")
         }
     }
 
@@ -94,7 +94,7 @@ struct TermsDetailView: View {
             Button {
                 onAgreeTapped()
             } label: {
-                Text("동의하기")
+                Text("common.agree")
                     .kohereTextStyle(.label1Semibold)
                     .foregroundColor(.staticWhite)
                     .frame(maxWidth: .infinity)

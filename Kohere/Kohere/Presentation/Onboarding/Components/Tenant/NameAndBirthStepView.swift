@@ -20,14 +20,14 @@ struct NameAndBirthStepView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 72) {
-            Text("Welcome!\nLet's check your details.")
+            Text("onboarding.tenant.name.title")
                 .kohereTextStyle(.heading1Bold)
                 .foregroundColor(.neutral90)
                 .padding(.top, 40)
             
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Last Name")
+                    Text("onboarding.profile.lastName")
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
                     
@@ -42,7 +42,7 @@ struct NameAndBirthStepView: View {
                 .zIndex(1)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("First Name")
+                    Text("onboarding.profile.firstName")
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
                     
@@ -60,7 +60,7 @@ struct NameAndBirthStepView: View {
                             .resizable()
                             .frame(width: 12, height: 12)
                         
-                        Text("Enter your name as shown on your passport")
+                        Text("onboarding.name.passportHint")
                             .kohereTextStyle(.caption2Medium)
                     }
                     .foregroundStyle(.primaryNormal)
@@ -69,7 +69,7 @@ struct NameAndBirthStepView: View {
                 .zIndex(2)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Date of Birth")
+                    Text("onboarding.profile.birthDate")
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
                     

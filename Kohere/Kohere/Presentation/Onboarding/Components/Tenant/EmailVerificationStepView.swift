@@ -20,12 +20,12 @@ struct EmailVerificationStepView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 72) {
-            Text("Verify your email\nand you're all set")
+            Text("onboarding.tenant.email.title")
                 .kohereTextStyle(.heading1Bold)
                 .foregroundColor(.coolNeutral90)
 
             VStack(alignment: .leading, spacing: 16) {
-                Text("E-mail")
+                Text("onboarding.profile.email")
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(.coolNeutral90)
 
@@ -85,12 +85,22 @@ struct EmailVerificationStepView: View {
 
 extension EmailVerificationStepView {
     private var verificationButtonTitle: some View {
-        Text(store.isEmailVerified ? "Verified" : (store.isCodeSent ? "Resend" : "Verify"))
+        Text(verificationButtonTitleKey)
             .kohereTextStyle(.label2Medium)
             .foregroundColor(verificationButtonTextColor)
             .frame(width: 80, height: 40)
             .background(verificationButtonBackgroundColor)
             .cornerRadius(12)
+    }
+
+    private var verificationButtonTitleKey: LocalizedStringKey {
+        if store.isEmailVerified {
+            "common.verified"
+        } else if store.isCodeSent {
+            "common.resend"
+        } else {
+            "common.verify"
+        }
     }
 
     private var verificationButtonTextColor: Color {
@@ -114,7 +124,7 @@ extension EmailVerificationStepView {
     }
 
     private var confirmButtonTitle: some View {
-        Text("Confirm")
+        Text("common.confirm")
             .kohereTextStyle(.label2Medium)
             .foregroundColor(store.canConfirmEmailVerificationCode && !store.isEmailVerified && !store.isEmailVerificationRequesting ? .staticWhite : .labelAssistive)
             .frame(width: 80, height: 40)
@@ -124,7 +134,7 @@ extension EmailVerificationStepView {
 
     @ViewBuilder private var emailSupportText: some View {
         if store.hasEmailFormatError {
-            Text("Please enter a valid email address")
+            Text("onboarding.email.error.invalidFormat")
                 .kohereTextStyle(.caption2Medium)
                 .foregroundStyle(.statusDanger)
                 .padding(.leading, 8)
