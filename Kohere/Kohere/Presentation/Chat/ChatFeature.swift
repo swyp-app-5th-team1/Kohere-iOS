@@ -24,8 +24,25 @@ enum ChatParticipantRole: Equatable {
     }
 }
 
+private extension ChatParticipantRole {
+    var userType: UserType {
+        switch self {
+        case .tenant:
+            return .tenant
+        case .landlord:
+            return .landlord
+        }
+    }
+}
+
 @Reducer
 struct ChatFeature {
+    enum SwipeAction: Equatable {
+        case report
+        case block
+        case delete
+    }
+
     @Dependency(\.fetchBookingsUseCase)
     var fetchBookingsUseCase
     
@@ -33,6 +50,7 @@ struct ChatFeature {
     enum Path {
         case chatDetail(ChatDetailFeature)
         case chatBot(ChatBotFeature)
+        case listingDetail(ListingDetailFeature)
     }
     
     // MARK: - State
@@ -61,7 +79,8 @@ struct ChatFeature {
         case bookingListResponse(Result<BookingPage, Error>)
         case path(StackActionOf<Path>)
         case chatRoomTapped(id: Int)
-        case searchButtonTapped
+        case swipeActionTapped(SwipeAction, roomID: Int)
+        case popupRequested(AppPopup)
         case roomFinderBannerTapped
         case mapTabRequested(diagnosisID: String?)
     }
@@ -84,7 +103,7 @@ struct ChatFeature {
                         await send(.bookingListResponse(.failure(error)))
                     }
                 }
-                
+
             case let .bookingListResponse(.success(page)):
                 state.isLoading = false
                 state.errorMessage = nil
@@ -108,6 +127,13 @@ struct ChatFeature {
                     )
                 }
                 return .none
+
+            case let .swipeActionTapped(swipeAction, roomID):
+                guard state.chatRooms.contains(where: { $0.id == roomID }) else { return .none }
+                return .send(.popupRequested(Self.popup(for: swipeAction)))
+
+            case .popupRequested:
+                return .none
                 
             case .path(.element(id: _, action: .chatDetail(.backButtonTapped))):
                 _ = state.path.popLast()
@@ -119,9 +145,21 @@ struct ChatFeature {
 
             case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
                 return .send(.mapTabRequested(diagnosisID: diagnosisID))
-                
-            case .searchButtonTapped:
-                // TODO: 검색 기능 구현 예정
+
+            case let .path(.element(id: _, action: .chatDetail(.delegate(.listingDetailRequested(listingID))))):
+                state.path.append(
+                    .listingDetail(
+                        ListingDetailFeature.State(
+                            listingID: listingID,
+                            userType: state.participantRole.userType,
+                            isApplicationDisabled: true
+                        )
+                    )
+                )
+                return .none
+
+            case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
+                _ = state.path.popLast()
                 return .none
 
             case .roomFinderBannerTapped:
@@ -136,6 +174,29 @@ struct ChatFeature {
             }
         }
         .forEach(\.path, action: \.path)
+    }
+}
+
+private extension ChatFeature {
+    static func popup(for action: SwipeAction) -> AppPopup {
+        let content: (messageKey: String.LocalizationValue, primaryTitleKey: String.LocalizationValue)
+
+        switch action {
+        case .report:
+            content = ("chat.popup.report.message", "chat.popup.report.primary")
+        case .block:
+            content = ("chat.popup.block.message", "chat.popup.block.primary")
+        case .delete:
+            content = ("chat.popup.delete.message", "chat.popup.delete.primary")
+        }
+
+        return .action(
+            AppPopup.Action(
+                message: String(localized: content.messageKey),
+                primaryTitle: String(localized: content.primaryTitleKey),
+                secondaryTitle: String(localized: "common.cancel")
+            )
+        )
     }
 }
 
@@ -178,12 +239,17 @@ struct ChatDetailFeature {
     }
     
     // MARK: - Action
+
+    enum Delegate: Equatable {
+        case listingDetailRequested(String)
+    }
     
     enum Action {
         case onAppear
         case bookingDetailResponse(Result<BookingDetail, Error>)
         case backButtonTapped
         case viewDetailsButtonTapped
+        case delegate(Delegate)
     }
     // MARK: - Reducer Body
     
@@ -218,8 +284,11 @@ struct ChatDetailFeature {
                 
             case .backButtonTapped:
                 return .none
+
             case .viewDetailsButtonTapped:
-                print("채팅방 id: \(state.chatRoom.id)")
+                return .send(.delegate(.listingDetailRequested(state.chatRoom.listingID)))
+
+            case .delegate:
                 return .none
             }
         }
