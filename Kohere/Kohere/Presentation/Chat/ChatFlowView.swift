@@ -33,6 +33,10 @@ struct ChatFlowView: View {
             case let .chatBot(chatBotStore):
                 ChatBotView(store: chatBotStore)
                     .navigationBarHidden(true)
+
+            case let .listingDetail(listingDetailStore):
+                ListingDetailView(store: listingDetailStore)
+                    .navigationBarHidden(true)
             }
         }
         .toolbar(store.path.isEmpty ? .visible : .hidden, for: .tabBar)

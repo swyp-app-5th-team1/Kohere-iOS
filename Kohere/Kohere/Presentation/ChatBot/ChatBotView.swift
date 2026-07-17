@@ -68,7 +68,7 @@ extension ChatBotView {
                 .padding(.top, 20)
                 .padding(.bottom, 40)
             }
-            .onChange(of: store.currentStep) { _, _ in
+            .onChange(of: store.history.count) { _, _ in
                 scrollToLastUserMessage(with: proxy)
             }
         }

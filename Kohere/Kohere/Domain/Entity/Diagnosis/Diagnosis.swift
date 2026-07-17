@@ -5,13 +5,13 @@
 //  Created by mandoo on 6/26/26.
 //
 
-enum SelectType: Equatable {
+enum SelectType: Equatable, Sendable {
     case single
     case multi
     case slider
 }
 
-struct Diagnosis: Equatable {
+struct Diagnosis: Equatable, Sendable {
     let step: Int
     let field: String
     let question: String
@@ -20,7 +20,14 @@ struct Diagnosis: Equatable {
     let options: [DiagnosisOption]
 }
 
-struct DiagnosisOption: Equatable {
+struct DiagnosisOption: Equatable, Sendable {
     let id: String
     let title: String
+}
+
+enum DiagnosisFlowResult: Equatable, Sendable {
+    case nextQuestion(Diagnosis)
+    case restart
+    case terminated
+    case completed(diagnosisID: String)
 }
