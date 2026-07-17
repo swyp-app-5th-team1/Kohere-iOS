@@ -2625,7 +2625,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "추천 매물"
+            "value" : "맞춤 매물"
           }
         }
       }
@@ -2642,7 +2642,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "매칭 시작하기"
+            "value" : "맞춤 추천 받기"
           }
         }
       }
@@ -2659,7 +2659,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI로 딱 맞는 방 찾기"
+            "value" : "챗봇과 함께 나에게 맞는 방 찾기"
           }
         }
       }
@@ -2670,13 +2670,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Try again for better matches"
+            "value" : "AI filtered your rooms. Tap to retry"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "더 잘 맞는 매물 다시 찾기"
+            "value" : "추천 결과를 확인하거나 다시 추천받아 보세요."
           }
         }
       }
@@ -2710,7 +2710,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "상관없음"
+            "value" : "전체"
           }
         }
       }
@@ -2745,6 +2745,150 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "월세"
+          }
+        }
+      }
+    },
+    "map.filter.option.addressRegistration" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Address Registration"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전입 신고 가능"
+          }
+        }
+      }
+    },
+    "map.filter.option.doubleRoom" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Double Room"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2인실"
+          }
+        }
+      }
+    },
+    "map.filter.option.englishSupport" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "English OK"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영어 소통 가능"
+          }
+        }
+      }
+    },
+    "map.filter.option.femaleOnly" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Female Only"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여성 전용"
+          }
+        }
+      }
+    },
+    "map.filter.option.mealsIncluded" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meals Included"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "식사 제공"
+          }
+        }
+      }
+    },
+    "map.filter.option.moveInNow" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move-in Now"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "즉시 입주"
+          }
+        }
+      }
+    },
+    "map.filter.option.noARCRequired" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No ARC"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ARC 없음"
+          }
+        }
+      }
+    },
+    "map.filter.option.noMaintenanceFee" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Maint. Fee"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "관리비 없음"
+          }
+        }
+      }
+    },
+    "map.filter.option.privateBathroom" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private Bath"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개인 화장실"
           }
         }
       }
@@ -2982,7 +3126,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이 지역 검색하기"
+            "value" : "이 지역에서 다시 검색"
           }
         }
       }

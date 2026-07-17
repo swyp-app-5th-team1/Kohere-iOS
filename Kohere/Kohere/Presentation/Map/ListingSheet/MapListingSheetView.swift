@@ -68,7 +68,7 @@ struct MapListingSheetView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(Text("필터 설정"))
+                .accessibilityLabel(Text("map.filter.accessibility.open"))
 
                 ForEach(filterChips) { chip in
                     MapListingFilterChip(item: chip) {

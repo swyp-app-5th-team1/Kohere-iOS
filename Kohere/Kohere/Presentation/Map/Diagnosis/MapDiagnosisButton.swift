@@ -41,7 +41,7 @@ struct MapDiagnosisButton: View {
                 discoveryExpandedContent
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("AI room matching diagnosis")
+            .accessibilityLabel(Text("map.diagnosis.accessibility.collapsed"))
 
         case .matches:
             matchesExpandedContent
@@ -53,10 +53,10 @@ struct MapDiagnosisButton: View {
             sparkleIcon(color: .secondary5)
 
             VStack(alignment: .leading, spacing: 0) {
-                Text("Find Your Perfect Room with AI")
+                Text("map.diagnosis.title")
                     .kohereTextStyle(.label3Semibold)
 
-                Text("Start Matching")
+                Text("map.diagnosis.startButton")
                     .kohereTextStyle(.caption2Regular)
             }
             .foregroundStyle(.secondary5)
@@ -74,10 +74,10 @@ struct MapDiagnosisButton: View {
                     sparkleIcon(color: .primary50)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Your Matches")
+                        Text("map.diagnosis.matchesTitle")
                             .kohereTextStyle(.label3Semibold)
 
-                        Text("Try again for better matches")
+                        Text("map.diagnosis.tryAgain")
                             .kohereTextStyle(.caption2Regular)
                     }
                     .foregroundStyle(.primary50)
@@ -92,13 +92,13 @@ struct MapDiagnosisButton: View {
                     .foregroundStyle(.primary50)
                     .frame(width: 16, height: 16)
             }
-            .accessibilityLabel("Collapse AI room matching button")
+            .accessibilityLabel(Text("map.diagnosis.accessibility.expandedClose"))
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .diagnosisButtonBackground(.surface, in: animationNamespace)
-        .accessibilityLabel("AI room matching results")
+        .accessibilityLabel(Text("map.diagnosis.accessibility.results"))
     }
 
     private var collapsedContent: some View {
@@ -115,7 +115,7 @@ struct MapDiagnosisButton: View {
                 .padding(.top, 2)
                 .padding(.trailing, 2)
 
-                Text("AI")
+                Text("map.diagnosis.badge")
                     .kohereTextStyle(.caption2Regular)
                     .foregroundStyle(.primary50)
                     .padding(.horizontal, 6)
@@ -129,7 +129,7 @@ struct MapDiagnosisButton: View {
             .frame(width: 48, height: 48)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("AI room matching diagnosis")
+        .accessibilityLabel(Text("map.diagnosis.accessibility.collapsed"))
     }
 
     @ViewBuilder private var collapsedCircleBackground: some View {

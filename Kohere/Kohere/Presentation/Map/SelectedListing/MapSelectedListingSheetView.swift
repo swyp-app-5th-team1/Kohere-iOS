@@ -64,7 +64,11 @@ struct MapSelectedListingSheetView: View {
                 .buttonStyle(.plain)
                 .frame(width: 24, height: 24)
                 .contentShape(Rectangle())
-                .accessibilityLabel(Text(item.isLiked ? "찜 해제" : "찜하기"))
+                .accessibilityLabel(
+                    item.isLiked
+                        ? Text("listingDetail.like.action.unlike")
+                        : Text("listingDetail.like.action.like")
+                )
             }
 
             Button {
@@ -79,7 +83,7 @@ struct MapSelectedListingSheetView: View {
             .buttonStyle(.plain)
             .frame(width: 24, height: 24)
             .contentShape(Rectangle())
-            .accessibilityLabel(Text("닫기"))
+            .accessibilityLabel(Text("common.close"))
         }
     }
 

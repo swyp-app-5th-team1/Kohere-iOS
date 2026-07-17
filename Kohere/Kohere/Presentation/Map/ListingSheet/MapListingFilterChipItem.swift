@@ -5,6 +5,8 @@
 //  Created by Codex on 6/26/26.
 //
 
+import Foundation
+
 struct MapListingFilterChipItem: Identifiable {
     enum Kind: Hashable {
         case options
@@ -43,7 +45,7 @@ struct MapListingFilterChipItem: Identifiable {
         guard filter.hasSelectedOptions else {
             return MapListingFilterChipItem(
                 kind: .options,
-                title: "매물 옵션",
+                title: String(localized: "map.filter.section.options"),
                 style: .plain,
                 showsChevron: true
             )
@@ -53,7 +55,7 @@ struct MapListingFilterChipItem: Identifiable {
             kind: .options,
             title: RoomCondition.allCases
                 .filter { filter.selectedOptions.contains($0) }
-                .map(\.displayTitle)
+                .map(\.mapFilterDisplayTitle)
                 .joined(separator: ", "),
             style: style(for: source),
             showsChevron: false
@@ -67,7 +69,7 @@ struct MapListingFilterChipItem: Identifiable {
         guard filter.hasSelectedPriceRange || source == .diagnosis else {
             return MapListingFilterChipItem(
                 kind: .price,
-                title: "가격",
+                title: String(localized: "map.filter.section.price"),
                 style: .plain,
                 showsChevron: true
             )
@@ -88,7 +90,7 @@ struct MapListingFilterChipItem: Identifiable {
         guard filter.hasSelectedPropertyTypes else {
             return MapListingFilterChipItem(
                 kind: .propertyType,
-                title: "매물 종류",
+                title: String(localized: "map.filter.section.propertyType"),
                 style: .plain,
                 showsChevron: true
             )
@@ -120,7 +122,7 @@ struct MapListingFilterChipItem: Identifiable {
     ) -> String {
         let monthlyRentTitle = monthlyRentTitle(for: filter, source: source)
         let depositTitle = MapFilterPriceFormatter.chipTitle(
-            prefix: "보증금",
+            prefix: String(localized: "map.filter.deposit"),
             selection: filter.depositRange,
             defaultSelection: MapFilterPriceRange.defaultDeposit
         )
@@ -129,7 +131,7 @@ struct MapListingFilterChipItem: Identifiable {
             .compactMap { $0 }
             .joined(separator: ", ")
 
-        return title.isEmpty ? "가격" : title
+        return title.isEmpty ? String(localized: "map.filter.section.price") : title
     }
 
     private static func monthlyRentTitle(
@@ -139,13 +141,13 @@ struct MapListingFilterChipItem: Identifiable {
         switch source {
         case .manual:
             MapFilterPriceFormatter.chipTitle(
-                prefix: "월세",
+                prefix: String(localized: "map.filter.monthlyRent"),
                 selection: filter.monthlyRentRange,
                 defaultSelection: MapFilterPriceRange.defaultMonthlyRent
             )
         case .diagnosis:
             MapFilterPriceFormatter.chipTitle(
-                prefix: "월세",
+                prefix: String(localized: "map.filter.monthlyRent"),
                 selection: filter.monthlyRentRange,
                 bounds: MapFilterPriceRange.monthlyRent
             )

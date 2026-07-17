@@ -8,6 +8,14 @@
 import Foundation
 
 enum MapFilterPriceFormatter {
+    static func amountText(_ tenThousandWon: Int) -> String {
+        if usesKoreanLocalization {
+            return "\(tenThousandWon)만 원"
+        }
+
+        return compactWonText(tenThousandWon)
+    }
+
     static func controlSummary(
         selection: RangeSliderValue,
         bounds: ClosedRange<Int>
@@ -18,13 +26,22 @@ enum MapFilterPriceFormatter {
             maximumBoundary: bounds.upperBound
         ) {
         case .all:
-            return String(localized: "Any")
+            return String(localized: "map.filter.any")
         case let .upperBound(maximum):
-            return "\(maximum)만 원 이하"
+            return localizedPriceText(
+                key: "map.filter.price.underFormat",
+                amounts: [maximum]
+            )
         case let .lowerBound(minimum):
-            return "\(minimum)만 원 이상"
+            return localizedPriceText(
+                key: "map.filter.price.upperOnlyFormat",
+                amounts: [minimum]
+            )
         case let .range(minimum, maximum):
-            return "\(minimum)만~\(maximum)만 원"
+            return localizedPriceText(
+                key: "map.filter.price.rangeFormat",
+                amounts: [minimum, maximum]
+            )
         }
     }
 
@@ -68,12 +85,39 @@ enum MapFilterPriceFormatter {
         case .all:
             return nil
         case let .upperBound(maximum):
-            return "\(prefix) \(maximum)만 원 이하"
+            return "\(prefix) \(localizedPriceText(key: "map.filter.price.underFormat", amounts: [maximum]))"
         case let .lowerBound(minimum):
-            return "\(prefix) \(minimum)만 원 이상"
+            return "\(prefix) \(localizedPriceText(key: "map.filter.price.upperOnlyFormat", amounts: [minimum]))"
         case let .range(minimum, maximum):
-            return "\(prefix) \(minimum)만~\(maximum)만 원"
+            return "\(prefix) \(localizedPriceText(key: "map.filter.price.rangeFormat", amounts: [minimum, maximum]))"
         }
+    }
+
+    private static func localizedPriceText(key: String, amounts: [Int]) -> String {
+        let format = Bundle.main.localizedString(forKey: key, value: key, table: nil)
+        let localizedAmounts = amounts.map { amountText($0) as CVarArg }
+        return String(format: format, arguments: localizedAmounts)
+    }
+
+    private static var usesKoreanLocalization: Bool {
+        Bundle.main.preferredLocalizations.first?.hasPrefix("ko") == true
+    }
+
+    private static func compactWonText(_ tenThousandWon: Int) -> String {
+        guard tenThousandWon >= 100 else {
+            return "₩\(tenThousandWon * 10)K"
+        }
+
+        let wholeMillions = tenThousandWon / 100
+        let fractionalMillions = tenThousandWon % 100
+
+        guard fractionalMillions > 0 else {
+            return "₩\(wholeMillions)M"
+        }
+
+        let fraction = String(format: "%02d", fractionalMillions)
+            .replacingOccurrences(of: "0+$", with: "", options: .regularExpression)
+        return "₩\(wholeMillions).\(fraction)M"
     }
 
     private static func rangeState(

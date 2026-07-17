@@ -81,7 +81,7 @@ struct MapTopControlsView: View {
                     .frame(width: 16, height: 16)
                     .foregroundStyle(.blue100)
 
-                Text("이 지역에서 다시 탐색")
+                Text("map.researchAreaButton")
                     .kohereTextStyle(.label2Medium)
                     .foregroundStyle(.blue100)
             }

@@ -95,11 +95,36 @@ enum MapPropertyType: CaseIterable, Hashable {
     var displayTitle: String {
         switch self {
         case .goshiwon:
-            String(localized: "고시원")
+            String(localized: "map.propertyType.goshiwon")
         case .coLiving:
-            String(localized: "코리빙")
+            String(localized: "map.propertyType.coLiving")
         case .shareHouse:
-            String(localized: "쉐어하우스")
+            String(localized: "map.propertyType.shareHouse")
+        }
+    }
+}
+
+extension RoomCondition {
+    var mapFilterDisplayTitle: String {
+        switch self {
+        case .moveInNow:
+            String(localized: "map.filter.option.moveInNow")
+        case .femaleOnly:
+            String(localized: "map.filter.option.femaleOnly")
+        case .mealsIncluded:
+            String(localized: "map.filter.option.mealsIncluded")
+        case .doubleRoom:
+            String(localized: "map.filter.option.doubleRoom")
+        case .privateBathroom:
+            String(localized: "map.filter.option.privateBathroom")
+        case .englishSupport:
+            String(localized: "map.filter.option.englishSupport")
+        case .addressRegistration:
+            String(localized: "map.filter.option.addressRegistration")
+        case .noMaintenanceFee:
+            String(localized: "map.filter.option.noMaintenanceFee")
+        case .noARCRequired:
+            String(localized: "map.filter.option.noARCRequired")
         }
     }
 }
