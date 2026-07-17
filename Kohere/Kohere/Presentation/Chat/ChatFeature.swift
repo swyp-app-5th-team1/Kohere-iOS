@@ -82,7 +82,7 @@ struct ChatFeature {
         case swipeActionTapped(SwipeAction, roomID: Int)
         case popupRequested(AppPopup)
         case roomFinderBannerTapped
-        case mapTabRequested(diagnosisID: String?)
+        case mapRequested(MapEntryRequest)
     }
     
     // MARK: - Reducer Body
@@ -166,7 +166,7 @@ struct ChatFeature {
                 state.path.append(.chatBot(ChatBotFeature.State()))
                 return .none
 
-            case .mapTabRequested:
+            case .mapRequested:
                 return .none
                 
             case .path:

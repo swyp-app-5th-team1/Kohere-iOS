@@ -17,7 +17,7 @@ extension MapFeature {
                 await send(.exchangeRateResponse(.failure(error)))
             }
         }
-        .cancellable(id: "MapFeature.exchangeRate", cancelInFlight: true)
+        .cancellable(id: MapEffectID.exchangeRate, cancelInFlight: true)
     }
 
     func applyExchangeRate(_ exchangeRate: KRWToUSDExchangeRate, to state: inout State) {

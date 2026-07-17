@@ -51,7 +51,6 @@ struct DiagnosisDetailResponseDTO: Decodable {
 
 struct DiagnosisRecommendationsResponseDTO: Decodable {
     let content: [DiagnosisRecommendedListingResponseDTO]?
-    let markers: [DiagnosisRecommendationMarkerResponseDTO]?
     let page: DiagnosisRecommendationPageResponseDTO?
     let suggestions: DiagnosisSuggestionsResponseDTO?
 }
@@ -68,12 +67,6 @@ struct DiagnosisRecommendedListingResponseDTO: Decodable {
     let lat: Double?
     let lng: Double?
     let conditions: [String]?
-}
-
-struct DiagnosisRecommendationMarkerResponseDTO: Decodable {
-    let listingId: String
-    let lat: Double?
-    let lng: Double?
 }
 
 struct DiagnosisRecommendationPageResponseDTO: Decodable {

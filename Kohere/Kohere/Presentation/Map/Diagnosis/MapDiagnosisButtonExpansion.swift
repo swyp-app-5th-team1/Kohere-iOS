@@ -17,7 +17,7 @@ var diagnosisButtonAutoCollapseEffect: Effect<MapFeature.Action> {
             return
         }
     }
-    .cancellable(id: "MapFeature.diagnosisButtonAutoCollapse", cancelInFlight: true)
+    .cancellable(id: MapEffectID.diagnosisButtonAutoCollapse, cancelInFlight: true)
 }
 
 func shouldExpandDiagnosisButtonToday(userDefaultsClient: UserDefaultsClient) -> Bool {

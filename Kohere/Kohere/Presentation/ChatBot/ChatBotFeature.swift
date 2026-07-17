@@ -93,7 +93,7 @@ struct ChatBotFeature {
         case budgetConfirmButtonTapped
         case findButtonTapped
         case resetButtonTapped
-        case mapTabRequested(diagnosisID: String?)
+        case mapRequested(MapEntryRequest)
     }
     
     // MARK: - Reducer Body
@@ -246,7 +246,7 @@ struct ChatBotFeature {
                 state.resetConversation()
                 return .send(.onAppear)
 
-            case .mapTabRequested:
+            case .mapRequested:
                 return .none
             }
         }
