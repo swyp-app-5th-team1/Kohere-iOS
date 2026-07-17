@@ -57,6 +57,7 @@ struct LoginFeature {
         case landlordAdminLoginButtonTapped
         case socialLoginCredentialReceived(SocialLoginCredential)
         case loginSuccess(Auth)
+        case loginAuthStored(Auth)
         case loginFailure(String)
         
         case notificationSheetDismissed
@@ -143,19 +144,24 @@ struct LoginFeature {
                 }
                 
             case let .loginSuccess(auth):
-                state.isLoginRequesting = false
                 state.authInfo = auth
                 state.loginErrorMessage = nil
                 state.currentSheet = auth.onboardingRequired ? .notificationOption : nil
                 guard !auth.onboardingRequired else {
+                    state.isLoginRequesting = false
                     return .none
                 }
                 let keychainClient = keychainClient
-                return .run { _ in
+                return .run { send in
                     try keychainClient.save(auth, for: .auth)
+                    await send(.loginAuthStored(auth))
                 } catch: { error, send in
                     await send(.loginFailure(Self.loginErrorMessage(for: error)))
                 }
+
+            case .loginAuthStored:
+                state.isLoginRequesting = false
+                return .none
                 
             case let .loginFailure(message):
                 state.isLoginRequesting = false

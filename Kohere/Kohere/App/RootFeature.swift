@@ -44,7 +44,7 @@ struct RootFeature {
         case onAppear
         case mainTabAppeared
         case storedAuthLoaded(Auth?, OnboardingUserType?)
-        case authSessionExpired
+        case authSessionExpired(AuthSessionExpirationContext?)
         case currentUserResponse(Result<UserProfile, Error>)
         case login(LoginFeature.Action)
         case saveAuthResponse(Result<Auth, Error>)
@@ -91,8 +91,8 @@ struct RootFeature {
                 let reissueTokenUseCase = reissueTokenUseCase
                 var effects: [Effect<Action>] = [
                     .run { send in
-                        for await _ in NotificationCenter.default.notifications(named: .authSessionExpired) {
-                            await send(.authSessionExpired)
+                        for await notification in NotificationCenter.default.notifications(named: .authSessionExpired) {
+                            await send(.authSessionExpired(notification.object as? AuthSessionExpirationContext))
                         }
                     }
                     .cancellable(
@@ -107,11 +107,13 @@ struct RootFeature {
                             let hasLaunchedBefore = try userDefaultsClient.load(for: .hasLaunchedBefore) ?? false
 
                             if !hasLaunchedBefore {
+                                Self.logFirstLaunchAuthReset()
                                 try keychainClient.delete(for: .auth)
                                 try userDefaultsClient.save(true, for: .hasLaunchedBefore)
                             }
 
                             let auth = try keychainClient.load(for: .auth)
+                            Self.logStoredAuthLoaded(auth != nil)
                             let pendingOnboardingUserTypeRawValue = try userDefaultsClient.load(for: .pendingOnboardingUserType)
                             let pendingOnboardingUserType = pendingOnboardingUserTypeRawValue.flatMap(OnboardingUserType.init(rawValue:))
                             let resolvedAuth = await Self.resolveStoredAuth(
@@ -120,7 +122,8 @@ struct RootFeature {
                                 reissueToken: reissueTokenUseCase.execute
                             )
                             await send(.storedAuthLoaded(resolvedAuth, pendingOnboardingUserType))
-                        } catch: { _, send in
+                        } catch: { error, send in
+                            Self.logStartupAuthLoadFailure(error)
                             await send(.storedAuthLoaded(nil, nil))
                         }
                     )
@@ -147,7 +150,8 @@ struct RootFeature {
 
                 return .none
 
-            case .authSessionExpired:
+            case let .authSessionExpired(context):
+                Self.logSessionExpiration(context)
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 state = State(isAuthLoading: false)
                 return .cancel(id: "RootFeature.fetchCurrentUser")
@@ -168,8 +172,7 @@ struct RootFeature {
                 state.isCurrentUserLoading = false
                 return .none
 
-            case let .login(.loginSuccess(auth)):
-                guard !auth.onboardingRequired else { return .none }
+            case let .login(.loginAuthStored(auth)):
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 state.authInfo = auth
                 return .none

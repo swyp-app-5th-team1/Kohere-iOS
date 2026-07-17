@@ -15,7 +15,34 @@ enum DataError: Error, Equatable {
     case decodingFailed
     case httpStatus(code: Int, message: String?)
     case serverError(code: String, message: String)
+    case transport(message: String)
     case underlying(message: String)
+}
+
+extension DataError {
+    nonisolated var invalidatesRefreshToken: Bool {
+        switch self {
+        case let .httpStatus(code, _):
+            return code == 401
+
+        case let .serverError(code, _):
+            switch code {
+            case "AUTH_INVALID_REFRESH_TOKEN",
+                 "INVALID_INPUT",
+                 "UNAUTHENTICATED",
+                 "TOKEN_EXPIRED",
+                 "INVALID_REFRESH_TOKEN",
+                 "REFRESH_TOKEN_EXPIRED":
+                return true
+
+            default:
+                return false
+            }
+
+        default:
+            return false
+        }
+    }
 }
 
 extension DataError: LocalizedError {
@@ -40,6 +67,9 @@ extension DataError: LocalizedError {
             message ?? "HTTP 요청이 실패했습니다. statusCode=\(code)"
 
         case let .serverError(_, message):
+            message
+
+        case let .transport(message):
             message
 
         case let .underlying(message):
@@ -71,6 +101,9 @@ extension DataError: CustomDebugStringConvertible {
 
         case let .serverError(code, message):
             "serverError(code: \(code), message: \(message))"
+
+        case let .transport(message):
+            "transport(message: \(message))"
 
         case let .underlying(message):
             "underlying(message: \(message))"

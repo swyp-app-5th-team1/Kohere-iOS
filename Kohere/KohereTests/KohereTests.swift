@@ -49,7 +49,7 @@ final class RootAuthRefreshTests: XCTestCase {
             auth,
             keychainClient: keychain.client,
             reissueToken: { _ in
-                throw DataError.underlying(message: "network unavailable")
+                throw DataError.transport(message: "network unavailable")
             }
         )
 
@@ -75,7 +75,47 @@ final class RootAuthRefreshTests: XCTestCase {
         XCTAssertEqual(keychain.saveCount, 0)
     }
 
-    func testKeychainSaveFailurePreservesStoredAuth() async {
+    func testDocumentedInvalidRefreshTokenCodeDeletesStoredAuth() async {
+        let auth = makeAuth()
+        let keychain = KeychainSpy()
+
+        let resolvedAuth = await RootFeature.resolveStoredAuth(
+            auth,
+            keychainClient: keychain.client,
+            reissueToken: { _ in
+                throw DataError.serverError(
+                    code: "AUTH_INVALID_REFRESH_TOKEN",
+                    message: "Invalid refresh token."
+                )
+            }
+        )
+
+        XCTAssertNil(resolvedAuth)
+        XCTAssertEqual(keychain.deleteCount, 1)
+        XCTAssertEqual(keychain.saveCount, 0)
+    }
+
+    func testDocumentedInvalidReissueInputCodeDeletesStoredAuth() async {
+        let auth = makeAuth()
+        let keychain = KeychainSpy()
+
+        let resolvedAuth = await RootFeature.resolveStoredAuth(
+            auth,
+            keychainClient: keychain.client,
+            reissueToken: { _ in
+                throw DataError.serverError(
+                    code: "INVALID_INPUT",
+                    message: "Invalid input."
+                )
+            }
+        )
+
+        XCTAssertNil(resolvedAuth)
+        XCTAssertEqual(keychain.deleteCount, 1)
+        XCTAssertEqual(keychain.saveCount, 0)
+    }
+
+    func testKeychainSaveFailureDeletesStoredAuth() async {
         let auth = makeAuth()
         let keychain = KeychainSpy(saveError: KeychainError.encodingFailed)
 
@@ -92,9 +132,35 @@ final class RootAuthRefreshTests: XCTestCase {
             }
         )
 
-        XCTAssertEqual(resolvedAuth, auth)
-        XCTAssertEqual(keychain.deleteCount, 0)
+        XCTAssertNil(resolvedAuth)
+        XCTAssertEqual(keychain.deleteCount, 1)
         XCTAssertEqual(keychain.saveCount, 1)
+    }
+
+    func testRuntimeRefreshTransportFailurePreservesSession() {
+        XCTAssertTrue(
+            AuthInterceptor.shouldPreserveAuthAfterRefreshFailure(
+                DataError.transport(message: "network unavailable")
+            )
+        )
+    }
+
+    func testRuntimeRefreshNonTransportFailuresExpireSession() {
+        XCTAssertFalse(
+            AuthInterceptor.shouldPreserveAuthAfterRefreshFailure(
+                DataError.httpStatus(code: 500, message: nil)
+            )
+        )
+        XCTAssertFalse(
+            AuthInterceptor.shouldPreserveAuthAfterRefreshFailure(
+                DataError.decodingFailed
+            )
+        )
+        XCTAssertFalse(
+            AuthInterceptor.shouldPreserveAuthAfterRefreshFailure(
+                KeychainError.encodingFailed
+            )
+        )
     }
 
     private func makeAuth() -> Auth {
@@ -130,6 +196,52 @@ final class RootAuthRefreshTests: XCTestCase {
                 delete: { [self] _ in
                     deleteCount += 1
                 }
+            )
+        }
+    }
+}
+
+@MainActor
+final class LoginAuthPersistenceTests: XCTestCase {
+    func testExistingUserLoginCompletesAfterAuthIsStored() async {
+        let auth = Auth(
+            onboardingRequired: false,
+            status: .active,
+            tokenType: "Bearer",
+            accessToken: "access-token",
+            refreshToken: "refresh-token",
+            expiresIn: 3600,
+            expiresAt: Date().addingTimeInterval(3600)
+        )
+        let keychain = LoginKeychainSpy()
+        let store = TestStore(
+            initialState: LoginFeature.State(isLoginRequesting: true)
+        ) {
+            LoginFeature()
+        } withDependencies: {
+            $0.keychainClient = keychain.client
+        }
+
+        await store.send(.loginSuccess(auth)) {
+            $0.authInfo = auth
+            $0.loginErrorMessage = nil
+            $0.currentSheet = nil
+        }
+        await store.receive(.loginAuthStored(auth)) {
+            $0.isLoginRequesting = false
+        }
+
+        XCTAssertEqual(keychain.saveCount, 1)
+    }
+
+    private final class LoginKeychainSpy: @unchecked Sendable {
+        var saveCount = 0
+
+        var client: KeychainClient {
+            KeychainClient(
+                save: { [self] _, _ in saveCount += 1 },
+                read: { _ in nil },
+                delete: { _ in }
             )
         }
     }
