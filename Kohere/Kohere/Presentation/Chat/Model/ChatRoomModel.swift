@@ -9,6 +9,7 @@ import Foundation
 
 nonisolated struct ChatRoomModel: Equatable, Identifiable {
     let id: Int
+    let listingID: String
     let listingName: String
     let location: String
     let thumbnailURL: String?
@@ -27,6 +28,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     
     init(entity: ChatRoom) {
         self.id = entity.id
+        self.listingID = "\(entity.id)"
         self.listingName = entity.listingName
         self.location = "\(entity.regionName) · \(entity.accommodationType)"
         self.thumbnailURL = MockListingImageProvider.listingImageName(
@@ -54,6 +56,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     
     init(summary: BookingSummary) {
         self.id = summary.bookingID
+        self.listingID = summary.listingID
         self.listingName = summary.title
         self.location = ""
         self.thumbnailURL = summary.thumbnailURL?.absoluteString
@@ -77,6 +80,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     
     init(detail: BookingDetail, fallback: ChatRoomModel) {
         self.id = detail.bookingID
+        self.listingID = detail.listingID
         self.listingName = detail.title
         self.location = detail.address
         self.thumbnailURL = detail.thumbnailURL?.absoluteString ?? fallback.thumbnailURL

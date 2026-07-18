@@ -8,6 +8,8 @@
 import ComposableArchitecture
 
 protocol DiagnosisInterface {
+    func startFlow() async throws -> DiagnosisFlowResult
+    func advanceFlow(with answer: DiagnosisAnswer) async throws -> DiagnosisFlowResult
     func fetchQuestion(step: Int) async throws -> Diagnosis
     func saveAnswer(_ answer: DiagnosisAnswer) async throws
     func submit() async throws -> DiagnosisSubmission
@@ -16,6 +18,8 @@ protocol DiagnosisInterface {
 }
 
 struct DiagnosisClient: Sendable {
+    var startFlow: @Sendable () async throws -> DiagnosisFlowResult
+    var advanceFlow: @Sendable (_ answer: DiagnosisAnswer) async throws -> DiagnosisFlowResult
     var fetchQuestion: @Sendable (_ step: Int) async throws -> Diagnosis
     var saveAnswer: @Sendable (_ answer: DiagnosisAnswer) async throws -> Void
     var submit: @Sendable () async throws -> DiagnosisSubmission
@@ -26,6 +30,12 @@ struct DiagnosisClient: Sendable {
 extension DiagnosisClient {
     init(repository: any DiagnosisInterface) {
         self.init(
+            startFlow: {
+                try await repository.startFlow()
+            },
+            advanceFlow: { answer in
+                try await repository.advanceFlow(with: answer)
+            },
             fetchQuestion: { step in
                 try await repository.fetchQuestion(step: step)
             },

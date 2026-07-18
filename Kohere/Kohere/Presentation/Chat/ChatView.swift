@@ -14,6 +14,7 @@ struct ChatView: View {
     // MARK: - Property
     
     let store: StoreOf<ChatFeature>
+    @State private var revealedChatRoomID: Int?
     
     // MARK: - Body
     
@@ -21,8 +22,7 @@ struct ChatView: View {
         VStack(spacing: 8) {
             KohereNavigationBar(
                 left: .smallLogo,
-                center: .text("Chat", style: .label1Semibold),
-                right: .searchButton({ store.send(.searchButtonTapped) })
+                center: .text("Chat", style: .label1Semibold)
             )
             
             roomFinderBanner
@@ -40,10 +40,29 @@ struct ChatView: View {
                         ForEach(store.chatRooms) { room in
                             ChatRoomRowCell(
                                 item: room,
-                                participantRole: store.participantRole
-                            ) { id in
-                                store.send(.chatRoomTapped(id: id))
-                            }
+                                participantRole: store.participantRole,
+                                isRevealed: revealedChatRoomID == room.id,
+                                onTap: { id in
+                                    store.send(.chatRoomTapped(id: id))
+                                },
+                                onReveal: {
+                                    revealedChatRoomID = room.id
+                                },
+                                onClose: {
+                                    if revealedChatRoomID == room.id {
+                                        revealedChatRoomID = nil
+                                    }
+                                },
+                                onReport: {
+                                    store.send(.swipeActionTapped(.report, roomID: room.id))
+                                },
+                                onBlock: {
+                                    store.send(.swipeActionTapped(.block, roomID: room.id))
+                                },
+                                onDelete: {
+                                    store.send(.swipeActionTapped(.delete, roomID: room.id))
+                                }
+                            )
                         }
                     }
                 }

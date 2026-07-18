@@ -285,6 +285,10 @@ struct RootFeature {
                 state.chat.path.removeAll()
                 return openMap(request: request, state: &state)
 
+            case let .chat(.popupRequested(popup)):
+                state.popup = popup
+                return .none
+
             case let .more(.popupRequested(popup)):
                 state.popup = popup
                 return .none

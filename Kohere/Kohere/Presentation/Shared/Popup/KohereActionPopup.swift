@@ -49,16 +49,12 @@ struct KohereActionPopup: View {
                 }
                 .buttonStyle(.plain)
             }
+            .padding(.horizontal, 12)
         }
-        .padding(.horizontal, 12)
         .padding(.top, 24)
         .padding(.bottom, 12)
-        .frame(maxWidth: 313)
+        .frame(width: 313)
         .background(.common0)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(.lineAlternative, lineWidth: 1)
-        }
     }
 }

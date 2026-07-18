@@ -9,6 +9,8 @@ import Alamofire
 import Foundation
 
 enum DiagnosisRouter: URLRequestConvertible {
+    case startFlow(environment: APIEnvironment)
+    case advanceFlow(DiagnosisAnswerRequestDTO, environment: APIEnvironment)
     case question(step: Int, environment: APIEnvironment)
     case saveAnswer(DiagnosisAnswerRequestDTO, environment: APIEnvironment)
     case submit(environment: APIEnvironment)
@@ -24,13 +26,19 @@ enum DiagnosisRouter: URLRequestConvertible {
         case .question, .detail, .recommendations:
             .get
 
-        case .saveAnswer, .submit:
+        case .startFlow, .advanceFlow, .saveAnswer, .submit:
             .post
         }
     }
 
     private var path: String {
         switch self {
+        case .startFlow:
+            "api/v2/diagnoses/start"
+
+        case .advanceFlow:
+            "api/v2/diagnoses/next"
+
         case let .question(step, _):
             "api/v1/diagnoses/questions/\(step)"
 
@@ -44,13 +52,15 @@ enum DiagnosisRouter: URLRequestConvertible {
             "api/v1/diagnoses/\(diagnosisID)"
 
         case let .recommendations(diagnosisID, _, _):
-            "api/v1/diagnoses/\(diagnosisID)/recommendations"
+            "api/v2/diagnoses/\(diagnosisID)/recommendations"
         }
     }
 
     private var environment: APIEnvironment {
         switch self {
-        case let .question(_, environment),
+        case let .startFlow(environment),
+             let .advanceFlow(_, environment),
+             let .question(_, environment),
              let .saveAnswer(_, environment),
 			 let .submit(environment),
 			 let .detail(_, environment),
@@ -70,10 +80,11 @@ enum DiagnosisRouter: URLRequestConvertible {
         case let .recommendations(_, query, _):
             request = try URLEncodedFormParameterEncoder.default.encode(query, into: request)
 
-        case let .saveAnswer(requestDTO, _):
+        case let .advanceFlow(requestDTO, _),
+             let .saveAnswer(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
-        case .detail, .question, .submit:
+        case .startFlow, .detail, .question, .submit:
             break
         }
 
