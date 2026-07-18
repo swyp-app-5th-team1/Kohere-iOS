@@ -39,6 +39,129 @@ final class QuizAnswerResponseMappingTests: XCTestCase {
     }
 }
 
+final class LanguageUpdateRequestDTOTests: XCTestCase {
+    func testLanguageOnlyUpdateEncodesOnlyLangField() throws {
+        let request = UpdateProfileRequestDTO(
+            UserProfileUpdate(lang: AppLanguage.english.rawValue)
+        )
+
+        let data = try JSONEncoder().encode(request)
+        let json = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+
+        XCTAssertEqual(json.count, 1)
+        XCTAssertEqual(json["lang"] as? String, "en")
+    }
+}
+
+@MainActor
+final class LanguageSelectionTests: XCTestCase {
+    func testSelectingDifferentLanguageRequestsLocalizedResetConfirmation() async {
+        var initialState = MoreFeature.State()
+        initialState.isLanguagePopoverPresented = true
+        initialState.selectedLanguage = .korean
+        let store = TestStore(initialState: initialState) {
+            MoreFeature()
+        }
+
+        await store.send(.languageSelected(.english)) {
+            $0.isLanguagePopoverPresented = false
+        }
+
+        await store.receive(
+            \.popupRequested,
+            .action(
+                AppPopup.Action(
+                    message: "언어를 변경하면 진행 중인 화면과 검색 설정이 초기화됩니다. 변경할까요?",
+                    primaryTitle: "변경하기",
+                    secondaryTitle: "취소",
+                    route: .confirmLanguageChange(.english)
+                )
+            )
+        )
+    }
+
+    func testSelectingCurrentLanguageOnlyClosesPopover() async {
+        var initialState = MoreFeature.State()
+        initialState.isLanguagePopoverPresented = true
+        initialState.selectedLanguage = .korean
+        let store = TestStore(initialState: initialState) {
+            MoreFeature()
+        }
+
+        await store.send(.languageSelected(.korean)) {
+            $0.isLanguagePopoverPresented = false
+        }
+    }
+}
+
+@MainActor
+final class LanguageResetTests: XCTestCase {
+    func testLanguageResetPreservesSessionAndRecreatesMainTabState() {
+        let auth = Auth(
+            onboardingRequired: false,
+            status: .active,
+            tokenType: "Bearer",
+            accessToken: "access-token",
+            refreshToken: "refresh-token",
+            expiresIn: 3600
+        )
+        let profile = UserProfile(
+            id: 13,
+            userType: .tenant,
+            firstName: "Gildong",
+            lastName: "Hong",
+            name: nil,
+            nickname: "tester",
+            gender: nil,
+            birthDate: nil,
+            country: "KR",
+            countryName: "대한민국",
+            countryFlag: nil,
+            occupation: nil,
+            email: nil,
+            visaType: nil,
+            phoneNumber: nil,
+            businessRegistrationNumber: nil,
+            status: .active,
+            termsOfServiceAgreed: true,
+            privacyPolicyAgreed: true,
+            marketingAgreed: false,
+            createdAt: "2026-07-18T00:00:00"
+        )
+        var state = RootFeature.State(
+            authInfo: auth,
+            currentUser: profile,
+            isAuthLoading: false,
+            selectedTab: .map
+        )
+        state.home.isQuizLoaded = true
+        state.map.isFilterPresented = true
+        state.more.path.append(.setting(SettingFeature.State()))
+        state.popup = .notice(AppPopup.Notice(message: "popup"))
+
+        RootFeature().resetMainContent(
+            language: .english,
+            userProfile: profile,
+            state: &state
+        )
+
+        XCTAssertEqual(state.authInfo, auth)
+        XCTAssertEqual(state.currentUser, profile)
+        XCTAssertEqual(state.appLanguage, .english)
+        XCTAssertEqual(state.selectedTab, .more)
+        XCTAssertNil(state.popup)
+        XCTAssertFalse(state.home.isQuizLoaded)
+        XCTAssertFalse(state.map.isFilterPresented)
+        XCTAssertTrue(state.more.path.isEmpty)
+        XCTAssertEqual(state.home.userType, .tenant)
+        XCTAssertEqual(state.map.userType, .tenant)
+        XCTAssertEqual(state.more.userProfile, profile)
+        XCTAssertEqual(state.more.selectedLanguage, .english)
+    }
+}
+
 @MainActor
 final class RootAuthRefreshTests: XCTestCase {
     func testTransientRefreshFailurePreservesStoredAuth() async {
@@ -438,14 +561,13 @@ final class MapDiagnosisRecommendationTests: XCTestCase {
         DiagnosisRecommendedListing(
             listingID: id,
             title: "Listing \(id)",
-            type: "GOSHIWON",
+            type: "Goshiwon",
             minMonthlyRent: 200_000,
             maxMonthlyRent: 300_000,
             minDeposit: 0,
             maxDeposit: 100_000,
-            thumbnailURL: nil,
-            coordinate: coordinate,
-            conditions: []
+            thumbnailURL: "listing_goshiwon_01",
+            coordinate: coordinate
         )
     }
 }
@@ -480,7 +602,10 @@ final class ListingApplicationFeatureTests: XCTestCase {
         XCTAssertFalse(state.isAgreementChecked)
         XCTAssertFalse(state.isSubmitButtonEnabled)
         XCTAssertEqual(state.roomOfferID, "room-offer-1")
-        XCTAssertEqual(state.submitButtonTitle, "동의하고 예약 신청하기")
+        XCTAssertEqual(
+            state.submitButtonTitle,
+            String(localized: "listingApplication.action.submit")
+        )
     }
 
     func testSubmitButtonRequiresAgreementProfileAndPhoneNumber() {
@@ -514,9 +639,47 @@ final class ListingApplicationFeatureTests: XCTestCase {
         )
 
         XCTAssertEqual(
-            ListingApplicationFeature.applicantSummary(from: profile),
+            ListingApplicationFeature.applicantSummary(
+                from: profile,
+                locale: Locale(identifier: "en_US")
+            ),
             "Song NunSeop · Male · South Korea"
         )
+    }
+
+    func testApplicantSummaryOmitsMissingName() {
+        let profile = makeUserProfile(
+            firstName: nil,
+            lastName: nil,
+            nickname: "",
+            gender: "MALE",
+            country: "KR",
+            countryName: "South Korea"
+        )
+
+        XCTAssertEqual(
+            ListingApplicationFeature.applicantSummary(
+                from: profile,
+                locale: Locale(identifier: "ko_KR")
+            ),
+            "남성 · 대한민국"
+        )
+    }
+
+    func testSubmittingKeepsDefaultSubmitButtonTitle() {
+        var state = ListingApplicationFeature.State(
+            listingID: "listing-1",
+            listingTitle: "Hongdae Stay",
+            roomOfferID: "room-offer-1",
+            roomTypeName: "Single Room",
+            roomPricingText: "₩500,000 / month"
+        )
+        let defaultTitle = state.submitButtonTitle
+
+        state.isSubmitting = true
+
+        XCTAssertEqual(state.submitButtonTitle, defaultTitle)
+        XCTAssertFalse(state.isSubmitButtonEnabled)
     }
 
     func testBookingRequestDTOEncodesBackendContract() throws {
@@ -626,7 +789,7 @@ final class ListingApplicationFeatureTests: XCTestCase {
             $0.isApplicantProfileLoading = false
             $0.hasLoadedApplicantProfile = true
             $0.applicantProfileErrorMessage = nil
-            $0.applicantSummary = "Song NunSeop · Male · South Korea"
+            $0.applicantSummary = ListingApplicationFeature.applicantSummary(from: profile)
             $0.phoneNumber = "821012345678"
         }
     }
@@ -842,6 +1005,7 @@ final class RootFavoritePropagationTests: XCTestCase {
             )
         )
         let detailID = try XCTUnwrap(state.map.path.ids.last)
+        state.map.path[id: detailID, case: \.listingDetail]?.detail = makeListingDetailModel()
 
         let store = TestStore(
             initialState: state,
@@ -858,8 +1022,8 @@ final class RootFavoritePropagationTests: XCTestCase {
                 )
             )
         ) {
-            $0.map.path[id: detailID, case: \.listingDetail]?.detail.overview.isLiked = true
-            $0.map.path[id: detailID, case: \.listingDetail]?.detail.overview.favoriteCount = 7
+            $0.map.path[id: detailID, case: \.listingDetail]?.detail?.overview.isLiked = true
+            $0.map.path[id: detailID, case: \.listingDetail]?.detail?.overview.favoriteCount = 7
             $0.home.recentlyViewedItems[0].isLiked = true
             $0.home.recentlyViewedItems[0].favoriteCount = 7
             $0.map.listings[0].isLiked = true
@@ -884,5 +1048,85 @@ final class RootFavoritePropagationTests: XCTestCase {
             isLiked: isLiked,
             favoriteCount: favoriteCount
         )
+    }
+
+    private func makeListingDetailModel() -> ListingDetailModel {
+        ListingDetailModel(
+            id: "listing-1",
+            overview: ListingDetailOverviewModel(
+                id: "listing-1",
+                title: "Listing",
+                typeTag: "Goshiwon",
+                monthlyRentText: "₩500,000",
+                convertedMonthlyRentText: "$360",
+                depositText: "₩1,000,000",
+                maintenanceFeeText: "₩50,000",
+                transitText: "",
+                imageCountText: "0/0",
+                reviewCount: 0,
+                isLiked: false,
+                favoriteCount: 6
+            ),
+            tabs: [],
+            roomOffers: [],
+            priceInfo: [],
+            propertyInfo: [],
+            propertyFeatures: [],
+            buildingInfo: [],
+            facilityInfo: [],
+            locationInfo: ListingLocationInfoModel(
+                sectionTitle: "",
+                addressText: "",
+                transits: [],
+                coordinate: nil,
+                nearbyPlacesTitle: "",
+                nearbyPlacesText: ""
+            )
+        )
+    }
+}
+
+@MainActor
+final class ListingDetailLoadFailureTests: XCTestCase {
+    func testLoadFailureRequestsNoticePopup() async {
+        var initialState = ListingDetailFeature.State(listingID: "listing-1")
+        initialState.isDetailLoading = true
+        let popup = AppPopup.notice(
+            AppPopup.Notice(
+                message: String(localized: "listingDetail.error.loadFailed"),
+                confirmTitle: String(localized: "common.confirm"),
+                confirmRoute: .dismissListingDetail
+            )
+        )
+        let store = TestStore(initialState: initialState) {
+            ListingDetailFeature()
+        }
+
+        await store.send(.detailResponse(.failure(.emptyResponse))) {
+            $0.isDetailLoading = false
+        }
+        await store.receive(.popupRequested(popup))
+    }
+
+    func testNoticeConfirmationClosesMapListingDetail() async {
+        var initialState = RootFeature.State(isAuthLoading: false)
+        initialState.selectedTab = .map
+        initialState.map.path.append(
+            .listingDetail(ListingDetailFeature.State(listingID: "listing-1"))
+        )
+        initialState.popup = .notice(
+            AppPopup.Notice(
+                message: "load failed",
+                confirmRoute: .dismissListingDetail
+            )
+        )
+        let store = TestStore(initialState: initialState) {
+            RootFeature()
+        }
+
+        await store.send(.popupNoticeConfirmButtonTapped) {
+            $0.popup = nil
+            _ = $0.map.path.popLast()
+        }
     }
 }
