@@ -194,7 +194,7 @@ struct MoreView: View {
     private var profileNameText: String {
         guard let profile = store.userProfile else {
             return store.userType == .landlord
-                ? "집주인 이름"
+                ? localized("more.profile.landlordNamePlaceholder")
                 : localized("more.profile.nicknamePlaceholder")
         }
 
@@ -284,7 +284,7 @@ struct MoreView: View {
             title: "사장님 서비스",
             items: [
                 .init(
-                    title: "무료로 방 홍보하기",
+                    title: localized("more.landlordService.promoteRoom"),
                     subtitle: "고시원 · 쉐어하우스 · 코리빙 등",
                     iconName: "external_link_24",
                     action: .promoteRoom
@@ -321,10 +321,7 @@ struct MoreView: View {
     }
 
     private func localized(_ key: String) -> String {
-        String(
-            localized: String.LocalizationValue(key),
-            locale: locale
-        )
+        AppLanguage(locale: locale).localized(key)
     }
 }
 

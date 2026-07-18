@@ -37,11 +37,11 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         self.dateText = Self.dateText(entity.lastMessageAt)
         self.timeText = "2분 전"
         self.applicantName = entity.applicantName
-        self.applicantGenderCode = Gender.male.rawValue
-        self.applicantCountryCode = "DE"
-        self.applicantCountryName = "Germany"
-        self.applicantEmail = "kohere@gmail.com"
-        self.roomType = "Room A"
+        self.applicantGenderCode = ""
+        self.applicantCountryCode = ""
+        self.applicantCountryName = ""
+        self.applicantEmail = ""
+        self.roomType = ""
         self.moveInDate = entity.moveInDate
         self.leaseTermMonths = entity.minStayMonths
         self.depositAmount = entity.deposit

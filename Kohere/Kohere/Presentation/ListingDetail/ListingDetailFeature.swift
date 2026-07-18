@@ -37,6 +37,7 @@ struct ListingDetailFeature {
         var listingDetail: ListingDetail?
         var krwToUSDExchangeRate: KRWToUSDExchangeRate?
         var userType: UserType?
+        var appLanguage: AppLanguage
         var isDetailLoading = false
         var isDetailLoaded = false
         var isExchangeRateLoading = false
@@ -51,10 +52,12 @@ struct ListingDetailFeature {
         init(
             listingID: String,
             userType: UserType? = nil,
+            appLanguage: AppLanguage = .systemDefault,
             isApplicationDisabled: Bool = false
         ) {
             self.listingID = listingID
             self.userType = userType
+            self.appLanguage = appLanguage
             self.isApplicationDisabled = isApplicationDisabled
         }
     }
@@ -116,7 +119,8 @@ struct ListingDetailFeature {
                 state.listingDetail = detail
                 state.detail = makeDetailModel(
                     from: detail,
-                    exchangeRate: state.krwToUSDExchangeRate
+                    exchangeRate: state.krwToUSDExchangeRate,
+                    language: state.appLanguage
                 )
                 state.isDetailLoading = false
                 state.isDetailLoaded = true
@@ -141,7 +145,11 @@ struct ListingDetailFeature {
                 let currentFavoriteStatus = state.detail.map {
                     (isLiked: $0.overview.isLiked, favoriteCount: $0.overview.favoriteCount)
                 }
-                state.detail = makeDetailModel(from: listingDetail, exchangeRate: exchangeRate)
+                state.detail = makeDetailModel(
+                    from: listingDetail,
+                    exchangeRate: exchangeRate,
+                    language: state.appLanguage
+                )
                 state.detail?.overview.isLiked = currentFavoriteStatus?.isLiked
                     ?? listingDetail.isFavorited
                 state.detail?.overview.favoriteCount = currentFavoriteStatus?.favoriteCount
@@ -286,12 +294,14 @@ extension ListingDetailFeature.State {
 private extension ListingDetailFeature {
     func makeDetailModel(
         from listingDetail: ListingDetail,
-        exchangeRate: KRWToUSDExchangeRate?
+        exchangeRate: KRWToUSDExchangeRate?,
+        language: AppLanguage
     ) -> ListingDetailModel {
         ListingDetailModel(
             listingDetail: listingDetail,
             exchangeRate: exchangeRate,
-            convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase
+            convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
+            language: language
         )
     }
 

@@ -95,6 +95,8 @@ struct RootFeature {
                     .flatMap(AppLanguage.init(rawValue:))
                     ?? .systemDefault
                 state.appLanguage = resolvedLanguage
+                state.home.appLanguage = resolvedLanguage
+                state.map.appLanguage = resolvedLanguage
                 state.more.selectedLanguage = resolvedLanguage
                 var effects: [Effect<Action>] = [
                     .run { send in
@@ -162,6 +164,8 @@ struct RootFeature {
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 let appLanguage = state.appLanguage
                 state = State(appLanguage: appLanguage, isAuthLoading: false)
+                state.home.appLanguage = appLanguage
+                state.map.appLanguage = appLanguage
                 state.more.selectedLanguage = appLanguage
                 return .cancel(id: "RootFeature.fetchCurrentUser")
 
@@ -363,6 +367,8 @@ struct RootFeature {
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 let appLanguage = state.appLanguage
                 state = State(appLanguage: appLanguage, isAuthLoading: false)
+                state.home.appLanguage = appLanguage
+                state.map.appLanguage = appLanguage
                 state.more.selectedLanguage = appLanguage
 
                 let logoutUseCase = logoutUseCase
@@ -386,6 +392,8 @@ struct RootFeature {
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 let appLanguage = state.appLanguage
                 state = State(appLanguage: appLanguage, isAuthLoading: false)
+                state.home.appLanguage = appLanguage
+                state.map.appLanguage = appLanguage
                 state.more.selectedLanguage = appLanguage
 
                 let deleteCurrentUserUseCase = deleteCurrentUserUseCase
@@ -423,10 +431,13 @@ extension RootFeature {
         state.selectedTab = .more
         state.popup = nil
 
-        state.home = HomeFeature.State(userType: userProfile.userType)
+        state.home = HomeFeature.State(
+            userType: userProfile.userType,
+            appLanguage: language
+        )
         state.community = CommunityFeature.State()
 
-        state.map = MapFeature.State()
+        state.map = MapFeature.State(appLanguage: language)
         state.map.userType = userProfile.userType
 
         state.chat = ChatFeature.State()

@@ -190,9 +190,9 @@ extension ListingApplicationFeature {
 
         switch value.uppercased() {
         case Gender.male.rawValue:
-            return String(localized: "listingApplication.applicant.gender.male", locale: locale)
+            return AppLanguage(locale: locale).localized("listingApplication.applicant.gender.male")
         case Gender.female.rawValue:
-            return String(localized: "listingApplication.applicant.gender.female", locale: locale)
+            return AppLanguage(locale: locale).localized("listingApplication.applicant.gender.female")
         default:
             return value
         }

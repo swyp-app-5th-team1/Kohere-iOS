@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct MapTopControlsView: View {
+    @Environment(\.locale)
+    private var locale
+
     let searchDisplayText: String?
     let showsResearchButton: Bool
     let onSearchTapped: () -> Void
@@ -26,7 +29,9 @@ struct MapTopControlsView: View {
     }
 
     private var searchBar: some View {
-        HStack(spacing: 0) {
+        let language = AppLanguage(locale: locale)
+
+        return HStack(spacing: 0) {
             Button(action: onSearchTapped) {
                 HStack(spacing: 12) {
                     Image(.search24)
@@ -35,7 +40,7 @@ struct MapTopControlsView: View {
                         .frame(width: 24, height: 24)
                         .foregroundStyle(.neutral70)
 
-                    Text(searchDisplayText ?? "지역, 학교, 지하철역")
+                    Text(searchDisplayText ?? language.localized("search.placeholder"))
                         .kohereTextStyle(.label1Medium)
                         .foregroundStyle(searchDisplayText == nil ? .coolNeutral20 : .coolNeutral80)
                         .lineLimit(1)
@@ -48,7 +53,10 @@ struct MapTopControlsView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(searchDisplayText ?? "지역, 학교, 지하철역 검색")
+            .accessibilityLabel(
+                searchDisplayText
+                    ?? language.localized("map.search.accessibility")
+            )
 
             if searchDisplayText != nil {
                 Button(action: onSearchDisplayClearTapped) {
@@ -58,7 +66,7 @@ struct MapTopControlsView: View {
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("검색 결과 지우기")
+                .accessibilityLabel(language.localized("map.search.clear"))
             }
         }
         .padding(.leading, 16)

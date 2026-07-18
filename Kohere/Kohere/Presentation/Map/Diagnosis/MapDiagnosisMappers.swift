@@ -8,21 +8,28 @@
 import Foundation
 
 extension ListingItemModel {
-    nonisolated init(recommendation: DiagnosisRecommendedListing) {
+    nonisolated init(
+        recommendation: DiagnosisRecommendedListing,
+        language: AppLanguage
+    ) {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
             thumbnailURL: recommendation.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: recommendation.minMonthlyRent,
-                max: recommendation.maxMonthlyRent
+                max: recommendation.maxMonthlyRent,
+                language: language
             ),
             formattedUsdPrice: "",
             detailsDescription: Self.depositTitle(
                 min: recommendation.minDeposit,
-                max: recommendation.maxDeposit
+                max: recommendation.maxDeposit,
+                language: language
             ),
-            locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
+            locationDescription: recommendation.title.isEmpty
+                ? Self.localized("map.diagnosis.matchesTitle", language: language)
+                : recommendation.title,
             typeTag: recommendation.type,
             period: "1 mo~",
             isLiked: false
@@ -32,7 +39,8 @@ extension ListingItemModel {
     nonisolated init(
         recommendation: DiagnosisRecommendedListing,
         exchangeRate: KRWToUSDExchangeRate?,
-        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase
+        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase,
+        language: AppLanguage
     ) {
         let convertedMonthlyRentText: String
         if let exchangeRate {
@@ -54,24 +62,42 @@ extension ListingItemModel {
             thumbnailURL: recommendation.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: recommendation.minMonthlyRent,
-                max: recommendation.maxMonthlyRent
+                max: recommendation.maxMonthlyRent,
+                language: language
             ),
             formattedUsdPrice: convertedMonthlyRentText,
             detailsDescription: Self.depositTitle(
                 min: recommendation.minDeposit,
-                max: recommendation.maxDeposit
+                max: recommendation.maxDeposit,
+                language: language
             ),
-            locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
+            locationDescription: recommendation.title.isEmpty
+                ? Self.localized("map.diagnosis.matchesTitle", language: language)
+                : recommendation.title,
             typeTag: recommendation.type,
             period: "1 mo~",
             isLiked: false
         )
     }
 
-    nonisolated private static func depositTitle(min: Int?, max: Int?) -> String {
-        MonthlyRentPriceFormatter.rangeTitle(prefix: "보증금", min: min, max: max)
+    nonisolated private static func depositTitle(
+        min: Int?,
+        max: Int?,
+        language: AppLanguage
+    ) -> String {
+        guard let amount = MonthlyRentPriceFormatter.amountRangeTitle(
+            min: min,
+            max: max,
+            language: language
+        ) else { return "" }
+
+        let format = localized("listingDetail.format.deposit.overview", language: language)
+        return String(format: format, locale: language.locale, amount)
     }
 
+    nonisolated private static func localized(_ key: String, language: AppLanguage) -> String {
+        language.localized(key)
+    }
 }
 
 extension MapFilterState {

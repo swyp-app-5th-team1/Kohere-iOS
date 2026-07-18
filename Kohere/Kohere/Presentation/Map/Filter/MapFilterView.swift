@@ -9,6 +9,8 @@ import ComposableArchitecture
 import SwiftUI
 
 struct MapFilterView: View {
+    @Environment(\.locale)
+    private var locale
     @Bindable var store: StoreOf<MapFeature>
 
     var body: some View {
@@ -45,7 +47,7 @@ struct MapFilterView: View {
             MapFilterFlowLayout(spacing: 8, rowSpacing: 8) {
                 ForEach(RoomCondition.allCases, id: \.self) { option in
                     MapFilterSelectionChip(
-                        title: option.mapFilterDisplayTitle,
+                        title: option.mapFilterDisplayTitle(locale: locale),
                         isSelected: store.editingFilter.selectedOptions.contains(option)
                     ) {
                         store.send(.filterOptionTapped(option))
@@ -62,8 +64,8 @@ struct MapFilterView: View {
                     title: String(localized: "map.filter.monthlyRent"),
                     selection: store.editingFilter.monthlyRentRange,
                     bounds: MapFilterPriceRange.monthlyRent,
-                    middleLabel: MapFilterPriceFormatter.amountText(50),
-                    maximumLabel: MapFilterPriceFormatter.amountText(100),
+                    middleLabel: MapFilterPriceFormatter.amountText(50, locale: locale),
+                    maximumLabel: MapFilterPriceFormatter.amountText(100, locale: locale),
                     onMinimumChange: { store.send(.monthlyRentMinimumChanged($0)) },
                     onMaximumChange: { store.send(.monthlyRentMaximumChanged($0)) }
                 )
@@ -72,8 +74,8 @@ struct MapFilterView: View {
                     title: String(localized: "map.filter.deposit"),
                     selection: store.editingFilter.depositRange,
                     bounds: MapFilterPriceRange.deposit,
-                    middleLabel: MapFilterPriceFormatter.amountText(150),
-                    maximumLabel: MapFilterPriceFormatter.amountText(300),
+                    middleLabel: MapFilterPriceFormatter.amountText(150, locale: locale),
+                    maximumLabel: MapFilterPriceFormatter.amountText(300, locale: locale),
                     onMinimumChange: { store.send(.depositMinimumChanged($0)) },
                     onMaximumChange: { store.send(.depositMaximumChanged($0)) }
                 )
@@ -86,7 +88,7 @@ struct MapFilterView: View {
             MapFilterFlowLayout(spacing: 8, rowSpacing: 8) {
                 ForEach(MapPropertyType.allCases, id: \.self) { propertyType in
                     MapFilterSelectionChip(
-                        title: propertyType.displayTitle,
+                        title: propertyType.displayTitle(locale: locale),
                         isSelected: store.editingFilter.selectedPropertyTypes.contains(propertyType)
                     ) {
                         store.send(.filterPropertyTypeTapped(propertyType))

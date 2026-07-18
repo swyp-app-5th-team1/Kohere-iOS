@@ -69,6 +69,7 @@ extension MapFeature {
                     ListingDetailFeature.State(
                         listingID: listingID,
                         userType: state.userType,
+                        appLanguage: state.appLanguage,
                         isApplicationDisabled: true
                     )
                 )

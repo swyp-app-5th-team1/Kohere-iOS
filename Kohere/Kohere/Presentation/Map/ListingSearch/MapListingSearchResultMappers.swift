@@ -8,24 +8,27 @@
 import Foundation
 
 extension ListingItemModel {
-    nonisolated init(listing: Listing) {
+    nonisolated init(listing: Listing, language: AppLanguage) {
         self.init(
             id: listing.id,
             title: listing.title,
             thumbnailURL: listing.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: listing.minMonthlyRent,
-                max: listing.maxMonthlyRent
+                max: listing.maxMonthlyRent,
+                language: language
             ),
             formattedUsdPrice: "",
             detailsDescription: Self.detailsTitle(
                 minDeposit: listing.minDeposit,
                 maxDeposit: listing.maxDeposit,
-                minimumMaintenanceFee: listing.minMaintenanceFee
+                minimumMaintenanceFee: listing.minMaintenanceFee,
+                maximumMaintenanceFee: listing.maxMaintenanceFee,
+                language: language
             ),
-            locationDescription: Self.locationTitle(from: listing),
+            locationDescription: Self.locationTitle(from: listing, language: language),
             typeTag: listing.type,
-            period: Self.minimumStayPeriodTitle(months: listing.minStayMonths),
+            period: Self.minimumStayPeriodTitle(months: listing.minStayMonths, language: language),
             isLiked: listing.isFavorited,
             favoriteCount: listing.favoriteCount
         )
@@ -34,7 +37,8 @@ extension ListingItemModel {
     nonisolated init(
         listing: Listing,
         exchangeRate: KRWToUSDExchangeRate?,
-        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase
+        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase,
+        language: AppLanguage
     ) {
         let convertedMonthlyRentText: String
         if let exchangeRate {
@@ -56,17 +60,20 @@ extension ListingItemModel {
             thumbnailURL: listing.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: listing.minMonthlyRent,
-                max: listing.maxMonthlyRent
+                max: listing.maxMonthlyRent,
+                language: language
             ),
             formattedUsdPrice: convertedMonthlyRentText,
             detailsDescription: Self.detailsTitle(
                 minDeposit: listing.minDeposit,
                 maxDeposit: listing.maxDeposit,
-                minimumMaintenanceFee: listing.minMaintenanceFee
+                minimumMaintenanceFee: listing.minMaintenanceFee,
+                maximumMaintenanceFee: listing.maxMaintenanceFee,
+                language: language
             ),
-            locationDescription: Self.locationTitle(from: listing),
+            locationDescription: Self.locationTitle(from: listing, language: language),
             typeTag: listing.type,
-            period: Self.minimumStayPeriodTitle(months: listing.minStayMonths),
+            period: Self.minimumStayPeriodTitle(months: listing.minStayMonths, language: language),
             isLiked: listing.isFavorited,
             favoriteCount: listing.favoriteCount
         )
@@ -75,74 +82,91 @@ extension ListingItemModel {
     nonisolated private static func detailsTitle(
         minDeposit: Int?,
         maxDeposit: Int?,
-        minimumMaintenanceFee: Int?
+        minimumMaintenanceFee: Int?,
+        maximumMaintenanceFee: Int?,
+        language: AppLanguage
     ) -> String {
         var parts: [String] = []
 
-        if let depositTitle = wonRangeTitle(min: minDeposit, max: maxDeposit) {
-            parts.append("보증금 \(depositTitle)")
+        if let depositTitle = MonthlyRentPriceFormatter.amountRangeTitle(
+            min: minDeposit,
+            max: maxDeposit,
+            language: language
+        ) {
+            parts.append(
+                formatted(
+                    "listingDetail.format.deposit.overview",
+                    language: language,
+                    arguments: [depositTitle]
+                )
+            )
         }
 
-        if let maintenanceFeeTitle = wonRangeTitle(min: minimumMaintenanceFee, max: minimumMaintenanceFee) {
-            parts.append("관리비 \(maintenanceFeeTitle)")
+        if let maintenanceFeeTitle = MonthlyRentPriceFormatter.amountRangeTitle(
+            min: minimumMaintenanceFee,
+            max: maximumMaintenanceFee,
+            language: language
+        ) {
+            parts.append(
+                formatted(
+                    "listingDetail.format.maintenanceFee.overview",
+                    language: language,
+                    arguments: [maintenanceFeeTitle]
+                )
+            )
         }
 
         return parts.joined(separator: " · ")
     }
 
-    nonisolated private static func locationTitle(from listing: Listing) -> String {
+    nonisolated private static func locationTitle(
+        from listing: Listing,
+        language: AppLanguage
+    ) -> String {
         if let nearestTransit = listing.nearestTransit {
             if let walkMinutes = nearestTransit.walkMinutes {
-                return "\(nearestTransit.name) 도보 \(walkMinutes)분"
+                return formatted(
+                    "listingDetail.format.transit.overview",
+                    language: language,
+                    arguments: ["\(walkMinutes)", nearestTransit.name]
+                )
             }
 
             return nearestTransit.name
         }
 
         if let distanceMeters = listing.distanceMeters {
-            return "\(Int(distanceMeters.rounded()))m 거리"
+            switch language {
+            case .korean:
+                return "\(Int(distanceMeters.rounded()))m 거리"
+            case .english:
+                return "\(Int(distanceMeters.rounded()))m away"
+            }
         }
 
         return listing.address ?? ""
     }
 
-    nonisolated private static func minimumStayPeriodTitle(months: Int?) -> String {
+    nonisolated private static func minimumStayPeriodTitle(
+        months: Int?,
+        language: AppLanguage
+    ) -> String {
         guard let months, months > 0 else { return "" }
-        guard months != 1 else { return "한달 이상" }
 
-        return "\(months)개월 이상"
-    }
-
-    nonisolated private static func wonRangeTitle(min: Int?, max: Int?) -> String? {
-        switch (min, max) {
-        case let (min?, max?) where min == max:
-            return wonTitle(min)
-        case let (min?, max?):
-            return "\(wonNumberTitle(min))~\(wonTitle(max))"
-        case let (min?, nil):
-            return "\(wonTitle(min))~"
-        case let (nil, max?):
-            return "~\(wonTitle(max))"
-        case (nil, nil):
-            return nil
+        switch language {
+        case .korean:
+            return months == 1 ? "한달 이상" : "\(months)개월 이상"
+        case .english:
+            return "\(months) mo~"
         }
     }
 
-    nonisolated private static func wonTitle(_ amount: Int) -> String {
-        guard amount != 0 else { return "0원" }
-        guard amount >= 10_000 else { return "\(amount)원" }
-
-        return "\(wonNumberTitle(amount))만원"
-    }
-
-    nonisolated private static func wonNumberTitle(_ amount: Int) -> String {
-        guard amount >= 10_000 else { return "\(amount)원" }
-
-        let tenths = amount / 1_000
-        if tenths % 10 == 0 {
-            return "\(tenths / 10)"
-        }
-
-        return "\(Double(tenths) / 10)"
+    nonisolated private static func formatted(
+        _ key: String,
+        language: AppLanguage,
+        arguments: [CVarArg]
+    ) -> String {
+        let format = language.localized(key)
+        return String(format: format, locale: language.locale, arguments: arguments)
     }
 }

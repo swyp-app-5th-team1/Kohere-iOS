@@ -92,39 +92,41 @@ enum MapPropertyType: CaseIterable, Hashable {
     case coLiving
     case shareHouse
 
-    var displayTitle: String {
-        switch self {
+    func displayTitle(locale: Locale) -> String {
+        let language = AppLanguage(locale: locale)
+        return switch self {
         case .goshiwon:
-            String(localized: "map.propertyType.goshiwon")
+            language.localized("map.propertyType.goshiwon")
         case .coLiving:
-            String(localized: "map.propertyType.coLiving")
+            language.localized("map.propertyType.coLiving")
         case .shareHouse:
-            String(localized: "map.propertyType.shareHouse")
+            language.localized("map.propertyType.shareHouse")
         }
     }
 }
 
 extension RoomCondition {
-    var mapFilterDisplayTitle: String {
-        switch self {
+    func mapFilterDisplayTitle(locale: Locale) -> String {
+        let language = AppLanguage(locale: locale)
+        return switch self {
         case .moveInNow:
-            String(localized: "map.filter.option.moveInNow")
+            language.localized("map.filter.option.moveInNow")
         case .femaleOnly:
-            String(localized: "map.filter.option.femaleOnly")
+            language.localized("map.filter.option.femaleOnly")
         case .mealsIncluded:
-            String(localized: "map.filter.option.mealsIncluded")
+            language.localized("map.filter.option.mealsIncluded")
         case .doubleRoom:
-            String(localized: "map.filter.option.doubleRoom")
+            language.localized("map.filter.option.doubleRoom")
         case .privateBathroom:
-            String(localized: "map.filter.option.privateBathroom")
+            language.localized("map.filter.option.privateBathroom")
         case .englishSupport:
-            String(localized: "map.filter.option.englishSupport")
+            language.localized("map.filter.option.englishSupport")
         case .addressRegistration:
-            String(localized: "map.filter.option.addressRegistration")
+            language.localized("map.filter.option.addressRegistration")
         case .noMaintenanceFee:
-            String(localized: "map.filter.option.noMaintenanceFee")
+            language.localized("map.filter.option.noMaintenanceFee")
         case .noARCRequired:
-            String(localized: "map.filter.option.noARCRequired")
+            language.localized("map.filter.option.noARCRequired")
         }
     }
 }

@@ -56,8 +56,10 @@ struct ListingDetailView: View {
     ) -> some View {
         ZStack(alignment: .top) {
             detailScrollView(detail: detail, scrollProxy: scrollProxy)
+                .accessibilityHidden(store.isApplicationSheetPresented)
 
             topChromeOverlay(detail: detail, scrollProxy: scrollProxy)
+                .accessibilityHidden(store.isApplicationSheetPresented)
 
             if store.isApplicationSheetPresented {
                 ListingDetailApplicationSheetOverlay(

@@ -152,7 +152,7 @@ final class NetworkService {
     }
     
     private func mapAFError(_ error: AFError) -> DataError {
-        if error.isSessionTaskError {
+        if error.isSessionTaskError || error.isExplicitlyCancelledError {
             return .transport(message: error.localizedDescription)
         }
 

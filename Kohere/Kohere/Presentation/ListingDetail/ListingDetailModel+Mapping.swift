@@ -4,7 +4,8 @@ extension ListingDetailModel {
     init(
         listingDetail: ListingDetail,
         exchangeRate: KRWToUSDExchangeRate?,
-        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase
+        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase,
+        language: AppLanguage
     ) {
         let roomPricings = listingDetail.roomOffers.compactMap(\.pricing)
         let monthlyRents = roomPricings.compactMap(\.monthlyRent)
@@ -25,7 +26,8 @@ extension ListingDetailModel {
             imageURLs: listingDetail.imageURLs,
             monthlyRentText: ListingDetailValueFormatter.monthlyRentTitle(
                 min: monthlyRents.min(),
-                max: monthlyRents.max()
+                max: monthlyRents.max(),
+                language: language
             ),
             convertedMonthlyRentText: MonthlyRentPriceFormatter.usdTitle(
                 min: convertedMonthlyRents.min(),
@@ -33,39 +35,51 @@ extension ListingDetailModel {
             ),
             depositText: ListingDetailValueFormatter.overviewDepositTitle(
                 min: deposits.min(),
-                max: deposits.max()
+                max: deposits.max(),
+                language: language
             ),
             maintenanceFeeText: ListingDetailValueFormatter.overviewMaintenanceFeeTitle(
                 min: maintenanceFees.min(),
-                max: maintenanceFees.max()
+                max: maintenanceFees.max(),
+                language: language
             ),
-            transitText: ListingDetailValueFormatter.transitTitle(listingDetail.nearestTransit),
+            transitText: ListingDetailValueFormatter.transitTitle(
+                listingDetail.nearestTransit,
+                language: language
+            ),
             imageCountText: Self.imageCountTitle(listingDetail.imageURLs.count),
             reviewCount: 0,
             isLiked: listingDetail.isFavorited,
             favoriteCount: listingDetail.favoriteCount
         )
         tabs = Self.tabs
-        roomOffers = listingDetail.roomOffers.map { Self.roomOfferModel($0) }
+        roomOffers = listingDetail.roomOffers.map { Self.roomOfferModel($0, language: language) }
         priceInfo = Self.priceRows(
             listingDetail: listingDetail,
             monthlyRents: monthlyRents,
             deposits: deposits,
-            maintenanceFees: maintenanceFees
+            maintenanceFees: maintenanceFees,
+            language: language
         )
-        propertyInfo = Self.propertyRows(listingDetail)
+        propertyInfo = Self.propertyRows(listingDetail, language: language)
         propertyFeatures = Self.propertyFeatures(listingDetail.conditions)
-        buildingInfo = Self.buildingRows(listingDetail.building)
-        facilityInfo = Self.facilityRows(listingDetail.facilities)
-        locationInfo = Self.locationInfo(listingDetail)
+        buildingInfo = Self.buildingRows(listingDetail.building, language: language)
+        facilityInfo = Self.facilityRows(listingDetail.facilities, language: language)
+        locationInfo = Self.locationInfo(listingDetail, language: language)
     }
 
-    private static func roomOfferModel(_ offer: ListingDetailRoomOffer) -> ListingRoomOfferModel {
+    private static func roomOfferModel(
+        _ offer: ListingDetailRoomOffer,
+        language: AppLanguage
+    ) -> ListingRoomOfferModel {
         ListingRoomOfferModel(
             id: offer.id,
             name: offer.name,
             imageURLs: offer.roomImageURLs,
-            pricingText: ListingDetailValueFormatter.roomOfferPricingTitle(offer.pricing),
+            pricingText: ListingDetailValueFormatter.roomOfferPricingTitle(
+                offer.pricing,
+                language: language
+            ),
             tags: roomOfferTags(offer)
         )
     }
@@ -78,7 +92,8 @@ extension ListingDetailModel {
         listingDetail: ListingDetail,
         monthlyRents: [Int],
         deposits: [Int],
-        maintenanceFees: [Int]
+        maintenanceFees: [Int],
+        language: AppLanguage
     ) -> [ListingDetailInfoRowModel] {
         var rows: [ListingDetailInfoRowModel] = [
             ListingDetailInfoRowModel(
@@ -90,19 +105,28 @@ extension ListingDetailModel {
             ListingDetailInfoRowModel(
                 id: "deposit",
                 title: String(localized: "listingDetail.field.deposit"),
-                value: ListingDetailValueFormatter.priceRowValue(min: deposits.min(), max: deposits.max())
+                value: ListingDetailValueFormatter.priceRowValue(
+                    min: deposits.min(),
+                    max: deposits.max(),
+                    language: language
+                )
             ),
             ListingDetailInfoRowModel(
                 id: "monthly-rent",
                 title: String(localized: "listingDetail.field.monthlyRent"),
-                value: ListingDetailValueFormatter.priceRowValue(min: monthlyRents.min(), max: monthlyRents.max())
+                value: ListingDetailValueFormatter.priceRowValue(
+                    min: monthlyRents.min(),
+                    max: monthlyRents.max(),
+                    language: language
+                )
             ),
             ListingDetailInfoRowModel(
                 id: "maintenance-fee",
                 title: String(localized: "listingDetail.field.maintenanceFee"),
                 value: ListingDetailValueFormatter.maintenanceFeeRowValue(
                     min: maintenanceFees.min(),
-                    max: maintenanceFees.max()
+                    max: maintenanceFees.max(),
+                    language: language
                 )
             )
         ]
@@ -120,10 +144,16 @@ extension ListingDetailModel {
         return rows
     }
 
-    private static func propertyRows(_ listingDetail: ListingDetail) -> [ListingDetailInfoRowModel] {
+    private static func propertyRows(
+        _ listingDetail: ListingDetail,
+        language: AppLanguage
+    ) -> [ListingDetailInfoRowModel] {
         var rows: [ListingDetailInfoRowModel] = []
 
-        if let contractTitle = ListingDetailValueFormatter.stayTitle(listingDetail.contract) {
+        if let contractTitle = ListingDetailValueFormatter.stayTitle(
+            listingDetail.contract,
+            language: language
+        ) {
             rows.append(ListingDetailInfoRowModel(id: "stay", title: String(localized: "listingDetail.field.usagePeriod"), value: contractTitle))
         }
 
@@ -141,7 +171,10 @@ extension ListingDetailModel {
         localizedServerCodes(conditionCodes, namespace: .roomOfferFilterTags)
     }
 
-    private static func buildingRows(_ building: ListingDetailBuilding?) -> [ListingDetailInfoRowModel] {
+    private static func buildingRows(
+        _ building: ListingDetailBuilding?,
+        language: AppLanguage
+    ) -> [ListingDetailInfoRowModel] {
         guard let building else { return [] }
 
         return [
@@ -150,14 +183,19 @@ extension ListingDetailModel {
                 title: String(localized: "listingDetail.field.buildingType"),
                 value: localizedServerCode(building.type, namespace: .buildingType)
             ),
-            optionalRow(id: "floor", title: String(localized: "listingDetail.field.floor"), value: ListingDetailValueFormatter.floorTitle(building)),
+            optionalRow(
+                id: "floor",
+                title: String(localized: "listingDetail.field.floor"),
+                value: ListingDetailValueFormatter.floorTitle(building, language: language)
+            ),
             optionalRow(
                 id: "parking",
                 title: String(localized: "listingDetail.field.parking"),
                 value: ListingDetailValueFormatter.availabilityTitle(
                     building.parkingAvailable,
                     availableKey: "listingDetail.value.parkingAvailable",
-                    unavailableKey: "listingDetail.value.noParking"
+                    unavailableKey: "listingDetail.value.noParking",
+                    language: language
                 )
             ),
             optionalRow(
@@ -166,14 +204,18 @@ extension ListingDetailModel {
                 value: ListingDetailValueFormatter.availabilityTitle(
                     building.elevatorAvailable,
                     availableKey: "listingDetail.value.elevatorAvailable",
-                    unavailableKey: "listingDetail.value.noElevator"
+                    unavailableKey: "listingDetail.value.noElevator",
+                    language: language
                 )
             )
         ]
         .compactMap { $0 }
     }
 
-    private static func facilityRows(_ facilities: ListingDetailFacilities?) -> [ListingDetailInfoRowModel] {
+    private static func facilityRows(
+        _ facilities: ListingDetailFacilities?,
+        language: AppLanguage
+    ) -> [ListingDetailInfoRowModel] {
         guard let facilities else { return [] }
 
         return [
@@ -205,7 +247,7 @@ extension ListingDetailModel {
             listRow(
                 id: "common-areas",
                 title: String(localized: "listingDetail.field.spaceFacility"),
-                values: commonSpaceTitles(facilities.commonSpaces)
+                values: commonSpaceTitles(facilities.commonSpaces, language: language)
             ),
             listRow(
                 id: "supplies",
@@ -216,14 +258,21 @@ extension ListingDetailModel {
         .compactMap { $0 }
     }
 
-    private static func locationInfo(_ listingDetail: ListingDetail) -> ListingLocationInfoModel {
+    private static func locationInfo(
+        _ listingDetail: ListingDetail,
+        language: AppLanguage
+    ) -> ListingLocationInfoModel {
         let transits = listingDetail.nearestTransit.map { transit in
             [
                 ListingTransitInfoModel(
                     id: transit.name,
                     lineText: transitLineText(transit),
                     lineColorName: "green60",
-                    description: ListingDetailValueFormatter.transitTitle(transit, includesFrom: true)
+                    description: ListingDetailValueFormatter.transitTitle(
+                        transit,
+                        includesFrom: true,
+                        language: language
+                    )
                 )
             ]
         } ?? []

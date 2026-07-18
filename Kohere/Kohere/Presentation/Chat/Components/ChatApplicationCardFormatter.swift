@@ -81,9 +81,7 @@ struct ChatApplicationCardFormatter {
     }
 
     var deposit: String {
-        guard let depositAmount = item.depositAmount,
-              depositAmount > 0
-        else { return notAvailable }
+        guard let depositAmount = item.depositAmount else { return notAvailable }
 
         return wonText(depositAmount)
     }
@@ -102,10 +100,7 @@ struct ChatApplicationCardFormatter {
     }
 
     func localized(_ key: String) -> String {
-        String(
-            localized: String.LocalizationValue(key),
-            locale: locale
-        )
+        language.localized(key)
     }
 
     private var locale: Locale {

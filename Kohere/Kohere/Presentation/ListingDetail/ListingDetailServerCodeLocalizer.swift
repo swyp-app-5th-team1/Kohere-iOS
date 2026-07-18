@@ -74,13 +74,21 @@ extension ListingDetailModel {
         return name
     }
 
-    static func commonSpaceTitles(_ commonSpaces: [ListingDetailCommonSpace]) -> [String] {
+    static func commonSpaceTitles(
+        _ commonSpaces: [ListingDetailCommonSpace],
+        language: AppLanguage
+    ) -> [String] {
         commonSpaces.map { commonSpace in
             let type = localizedServerCode(
                 commonSpace.type,
-                namespace: .facilitiesCommonSpaces
+                namespace: .facilitiesCommonSpaces,
+                language: language
             ) ?? commonSpace.type
-            return ListingDetailValueFormatter.commonSpaceTitle(type: type, count: commonSpace.count)
+            return ListingDetailValueFormatter.commonSpaceTitle(
+                type: type,
+                count: commonSpace.count,
+                language: language
+            )
         }
     }
 
@@ -132,7 +140,8 @@ extension ListingDetailModel {
 
     static func localizedServerCode(
         _ code: String?,
-        namespace: ServerCodeNamespace
+        namespace: ServerCodeNamespace,
+        language: AppLanguage = .systemDefault
     ) -> String? {
         guard let code = code?.trimmingCharacters(in: .whitespacesAndNewlines),
               !code.isEmpty else {
@@ -144,7 +153,7 @@ extension ListingDetailModel {
             return nil
         }
 
-        return localized(localization.key, fallback: localization.fallback)
+        return language.localized(localization.key, fallback: localization.fallback)
     }
 
     static func localized(_ key: String, fallback: String) -> String {

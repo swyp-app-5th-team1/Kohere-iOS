@@ -16,14 +16,22 @@ enum RecentlyViewedDelegate: Equatable {
 struct RecentlyViewedFeature {
     @Dependency(\.listingClient)
     var listingClient
+    @Dependency(\.fetchKRWToUSDExchangeRateUseCase)
+    var fetchKRWToUSDExchangeRateUseCase
+    @Dependency(\.convertMonthlyRentCurrencyUseCase)
+    var convertMonthlyRentCurrencyUseCase
     
     // MARK: - State
     
     @ObservableState
     struct State: Equatable {
         var userType: UserType?
+        var appLanguage: AppLanguage = .systemDefault
+        var listings: [Listing] = []
         var items: [ListingItemModel] = []
         var isLoading: Bool = false
+        var krwToUSDExchangeRate: KRWToUSDExchangeRate?
+        var isExchangeRateLoading = false
         var favoriteUpdatingIDs: Set<String> = []
         var errorMessage: String?
     }
@@ -33,6 +41,7 @@ struct RecentlyViewedFeature {
     enum Action: Equatable {
         case onAppear
         case recentListingsResponse(Result<[Listing], DataError>)
+        case exchangeRateResponse(Result<KRWToUSDExchangeRate, CurrencyError>)
         case cardTapped(id: String)
         case likeButtonTapped(id: String)
         case favoriteStatusResponse(listingID: String, Result<ListingFavoriteStatus, DataError>)
@@ -46,21 +55,42 @@ struct RecentlyViewedFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard !state.isLoading else { return .none }
-                state.isLoading = true
-                state.errorMessage = nil
+                var effects: [Effect<Action>] = []
 
-                return .run { [listingClient] send in
-                    do {
-                        let listings = try await listingClient.fetchRecentListings()
-                        await send(.recentListingsResponse(.success(listings)))
-                    } catch {
-                        await send(.recentListingsResponse(.failure(.from(error))))
-                    }
+                if !state.isLoading {
+                    state.isLoading = true
+                    state.errorMessage = nil
+                    effects.append(
+                        .run { [listingClient] send in
+                            do {
+                                let listings = try await listingClient.fetchRecentListings()
+                                await send(.recentListingsResponse(.success(listings)))
+                            } catch {
+                                await send(.recentListingsResponse(.failure(.from(error))))
+                            }
+                        }
+                    )
                 }
 
+                if state.krwToUSDExchangeRate == nil, !state.isExchangeRateLoading {
+                    state.isExchangeRateLoading = true
+                    effects.append(
+                        .run { [fetchKRWToUSDExchangeRateUseCase] send in
+                            do {
+                                let rate = try await fetchKRWToUSDExchangeRateUseCase.execute()
+                                await send(.exchangeRateResponse(.success(rate)))
+                            } catch {
+                                await send(.exchangeRateResponse(.failure(.exchangeRateUnavailable)))
+                            }
+                        }
+                    )
+                }
+
+                return .merge(effects)
+
             case let .recentListingsResponse(.success(listings)):
-                state.items = listings.map(ListingItemModel.init(listing:))
+                state.listings = listings
+                state.items = listingItems(from: listings, state: state)
                 state.isLoading = false
                 state.errorMessage = nil
                 return .none
@@ -68,6 +98,16 @@ struct RecentlyViewedFeature {
             case let .recentListingsResponse(.failure(error)):
                 state.isLoading = false
                 state.errorMessage = error.localizedDescription
+                return .none
+
+            case let .exchangeRateResponse(.success(rate)):
+                state.krwToUSDExchangeRate = rate
+                state.isExchangeRateLoading = false
+                state.items = listingItems(from: state.listings, state: state)
+                return .none
+
+            case .exchangeRateResponse(.failure):
+                state.isExchangeRateLoading = false
                 return .none
                 
             case let .cardTapped(id):
@@ -114,6 +154,20 @@ struct RecentlyViewedFeature {
             case .backButtonTapped, .delegate:
                 return .none
             }
+        }
+    }
+
+    private func listingItems(
+        from listings: [Listing],
+        state: State
+    ) -> [ListingItemModel] {
+        listings.map {
+            ListingItemModel(
+                listing: $0,
+                exchangeRate: state.krwToUSDExchangeRate,
+                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
+                language: state.appLanguage
+            )
         }
     }
 }

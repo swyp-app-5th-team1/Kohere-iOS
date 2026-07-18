@@ -159,6 +159,8 @@ struct UIKitMonthYearPicker: UIViewRepresentable {
 
     final class Coordinator: NSObject, UIPickerViewDataSource, UIPickerViewDelegate {
         var parent: UIKitMonthYearPicker
+        private var cachedMonthFormatter: DateFormatter?
+        private var cachedMonthFormatterLocaleIdentifier: String?
 
         init(parent: UIKitMonthYearPicker) {
             self.parent = parent
@@ -238,10 +240,24 @@ struct UIKitMonthYearPicker: UIViewRepresentable {
                 )
             }
 
-            let formatter = DateFormatter()
-            formatter.locale = ListingApplicationFeature.State.displayLocale
+            let formatter = monthFormatter(
+                for: ListingApplicationFeature.State.displayLocale
+            )
             let symbols = formatter.shortMonthSymbols ?? []
             return symbols.indices.contains(value - 1) ? symbols[value - 1] : "\(value)"
+        }
+
+        private func monthFormatter(for locale: Locale) -> DateFormatter {
+            if let cachedMonthFormatter,
+               cachedMonthFormatterLocaleIdentifier == locale.identifier {
+                return cachedMonthFormatter
+            }
+
+            let formatter = DateFormatter()
+            formatter.locale = locale
+            cachedMonthFormatter = formatter
+            cachedMonthFormatterLocaleIdentifier = locale.identifier
+            return formatter
         }
 
         private static var font: UIFont {

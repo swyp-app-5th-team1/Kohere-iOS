@@ -17,8 +17,31 @@ enum AppLanguage: String, CaseIterable, Codable, Equatable, Sendable {
             : .english
     }
 
-    var locale: Locale {
+    nonisolated var locale: Locale {
         Locale(identifier: rawValue)
+    }
+
+    nonisolated init(locale: Locale) {
+        self = locale.language.languageCode?.identifier == Self.korean.rawValue
+            ? .korean
+            : .english
+    }
+
+    nonisolated func localized(_ key: String, fallback: String? = nil) -> String {
+        guard let path = Bundle.main.path(forResource: rawValue, ofType: "lproj"),
+              let bundle = Bundle(path: path) else {
+            return Bundle.main.localizedString(
+                forKey: key,
+                value: fallback ?? key,
+                table: nil
+            )
+        }
+
+        return bundle.localizedString(
+            forKey: key,
+            value: fallback ?? key,
+            table: nil
+        )
     }
 
     var title: String {

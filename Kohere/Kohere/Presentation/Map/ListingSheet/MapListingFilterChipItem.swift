@@ -29,23 +29,26 @@ struct MapListingFilterChipItem: Identifiable {
 
     static func items(
         for filter: MapFilterState,
-        source: MapFilterApplicationSource
+        source: MapFilterApplicationSource,
+        locale: Locale
     ) -> [MapListingFilterChipItem] {
         [
-            optionsItem(for: filter, source: source),
-            priceItem(for: filter, source: source),
-            propertyTypeItem(for: filter, source: source)
+            optionsItem(for: filter, source: source, locale: locale),
+            priceItem(for: filter, source: source, locale: locale),
+            propertyTypeItem(for: filter, source: source, locale: locale)
         ]
     }
 
     private static func optionsItem(
         for filter: MapFilterState,
-        source: MapFilterApplicationSource
+        source: MapFilterApplicationSource,
+        locale: Locale
     ) -> MapListingFilterChipItem {
+        let language = AppLanguage(locale: locale)
         guard filter.hasSelectedOptions else {
             return MapListingFilterChipItem(
                 kind: .options,
-                title: String(localized: "map.filter.section.options"),
+                title: language.localized("map.filter.section.options"),
                 style: .plain,
                 showsChevron: true
             )
@@ -55,7 +58,7 @@ struct MapListingFilterChipItem: Identifiable {
             kind: .options,
             title: RoomCondition.allCases
                 .filter { filter.selectedOptions.contains($0) }
-                .map(\.mapFilterDisplayTitle)
+                .map { $0.mapFilterDisplayTitle(locale: locale) }
                 .joined(separator: ", "),
             style: style(for: source),
             showsChevron: false
@@ -64,12 +67,14 @@ struct MapListingFilterChipItem: Identifiable {
 
     private static func priceItem(
         for filter: MapFilterState,
-        source: MapFilterApplicationSource
+        source: MapFilterApplicationSource,
+        locale: Locale
     ) -> MapListingFilterChipItem {
+        let language = AppLanguage(locale: locale)
         guard filter.hasSelectedPriceRange || source == .diagnosis else {
             return MapListingFilterChipItem(
                 kind: .price,
-                title: String(localized: "map.filter.section.price"),
+                title: language.localized("map.filter.section.price"),
                 style: .plain,
                 showsChevron: true
             )
@@ -77,7 +82,7 @@ struct MapListingFilterChipItem: Identifiable {
 
         return MapListingFilterChipItem(
             kind: .price,
-            title: priceTitle(for: filter, source: source),
+            title: priceTitle(for: filter, source: source, locale: locale),
             style: style(for: source),
             showsChevron: false
         )
@@ -85,12 +90,14 @@ struct MapListingFilterChipItem: Identifiable {
 
     private static func propertyTypeItem(
         for filter: MapFilterState,
-        source: MapFilterApplicationSource
+        source: MapFilterApplicationSource,
+        locale: Locale
     ) -> MapListingFilterChipItem {
+        let language = AppLanguage(locale: locale)
         guard filter.hasSelectedPropertyTypes else {
             return MapListingFilterChipItem(
                 kind: .propertyType,
-                title: String(localized: "map.filter.section.propertyType"),
+                title: language.localized("map.filter.section.propertyType"),
                 style: .plain,
                 showsChevron: true
             )
@@ -100,7 +107,7 @@ struct MapListingFilterChipItem: Identifiable {
             kind: .propertyType,
             title: MapPropertyType.allCases
                 .filter { filter.selectedPropertyTypes.contains($0) }
-                .map(\.displayTitle)
+                .map { $0.displayTitle(locale: locale) }
                 .joined(separator: ", "),
             style: style(for: source),
             showsChevron: false
@@ -118,38 +125,45 @@ struct MapListingFilterChipItem: Identifiable {
 
     private static func priceTitle(
         for filter: MapFilterState,
-        source: MapFilterApplicationSource
+        source: MapFilterApplicationSource,
+        locale: Locale
     ) -> String {
-        let monthlyRentTitle = monthlyRentTitle(for: filter, source: source)
+        let language = AppLanguage(locale: locale)
+        let monthlyRentTitle = monthlyRentTitle(for: filter, source: source, locale: locale)
         let depositTitle = MapFilterPriceFormatter.chipTitle(
-            prefix: String(localized: "map.filter.deposit"),
+            prefix: language.localized("map.filter.deposit"),
             selection: filter.depositRange,
-            defaultSelection: MapFilterPriceRange.defaultDeposit
+            defaultSelection: MapFilterPriceRange.defaultDeposit,
+            locale: locale
         )
 
         let title = [monthlyRentTitle, depositTitle]
             .compactMap { $0 }
             .joined(separator: ", ")
 
-        return title.isEmpty ? String(localized: "map.filter.section.price") : title
+        return title.isEmpty ? language.localized("map.filter.section.price") : title
     }
 
     private static func monthlyRentTitle(
         for filter: MapFilterState,
-        source: MapFilterApplicationSource
+        source: MapFilterApplicationSource,
+        locale: Locale
     ) -> String? {
-        switch source {
+        let language = AppLanguage(locale: locale)
+        return switch source {
         case .manual:
             MapFilterPriceFormatter.chipTitle(
-                prefix: String(localized: "map.filter.monthlyRent"),
+                prefix: language.localized("map.filter.monthlyRent"),
                 selection: filter.monthlyRentRange,
-                defaultSelection: MapFilterPriceRange.defaultMonthlyRent
+                defaultSelection: MapFilterPriceRange.defaultMonthlyRent,
+                locale: locale
             )
         case .diagnosis:
             MapFilterPriceFormatter.chipTitle(
-                prefix: String(localized: "map.filter.monthlyRent"),
+                prefix: language.localized("map.filter.monthlyRent"),
                 selection: filter.monthlyRentRange,
-                bounds: MapFilterPriceRange.monthlyRent
+                bounds: MapFilterPriceRange.monthlyRent,
+                locale: locale
             )
         }
     }

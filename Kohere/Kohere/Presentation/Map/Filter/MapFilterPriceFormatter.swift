@@ -8,8 +8,8 @@
 import Foundation
 
 enum MapFilterPriceFormatter {
-    static func amountText(_ tenThousandWon: Int) -> String {
-        if usesKoreanLocalization {
+    static func amountText(_ tenThousandWon: Int, locale: Locale) -> String {
+        if locale.language.languageCode?.identifier == AppLanguage.korean.rawValue {
             return "\(tenThousandWon)만 원"
         }
 
@@ -18,7 +18,8 @@ enum MapFilterPriceFormatter {
 
     static func controlSummary(
         selection: RangeSliderValue,
-        bounds: ClosedRange<Int>
+        bounds: ClosedRange<Int>,
+        locale: Locale
     ) -> String {
         switch rangeState(
             selection: selection,
@@ -26,21 +27,24 @@ enum MapFilterPriceFormatter {
             maximumBoundary: bounds.upperBound
         ) {
         case .all:
-            return String(localized: "map.filter.any")
+            return AppLanguage(locale: locale).localized("map.filter.any")
         case let .upperBound(maximum):
             return localizedPriceText(
                 key: "map.filter.price.underFormat",
-                amounts: [maximum]
+                amounts: [maximum],
+                locale: locale
             )
         case let .lowerBound(minimum):
             return localizedPriceText(
                 key: "map.filter.price.upperOnlyFormat",
-                amounts: [minimum]
+                amounts: [minimum],
+                locale: locale
             )
         case let .range(minimum, maximum):
             return localizedPriceText(
                 key: "map.filter.price.rangeFormat",
-                amounts: [minimum, maximum]
+                amounts: [minimum, maximum],
+                locale: locale
             )
         }
     }
@@ -48,26 +52,30 @@ enum MapFilterPriceFormatter {
     static func chipTitle(
         prefix: String,
         selection: RangeSliderValue,
-        defaultSelection: RangeSliderValue
+        defaultSelection: RangeSliderValue,
+        locale: Locale
     ) -> String? {
         chipTitle(
             prefix: prefix,
             selection: selection,
             minimumBoundary: defaultSelection.minimum,
-            maximumBoundary: defaultSelection.maximum
+            maximumBoundary: defaultSelection.maximum,
+            locale: locale
         )
     }
 
     static func chipTitle(
         prefix: String,
         selection: RangeSliderValue,
-        bounds: ClosedRange<Int>
+        bounds: ClosedRange<Int>,
+        locale: Locale
     ) -> String? {
         chipTitle(
             prefix: prefix,
             selection: selection,
             minimumBoundary: bounds.lowerBound,
-            maximumBoundary: bounds.upperBound
+            maximumBoundary: bounds.upperBound,
+            locale: locale
         )
     }
 
@@ -75,7 +83,8 @@ enum MapFilterPriceFormatter {
         prefix: String,
         selection: RangeSliderValue,
         minimumBoundary: Int,
-        maximumBoundary: Int
+        maximumBoundary: Int,
+        locale: Locale
     ) -> String? {
         switch rangeState(
             selection: selection,
@@ -85,22 +94,22 @@ enum MapFilterPriceFormatter {
         case .all:
             return nil
         case let .upperBound(maximum):
-            return "\(prefix) \(localizedPriceText(key: "map.filter.price.underFormat", amounts: [maximum]))"
+            return "\(prefix) \(localizedPriceText(key: "map.filter.price.underFormat", amounts: [maximum], locale: locale))"
         case let .lowerBound(minimum):
-            return "\(prefix) \(localizedPriceText(key: "map.filter.price.upperOnlyFormat", amounts: [minimum]))"
+            return "\(prefix) \(localizedPriceText(key: "map.filter.price.upperOnlyFormat", amounts: [minimum], locale: locale))"
         case let .range(minimum, maximum):
-            return "\(prefix) \(localizedPriceText(key: "map.filter.price.rangeFormat", amounts: [minimum, maximum]))"
+            return "\(prefix) \(localizedPriceText(key: "map.filter.price.rangeFormat", amounts: [minimum, maximum], locale: locale))"
         }
     }
 
-    private static func localizedPriceText(key: String, amounts: [Int]) -> String {
-        let format = Bundle.main.localizedString(forKey: key, value: key, table: nil)
-        let localizedAmounts = amounts.map { amountText($0) as CVarArg }
-        return String(format: format, arguments: localizedAmounts)
-    }
-
-    private static var usesKoreanLocalization: Bool {
-        Bundle.main.preferredLocalizations.first?.hasPrefix("ko") == true
+    private static func localizedPriceText(
+        key: String,
+        amounts: [Int],
+        locale: Locale
+    ) -> String {
+        let format = AppLanguage(locale: locale).localized(key)
+        let localizedAmounts = amounts.map { amountText($0, locale: locale) as CVarArg }
+        return String(format: format, locale: locale, arguments: localizedAmounts)
     }
 
     private static func compactWonText(_ tenThousandWon: Int) -> String {

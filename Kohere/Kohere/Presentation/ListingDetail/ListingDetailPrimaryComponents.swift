@@ -338,6 +338,8 @@ struct ListingDetailApplicationSheetOverlay: View {
                 onApplyTap: onApplyTap
             )
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(.isModal)
         .transition(.opacity)
         .zIndex(3)
     }

@@ -173,6 +173,7 @@ struct MoreFeature {
                         ListingDetailFeature.State(
                             listingID: listingID,
                             userType: state.userType,
+                            appLanguage: state.selectedLanguage,
                             isApplicationDisabled: true
                         )
                     )
@@ -184,11 +185,27 @@ struct MoreFeature {
                 return .send(.chatTabRequested)
 
             case let .path(.element(id: _, action: .savedListings(.delegate(.listingDetailRequested(listingID))))):
-                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: listingID, userType: state.userType)))
+                state.path.append(
+                    .listingDetail(
+                        ListingDetailFeature.State(
+                            listingID: listingID,
+                            userType: state.userType,
+                            appLanguage: state.selectedLanguage
+                        )
+                    )
+                )
                 return .none
 
             case let .path(.element(id: _, action: .recentlyViewedList(.delegate(.listingDetailRequested(listingID))))):
-                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: listingID, userType: state.userType)))
+                state.path.append(
+                    .listingDetail(
+                        ListingDetailFeature.State(
+                            listingID: listingID,
+                            userType: state.userType,
+                            appLanguage: state.selectedLanguage
+                        )
+                    )
+                )
                 return .none
 
             case .path(.element(id: _, action: .setting(.backButtonTapped))):
@@ -361,24 +378,42 @@ struct MoreFeature {
                 return .none
 
             case .feedbackTapped:
-                guard let mailURL = Self.feedbackMailURL else { return .none }
+                guard let mailURL = Self.feedbackMailURL(language: state.selectedLanguage) else {
+                    return .none
+                }
                 return .run { [openURL] _ in
                     await openURL(mailURL)
                 }
 
             case .collaborationTapped:
-                guard let mailURL = Self.collaborationMailURL else { return .none }
+                guard let mailURL = Self.collaborationMailURL(language: state.selectedLanguage) else {
+                    return .none
+                }
                 return .run { [openURL] _ in
                     await openURL(mailURL)
                 }
 
             case .savedListingsTapped:
                 guard state.canUseFavoriteFeatures else { return .none }
-                state.path.append(.savedListings(SavedListingsFeature.State(userType: state.userType)))
+                state.path.append(
+                    .savedListings(
+                        SavedListingsFeature.State(
+                            userType: state.userType,
+                            appLanguage: state.selectedLanguage
+                        )
+                    )
+                )
                 return .none
 
             case .recentlyViewedListingsTapped:
-                state.path.append(.recentlyViewedList(RecentlyViewedFeature.State(userType: state.userType)))
+                state.path.append(
+                    .recentlyViewedList(
+                        RecentlyViewedFeature.State(
+                            userType: state.userType,
+                            appLanguage: state.selectedLanguage
+                        )
+                    )
+                )
                 return .none
 
             case let .userProfileUpdated(userProfile):
@@ -419,15 +454,15 @@ extension MoreFeature.State {
 private extension MoreFeature {
     static let supportEmail = "kohere26@gmail.com"
 
-    static var feedbackMailURL: URL? {
+    static func feedbackMailURL(language: AppLanguage) -> URL? {
         mailURL(
-            body: "코히어를 이용하며 느낀 점이나 개선되었으면 하는 점을 자유롭게 작성해 주세요.\n\n"
+            body: language.localized("more.support.feedbackMailBody")
         )
     }
 
-    static var collaborationMailURL: URL? {
+    static func collaborationMailURL(language: AppLanguage) -> URL? {
         mailURL(
-            body: "광고, 제휴 등 코히어와 함께하고 싶은 내용을 자유롭게 작성해 주세요.\n\n"
+            body: language.localized("more.support.collaborationMailBody")
         )
     }
 
@@ -442,9 +477,6 @@ private extension MoreFeature {
     }
 
     static func localized(_ key: String, language: AppLanguage) -> String {
-        String(
-            localized: String.LocalizationValue(key),
-            locale: language.locale
-        )
+        language.localized(key)
     }
 }

@@ -55,6 +55,143 @@ final class LanguageUpdateRequestDTOTests: XCTestCase {
     }
 }
 
+final class ListingCardLocalizationTests: XCTestCase {
+    func testEnglishListingCardUsesCompactKoreanWonAndEnglishLabels() {
+        let item = ListingItemModel(listing: makeListing(), language: .english)
+
+        XCTAssertEqual(item.formattedPrice, "₩380~400K/mo")
+        XCTAssertEqual(item.detailsDescription, "Dep. ₩200K · Maint. ₩20K")
+        XCTAssertEqual(item.locationDescription, "8-min walk Hongdae Sta.")
+        XCTAssertEqual(item.period, "1 mo~")
+    }
+
+    func testKoreanListingCardKeepsKoreanPriceAndLabels() {
+        let item = ListingItemModel(listing: makeListing(), language: .korean)
+
+        XCTAssertEqual(item.formattedPrice, "월세 38~40만원")
+        XCTAssertEqual(item.detailsDescription, "보증금 20만원 · 관리비 2만원")
+        XCTAssertEqual(item.locationDescription, "Hongdae 도보 8분")
+        XCTAssertEqual(item.period, "한달 이상")
+    }
+
+    func testMapFilterAmountUsesRuntimeLocale() {
+        XCTAssertEqual(
+            MapFilterPriceFormatter.amountText(50, locale: AppLanguage.english.locale),
+            "₩500K"
+        )
+        XCTAssertEqual(
+            MapFilterPriceFormatter.amountText(50, locale: AppLanguage.korean.locale),
+            "50만 원"
+        )
+    }
+
+    private func makeListing() -> Listing {
+        Listing(
+            listingID: "listing-1",
+            title: "Hongdae House",
+            type: "Goshiwon",
+            minMonthlyRent: 380_000,
+            maxMonthlyRent: 400_000,
+            minDeposit: 200_000,
+            maxDeposit: 200_000,
+            minMaintenanceFee: 20_000,
+            maxMaintenanceFee: 20_000,
+            minStayMonths: 1,
+            maxStayMonths: nil,
+            thumbnailURL: nil,
+            coordinate: nil,
+            address: nil,
+            nearestTransit: ListingNearestTransit(
+                type: "SUBWAY",
+                name: "Hongdae",
+                walkMinutes: 8
+            ),
+            distanceMeters: nil,
+            isFavorited: false,
+            favoriteCount: 0
+        )
+    }
+}
+
+final class ListingDetailValueFormatterLocalizationTests: XCTestCase {
+    func testMonthlyRentUsesExplicitAppLanguage() {
+        XCTAssertEqual(
+            ListingDetailValueFormatter.monthlyRentTitle(
+                min: 380_000,
+                max: 400_000,
+                language: .english
+            ),
+            "₩380~400K/mo"
+        )
+        XCTAssertEqual(
+            ListingDetailValueFormatter.monthlyRentTitle(
+                min: 380_000,
+                max: 400_000,
+                language: .korean
+            ),
+            "월세 38~40만 원"
+        )
+    }
+
+    func testTransitUsesExplicitAppLanguage() {
+        let transit = ListingDetailNearestTransit(
+            type: "SUBWAY",
+            name: "Anguk",
+            walkMinutes: 8,
+            nearbyPlacesDescription: nil
+        )
+
+        XCTAssertEqual(
+            ListingDetailValueFormatter.transitTitle(transit, language: .english),
+            "8-min walk Anguk Sta."
+        )
+        XCTAssertEqual(
+            ListingDetailValueFormatter.transitTitle(transit, language: .korean),
+            "안국역 도보 8분"
+        )
+    }
+}
+
+final class ChatApplicationCardFormatterTests: XCTestCase {
+    func testChatRoomSummaryDoesNotFabricateMissingApplicantDetails() {
+        let model = makeChatRoomModel(deposit: 0)
+
+        XCTAssertEqual(model.applicantGenderCode, "")
+        XCTAssertEqual(model.applicantCountryCode, "")
+        XCTAssertEqual(model.applicantCountryName, "")
+        XCTAssertEqual(model.applicantEmail, "")
+        XCTAssertEqual(model.roomType, "")
+    }
+
+    func testZeroDepositIsDisplayedAsValidAmount() {
+        let formatter = ChatApplicationCardFormatter(
+            item: makeChatRoomModel(deposit: 0),
+            language: .english
+        )
+
+        XCTAssertEqual(formatter.deposit, "₩ 0")
+    }
+
+    private func makeChatRoomModel(deposit: Int) -> ChatRoomModel {
+        ChatRoomModel(
+            entity: ChatRoom(
+                id: 1,
+                listingName: "Listing",
+                regionName: "Seoul",
+                accommodationType: "Co-living",
+                status: "SUBMITTED",
+                lastMessageAt: Date(timeIntervalSince1970: 0),
+                applicantName: "Applicant",
+                moveInDate: Date(timeIntervalSince1970: 0),
+                minStayMonths: 1,
+                deposit: deposit,
+                totalCostKRW: 0,
+                pricePerMonthKRW: 0
+            )
+        )
+    }
+}
+
 @MainActor
 final class LanguageSelectionTests: XCTestCase {
     func testSelectingDifferentLanguageRequestsLocalizedResetConfirmation() async {
@@ -156,7 +293,9 @@ final class LanguageResetTests: XCTestCase {
         XCTAssertFalse(state.map.isFilterPresented)
         XCTAssertTrue(state.more.path.isEmpty)
         XCTAssertEqual(state.home.userType, .tenant)
+        XCTAssertEqual(state.home.appLanguage, .english)
         XCTAssertEqual(state.map.userType, .tenant)
+        XCTAssertEqual(state.map.appLanguage, .english)
         XCTAssertEqual(state.more.userProfile, profile)
         XCTAssertEqual(state.more.selectedLanguage, .english)
     }

@@ -13,6 +13,7 @@ extension MapFeature {
         // Navigation
         var path = StackState<Path.State>()
         var userType: UserType?
+        var appLanguage: AppLanguage = .systemDefault
 
         // 현재 검색 모드 / 화면 표시
         var listingSource: MapListingSource = .idle
