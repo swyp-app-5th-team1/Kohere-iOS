@@ -20,6 +20,8 @@ struct MoveInApplicationCardView: View {
     let item: ChatRoomModel
     var mode: MoveInApplicationCardMode = .tenant
 
+    @Environment(\.locale)
+    private var locale
     @State private var isEmailCopied = false
     @State private var emailCopyResetTask: Task<Void, Never>?
     
@@ -39,8 +41,8 @@ struct MoveInApplicationCardView: View {
                     .kohereTextStyle(.caption1Regular)
                     .foregroundColor(.labelAlternative)
                 
-                if !item.pricePerMonth.isEmpty {
-                    Text(item.pricePerMonth)
+                if !cardFormatter.pricePerMonth.isEmpty {
+                    Text(cardFormatter.pricePerMonth)
                         .kohereTextStyle(.caption1Regular)
                         .foregroundColor(.labelAlternative)
                 }
@@ -98,31 +100,70 @@ struct MoveInApplicationCardView: View {
         switch mode {
         case .tenant:
             VStack(spacing: 4) {
-                infoRow(label: "Applicant", value: item.applicantName)
-                infoRow(label: "Move-in Date", value: item.moveInDate)
-                infoRow(label: "Lease Term", value: item.leaseTerm)
-                infoRow(label: "Deposit", value: item.deposit)
-                infoRow(label: "Total Cost", value: item.totalCost)
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.applicant"),
+                    value: cardFormatter.applicantName
+                )
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.moveInDate"),
+                    value: cardFormatter.moveInDate
+                )
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.leaseTerm"),
+                    value: cardFormatter.leaseTerm
+                )
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.deposit"),
+                    value: cardFormatter.deposit
+                )
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.totalCost"),
+                    value: cardFormatter.totalCost
+                )
             }
             
         case .landlord:
             VStack(spacing: 4) {
-                infoRow(label: "이름", value: item.applicantName)
-                infoRow(label: "성별", value: item.applicantGender)
-                infoRow(label: "국적", value: item.applicantNationality)
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.applicant"),
+                    value: cardFormatter.applicantName
+                )
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.gender"),
+                    value: cardFormatter.applicantGender
+                )
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.nationality"),
+                    value: cardFormatter.applicantNationality
+                )
                 emailRow
-                infoRow(label: "객실 타입", value: item.roomType)
-                infoRow(label: "입주희망일", value: item.moveInDate)
-                infoRow(label: "희망입주기간", value: item.leaseTerm)
-                infoRow(label: "보증금", value: item.deposit)
-                infoRow(label: "총 초기비용", value: item.totalCost)
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.roomType"),
+                    value: cardFormatter.roomType
+                )
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.moveInDate"),
+                    value: cardFormatter.moveInDate
+                )
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.leaseTerm"),
+                    value: cardFormatter.leaseTerm
+                )
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.deposit"),
+                    value: cardFormatter.deposit
+                )
+                infoRow(
+                    label: cardFormatter.localized("chat.applicationCard.field.totalCost"),
+                    value: cardFormatter.totalCost
+                )
             }
         }
     }
     
     private var emailRow: some View {
         HStack {
-            Text("이메일")
+            Text(cardFormatter.localized("chat.applicationCard.field.email"))
                 .kohereTextStyle(.caption1Regular)
                 .foregroundColor(.neutral50)
             
@@ -132,7 +173,7 @@ struct MoveInApplicationCardView: View {
                 copyApplicantEmail()
             } label: {
                 HStack(spacing: 4) {
-                    Text(item.applicantEmail)
+                    Text(cardFormatter.applicantEmail)
                         .kohereTextStyle(.label3Medium)
                         .foregroundColor(.statusInfo)
 
@@ -144,7 +185,13 @@ struct MoveInApplicationCardView: View {
                 }
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(isEmailCopied ? "이메일 복사됨" : "이메일 복사")
+            .accessibilityLabel(
+                cardFormatter.localized(
+                    isEmailCopied
+                        ? "chat.applicationCard.accessibility.emailCopied"
+                        : "chat.applicationCard.accessibility.copyEmail"
+                )
+            )
             .accessibilityValue(item.applicantEmail)
         }
         .frame(height: 24)
@@ -163,6 +210,24 @@ struct MoveInApplicationCardView: View {
                 .foregroundColor(.neutral70)
         }
         .frame(height: 24)
+    }
+
+    private var cardFormatter: ChatApplicationCardFormatter {
+        ChatApplicationCardFormatter(
+            item: item,
+            language: cardLanguage
+        )
+    }
+
+    private var cardLanguage: AppLanguage {
+        switch mode {
+        case .landlord:
+            return .korean
+        case .tenant:
+            return locale.language.languageCode?.identifier == AppLanguage.korean.rawValue
+                ? .korean
+                : .english
+        }
     }
 
     private func copyApplicantEmail() {

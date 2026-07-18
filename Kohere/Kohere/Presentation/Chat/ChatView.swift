@@ -21,7 +21,7 @@ struct ChatView: View {
         VStack(spacing: 8) {
             KohereNavigationBar(
                 left: .smallLogo,
-                center: .text("Chat", style: .label1Semibold),
+                center: .text(String(localized: "chat.title"), style: .label1Semibold),
                 right: .searchButton({ store.send(.searchButtonTapped) })
             )
             
@@ -29,7 +29,7 @@ struct ChatView: View {
             
             if store.chatRooms.isEmpty {
                 KohereEmptyView(
-                    title: "No messages yet\nContact a host to start chatting",
+                    title: String(localized: "chat.empty.title"),
                     fontStyle: .label2Semibold,
                     fontColor: .neutral40
                 )
@@ -65,7 +65,7 @@ struct ChatView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 80)
                 .overlay(
-                    Text(ChatLocalizedText.bannerTitle)
+                    Text("common.roomFinderBanner.title")
                         .kohereTextStyle(.heading3Semibold)
                         .foregroundStyle(.neutral5)
                         .padding(.leading, 16),
@@ -74,20 +74,8 @@ struct ChatView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text(ChatLocalizedText.bannerAccessibilityLabel))
+        .accessibilityLabel(Text("common.roomFinderBanner.accessibility"))
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-    }
-}
-
-private enum ChatLocalizedText {
-    static let koreanLocale = Locale(identifier: "ko")
-
-    static var bannerTitle: String {
-        String(localized: "chat.banner.findRoom", locale: koreanLocale)
-    }
-
-    static var bannerAccessibilityLabel: String {
-        bannerTitle.replacingOccurrences(of: "\n", with: " ")
     }
 }

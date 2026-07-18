@@ -157,11 +157,11 @@ private extension ChatDetailView {
                 )
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Your application is sent!")
+                Text("chat.applicationSent.title")
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(.staticBlack)
                 
-                Text("The landlord will review your\napplication and get back to you\nvia email soon.\nMake sure to check your inbox\n(and spam folder)! 👀")
+                Text("chat.applicationSent.message")
                     .kohereTextStyle(.body2Regular)
                     .foregroundStyle(.staticBlack)
             }
@@ -209,11 +209,11 @@ private extension ChatDetailView {
     
     var landlordRequestMessage: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("You’ve received a new move-in\nrequest!")
+            Text("chat.applicationReceived.title")
                 .kohereTextStyle(.label2Semibold)
                 .foregroundStyle(.staticBlack)
             
-            Text("Please reply to the email address\non the card within 24 hours to\nconfirm availability. 💌")
+            Text("chat.applicationReceived.message")
                 .kohereTextStyle(.body2Regular)
                 .foregroundStyle(.staticBlack)
         }
