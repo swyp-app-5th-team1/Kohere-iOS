@@ -234,7 +234,7 @@ struct ListingDetailApplicationPanel: View {
             HStack(spacing: 12) {
                 Text(
                     selectedRoomOffer?.name
-                        ?? String(localized: "listingDetail.field.roomType", locale: locale)
+                        ?? AppLanguage(locale: locale).localized("listingDetail.field.roomType")
                 )
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(isRoomTypeSelectorPresented || selectedRoomOffer != nil ? .labelStrong : .labelNeutral)

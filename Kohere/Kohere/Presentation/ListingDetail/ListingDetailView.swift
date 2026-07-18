@@ -131,6 +131,9 @@ struct ListingDetailView: View {
                         ListingDetailPropertySection(
                             title: title(for: .property, detail: detail),
                             rows: detail.propertyInfo,
+                            featuresTitle: store.appLanguage.localized(
+                                "listingDetail.field.otherDetails"
+                            ),
                             features: detail.propertyFeatures
                         )
                     }
@@ -326,8 +329,7 @@ struct ListingDetailView: View {
             ListingDetailTopNavigationBar(
                 progress: topChromeProgress,
                 height: collapsedNavigationBarHeight,
-                onBackTap: { store.send(.backButtonTapped) },
-                onShareTap: { store.send(.shareButtonTapped) }
+                onBackTap: { store.send(.backButtonTapped) }
             )
 
             if showsPinnedTabs {
