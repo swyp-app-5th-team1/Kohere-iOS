@@ -240,7 +240,10 @@ struct ChatBotFeature {
                 
             case .findButtonTapped:
                 guard let diagnosisID = state.completedDiagnosisID else { return .none }
-                return .send(.mapTabRequested(diagnosisID: diagnosisID))
+                let request = Int(diagnosisID)
+                    .map(MapEntryRequest.diagnosis(id:))
+                    ?? .browseListings
+                return .send(.mapRequested(request))
                 
             case .resetButtonTapped:
                 state.resetConversation()

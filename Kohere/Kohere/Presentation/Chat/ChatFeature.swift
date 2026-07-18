@@ -143,8 +143,8 @@ struct ChatFeature {
                 _ = state.path.popLast()
                 return .none
 
-            case let .path(.element(id: _, action: .chatBot(.mapTabRequested(diagnosisID)))):
-                return .send(.mapTabRequested(diagnosisID: diagnosisID))
+            case let .path(.element(id: _, action: .chatBot(.mapRequested(request)))):
+                return .send(.mapRequested(request))
 
             case let .path(.element(id: _, action: .chatDetail(.delegate(.listingDetailRequested(listingID))))):
                 state.path.append(
