@@ -36,7 +36,7 @@ struct EmailVerificationStepView: View {
                             activeField: $activeField,
                             keyboardField: keyboardField,
                             equals: .email,
-                            placeholder: "Enter your email",
+                            placeholder: store.appLanguage.localized("onboarding.email.placeholder"),
                             keyboardType: .emailAddress,
                             hasError: store.hasEmailFormatError
                         )
@@ -60,7 +60,7 @@ struct EmailVerificationStepView: View {
                             activeField: $activeField,
                             keyboardField: keyboardField,
                             equals: .verificationCode,
-                            placeholder: "Enter the 6-digit code",
+                            placeholder: store.appLanguage.localized("onboarding.verification.email.placeholder"),
                             keyboardType: .numberPad,
                             hasError: store.emailVerificationCodeErrorMessage != nil
                         )

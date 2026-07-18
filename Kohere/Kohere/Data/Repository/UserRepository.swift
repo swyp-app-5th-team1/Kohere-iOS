@@ -82,6 +82,7 @@ private extension UserProfileResponseDTO {
             termsOfServiceAgreed: termsOfServiceAgreed,
             privacyPolicyAgreed: privacyPolicyAgreed,
             marketingAgreed: marketingAgreed,
+            lang: lang,
             createdAt: createdAt
         )
     }
