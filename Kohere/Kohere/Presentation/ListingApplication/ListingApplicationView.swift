@@ -93,14 +93,14 @@ struct ListingApplicationView: View {
     private var dateSelectionBottomBar: some View {
         HStack(spacing: 8) {
             ListingApplicationBottomButton(
-                title: "이전",
+                title: String(localized: "listingApplication.action.back"),
                 style: .secondary
             ) {
                 store.send(.previousButtonTapped)
             }
 
             ListingApplicationBottomButton(
-                title: "신청하기",
+                title: String(localized: "listingApplication.action.apply"),
                 style: .primary
             ) {
                 store.send(.dateSelectionApplyButtonTapped)
@@ -115,15 +115,15 @@ struct ListingApplicationView: View {
     private var reviewView: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("아래 내용이 맞는지 확인해 주세요")
+                Text("listingApplication.review.prompt")
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.labelNormal)
 
                 ListingApplicationSummaryCard(
                     title: store.applicationTitle,
                     roomTypeName: store.roomTypeName,
-                    moveInDateText: store.moveInKoreanText,
-                    moveOutDateText: store.moveOutKoreanText,
+                    moveInDateText: store.moveInReviewText,
+                    moveOutDateText: store.moveOutReviewText,
                     rentalPeriodText: store.rentalPeriodText,
                     priceText: store.roomPricingText
                 )
@@ -210,8 +210,8 @@ struct ListingApplicationView: View {
 
             ListingApplicationCompletionPopup(
                 applicationTitle: store.applicationTitle,
-                moveInDateText: store.moveInKoreanText,
-                moveOutDateText: store.moveOutKoreanText,
+                moveInDateText: store.moveInReviewText,
+                moveOutDateText: store.moveOutReviewText,
                 rentalPeriodText: store.rentalPeriodText,
                 priceText: store.roomPricingText,
                 onCloseTap: { store.send(.completionCloseButtonTapped) },
@@ -269,11 +269,11 @@ private struct ListingApplicationCompletionPopup: View {
             .frame(width: 48, height: 48)
 
             VStack(spacing: 8) {
-                Text("신청을 완료했어요!")
+                Text("listingApplication.completion.title")
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.coolNeutral90)
 
-                Text("임대인이 신청 내용을 확인한 후\n등록된 이메일로 연락드릴 예정입니다")
+                Text("listingApplication.completion.message")
                     .kohereTextStyle(.caption1Regular)
                     .foregroundStyle(.coolNeutral50)
                     .multilineTextAlignment(.center)
@@ -283,15 +283,15 @@ private struct ListingApplicationCompletionPopup: View {
 
     private var summary: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("신청 요약 정보")
+            Text("listingApplication.completion.summaryTitle")
                 .kohereTextStyle(.label3Semibold)
                 .foregroundStyle(.coolNeutral80)
 
             VStack(spacing: 12) {
-                summaryRow(title: "입주 희망일", value: moveInDateText)
-                summaryRow(title: "종료일", value: moveOutDateText)
-                summaryRow(title: "계약 기간", value: rentalPeriodText)
-                summaryRow(title: "금액", value: priceText)
+                summaryRow(title: String(localized: "listingApplication.field.moveInDate"), value: moveInDateText)
+                summaryRow(title: String(localized: "listingApplication.field.moveOutDate"), value: moveOutDateText)
+                summaryRow(title: String(localized: "listingApplication.field.contractPeriod"), value: rentalPeriodText)
+                summaryRow(title: String(localized: "listingApplication.review.field.cost"), value: priceText)
             }
         }
         .padding(.horizontal, 16)
@@ -320,13 +320,13 @@ private struct ListingApplicationCompletionPopup: View {
     private var buttons: some View {
         HStack(spacing: 8) {
             popupButton(
-                title: "닫기",
+                title: String(localized: "listingApplication.action.close"),
                 style: .secondary,
                 action: onCloseTap
             )
 
             popupButton(
-                title: "확인하기",
+                title: String(localized: "listingApplication.action.view"),
                 style: .primary,
                 action: onConfirmTap
             )

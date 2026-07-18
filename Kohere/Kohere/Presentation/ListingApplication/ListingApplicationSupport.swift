@@ -20,8 +20,8 @@ enum ListingApplicationPrivacySection: String, CaseIterable, Equatable, Hashable
 
     var title: String {
         switch self {
-        case .collection: "개인정보 수집 및 이용 안내"
-        case .thirdParty: "개인정보 제 3자 제공 동의"
+        case .collection: String(localized: "listingApplication.privacy.collection.title")
+        case .thirdParty: String(localized: "listingApplication.privacy.thirdParty.title")
         }
     }
 
@@ -58,32 +58,47 @@ extension ListingApplicationFeature.State {
 
     nonisolated static var calendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.locale = Locale(identifier: "ko_KR")
+        calendar.locale = displayLocale
         calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
         return calendar
     }
 
+    nonisolated static var displayLocale: Locale {
+        let language = Bundle.main.preferredLocalizations.first ?? "en"
+        return Locale(identifier: language.hasPrefix("ko") ? "ko_KR" : "en_US")
+    }
+
     nonisolated static var monthFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        formatter.dateFormat = "yyyy년 M월"
-        return formatter
+        dateFormatter(
+            koreanFormat: "yyyy년 M월",
+            englishFormat: "MMMM yyyy"
+        )
     }
 
     nonisolated static var compactDateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        formatter.dateFormat = "yyyy.MM.dd (E)"
-        return formatter
+        dateFormatter(
+            koreanFormat: "yyyy.MM.dd (E)",
+            englishFormat: "MMM d, yyyy (EEE)"
+        )
     }
 
-    nonisolated static var koreanDateFormatter: DateFormatter {
+    nonisolated static var reviewDateFormatter: DateFormatter {
+        dateFormatter(
+            koreanFormat: "yyyy년 M월 d일(E)",
+            englishFormat: "MMM d, yyyy (EEE)"
+        )
+    }
+
+    nonisolated private static func dateFormatter(
+        koreanFormat: String,
+        englishFormat: String
+    ) -> DateFormatter {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.locale = displayLocale
         formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        formatter.dateFormat = "yyyy년 M월 d일(E)"
+        formatter.dateFormat = displayLocale.identifier.hasPrefix("ko")
+            ? koreanFormat
+            : englishFormat
         return formatter
     }
 }
@@ -136,16 +151,19 @@ extension ListingApplicationFeature {
         ) ?? minimumDate
     }
 
-    nonisolated static func applicantSummary(from profile: UserProfile) -> String {
+    nonisolated static func applicantSummary(
+        from profile: UserProfile,
+        locale: Locale = State.displayLocale
+    ) -> String {
         let name = firstNonEmpty([
             profile.name,
             fullName(firstName: profile.firstName, lastName: profile.lastName),
             profile.nickname
-        ]) ?? "이름 정보 없음"
-        let gender = readableGender(profile.gender)
+        ])
+        let gender = readableGender(profile.gender, locale: locale)
         let country = firstNonEmpty([
+            profile.country.flatMap { countryTitle(countryCode: $0, locale: locale) },
             profile.countryName,
-            profile.country.flatMap(countryTitle),
             profile.country
         ])
 
@@ -164,21 +182,27 @@ extension ListingApplicationFeature {
         return parts.joined(separator: " ")
     }
 
-    nonisolated private static func readableGender(_ rawValue: String?) -> String? {
+    nonisolated private static func readableGender(
+        _ rawValue: String?,
+        locale: Locale
+    ) -> String? {
         guard let value = normalizedText(rawValue), !value.isEmpty else { return nil }
 
         switch value.uppercased() {
         case Gender.male.rawValue:
-            return "Male"
+            return String(localized: "listingApplication.applicant.gender.male", locale: locale)
         case Gender.female.rawValue:
-            return "Female"
+            return String(localized: "listingApplication.applicant.gender.female", locale: locale)
         default:
             return value
         }
     }
 
-    nonisolated private static func countryTitle(countryCode: String) -> String? {
-        countryTitleByCode[countryCode.uppercased()]
+    nonisolated private static func countryTitle(
+        countryCode: String,
+        locale: Locale
+    ) -> String? {
+        locale.localizedString(forRegionCode: countryCode.uppercased())
     }
 
     nonisolated private static func firstNonEmpty(_ values: [String?]) -> String? {
@@ -188,19 +212,4 @@ extension ListingApplicationFeature {
     nonisolated private static func normalizedText(_ text: String?) -> String? {
         text?.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-
-    nonisolated private static let countryTitleByCode: [String: String] = [
-        "KR": "Korea, Republic of",
-        "US": "United States",
-        "JP": "Japan",
-        "CN": "China",
-        "VN": "Vietnam",
-        "CA": "Canada",
-        "GB": "United Kingdom",
-        "FR": "France",
-        "ES": "Spain",
-        "IT": "Italy",
-        "TR": "Turkey",
-        "HU": "Hungary"
-    ]
 }

@@ -29,7 +29,7 @@ struct ListingApplicationFeature {
         var displayedMonth: Date
         var rentalMonths = 1
         var isMonthPickerPresented = false
-        var applicantSummary = "프로필 정보를 불러오는 중입니다"
+        var applicantSummary = ""
         var isApplicantProfileLoading = false
         var hasLoadedApplicantProfile = false
         var applicantProfileErrorMessage: String?
@@ -44,13 +44,17 @@ struct ListingApplicationFeature {
 
         var navigationTitle: String {
             switch step {
-            case .dateSelection: "입주 날짜 선택"
-            case .review: "입주 신청"
+            case .dateSelection: String(localized: "listingApplication.navigation.dateSelection")
+            case .review: String(localized: "listingApplication.navigation.review")
             }
         }
 
         var applicationTitle: String {
-            "\(listingTitle) 입주 신청"
+            String(
+                format: String(localized: "listingApplication.format.applicationTitle"),
+                locale: Self.displayLocale,
+                listingTitle
+            )
         }
 
         var moveOutDate: Date {
@@ -69,16 +73,19 @@ struct ListingApplicationFeature {
             Self.compactDateFormatter.string(from: moveOutDate)
         }
 
-        var moveInKoreanText: String {
-            Self.koreanDateFormatter.string(from: moveInDate)
+        var moveInReviewText: String {
+            Self.reviewDateFormatter.string(from: moveInDate)
         }
 
-        var moveOutKoreanText: String {
-            Self.koreanDateFormatter.string(from: moveOutDate)
+        var moveOutReviewText: String {
+            Self.reviewDateFormatter.string(from: moveOutDate)
         }
 
         var rentalPeriodText: String {
-            "\(rentalMonths)개월"
+            let format = rentalMonths == 1
+                ? String(localized: "listingApplication.format.rentalPeriod.one")
+                : String(localized: "listingApplication.format.rentalPeriod.other")
+            return String(format: format, locale: Self.displayLocale, String(rentalMonths))
         }
 
         var isSubmitButtonEnabled: Bool {
@@ -90,7 +97,7 @@ struct ListingApplicationFeature {
         }
 
         var submitButtonTitle: String {
-            isSubmitting ? "예약 신청 중..." : "동의하고 예약 신청하기"
+            String(localized: "listingApplication.action.submit")
         }
 
         var normalizedPhoneNumber: String {
@@ -232,7 +239,7 @@ struct ListingApplicationFeature {
                 state.isApplicantProfileLoading = false
                 state.hasLoadedApplicantProfile = false
                 state.applicantProfileErrorMessage = error.localizedDescription
-                state.applicantSummary = "프로필 정보를 불러오지 못했습니다"
+                state.applicantSummary = String(localized: "listingApplication.applicant.profile.loadFailed")
                 return .none
 
             case .backButtonTapped:

@@ -222,7 +222,26 @@ struct UIKitMonthYearPicker: UIViewRepresentable {
         }
 
         private func title(for value: Int, component: Int) -> String {
-            component == 0 ? "\(value)년" : "\(value)월"
+            if component == 0 {
+                return String(
+                    format: String(localized: "listingApplication.format.year"),
+                    locale: ListingApplicationFeature.State.displayLocale,
+                    String(value)
+                )
+            }
+
+            if ListingApplicationFeature.State.displayLocale.identifier.hasPrefix("ko") {
+                return String(
+                    format: String(localized: "listingApplication.format.month"),
+                    locale: ListingApplicationFeature.State.displayLocale,
+                    String(value)
+                )
+            }
+
+            let formatter = DateFormatter()
+            formatter.locale = ListingApplicationFeature.State.displayLocale
+            let symbols = formatter.shortMonthSymbols ?? []
+            return symbols.indices.contains(value - 1) ? symbols[value - 1] : "\(value)"
         }
 
         private static var font: UIFont {
