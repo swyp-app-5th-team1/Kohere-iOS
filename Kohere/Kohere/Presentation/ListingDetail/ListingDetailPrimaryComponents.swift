@@ -120,7 +120,7 @@ struct ListingDetailBottomBar: View {
             }
 
             Button(action: onApplyTap) {
-                Text("신청하기")
+                Text("listingDetail.action.apply")
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.staticWhite)
                     .frame(maxWidth: .infinity)
@@ -229,7 +229,7 @@ struct ListingDetailApplicationPanel: View {
     private var roomTypeSelector: some View {
         Button(action: onRoomTypeSelectorTap) {
             HStack(spacing: 12) {
-                Text(selectedRoomOffer?.name ?? "방 유형")
+                Text(selectedRoomOffer?.name ?? String(localized: "listingDetail.field.roomType"))
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(isRoomTypeSelectorPresented || selectedRoomOffer != nil ? .labelStrong : .labelNeutral)
 
@@ -256,7 +256,7 @@ struct ListingDetailApplicationPanel: View {
     private var sheetBottomBar: some View {
         VStack(spacing: 0) {
             Button(action: onApplyTap) {
-                Text("신청하기")
+                Text("listingDetail.action.apply")
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.staticWhite)
                     .frame(maxWidth: .infinity)
@@ -308,5 +308,37 @@ struct ListingDetailApplicationPanel: View {
                 .stroke(.primaryNormal, lineWidth: 1)
         }
         .padding(.horizontal, 20)
+    }
+}
+
+struct ListingDetailApplicationSheetOverlay: View {
+    let roomOffers: [ListingRoomOfferModel]
+    let selectedRoomOfferID: String?
+    let isRoomTypeSelectorPresented: Bool
+    let validationMessage: String?
+    let onDismiss: () -> Void
+    let onRoomTypeSelectorTap: () -> Void
+    let onRoomOfferTap: (String) -> Void
+    let onApplyTap: () -> Void
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Color.materialDimmer
+                .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture(perform: onDismiss)
+
+            ListingDetailApplicationPanel(
+                roomOffers: roomOffers,
+                selectedRoomOfferID: selectedRoomOfferID,
+                isRoomTypeSelectorPresented: isRoomTypeSelectorPresented,
+                validationMessage: validationMessage,
+                onRoomTypeSelectorTap: onRoomTypeSelectorTap,
+                onRoomOfferTap: onRoomOfferTap,
+                onApplyTap: onApplyTap
+            )
+        }
+        .transition(.opacity)
+        .zIndex(3)
     }
 }

@@ -117,6 +117,54 @@ struct ListingDetailInfoSection: View {
     }
 }
 
+struct ListingDetailPropertySection: View {
+    let title: String
+    let rows: [ListingDetailInfoRowModel]
+    let features: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(title)
+                .kohereTextStyle(.heading3Semibold)
+                .foregroundStyle(.common100)
+
+            ForEach(rows) { row in
+                ListingDetailInfoRow(
+                    row: row,
+                    showsDivider: row.id != rows.last?.id || !features.isEmpty
+                )
+            }
+
+            if !features.isEmpty {
+                HStack(alignment: .top, spacing: 0) {
+                    Text(String(localized: "listingDetail.field.otherDetails"))
+                        .kohereTextStyle(.body2Regular)
+                        .foregroundStyle(.common100)
+                        .frame(width: 110, alignment: .leading)
+
+                    MapFilterFlowLayout(spacing: 4, rowSpacing: 4) {
+                        ForEach(features, id: \.self) { feature in
+                            Text(feature)
+                                .kohereTextStyle(.caption2Regular)
+                                .foregroundStyle(.labelNeutral)
+                                .padding(4)
+                                .frame(minHeight: 22)
+                                .background(.fillAlternative)
+                                .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.vertical, 16)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 8)
+        .background(.common0)
+    }
+}
+
 struct ListingDetailInfoRow: View {
     let row: ListingDetailInfoRowModel
     let showsDivider: Bool
@@ -126,7 +174,7 @@ struct ListingDetailInfoRow: View {
             Text(row.title)
                 .kohereTextStyle(.body2Regular)
                 .foregroundStyle(.common100)
-                .frame(width: 128, alignment: .leading)
+                .frame(width: 110, alignment: .leading)
 
             Text(row.value)
                 .kohereTextStyle(.body3Regular)
@@ -218,12 +266,12 @@ struct ListingDetailReviewSection: View {
     var body: some View {
         VStack(spacing: 16) {
             ListingDetailSectionHeader(
-                title: "리뷰",
+                title: String(localized: "listingDetail.tab.review"),
                 count: reviewCount,
                 showsChevron: false
             )
 
-            Text(reviewCount == 0 ? "등록된 리뷰가 없어요" : "리뷰를 확인해보세요")
+            Text(reviewCount == 0 ? String(localized: "listingDetail.review.empty") : "리뷰를 확인해보세요")
                 .kohereTextStyle(.caption1Regular)
                 .foregroundStyle(.labelAlternative)
                 .frame(maxWidth: .infinity)

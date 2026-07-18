@@ -23,8 +23,7 @@ struct ListingDetail: Equatable, Identifiable {
     let building: ListingDetailBuilding?
     let propertyPolicies: ListingDetailPropertyPolicies?
     let facilities: ListingDetailFacilities?
-    let conditionCodes: [String]
-    let conditions: [RoomCondition]
+    let conditions: [String]
     let roomOffers: [ListingDetailRoomOffer]
     let descriptions: ListingDetailDescriptions?
     let imageURLs: [String]
@@ -70,7 +69,6 @@ struct ListingDetailBuilding: Equatable {
 struct ListingDetailPropertyPolicies: Equatable {
     let arcRequired: Bool?
     let residentRegistrationAvailable: Bool?
-    let studySuitable: Bool?
     let mealsProvided: Bool?
     let englishAvailable: Bool?
 }
@@ -96,8 +94,7 @@ struct ListingDetailRoomOffer: Equatable, Identifiable {
     let status: String?
     let pricing: ListingDetailRoomPricing?
     let inventory: ListingDetailRoomInventory?
-    let filterTagCodes: [String]
-    let filterTags: [RoomCondition]
+    let filterTags: [String]
     let roomImageURLs: [String]
 }
 

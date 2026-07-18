@@ -23,7 +23,6 @@ struct Listing: Equatable, Identifiable {
     let coordinate: MapCoordinate?
     let address: String?
     let nearestTransit: ListingNearestTransit?
-    let conditions: [RoomCondition]
     let distanceMeters: Double?
     let isFavorited: Bool
     let favoriteCount: Int?

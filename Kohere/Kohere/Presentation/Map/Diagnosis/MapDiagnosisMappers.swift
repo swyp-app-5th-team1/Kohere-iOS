@@ -12,7 +12,7 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
-            thumbnailURL: Self.thumbnailURL(for: recommendation),
+            thumbnailURL: recommendation.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: recommendation.minMonthlyRent,
                 max: recommendation.maxMonthlyRent
@@ -23,7 +23,7 @@ extension ListingItemModel {
                 max: recommendation.maxDeposit
             ),
             locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
-            typeTag: Self.typeTitle(from: recommendation.type),
+            typeTag: recommendation.type,
             period: "1 mo~",
             isLiked: false
         )
@@ -51,7 +51,7 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
-            thumbnailURL: Self.thumbnailURL(for: recommendation),
+            thumbnailURL: recommendation.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: recommendation.minMonthlyRent,
                 max: recommendation.maxMonthlyRent
@@ -62,7 +62,7 @@ extension ListingItemModel {
                 max: recommendation.maxDeposit
             ),
             locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
-            typeTag: Self.typeTitle(from: recommendation.type),
+            typeTag: recommendation.type,
             period: "1 mo~",
             isLiked: false
         )
@@ -70,34 +70,6 @@ extension ListingItemModel {
 
     nonisolated private static func depositTitle(min: Int?, max: Int?) -> String {
         MonthlyRentPriceFormatter.rangeTitle(prefix: "보증금", min: min, max: max)
-    }
-
-    nonisolated private static func thumbnailURL(for recommendation: DiagnosisRecommendedListing) -> String {
-        let thumbnailURL = recommendation.thumbnailURL?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let thumbnailURL, !thumbnailURL.isEmpty {
-            return thumbnailURL
-        }
-
-        return MockListingImageProvider.listingImageName(
-            listingID: recommendation.listingID,
-            propertyType: recommendation.type
-        )
-    }
-
-    nonisolated private static func typeTitle(from type: String) -> String {
-        switch type.uppercased() {
-        case "GOSHIWON":
-            return "Goshiwon"
-        case "CO_LIVING":
-            return "Co-living"
-        case "SHARE_HOUSE":
-            return "Share house"
-        default:
-            return type
-                .replacingOccurrences(of: "_", with: " ")
-                .lowercased()
-                .capitalized
-        }
     }
 
 }

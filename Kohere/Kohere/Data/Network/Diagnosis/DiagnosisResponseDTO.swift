@@ -52,7 +52,7 @@ struct DiagnosisRecommendationsResponseDTO: Decodable {
 struct DiagnosisRecommendedListingResponseDTO: Decodable {
     let listingId: String
     let title: String?
-    let type: String?
+    let type: ListingCodeLabelResponseDTO?
     let monthlyRentMin: Int?
     let monthlyRentMax: Int?
     let minDeposit: Int?
@@ -60,7 +60,6 @@ struct DiagnosisRecommendedListingResponseDTO: Decodable {
     let thumbnailUrl: String?
     let lat: Double?
     let lng: Double?
-    let conditions: [String]?
 }
 
 struct DiagnosisRecommendationPageResponseDTO: Decodable {

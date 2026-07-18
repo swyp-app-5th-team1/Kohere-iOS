@@ -24,7 +24,7 @@ extension ListingItemModel {
                 minimumMaintenanceFee: listing.minMaintenanceFee
             ),
             locationDescription: Self.locationTitle(from: listing),
-            typeTag: Self.typeTitle(from: listing.type),
+            typeTag: listing.type,
             period: Self.minimumStayPeriodTitle(months: listing.minStayMonths),
             isLiked: listing.isFavorited,
             favoriteCount: listing.favoriteCount
@@ -65,7 +65,7 @@ extension ListingItemModel {
                 minimumMaintenanceFee: listing.minMaintenanceFee
             ),
             locationDescription: Self.locationTitle(from: listing),
-            typeTag: Self.typeTitle(from: listing.type),
+            typeTag: listing.type,
             period: Self.minimumStayPeriodTitle(months: listing.minStayMonths),
             isLiked: listing.isFavorited,
             favoriteCount: listing.favoriteCount
@@ -111,22 +111,6 @@ extension ListingItemModel {
         guard months != 1 else { return "한달 이상" }
 
         return "\(months)개월 이상"
-    }
-
-    nonisolated private static func typeTitle(from type: String) -> String {
-        switch type.uppercased() {
-        case "GOSHIWON":
-            return "Goshiwon"
-        case "CO_LIVING":
-            return "Co-living"
-        case "SHARE_HOUSE":
-            return "Share house"
-        default:
-            return type
-                .replacingOccurrences(of: "_", with: " ")
-                .lowercased()
-                .capitalized
-        }
     }
 
     nonisolated private static func wonRangeTitle(min: Int?, max: Int?) -> String? {

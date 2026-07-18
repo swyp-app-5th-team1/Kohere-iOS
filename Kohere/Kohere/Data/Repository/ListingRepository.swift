@@ -33,7 +33,8 @@ final class ListingRepository: ListingInterface {
     func fetchDetail(listingID: String) async throws -> ListingDetail {
         let environment = try environmentProvider()
         let responseDTO: ListingDetailResponseDTO = try await authenticatedNetworkService.request(
-            ListingRouter.detail(listingID: listingID, environment)
+            ListingRouter.detail(listingID: listingID, environment),
+            debugRawJSONLabel: "Listing.fetchDetail listingID=\(listingID)"
         )
 
         return try responseDTO.toEntity()
@@ -156,6 +157,8 @@ private extension ListingBookingResponseDTO {
 private extension ListingListItemResponseDTO {
     func toEntity() -> Listing? {
         guard let listingId else { return nil }
+        let propertyTypeCode = type?.code ?? ""
+        let propertyTypeLabel = type?.label ?? ""
 
         let coordinate: MapCoordinate?
         if let lat = location?.lat, let lng = location?.lng {
@@ -172,7 +175,7 @@ private extension ListingListItemResponseDTO {
         return Listing(
             listingID: listingId,
             title: title ?? "",
-            type: type ?? "",
+            type: propertyTypeLabel,
             minMonthlyRent: monthlyRents.min(),
             maxMonthlyRent: monthlyRents.max(),
             minDeposit: deposits.min(),
@@ -182,11 +185,13 @@ private extension ListingListItemResponseDTO {
             minStayMonths: contract?.minStayMonths,
             maxStayMonths: contract?.maxStayMonths,
             thumbnailURL: firstImageURL(imageUrls)
-                ?? MockListingImageProvider.listingImageName(listingID: listingId, propertyType: type),
+                ?? MockListingImageProvider.listingImageName(
+                    listingID: listingId,
+                    propertyType: propertyTypeCode
+                ),
             coordinate: coordinate,
             address: address?.fullAddress,
             nearestTransit: nearestTransit?.toEntity(),
-            conditions: (conditions ?? []).compactMap(RoomCondition.init(conditionCode:)),
             distanceMeters: distanceMeters,
             isFavorited: favorited ?? false,
             favoriteCount: favoriteCount
@@ -202,7 +207,7 @@ private func firstImageURL(_ imageURLs: [String]?) -> String? {
 
 private extension ListingNearestTransitResponseDTO {
     func toEntity() -> ListingNearestTransit? {
-        guard let type, let name else { return nil }
+        guard let type = type?.code, let name else { return nil }
 
         return ListingNearestTransit(
             type: type,

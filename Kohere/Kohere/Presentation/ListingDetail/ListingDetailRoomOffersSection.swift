@@ -13,7 +13,7 @@ struct ListingDetailRoomOffersSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             ListingDetailSectionHeader(
-                title: "각 방 정보",
+                title: String(localized: "listingDetail.section.roomOffers"),
                 count: roomOffers.count,
                 showsChevron: false
             )
