@@ -102,7 +102,7 @@ extension ChatBotView {
                 Button {
                     store.send(.findButtonTapped)
                 } label: {
-                    Text("찾아보기")
+                    Text(String(localized: "chatBot.action.find"))
                         .kohereTextStyle(.label1Semibold)
                         .foregroundColor(store.isFindButtonEnabled ? .staticWhite : .labelDisable)
                         .frame(maxWidth: .infinity)
