@@ -42,7 +42,7 @@ struct RoomFinderBannerView: View {
                     )
                 
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("home.roomFinder.title")
+                    Text("common.roomFinderBanner.title")
                         .kohereTextStyle(.heading2Bold)
                         .foregroundColor(.staticBlack)
                         .lineSpacing(4)

@@ -28,13 +28,32 @@ extension RootFeature {
         return .send(.map(.listingMapPreviewRequested(coordinate)))
     }
 
-    func handlePopupRoute(_ route: AppPopup.Route) -> Effect<Action> {
+    func handlePopupRoute(
+        _ route: AppPopup.Route,
+        state: inout State
+    ) -> Effect<Action> {
         switch route {
         case .logout:
             return .send(.more(.logoutConfirmed))
 
         case .deleteAccount:
             return .send(.more(.deleteAccountConfirmed))
+
+        case .dismissListingDetail:
+            switch state.selectedTab {
+            case .home:
+                _ = state.home.path.popLast()
+            case .map:
+                _ = state.map.path.popLast()
+            case .more:
+                _ = state.more.path.popLast()
+            case .community, .chat:
+                break
+            }
+            return .none
+
+        case let .confirmLanguageChange(language):
+            return .send(.more(.languageChangeConfirmed(language)))
         }
     }
 }

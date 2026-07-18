@@ -16,14 +16,22 @@ enum SavedListingsDelegate: Equatable {
 struct SavedListingsFeature {
     @Dependency(\.listingClient)
     var listingClient
+    @Dependency(\.fetchKRWToUSDExchangeRateUseCase)
+    var fetchKRWToUSDExchangeRateUseCase
+    @Dependency(\.convertMonthlyRentCurrencyUseCase)
+    var convertMonthlyRentCurrencyUseCase
     
     // MARK: - State
     
     @ObservableState
     struct State: Equatable {
         var userType: UserType?
+        var appLanguage: AppLanguage = .systemDefault
+        var listings: [Listing] = []
         var items: [ListingItemModel] = []
         var isLoading: Bool = false
+        var krwToUSDExchangeRate: KRWToUSDExchangeRate?
+        var isExchangeRateLoading = false
         var favoriteUpdatingIDs: Set<String> = []
         var errorMessage: String?
     }
@@ -33,6 +41,7 @@ struct SavedListingsFeature {
     enum Action: Equatable {
         case onAppear
         case favoriteListingsResponse(Result<ListingSearchPage, DataError>)
+        case exchangeRateResponse(Result<KRWToUSDExchangeRate, CurrencyError>)
         case cardTapped(id: String)
         case likeButtonTapped(id: String)
         case favoriteStatusResponse(listingID: String, Result<ListingFavoriteStatus, DataError>)
@@ -46,24 +55,43 @@ struct SavedListingsFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard state.canUseFavoriteFeatures,
-                      !state.isLoading
-                else { return .none }
-                state.isLoading = true
-                state.errorMessage = nil
+                var effects: [Effect<Action>] = []
 
-                return .run { [listingClient] send in
-                    do {
-                        // TODO: 고도화 때 페이지네이션 처리
-                        let page = try await listingClient.fetchFavoriteListings(0, 30)
-                        await send(.favoriteListingsResponse(.success(page)))
-                    } catch {
-                        await send(.favoriteListingsResponse(.failure(.from(error))))
-                    }
+                if state.canUseFavoriteFeatures, !state.isLoading {
+                    state.isLoading = true
+                    state.errorMessage = nil
+                    effects.append(
+                        .run { [listingClient] send in
+                            do {
+                                // TODO: 고도화 때 페이지네이션 처리
+                                let page = try await listingClient.fetchFavoriteListings(0, 30)
+                                await send(.favoriteListingsResponse(.success(page)))
+                            } catch {
+                                await send(.favoriteListingsResponse(.failure(.from(error))))
+                            }
+                        }
+                    )
                 }
 
+                if state.krwToUSDExchangeRate == nil, !state.isExchangeRateLoading {
+                    state.isExchangeRateLoading = true
+                    effects.append(
+                        .run { [fetchKRWToUSDExchangeRateUseCase] send in
+                            do {
+                                let rate = try await fetchKRWToUSDExchangeRateUseCase.execute()
+                                await send(.exchangeRateResponse(.success(rate)))
+                            } catch {
+                                await send(.exchangeRateResponse(.failure(.exchangeRateUnavailable)))
+                            }
+                        }
+                    )
+                }
+
+                return .merge(effects)
+
             case let .favoriteListingsResponse(.success(page)):
-                state.items = page.content.map(ListingItemModel.init(listing:))
+                state.listings = page.content
+                state.items = listingItems(from: page.content, state: state)
                 state.isLoading = false
                 state.errorMessage = nil
                 return .none
@@ -71,6 +99,16 @@ struct SavedListingsFeature {
             case let .favoriteListingsResponse(.failure(error)):
                 state.isLoading = false
                 state.errorMessage = error.localizedDescription
+                return .none
+
+            case let .exchangeRateResponse(.success(rate)):
+                state.krwToUSDExchangeRate = rate
+                state.isExchangeRateLoading = false
+                state.items = listingItems(from: state.listings, state: state)
+                return .none
+
+            case .exchangeRateResponse(.failure):
+                state.isExchangeRateLoading = false
                 return .none
                 
             case let .cardTapped(id):
@@ -121,6 +159,20 @@ struct SavedListingsFeature {
             case .backButtonTapped, .delegate:
                 return .none
             }
+        }
+    }
+
+    private func listingItems(
+        from listings: [Listing],
+        state: State
+    ) -> [ListingItemModel] {
+        listings.map {
+            ListingItemModel(
+                listing: $0,
+                exchangeRate: state.krwToUSDExchangeRate,
+                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
+                language: state.appLanguage
+            )
         }
     }
 }

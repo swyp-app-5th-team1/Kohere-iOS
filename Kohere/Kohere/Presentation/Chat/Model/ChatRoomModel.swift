@@ -16,15 +16,16 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     let dateText: String
     let timeText: String
     let applicantName: String
-    let applicantGender: String
-    let applicantNationality: String
+    let applicantGenderCode: String
+    let applicantCountryCode: String
+    let applicantCountryName: String
     let applicantEmail: String
     let roomType: String
-    let moveInDate: String
-    let leaseTerm: String
-    let deposit: String
-    let totalCost: String
-    let pricePerMonth: String
+    let moveInDate: Date?
+    let leaseTermMonths: Int
+    let depositAmount: Int?
+    let totalCostAmount: Int?
+    let pricePerMonthAmount: Int?
     
     init(entity: ChatRoom) {
         self.id = entity.id
@@ -38,20 +39,16 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         self.dateText = Self.dateText(entity.lastMessageAt)
         self.timeText = "2분 전"
         self.applicantName = entity.applicantName
-        self.applicantGender = "Male"
-        self.applicantNationality = "Germany"
-        self.applicantEmail = "kohere@gmail.com"
-        self.roomType = "Room A"
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM dd, yyyy"
-        formatter.locale = Locale(identifier: "en_US")
-        self.moveInDate = formatter.string(from: entity.moveInDate)
-        
-        self.leaseTerm = "\(entity.minStayMonths)-month"
-        self.deposit = entity.deposit == 0 ? "N/A" : Self.wonText(entity.deposit)
-        
-        self.totalCost = Self.wonText(entity.totalCostKRW)
-        self.pricePerMonth = "\(Self.wonText(entity.pricePerMonthKRW))/mo"
+        self.applicantGenderCode = ""
+        self.applicantCountryCode = ""
+        self.applicantCountryName = ""
+        self.applicantEmail = ""
+        self.roomType = ""
+        self.moveInDate = entity.moveInDate
+        self.leaseTermMonths = entity.minStayMonths
+        self.depositAmount = entity.deposit
+        self.totalCostAmount = entity.totalCostKRW
+        self.pricePerMonthAmount = entity.pricePerMonthKRW
     }
     
     init(summary: BookingSummary) {
@@ -67,15 +64,16 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         self.dateText = Self.dateText(summary.createdAt)
         self.timeText = Self.timeText(summary.createdAt)
         self.applicantName = "N/A"
-        self.applicantGender = "N/A"
-        self.applicantNationality = "N/A"
+        self.applicantGenderCode = ""
+        self.applicantCountryCode = ""
+        self.applicantCountryName = ""
         self.applicantEmail = "N/A"
         self.roomType = "N/A"
-        self.moveInDate = Self.moveInDateText(summary.moveInDate)
-        self.leaseTerm = Self.leaseTermText(summary.contractPeriod)
-        self.deposit = "N/A"
-        self.totalCost = "N/A"
-        self.pricePerMonth = ""
+        self.moveInDate = summary.moveInDate
+        self.leaseTermMonths = summary.contractPeriod
+        self.depositAmount = nil
+        self.totalCostAmount = nil
+        self.pricePerMonthAmount = nil
     }
     
     init(detail: BookingDetail, fallback: ChatRoomModel) {
@@ -87,25 +85,16 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         self.dateText = Self.dateText(detail.createdAt)
         self.timeText = Self.timeText(detail.createdAt)
         self.applicantName = Self.displayText(detail.applicantName)
-        self.applicantGender = Self.genderText(detail.applicantGender)
-        self.applicantNationality = Self.nationalityText(
-            countryName: detail.applicantCountryName,
-            countryCode: detail.applicantCountry
-        )
+        self.applicantGenderCode = detail.applicantGender
+        self.applicantCountryCode = detail.applicantCountry
+        self.applicantCountryName = detail.applicantCountryName
         self.applicantEmail = Self.displayText(detail.applicantEmail)
         self.roomType = detail.roomOfferName.isEmpty ? "N/A" : detail.roomOfferName
-        self.moveInDate = Self.moveInDateText(detail.moveInDate)
-        self.leaseTerm = Self.leaseTermText(detail.contractPeriod)
-        self.deposit = detail.deposit == 0 ? "N/A" : Self.wonText(detail.deposit)
-        self.totalCost = Self.wonText(detail.totalAmount)
-        self.pricePerMonth = fallback.pricePerMonth
-    }
-    
-    private static func wonText(_ value: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        
-        return "₩ \(formatter.string(from: NSNumber(value: value)) ?? "\(value)")"
+        self.moveInDate = detail.moveInDate
+        self.leaseTermMonths = detail.contractPeriod
+        self.depositAmount = detail.deposit
+        self.totalCostAmount = detail.totalAmount
+        self.pricePerMonthAmount = fallback.pricePerMonthAmount
     }
 
     private static func displayText(_ value: String) -> String {
@@ -113,25 +102,6 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         return trimmedValue.isEmpty ? "N/A" : trimmedValue
     }
 
-    private static func genderText(_ value: String) -> String {
-        let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        switch trimmedValue.uppercased() {
-        case Gender.male.rawValue:
-            return "Male"
-        case Gender.female.rawValue:
-            return "Female"
-        default:
-            return displayText(trimmedValue)
-        }
-    }
-
-    private static func nationalityText(countryName: String, countryCode: String) -> String {
-        let countryNameText = displayText(countryName)
-        guard countryNameText == "N/A" else { return countryNameText }
-        return displayText(countryCode)
-    }
-    
     private static func dateText(_ date: Date?) -> String {
         guard let date else { return "" }
         let formatter = DateFormatter()
@@ -150,19 +120,6 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         return formatter.string(from: date)
     }
     
-    private static func moveInDateText(_ date: Date?) -> String {
-        guard let date else { return "N/A" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, yyyy"
-        formatter.locale = Locale(identifier: "en_US")
-        
-        return formatter.string(from: date)
-    }
-    
-    private static func leaseTermText(_ months: Int) -> String {
-        guard months > 0 else { return "N/A" }
-        return "\(months)-month"
-    }
 }
 
 extension ChatRoomModel {

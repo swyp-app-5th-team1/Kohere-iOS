@@ -218,6 +218,9 @@ private extension DiagnosisRecommendationsResponseDTO {
 
 private extension DiagnosisRecommendedListingResponseDTO {
     func toEntity() -> DiagnosisRecommendedListing {
+        let propertyTypeCode = type?.code ?? ""
+        let propertyTypeLabel = type?.label ?? ""
+
         let coordinate: MapCoordinate?
         if let lat, let lng {
             coordinate = MapCoordinate(latitude: lat, longitude: lng)
@@ -228,15 +231,23 @@ private extension DiagnosisRecommendedListingResponseDTO {
         return DiagnosisRecommendedListing(
             listingID: listingId,
             title: title ?? "",
-            type: type ?? "",
+            type: propertyTypeLabel,
             minMonthlyRent: monthlyRentMin,
             maxMonthlyRent: monthlyRentMax,
             minDeposit: minDeposit,
             maxDeposit: maxDeposit,
-            thumbnailURL: thumbnailUrl,
-            coordinate: coordinate,
-            conditions: (conditions ?? []).compactMap(RoomCondition.init(conditionCode:))
+            thumbnailURL: nonEmptyThumbnailURL
+                ?? MockListingImageProvider.listingImageName(
+                    listingID: listingId,
+                    propertyType: propertyTypeCode
+                ),
+            coordinate: coordinate
         )
+    }
+
+    private var nonEmptyThumbnailURL: String? {
+        let trimmedURL = thumbnailUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedURL?.isEmpty == false ? trimmedURL : nil
     }
 }
 

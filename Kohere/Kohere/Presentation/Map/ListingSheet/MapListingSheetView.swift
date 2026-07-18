@@ -9,6 +9,9 @@ import ComposableArchitecture
 import SwiftUI
 
 struct MapListingSheetView: View {
+    @Environment(\.locale)
+    private var locale
+
     let store: StoreOf<MapFeature>
     let contentBottomPadding: CGFloat
 
@@ -68,7 +71,7 @@ struct MapListingSheetView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(Text("필터 설정"))
+                .accessibilityLabel(Text("map.filter.accessibility.open"))
 
                 ForEach(filterChips) { chip in
                     MapListingFilterChip(item: chip) {
@@ -84,7 +87,8 @@ struct MapListingSheetView: View {
     private var filterChips: [MapListingFilterChipItem] {
         MapListingFilterChipItem.items(
             for: store.appliedFilter,
-            source: store.appliedFilterSource
+            source: store.appliedFilterSource,
+            locale: locale
         )
     }
 
@@ -157,10 +161,10 @@ struct MapListingSheetView: View {
     private var emptyStateTitle: String {
         switch store.listingSource {
         case .diagnosis:
-            return "조건에 맞는 집이 아직 없어요"
+            return AppLanguage(locale: locale).localized("map.listing.empty.diagnosis")
 
         case .idle, .locationSearch:
-            return "이 지역에는 매물이 없어요"
+            return AppLanguage(locale: locale).localized("map.listing.empty.location")
         }
     }
 }

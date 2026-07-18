@@ -159,6 +159,8 @@ struct UIKitMonthYearPicker: UIViewRepresentable {
 
     final class Coordinator: NSObject, UIPickerViewDataSource, UIPickerViewDelegate {
         var parent: UIKitMonthYearPicker
+        private var cachedMonthFormatter: DateFormatter?
+        private var cachedMonthFormatterLocaleIdentifier: String?
 
         init(parent: UIKitMonthYearPicker) {
             self.parent = parent
@@ -222,7 +224,40 @@ struct UIKitMonthYearPicker: UIViewRepresentable {
         }
 
         private func title(for value: Int, component: Int) -> String {
-            component == 0 ? "\(value)년" : "\(value)월"
+            if component == 0 {
+                return String(
+                    format: String(localized: "listingApplication.format.year"),
+                    locale: ListingApplicationFeature.State.displayLocale,
+                    String(value)
+                )
+            }
+
+            if ListingApplicationFeature.State.displayLocale.identifier.hasPrefix("ko") {
+                return String(
+                    format: String(localized: "listingApplication.format.month"),
+                    locale: ListingApplicationFeature.State.displayLocale,
+                    String(value)
+                )
+            }
+
+            let formatter = monthFormatter(
+                for: ListingApplicationFeature.State.displayLocale
+            )
+            let symbols = formatter.shortMonthSymbols ?? []
+            return symbols.indices.contains(value - 1) ? symbols[value - 1] : "\(value)"
+        }
+
+        private func monthFormatter(for locale: Locale) -> DateFormatter {
+            if let cachedMonthFormatter,
+               cachedMonthFormatterLocaleIdentifier == locale.identifier {
+                return cachedMonthFormatter
+            }
+
+            let formatter = DateFormatter()
+            formatter.locale = locale
+            cachedMonthFormatter = formatter
+            cachedMonthFormatterLocaleIdentifier = locale.identifier
+            return formatter
         }
 
         private static var font: UIFont {

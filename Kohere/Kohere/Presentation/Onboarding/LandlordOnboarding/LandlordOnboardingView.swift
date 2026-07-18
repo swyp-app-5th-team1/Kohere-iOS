@@ -92,7 +92,7 @@ private extension LandlordOnboardingView {
                     store.send(.nextButtonTapped)
                 }
             } label: {
-                Text(store.isOnboardingSubmitting ? "Loading..." : store.primaryButtonTitle)
+                Text(store.isOnboardingSubmitting ? "로딩 중..." : store.primaryButtonTitle)
                     .kohereTextStyle(.label1Semibold)
                     .foregroundColor(.staticWhite)
                     .frame(maxWidth: .infinity)

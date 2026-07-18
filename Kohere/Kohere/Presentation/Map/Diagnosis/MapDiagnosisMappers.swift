@@ -8,22 +8,29 @@
 import Foundation
 
 extension ListingItemModel {
-    nonisolated init(recommendation: DiagnosisRecommendedListing) {
+    nonisolated init(
+        recommendation: DiagnosisRecommendedListing,
+        language: AppLanguage
+    ) {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
-            thumbnailURL: Self.thumbnailURL(for: recommendation),
+            thumbnailURL: recommendation.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: recommendation.minMonthlyRent,
-                max: recommendation.maxMonthlyRent
+                max: recommendation.maxMonthlyRent,
+                language: language
             ),
             formattedUsdPrice: "",
             detailsDescription: Self.depositTitle(
                 min: recommendation.minDeposit,
-                max: recommendation.maxDeposit
+                max: recommendation.maxDeposit,
+                language: language
             ),
-            locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
-            typeTag: Self.typeTitle(from: recommendation.type),
+            locationDescription: recommendation.title.isEmpty
+                ? Self.localized("map.diagnosis.matchesTitle", language: language)
+                : recommendation.title,
+            typeTag: recommendation.type,
             period: "1 mo~",
             isLiked: false
         )
@@ -32,7 +39,8 @@ extension ListingItemModel {
     nonisolated init(
         recommendation: DiagnosisRecommendedListing,
         exchangeRate: KRWToUSDExchangeRate?,
-        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase
+        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase,
+        language: AppLanguage
     ) {
         let convertedMonthlyRentText: String
         if let exchangeRate {
@@ -51,55 +59,45 @@ extension ListingItemModel {
         self.init(
             id: recommendation.listingID,
             title: recommendation.title,
-            thumbnailURL: Self.thumbnailURL(for: recommendation),
+            thumbnailURL: recommendation.thumbnailURL,
             formattedPrice: MonthlyRentPriceFormatter.wonTitle(
                 min: recommendation.minMonthlyRent,
-                max: recommendation.maxMonthlyRent
+                max: recommendation.maxMonthlyRent,
+                language: language
             ),
             formattedUsdPrice: convertedMonthlyRentText,
             detailsDescription: Self.depositTitle(
                 min: recommendation.minDeposit,
-                max: recommendation.maxDeposit
+                max: recommendation.maxDeposit,
+                language: language
             ),
-            locationDescription: recommendation.title.isEmpty ? "추천 매물" : recommendation.title,
-            typeTag: Self.typeTitle(from: recommendation.type),
+            locationDescription: recommendation.title.isEmpty
+                ? Self.localized("map.diagnosis.matchesTitle", language: language)
+                : recommendation.title,
+            typeTag: recommendation.type,
             period: "1 mo~",
             isLiked: false
         )
     }
 
-    nonisolated private static func depositTitle(min: Int?, max: Int?) -> String {
-        MonthlyRentPriceFormatter.rangeTitle(prefix: "보증금", min: min, max: max)
+    nonisolated private static func depositTitle(
+        min: Int?,
+        max: Int?,
+        language: AppLanguage
+    ) -> String {
+        guard let amount = MonthlyRentPriceFormatter.amountRangeTitle(
+            min: min,
+            max: max,
+            language: language
+        ) else { return "" }
+
+        let format = localized("listingDetail.format.deposit.overview", language: language)
+        return String(format: format, locale: language.locale, amount)
     }
 
-    nonisolated private static func thumbnailURL(for recommendation: DiagnosisRecommendedListing) -> String {
-        let thumbnailURL = recommendation.thumbnailURL?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let thumbnailURL, !thumbnailURL.isEmpty {
-            return thumbnailURL
-        }
-
-        return MockListingImageProvider.listingImageName(
-            listingID: recommendation.listingID,
-            propertyType: recommendation.type
-        )
+    nonisolated private static func localized(_ key: String, language: AppLanguage) -> String {
+        language.localized(key)
     }
-
-    nonisolated private static func typeTitle(from type: String) -> String {
-        switch type.uppercased() {
-        case "GOSHIWON":
-            return "Goshiwon"
-        case "CO_LIVING":
-            return "Co-living"
-        case "SHARE_HOUSE":
-            return "Share house"
-        default:
-            return type
-                .replacingOccurrences(of: "_", with: " ")
-                .lowercased()
-                .capitalized
-        }
-    }
-
 }
 
 extension MapFilterState {

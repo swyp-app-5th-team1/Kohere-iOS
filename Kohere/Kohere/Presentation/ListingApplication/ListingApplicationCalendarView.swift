@@ -52,12 +52,12 @@ struct ListingApplicationDateSelectionView: View {
                     .frame(width: 16, height: 16)
                     .foregroundStyle(.labelNormal)
 
-                Text("입주 희망일 및 기간을 선택해 주세요")
+                Text("listingApplication.dateSelection.title")
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.labelNormal)
             }
 
-            Text("선택 기간에 따라 종료일은 자동 적용됩니다")
+            Text("listingApplication.dateSelection.subtitle")
                 .kohereTextStyle(.caption1Regular)
                 .foregroundStyle(.labelAlternative)
                 .padding(.leading, 24)
@@ -141,13 +141,13 @@ struct ListingApplicationDateSelectionView: View {
 
     private var dateSummary: some View {
         HStack(spacing: 0) {
-            summaryColumn(title: "입주 희망일", value: moveInDateText)
+            summaryColumn(title: String(localized: "listingApplication.field.moveInDate"), value: moveInDateText)
 
             Rectangle()
                 .fill(.lineNeutral)
                 .frame(width: 1, height: 40)
 
-            summaryColumn(title: "종료일", value: moveOutDateText)
+            summaryColumn(title: String(localized: "listingApplication.field.moveOutDate"), value: moveOutDateText)
         }
         .frame(maxWidth: .infinity)
     }
@@ -181,7 +181,7 @@ struct ListingApplicationDateSelectionView: View {
             .opacity(rentalMonths <= 1 ? 0.35 : 1)
 
             VStack(spacing: 2) {
-                Text("계약 기간")
+                Text("listingApplication.field.contractPeriod")
                     .kohereTextStyle(.caption1Regular)
                     .foregroundStyle(.labelAlternative)
 

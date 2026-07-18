@@ -11,19 +11,19 @@ extension ListingDetailResponseDTO {
     func toEntity() throws -> ListingDetail {
         guard let listingId else { throw DataError.decodingFailed }
 
-        let conditionCodes = conditions ?? []
+        let propertyTypeCode = type?.code ?? ""
 
         let listingImageURLs = nonEmptyImageURLs(imageUrls)
 
         return ListingDetail(
             listingID: listingId,
             title: title ?? "",
-            type: type ?? "",
+            type: type?.code ?? "",
             status: status ?? "",
-            rentalType: rentalType ?? "",
+            rentalType: rentalType?.code ?? "",
             refundPolicy: refundPolicy?.toDetailEntity(),
             contract: contract?.toDetailEntity(),
-            genderPolicy: genderPolicy,
+            genderPolicy: genderPolicy?.code,
             coordinate: location?.toDetailCoordinate(),
             address: address?.toDetailEntity(),
             nearestTransit: nearestTransit?.toDetailEntity(),
@@ -31,14 +31,16 @@ extension ListingDetailResponseDTO {
             building: building?.toDetailEntity(),
             propertyPolicies: propertyPolicies?.toDetailEntity(),
             facilities: facilities?.toDetailEntity(),
-            conditionCodes: conditionCodes,
-            conditions: conditionCodes.compactMap(RoomCondition.init(conditionCode:)),
+            conditions: (conditions ?? []).map(\.code),
             roomOffers: (roomOffers ?? []).compactMap {
-                $0.toDetailEntity(listingID: listingId, propertyType: type)
+                $0.toDetailEntity(listingID: listingId, propertyType: propertyTypeCode)
             },
             descriptions: descriptions?.toDetailEntity(),
             imageURLs: listingImageURLs.isEmpty
-                ? MockListingImageProvider.listingImageNames(listingID: listingId, propertyType: type)
+                ? MockListingImageProvider.listingImageNames(
+                    listingID: listingId,
+                    propertyType: propertyTypeCode
+                )
                 : listingImageURLs,
             isFavorited: favorited ?? false,
             favoriteCount: favoriteCount ?? 0,
@@ -60,7 +62,7 @@ private extension ListingNearestTransitResponseDTO {
         guard let name else { return nil }
 
         return ListingDetailNearestTransit(
-            type: type,
+            type: type?.code,
             name: name,
             walkMinutes: walkMinutes,
             nearbyPlacesDescription: nearbyPlacesDescription
@@ -106,7 +108,7 @@ private extension ListingAddressResponseDTO {
 private extension ListingBuildingResponseDTO {
     func toDetailEntity() -> ListingDetailBuilding {
         ListingDetailBuilding(
-            type: type,
+            type: type?.code,
             usedFloorMin: usedFloorMin,
             usedFloorMax: usedFloorMax,
             totalFloors: totalFloors,
@@ -121,7 +123,6 @@ private extension ListingPropertyPoliciesResponseDTO {
         ListingDetailPropertyPolicies(
             arcRequired: arcRequired,
             residentRegistrationAvailable: residentRegistrationAvailable,
-            studySuitable: studySuitable,
             mealsProvided: mealsProvided,
             englishAvailable: englishAvailable
         )
@@ -131,20 +132,20 @@ private extension ListingPropertyPoliciesResponseDTO {
 private extension ListingFacilitiesResponseDTO {
     func toDetailEntity() -> ListingDetailFacilities {
         ListingDetailFacilities(
-            heatingSystem: heatingSystem ?? [],
-            kitchen: kitchen ?? [],
-            laundry: laundry ?? [],
-            livingAmenities: livingAmenities ?? [],
-            securityFeatures: securityFeatures ?? [],
+            heatingSystem: (heatingSystem ?? []).map(\.code),
+            kitchen: (kitchen ?? []).map(\.code),
+            laundry: (laundry ?? []).map(\.code),
+            livingAmenities: (livingAmenities ?? []).map(\.code),
+            securityFeatures: (securityFeatures ?? []).map(\.code),
             commonSpaces: (commonSpaces ?? []).compactMap { $0.toDetailEntity() },
-            providedSupplies: providedSupplies ?? []
+            providedSupplies: (providedSupplies ?? []).map(\.code)
         )
     }
 }
 
 private extension ListingCommonSpaceResponseDTO {
     func toDetailEntity() -> ListingDetailCommonSpace? {
-        guard let type else { return nil }
+        guard let type = type?.code else { return nil }
 
         return ListingDetailCommonSpace(
             type: type,
@@ -157,7 +158,6 @@ private extension ListingRoomOfferResponseDTO {
     func toDetailEntity(listingID: String, propertyType: String?) -> ListingDetailRoomOffer? {
         guard let roomOfferId else { return nil }
 
-        let filterTagCodes = filterTags ?? []
         let imageURLs = nonEmptyImageURLs(roomImageUrls)
 
         return ListingDetailRoomOffer(
@@ -166,8 +166,7 @@ private extension ListingRoomOfferResponseDTO {
             status: status,
             pricing: pricing?.toDetailEntity(),
             inventory: inventory?.toDetailEntity(),
-            filterTagCodes: filterTagCodes,
-            filterTags: filterTagCodes.compactMap(RoomCondition.init(conditionCode:)),
+            filterTags: (filterTags ?? []).map(\.code),
             roomImageURLs: imageURLs.isEmpty
                 ? MockListingImageProvider.roomImageNames(
                     listingID: listingID,

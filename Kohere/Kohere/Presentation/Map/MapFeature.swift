@@ -106,7 +106,13 @@ struct MapFeature {
             case .selectedListingCardTapped:
                 guard let selectedMarkerID = state.selectedMarkerID else { return .none }
                 state.path.append(
-                    .listingDetail(ListingDetailFeature.State(listingID: selectedMarkerID, userType: state.userType))
+                    .listingDetail(
+                        ListingDetailFeature.State(
+                            listingID: selectedMarkerID,
+                            userType: state.userType,
+                            appLanguage: state.appLanguage
+                        )
+                    )
                 )
                 return .none
 
@@ -117,7 +123,13 @@ struct MapFeature {
 
             case let .listingCardTapped(id):
                 state.path.append(
-                    .listingDetail(ListingDetailFeature.State(listingID: id, userType: state.userType))
+                    .listingDetail(
+                        ListingDetailFeature.State(
+                            listingID: id,
+                            userType: state.userType,
+                            appLanguage: state.appLanguage
+                        )
+                    )
                 )
                 return .none
 

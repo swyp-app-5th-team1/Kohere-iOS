@@ -9,13 +9,39 @@ import Foundation
 
 enum DataError: Error, Equatable {
     case missingBaseURL
-    case missingNaverSearchCredentials
     case invalidURL
     case emptyResponse
     case decodingFailed
     case httpStatus(code: Int, message: String?)
     case serverError(code: String, message: String)
+    case transport(message: String)
     case underlying(message: String)
+}
+
+extension DataError {
+    nonisolated var invalidatesRefreshToken: Bool {
+        switch self {
+        case let .httpStatus(code, _):
+            return code == 401
+
+        case let .serverError(code, _):
+            switch code {
+            case "AUTH_INVALID_REFRESH_TOKEN",
+                 "INVALID_INPUT",
+                 "UNAUTHENTICATED",
+                 "TOKEN_EXPIRED",
+                 "INVALID_REFRESH_TOKEN",
+                 "REFRESH_TOKEN_EXPIRED":
+                return true
+
+            default:
+                return false
+            }
+
+        default:
+            return false
+        }
+    }
 }
 
 extension DataError: LocalizedError {
@@ -23,9 +49,6 @@ extension DataError: LocalizedError {
         switch self {
         case .missingBaseURL:
             "API Base URL이 설정되지 않았습니다."
-
-        case .missingNaverSearchCredentials:
-            "네이버 검색 API 키가 설정되지 않았습니다."
 
         case .invalidURL:
             "요청 URL을 만들 수 없습니다."
@@ -42,6 +65,9 @@ extension DataError: LocalizedError {
         case let .serverError(_, message):
             message
 
+        case let .transport(message):
+            message
+
         case let .underlying(message):
             message
         }
@@ -53,9 +79,6 @@ extension DataError: CustomDebugStringConvertible {
         switch self {
         case .missingBaseURL:
             "missingBaseURL"
-
-        case .missingNaverSearchCredentials:
-            "missingNaverSearchCredentials"
 
         case .invalidURL:
             "invalidURL"
@@ -71,6 +94,9 @@ extension DataError: CustomDebugStringConvertible {
 
         case let .serverError(code, message):
             "serverError(code: \(code), message: \(message))"
+
+        case let .transport(message):
+            "transport(message: \(message))"
 
         case let .underlying(message):
             "underlying(message: \(message))"

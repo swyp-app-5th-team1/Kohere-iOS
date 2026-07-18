@@ -37,9 +37,9 @@ struct ChatRoomRowCell: View {
     private var statusText: String {
         switch participantRole {
         case .tenant:
-            return "신청서가 전송되었어요!"
+            return String(localized: "chat.applicationSent.title")
         case .landlord:
-            return "새로운 입주 신청이 도착했어요!"
+            return String(localized: "chat.applicationReceived.title")
         }
     }
     

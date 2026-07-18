@@ -22,19 +22,19 @@ enum ListingDetailSection: Int, CaseIterable, Identifiable {
     var fallbackTitle: String {
         switch self {
         case .roomOffers:
-            return "각 방 정보"
+            return String(localized: "listingDetail.tab.roomOffers")
         case .price:
-            return "가격 정보"
+            return String(localized: "listingDetail.tab.price")
         case .property:
-            return "매물 정보"
+            return String(localized: "listingDetail.tab.property")
         case .building:
-            return "건물 정보"
+            return String(localized: "listingDetail.tab.building")
         case .facility:
-            return "공용 시설"
+            return String(localized: "listingDetail.tab.facility")
         case .location:
-            return "위치"
+            return String(localized: "listingDetail.tab.location")
         case .review:
-            return "리뷰"
+            return String(localized: "listingDetail.tab.review")
         }
     }
 }

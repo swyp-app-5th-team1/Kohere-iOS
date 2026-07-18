@@ -30,6 +30,7 @@ extension UserDefaultsKey where Value == [String] {
 
 extension UserDefaultsKey where Value == String {
     nonisolated static let pendingOnboardingUserType = Self(rawValue: "pendingOnboardingUserType")
+    nonisolated static let appLanguage = Self(rawValue: "appLanguage")
 }
 
 enum UserDefaultsStoredValue: Sendable {

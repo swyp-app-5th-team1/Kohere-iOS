@@ -12,6 +12,7 @@ enum AppPopup: Equatable {
     struct Notice: Equatable {
         let message: String
         var confirmTitle = "확인"
+        var confirmRoute: Route?
     }
 
     struct Action: Equatable {
@@ -53,5 +54,7 @@ enum AppPopup: Equatable {
     enum Route: Equatable {
         case logout
         case deleteAccount
+        case dismissListingDetail
+        case confirmLanguageChange(AppLanguage)
     }
 }

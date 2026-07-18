@@ -274,26 +274,30 @@ extension MapFeature {
 
     func listingItemModels(
         from listings: [Listing],
-        exchangeRate: KRWToUSDExchangeRate?
+        exchangeRate: KRWToUSDExchangeRate?,
+        language: AppLanguage
     ) -> [ListingItemModel] {
         listings.map {
             ListingItemModel(
                 listing: $0,
                 exchangeRate: exchangeRate,
-                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase
+                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
+                language: language
             )
         }
     }
 
     func listingItemModels(
         from recommendations: [DiagnosisRecommendedListing],
-        exchangeRate: KRWToUSDExchangeRate?
+        exchangeRate: KRWToUSDExchangeRate?,
+        language: AppLanguage
     ) -> [ListingItemModel] {
         recommendations.map {
             ListingItemModel(
                 recommendation: $0,
                 exchangeRate: exchangeRate,
-                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase
+                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
+                language: language
             )
         }
     }
@@ -303,13 +307,15 @@ extension MapFeature {
         case .locationSearch:
             state.listings = listingItemModels(
                 from: state.listingSearchResults,
-                exchangeRate: state.krwToUSDExchangeRate
+                exchangeRate: state.krwToUSDExchangeRate,
+                language: state.appLanguage
             )
 
         case .diagnosis:
             state.listings = listingItemModels(
                 from: state.diagnosisRecommendedListings,
-                exchangeRate: state.krwToUSDExchangeRate
+                exchangeRate: state.krwToUSDExchangeRate,
+                language: state.appLanguage
             )
 
         case .idle:

@@ -8,17 +8,30 @@
 import Foundation
 
 enum MonthlyRentPriceFormatter {
-    nonisolated static func rangeTitle(prefix: String, min: Int?, max: Int?) -> String {
-        guard let rangeTitle = wonRangeTitle(min: min, max: max) else { return "" }
+    nonisolated static func rangeTitle(
+        prefix: String,
+        min: Int?,
+        max: Int?,
+        language: AppLanguage
+    ) -> String {
+        guard let rangeTitle = amountRangeTitle(min: min, max: max, language: language) else { return "" }
         return "\(prefix) \(rangeTitle)"
     }
 
-    nonisolated static func wonTitle(min: Int?, max: Int?) -> String {
-        guard let rangeTitle = wonRangeTitle(min: min, max: max) else {
-            return "월세 정보 없음"
+    nonisolated static func wonTitle(
+        min: Int?,
+        max: Int?,
+        language: AppLanguage
+    ) -> String {
+        guard let rangeTitle = amountRangeTitle(min: min, max: max, language: language) else {
+            return localized("listingDetail.value.noPriceInfo", language: language)
         }
 
-        return "월세 \(rangeTitle)"
+        return formatted(
+            "listingDetail.format.monthlyRent",
+            language: language,
+            arguments: [rangeTitle]
+        )
     }
 
     nonisolated static func usdTitle(
@@ -43,29 +56,46 @@ enum MonthlyRentPriceFormatter {
         "≈\(usdTitle(amount))/mo"
     }
 
+    nonisolated static func amountRangeTitle(
+        min: Int?,
+        max: Int?,
+        language: AppLanguage
+    ) -> String? {
+        switch language {
+        case .korean:
+            koreanWonRangeTitle(min: min, max: max)
+        case .english:
+            compactWonRangeTitle(min: min, max: max)
+        }
+    }
+
     nonisolated static func wonRangeTitle(min: Int?, max: Int?) -> String? {
+        koreanWonRangeTitle(min: min, max: max)
+    }
+
+    nonisolated private static func koreanWonRangeTitle(min: Int?, max: Int?) -> String? {
         switch (min, max) {
         case let (min?, max?) where min == max:
-            return wonTitle(min)
+            return koreanWonTitle(min)
         case let (min?, max?):
-            return "\(wonNumberTitle(min))~\(wonTitle(max))"
+            return "\(koreanWonNumberTitle(min))~\(koreanWonTitle(max))"
         case let (min?, nil):
-            return "\(wonTitle(min))~"
+            return "\(koreanWonTitle(min))~"
         case let (nil, max?):
-            return "~\(wonTitle(max))"
+            return "~\(koreanWonTitle(max))"
         case (nil, nil):
             return nil
         }
     }
 
-    nonisolated private static func wonTitle(_ amount: Int) -> String {
+    nonisolated private static func koreanWonTitle(_ amount: Int) -> String {
         guard amount != 0 else { return "0원" }
         guard amount >= 10_000 else { return "\(amount)원" }
 
-        return "\(wonNumberTitle(amount))만원"
+        return "\(koreanWonNumberTitle(amount))만원"
     }
 
-    nonisolated private static func wonNumberTitle(_ amount: Int) -> String {
+    nonisolated private static func koreanWonNumberTitle(_ amount: Int) -> String {
         guard amount >= 10_000 else { return "\(amount)원" }
 
         let tenths = amount / 1_000
@@ -74,6 +104,57 @@ enum MonthlyRentPriceFormatter {
         }
 
         return "\(Double(tenths) / 10)"
+    }
+
+    nonisolated private static func compactWonRangeTitle(min: Int?, max: Int?) -> String? {
+        switch (min, max) {
+        case let (min?, max?) where min == max:
+            return compactWonTitle(min)
+        case let (min?, max?):
+            let minimum = compactWonComponent(min)
+            let maximum = compactWonComponent(max)
+
+            if minimum.suffix == maximum.suffix {
+                return "₩\(minimum.number)~\(maximum.number)\(maximum.suffix)"
+            }
+
+            return "\(compactWonTitle(min))~\(compactWonTitle(max))"
+        case let (min?, nil):
+            return "\(compactWonTitle(min))~"
+        case let (nil, max?):
+            return "~\(compactWonTitle(max))"
+        case (nil, nil):
+            return nil
+        }
+    }
+
+    nonisolated private static func compactWonTitle(_ amount: Int) -> String {
+        let component = compactWonComponent(amount)
+        return "₩\(component.number)\(component.suffix)"
+    }
+
+    nonisolated private static func compactWonComponent(_ amount: Int) -> (number: String, suffix: String) {
+        if amount >= 1_000_000 {
+            return (decimalText(amount: amount, unit: 1_000_000), "M")
+        }
+
+        if amount >= 1_000 {
+            return (decimalText(amount: amount, unit: 1_000), "K")
+        }
+
+        return ("\(amount)", "")
+    }
+
+    nonisolated private static func decimalText(amount: Int, unit: Int) -> String {
+        let hundredths = amount * 100 / unit
+        let whole = hundredths / 100
+        let fraction = hundredths % 100
+
+        guard fraction > 0 else { return "\(whole)" }
+        if fraction.isMultiple(of: 10) {
+            return "\(whole).\(fraction / 10)"
+        }
+        return String(format: "%d.%02d", whole, fraction)
     }
 
     nonisolated private static func usdTitle(_ amount: Decimal) -> String {
@@ -93,5 +174,21 @@ enum MonthlyRentPriceFormatter {
         formatter.groupingSeparator = ","
 
         return formatter.string(from: number) ?? "\(number.intValue)"
+    }
+
+    nonisolated private static func formatted(
+        _ key: String,
+        language: AppLanguage,
+        arguments: [CVarArg]
+    ) -> String {
+        String(
+            format: localized(key, language: language),
+            locale: language.locale,
+            arguments: arguments
+        )
+    }
+
+    nonisolated private static func localized(_ key: String, language: AppLanguage) -> String {
+        language.localized(key)
     }
 }

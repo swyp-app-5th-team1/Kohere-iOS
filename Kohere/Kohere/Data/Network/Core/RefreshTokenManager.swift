@@ -10,22 +10,37 @@ import Foundation
 
 actor RefreshTokenManager {
     private var isRefreshing = false
+    private var activeAttemptID: String?
     private var requestsToRetry: [(RetryResult) -> Void] = []
     
-    func enqueue(_ completion: @escaping (RetryResult) -> Void) -> Bool {
+    func enqueue(_ completion: @escaping (RetryResult) -> Void) -> RefreshEnqueueDecision {
         requestsToRetry.append(completion)
         
-        if isRefreshing {
-            return false
+        if isRefreshing, let activeAttemptID {
+            return RefreshEnqueueDecision(
+                attemptID: activeAttemptID,
+                shouldStartRefresh: false
+            )
         }
         
+        let attemptID = String(UUID().uuidString.prefix(8))
         isRefreshing = true
-        return true
+        activeAttemptID = attemptID
+        return RefreshEnqueueDecision(
+            attemptID: attemptID,
+            shouldStartRefresh: true
+        )
     }
     
     func complete(with result: RetryResult) {
         requestsToRetry.forEach { $0(result) }
         requestsToRetry.removeAll()
         isRefreshing = false
+        activeAttemptID = nil
     }
+}
+
+struct RefreshEnqueueDecision: Equatable, Sendable {
+    let attemptID: String
+    let shouldStartRefresh: Bool
 }

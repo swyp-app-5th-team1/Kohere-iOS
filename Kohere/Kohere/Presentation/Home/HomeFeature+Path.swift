@@ -88,6 +88,7 @@ extension HomeFeature {
                     ListingDetailFeature.State(
                         listingID: listingID,
                         userType: state.userType,
+                        appLanguage: state.appLanguage,
                         isApplicationDisabled: true
                     )
                 )
@@ -102,14 +103,26 @@ extension HomeFeature {
             id: _,
             action: .savedListings(.delegate(.listingDetailRequested(listingID)))
         ):
-            state.path.append(listingDetailState(listingID, userType: state.userType))
+            state.path.append(
+                listingDetailState(
+                    listingID,
+                    userType: state.userType,
+                    appLanguage: state.appLanguage
+                )
+            )
             return .none
 
         case let .element(
             id: _,
             action: .recentlyViewedList(.delegate(.listingDetailRequested(listingID)))
         ):
-            state.path.append(listingDetailState(listingID, userType: state.userType))
+            state.path.append(
+                listingDetailState(
+                    listingID,
+                    userType: state.userType,
+                    appLanguage: state.appLanguage
+                )
+            )
             return .none
 
         case .element(id: _, action: .notifications(.backButtonTapped)):
@@ -146,12 +159,14 @@ extension HomeFeature {
 
     private func listingDetailState(
         _ listingID: String,
-        userType: UserType?
+        userType: UserType?,
+        appLanguage: AppLanguage
     ) -> Path.State {
         .listingDetail(
             ListingDetailFeature.State(
                 listingID: listingID,
-                userType: userType
+                userType: userType,
+                appLanguage: appLanguage
             )
         )
     }

@@ -42,6 +42,7 @@ struct HomeFeature {
     struct State: Equatable {
         var path = StackState<Path.State>()
         var userType: UserType?
+        var appLanguage: AppLanguage
         var recentListings: [Listing] = []
         var recentlyViewedItems: [ListingItemModel] = []
         var isRecentlyViewedLoading: Bool = false
@@ -62,11 +63,13 @@ struct HomeFeature {
         
         init(
             userType: UserType? = nil,
+            appLanguage: AppLanguage = .systemDefault,
             recentlyViewedItems: [ListingItemModel] = [],
             quiz: Quiz = Quiz.mockQuiz,
             livingGuides: [LivingGuide] = []
         ) {
             self.userType = userType
+            self.appLanguage = appLanguage
             self.recentlyViewedItems = recentlyViewedItems
             self.isRecentlyViewedLoaded = !recentlyViewedItems.isEmpty
             self.quiz = QuizModel(entity: quiz, selectedChoiceKey: nil)
@@ -229,7 +232,8 @@ struct HomeFeature {
                     ListingItemModel(
                         listing: $0,
                         exchangeRate: state.krwToUSDExchangeRate,
-                        convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase
+                        convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
+                        language: state.appLanguage
                     )
                 }
                 state.isRecentlyViewedLoading = false
@@ -254,7 +258,8 @@ struct HomeFeature {
                     var item = ListingItemModel(
                         listing: listing,
                         exchangeRate: exchangeRate,
-                        convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase
+                        convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
+                        language: state.appLanguage
                     )
 
                     if let currentItem = currentItems.first(where: { $0.id == item.id }) {
@@ -292,7 +297,15 @@ struct HomeFeature {
                 
             case .navigationHeartTapped:
                 guard state.canUseFavoriteFeatures else { return .none }
-                state.path.append(.savedListings(SavedListingsFeature.State(userType: state.userType)))
+                state.path.append(
+                    .savedListings(
+                        SavedListingsFeature.State(
+                            userType: state.userType,
+                            appLanguage: state.appLanguage,
+                            krwToUSDExchangeRate: state.krwToUSDExchangeRate
+                        )
+                    )
+                )
                 return .none
                 
             case .navigationNoticeTapped:
@@ -304,14 +317,30 @@ struct HomeFeature {
                 return .none
                 
             case .seeAllListingsTapped:
-                state.path.append(.recentlyViewedList(RecentlyViewedFeature.State(userType: state.userType)))
+                state.path.append(
+                    .recentlyViewedList(
+                        RecentlyViewedFeature.State(
+                            userType: state.userType,
+                            appLanguage: state.appLanguage,
+                            krwToUSDExchangeRate: state.krwToUSDExchangeRate
+                        )
+                    )
+                )
                 return .none
                 
             case .browseListingsTapped:
                 return .send(.mapRequested(.browseListings))
                 
             case let .cardTapped(id):
-                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: id, userType: state.userType)))
+                state.path.append(
+                    .listingDetail(
+                        ListingDetailFeature.State(
+                            listingID: id,
+                            userType: state.userType,
+                            appLanguage: state.appLanguage
+                        )
+                    )
+                )
                 return .none
                 
             case let .likeButtonTapped(id):

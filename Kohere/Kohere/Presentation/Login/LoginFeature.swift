@@ -54,9 +54,9 @@ struct LoginFeature {
     enum Action: Equatable {
         case googleLoginButtonTapped
         case appleLoginButtonTapped
-        case landlordAdminLoginButtonTapped
         case socialLoginCredentialReceived(SocialLoginCredential)
         case loginSuccess(Auth)
+        case loginAuthStored(Auth)
         case loginFailure(String)
         
         case notificationSheetDismissed
@@ -109,15 +109,6 @@ struct LoginFeature {
                     }
                 }
 
-            case .landlordAdminLoginButtonTapped:
-                guard let idToken = Self.landlordAdminIDToken else {
-                    state.loginErrorMessage = "임대인 관리자 토큰이 설정되지 않았습니다."
-                    return .none
-                }
-                state.isLoginRequesting = true
-                state.loginErrorMessage = nil
-                return .send(.socialLoginCredentialReceived(.google(idToken: idToken)))
-
             case let .socialLoginCredentialReceived(credential):
                 return .run { send in
                     do {
@@ -143,19 +134,24 @@ struct LoginFeature {
                 }
                 
             case let .loginSuccess(auth):
-                state.isLoginRequesting = false
                 state.authInfo = auth
                 state.loginErrorMessage = nil
                 state.currentSheet = auth.onboardingRequired ? .notificationOption : nil
                 guard !auth.onboardingRequired else {
+                    state.isLoginRequesting = false
                     return .none
                 }
                 let keychainClient = keychainClient
-                return .run { _ in
+                return .run { send in
                     try keychainClient.save(auth, for: .auth)
+                    await send(.loginAuthStored(auth))
                 } catch: { error, send in
                     await send(.loginFailure(Self.loginErrorMessage(for: error)))
                 }
+
+            case .loginAuthStored:
+                state.isLoginRequesting = false
+                return .none
                 
             case let .loginFailure(message):
                 state.isLoginRequesting = false
@@ -251,18 +247,6 @@ struct LoginFeature {
 }
 
 private extension LoginFeature {
-    static var landlordAdminIDToken: String? {
-        guard let rawValue = Bundle.main.object(
-            forInfoDictionaryKey: "KOHERE_LANDLORD_ADMIN_ID_TOKEN"
-        ) as? String else { return nil }
-
-        let token = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !token.isEmpty,
-              token != "$(KOHERE_LANDLORD_ADMIN_ID_TOKEN)",
-              token != "YOUR_LANDLORD_ADMIN_ID_TOKEN" else { return nil }
-        return token
-    }
-
     static func loginErrorMessage(for error: Error) -> String {
         if let dataError = error as? DataError {
             switch dataError {

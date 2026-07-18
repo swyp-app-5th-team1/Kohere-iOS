@@ -36,7 +36,7 @@ struct TermsAgreementBottomSheet: View {
                 .padding(.top, 12)
             
             VStack(alignment: .leading) {
-                Text("코히어 로그인을 위해\n꼭 필요한 동의만 추렸어요")
+                Text("login.terms.title")
                     .kohereTextStyle(.heading2Bold)
                     .foregroundColor(.neutral80)
                     .multilineTextAlignment(.leading)
@@ -46,7 +46,7 @@ struct TermsAgreementBottomSheet: View {
             .padding(.horizontal, 40)
             
             VStack(alignment: .leading, spacing: 0) {
-                Text("코히어 이용 약관 동의")
+                Text("login.terms.requiredSectionTitle")
                     .kohereTextStyle(.caption1Regular)
                     .foregroundColor(.neutral60)
                     .padding(.bottom, 12)
@@ -60,7 +60,7 @@ struct TermsAgreementBottomSheet: View {
                             .foregroundColor(isRequiredTermsAgreed ? .statusInfo : .labelAssistive)
                             .frame(width: 24, height: 24)
 
-                        Text("필수 약관 전체 동의")
+                        Text("login.terms.agreeAllRequired")
                             .kohereTextStyle(.label1Semibold)
                             .foregroundColor(.neutral80)
 
@@ -78,7 +78,7 @@ struct TermsAgreementBottomSheet: View {
                     .padding(.bottom, 6)
                 
                 agreementRow(
-                    title: "서비스 이용약관 (필수)",
+                    title: "login.terms.serviceRequired.title",
                     isAgreed: isServiceTermsAgreed,
                     bottomHitPadding: 22,
                     onAgreementTapped: onServiceTermsAgreementTapped,
@@ -88,7 +88,7 @@ struct TermsAgreementBottomSheet: View {
                 )
                 
                 agreementRow(
-                    title: "개인정보처리방침 (필수)",
+                    title: "login.terms.privacyRequired.title",
                     isAgreed: isPrivacyTermsAgreed,
                     bottomHitPadding: 22,
                     onAgreementTapped: onPrivacyTermsAgreementTapped,
@@ -98,7 +98,7 @@ struct TermsAgreementBottomSheet: View {
                 )
                 
                 agreementRow(
-                    title: "마케팅 정보 수신 동의 (선택)",
+                    title: "login.terms.marketingOptional.title",
                     isAgreed: isMarketingCommunicationsAgreed,
                     bottomHitPadding: 12,
                     onAgreementTapped: onMarketingCommunicationsAgreementTapped,
@@ -118,7 +118,7 @@ struct TermsAgreementBottomSheet: View {
                         onStartTapped()
                     }
                 } label: {
-                    Text("시작하기")
+                    Text("login.terms.startButton")
                         .kohereTextStyle(.label1Semibold)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -137,7 +137,7 @@ struct TermsAgreementBottomSheet: View {
 
 private extension TermsAgreementBottomSheet {
     func agreementRow(
-        title: String,
+        title: LocalizedStringKey,
         isAgreed: Bool,
         bottomHitPadding: CGFloat,
         onAgreementTapped: @escaping () -> Void,

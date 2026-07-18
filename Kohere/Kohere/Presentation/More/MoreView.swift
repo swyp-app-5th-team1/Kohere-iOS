@@ -9,15 +9,25 @@ import ComposableArchitecture
 import SwiftUI
 
 struct MoreView: View {
+    @Environment(\.locale)
+    private var locale
+
     let store: StoreOf<MoreFeature>
 
     var body: some View {
         VStack(spacing: 0) {
             KohereNavigationBar(
                 left: .smallLogo,
-                center: .text("More"),
+                center: .text(localized("more.title")),
                 right: .moreTab(
                     showsLanguage: store.userType != .landlord,
+                    languagePopover: NavigationPopover(
+                        isPresented: store.isLanguagePopoverPresented,
+                        onPresentationChanged: {
+                            store.send(.languagePopoverPresentationChanged($0))
+                        },
+                        content: AnyView(languagePopover)
+                    ),
                     onLanguage: { store.send(.navigationLanguageTapped) },
                     onSetting: { store.send(.navigationSettingTapped) }
                 ),
@@ -53,16 +63,71 @@ struct MoreView: View {
         }
     }
 
+    private var languagePopover: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                Text(localized("language.current"))
+                    .kohereTextStyle(.label2Medium)
+                    .foregroundStyle(.neutral50)
+
+                Spacer(minLength: 8)
+
+                Text(store.selectedLanguage.title)
+                    .kohereTextStyle(.label2Semibold)
+                    .foregroundStyle(.primary50)
+            }
+            .padding(.horizontal, 16)
+            .frame(height: 48)
+
+            Divider()
+                .foregroundStyle(.lineAlternative)
+
+            ForEach(AppLanguage.allCases, id: \.self) { language in
+                Button {
+                    store.send(.languageSelected(language))
+                } label: {
+                    HStack(spacing: 8) {
+                        Text(language.title)
+                            .kohereTextStyle(.label1Medium)
+                            .foregroundStyle(.neutral80)
+
+                        Spacer(minLength: 8)
+
+                        if store.selectedLanguage == language {
+                            Image(.check24)
+                                .renderingMode(.template)
+                                .foregroundStyle(.primary50)
+                                .frame(width: 24, height: 24)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .frame(height: 48)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(width: 220)
+        .padding(.vertical, 8)
+        .background(.common0)
+    }
+
     private func handleMenuItemTapped(_ item: MoreMenuItem) {
         switch item.action {
         case .savedListings:
             store.send(.savedListingsTapped)
         case .recentlyViewedListings:
             store.send(.recentlyViewedListingsTapped)
+        case .announcements:
+            store.send(.announcementsTapped)
         case let .livingGuide(theme):
             store.send(.livingGuideItemTapped(theme))
         case .promoteRoom:
             store.send(.promoteRoomTapped)
+        case .feedback:
+            store.send(.feedbackTapped)
+        case .collaboration:
+            store.send(.collaborationTapped)
         case nil:
             break
         }
@@ -128,7 +193,9 @@ struct MoreView: View {
 
     private var profileNameText: String {
         guard let profile = store.userProfile else {
-            return store.userType == .landlord ? "집주인 이름" : "닉네임"
+            return store.userType == .landlord
+                ? localized("more.profile.landlordNamePlaceholder")
+                : localized("more.profile.nicknamePlaceholder")
         }
 
         switch profile.userType {
@@ -160,10 +227,18 @@ struct MoreView: View {
 
     private var tenantActivitySection: some View {
         MoreMenuSection(
-            title: "내 활동",
+            title: localized("more.activity.title"),
             items: [
-                .init(title: "찜한 매물", iconName: "heart_24", action: .savedListings),
-                .init(title: "최근 본 매물", iconName: "thunder_24", action: .recentlyViewedListings)
+                .init(
+                    title: localized("more.activity.savedListings"),
+                    iconName: "heart_24",
+                    action: .savedListings
+                ),
+                .init(
+                    title: localized("more.activity.recentlyViewed"),
+                    iconName: "thunder_24",
+                    action: .recentlyViewedListings
+                )
             ],
             horizontalPadding: 16,
             onItemTapped: handleMenuItemTapped
@@ -172,28 +247,28 @@ struct MoreView: View {
 
     private var tenantLivingGuideSection: some View {
         MoreMenuSection(
-            title: "한국 생활 팁",
+            title: localized("home.livingGuide.title"),
             items: [
                 .init(
-                    title: "조심해야 할 사기 유형",
+                    title: localized("home.livingGuide.fraud.title"),
                     iconName: "contractChecklist",
                     rendersAsTemplate: false,
                     action: .livingGuide(.housingScams)
                 ),
                 .init(
-                    title: "은행 계좌 개설 방법",
+                    title: localized("home.livingGuide.bankAccount.title"),
                     iconName: "bankAccountGuide",
                     rendersAsTemplate: false,
                     action: .livingGuide(.bankAccount)
                 ),
                 .init(
-                    title: "대중교통 이용 안내",
+                    title: localized("home.livingGuide.transportation.title"),
                     iconName: "train",
                     rendersAsTemplate: false,
                     action: .livingGuide(.publicTransit)
                 ),
                 .init(
-                    title: "건강 보험 등록",
+                    title: localized("home.livingGuide.healthInsurance.title"),
                     iconName: "healthInsurance",
                     rendersAsTemplate: false,
                     action: .livingGuide(.healthInsurance)
@@ -209,7 +284,7 @@ struct MoreView: View {
             title: "사장님 서비스",
             items: [
                 .init(
-                    title: "무료로 방 등록하기",
+                    title: localized("more.landlordService.promoteRoom"),
                     subtitle: "고시원 · 쉐어하우스 · 코리빙 등",
                     iconName: "external_link_24",
                     action: .promoteRoom
@@ -222,14 +297,31 @@ struct MoreView: View {
 
     private var customerSupportSection: some View {
         MoreMenuSection(
-            title: "고객지원",
+            title: localized("more.support.title"),
             items: [
-                .init(title: "공지사항", iconName: "megaphone_24"),
-                .init(title: "피드백 보내기", iconName: "mail_24"),
-                .init(title: "협업 신청하기", iconName: "send_24")
+                .init(
+                    title: localized("more.support.announcements"),
+                    iconName: "megaphone_24",
+                    action: .announcements
+                ),
+                .init(
+                    title: localized("more.support.feedback"),
+                    iconName: "mail_24",
+                    action: .feedback
+                ),
+                .init(
+                    title: localized("more.support.partner"),
+                    iconName: "send_24",
+                    action: .collaboration
+                )
             ],
-            horizontalPadding: 16
+            horizontalPadding: 16,
+            onItemTapped: handleMenuItemTapped
         )
+    }
+
+    private func localized(_ key: String) -> String {
+        AppLanguage(locale: locale).localized(key)
     }
 }
 
@@ -320,6 +412,9 @@ private struct MoreMenuItem: Identifiable, Equatable {
 private enum MoreMenuAction: Equatable {
     case savedListings
     case recentlyViewedListings
+    case announcements
     case livingGuide(LivingGuideTheme)
     case promoteRoom
+    case feedback
+    case collaboration
 }

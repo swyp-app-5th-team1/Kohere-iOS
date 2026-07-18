@@ -24,6 +24,9 @@ struct MoreFlowView: View {
             case let .account(accountStore):
                 AccountView(store: accountStore)
                     .navigationBarHidden(true)
+            case let .announcements(announcementsStore):
+                AnnouncementsView(store: announcementsStore)
+                    .navigationBarHidden(true)
             case let .livingGuideDetail(livingGuideDetailStore):
                 LivingGuideDetailView(store: livingGuideDetailStore)
                     .navigationBarHidden(true)

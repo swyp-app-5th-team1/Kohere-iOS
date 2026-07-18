@@ -112,7 +112,6 @@ struct ListingApplicationSummaryCard: View {
     let moveOutDateText: String
     let rentalPeriodText: String
     let priceText: String
-    var includesTotalPrice = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -123,20 +122,13 @@ struct ListingApplicationSummaryCard: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 VStack(spacing: 12) {
-                    badgeRow(title: "객실 타입", value: roomTypeName)
-                    badgeRow(title: "입주 희망일", value: moveInDateText)
-                    badgeRow(title: "입주 종료일", value: moveOutDateText)
+                    badgeRow(title: String(localized: "listingApplication.review.field.roomType"), value: roomTypeName)
+                    badgeRow(title: String(localized: "listingApplication.review.field.moveInDate"), value: moveInDateText)
+                    badgeRow(title: String(localized: "listingApplication.review.field.moveOutDate"), value: moveOutDateText)
                 }
 
-                plainRow(title: "계약 기간", value: rentalPeriodText)
-                plainRow(title: "금액", value: priceText)
-
-                if includesTotalPrice {
-                    Text("총 계약금 200만 원")
-                        .kohereTextStyle(.label3Semibold)
-                        .foregroundStyle(.coolNeutral80)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                }
+                plainRow(title: String(localized: "listingApplication.review.field.leaseTerm"), value: rentalPeriodText)
+                plainRow(title: String(localized: "listingApplication.review.field.cost"), value: priceText)
             }
         }
         .padding(16)
@@ -201,7 +193,7 @@ struct ListingApplicationApplicantCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("신청자 정보")
+            Text("listingApplication.applicant.title")
                 .kohereTextStyle(.heading3Semibold)
                 .foregroundStyle(.neutral80)
 
@@ -229,7 +221,7 @@ struct ListingApplicationApplicantCard: View {
                 TextField(
                     "",
                     text: $phoneNumber,
-                    prompt: Text("연락처를 입력해 주세요.")
+                    prompt: Text("listingApplication.applicant.phone.placeholder")
                         .foregroundColor(.coolNeutral20)
                 )
                     .kohereTextStyle(.label2Medium)
@@ -257,7 +249,7 @@ struct ListingApplicationApplicantCard: View {
             }
 
             if showsPhoneNumberError {
-                Text("답변 필수 입니다.")
+                Text("listingApplication.applicant.phone.required")
                     .kohereTextStyle(.caption1Regular)
                     .foregroundStyle(.statusDanger)
                     .padding(.horizontal, 8)
@@ -351,7 +343,7 @@ struct ListingApplicationAgreementCard: View {
                     .frame(width: 24, height: 24)
                     .foregroundStyle(isChecked ? .statusInfo : .labelAssistive)
 
-                Text("예약 서비스 이용을 위한 개인정보 제3자 제공 규정을 확인하였으며 이에 동의합니다.")
+                Text("listingApplication.privacy.thirdParty.agreement")
                     .kohereTextStyle(.label2Medium)
                     .foregroundStyle(.neutral70)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -378,12 +370,12 @@ struct ListingApplicationConfirmationNotice: View {
                     .frame(width: 16, height: 16)
                     .foregroundStyle(.statusInfo)
 
-                Text("예약 확정 안내")
+                Text("listingApplication.notice.title")
                     .kohereTextStyle(.caption2Semibold)
                     .foregroundStyle(.statusInfo)
             }
 
-            Text("임대인 확인 후 이메일로 안내됩니다.")
+            Text("listingApplication.notice.message")
                 .kohereTextStyle(.caption1Regular)
                 .foregroundStyle(.labelAlternative)
         }

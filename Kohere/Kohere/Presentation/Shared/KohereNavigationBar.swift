@@ -21,10 +21,21 @@ enum NavigationCenter {
     case text(String, style: KohereTextStyle = .heading3Semibold)
 }
 
+struct NavigationPopover {
+    let isPresented: Bool
+    let onPresentationChanged: (Bool) -> Void
+    let content: AnyView
+}
+
 enum NavigationRight {
     case none
     case homeTab(showsHeart: Bool = true, onSearch: () -> Void, onHeart: () -> Void, onNotice: () -> Void)
-    case moreTab(showsLanguage: Bool = true, onLanguage: () -> Void, onSetting: () -> Void)
+    case moreTab(
+        showsLanguage: Bool = true,
+        languagePopover: NavigationPopover? = nil,
+        onLanguage: () -> Void,
+        onSetting: () -> Void
+    )
     case detailInfo(onHeart: () -> Void, onShare: () -> Void)
     case searchButton(() -> Void)
     case checkButton(isEnabled: Bool, action: () -> Void)
@@ -142,6 +153,7 @@ extension KohereNavigationBar {
                         .foregroundColor(rightColor)
                         .frame(width: 24, height: 24)
                 }
+                .accessibilityLabel(Text("common.accessibility.search"))
                 if showsHeart {
                     Button(action: onHeart) {
                         Image(.heart24)
@@ -158,15 +170,13 @@ extension KohereNavigationBar {
                 }
             }
             
-        case .moreTab(let showsLanguage, let onLanguage, let onSetting):
+        case .moreTab(let showsLanguage, let languagePopover, let onLanguage, let onSetting):
             HStack(spacing: 8) {
                 if showsLanguage {
-                    Button(action: onLanguage) {
-                        Image(.globe24)
-                            .renderingMode(.template)
-                            .foregroundColor(rightColor)
-                            .frame(width: 24, height: 24)
-                    }
+                    languageButton(
+                        popover: languagePopover,
+                        action: onLanguage
+                    )
                 }
                 Button(action: onSetting) {
                     Image(.setting24)
@@ -199,6 +209,7 @@ extension KohereNavigationBar {
                     .foregroundColor(rightColor)
                     .frame(width: 24, height: 24)
             }
+            .accessibilityLabel(Text("common.accessibility.search"))
 
         case .checkButton(let isEnabled, let action):
             Button(action: action) {
@@ -210,6 +221,37 @@ extension KohereNavigationBar {
             .disabled(!isEnabled)
             .accessibilityLabel("Save profile")
             .accessibilityHint("Enabled when all required fields are completed.")
+        }
+    }
+
+    @ViewBuilder
+    private func languageButton(
+        popover: NavigationPopover?,
+        action: @escaping () -> Void
+    ) -> some View {
+        let button = Button(action: action) {
+            Image(.globe24)
+                .renderingMode(.template)
+                .foregroundColor(rightColor)
+                .frame(width: 24, height: 24)
+        }
+        .accessibilityLabel("언어 변경")
+
+        if let popover {
+            button
+                .popover(
+                    isPresented: Binding(
+                        get: { popover.isPresented },
+                        set: popover.onPresentationChanged
+                    ),
+                    attachmentAnchor: .rect(.bounds),
+                    arrowEdge: .top
+                ) {
+                    popover.content
+                        .presentationCompactAdaptation(.popover)
+                }
+        } else {
+            button
         }
     }
 }

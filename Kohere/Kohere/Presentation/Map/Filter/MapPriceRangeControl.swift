@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct MapPriceRangeControl: View {
+    @Environment(\.locale)
+    private var locale
+
     let title: String
     let selection: RangeSliderValue
     let bounds: ClosedRange<Int>
@@ -62,7 +65,8 @@ struct MapPriceRangeControl: View {
     private var summaryText: String {
         MapFilterPriceFormatter.controlSummary(
             selection: selection,
-            bounds: bounds
+            bounds: bounds,
+            locale: locale
         )
     }
 }

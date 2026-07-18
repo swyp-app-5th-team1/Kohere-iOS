@@ -92,14 +92,41 @@ enum MapPropertyType: CaseIterable, Hashable {
     case coLiving
     case shareHouse
 
-    var displayTitle: String {
-        switch self {
+    func displayTitle(locale: Locale) -> String {
+        let language = AppLanguage(locale: locale)
+        return switch self {
         case .goshiwon:
-            String(localized: "고시원")
+            language.localized("map.propertyType.goshiwon")
         case .coLiving:
-            String(localized: "코리빙")
+            language.localized("map.propertyType.coLiving")
         case .shareHouse:
-            String(localized: "쉐어하우스")
+            language.localized("map.propertyType.shareHouse")
+        }
+    }
+}
+
+extension RoomCondition {
+    func mapFilterDisplayTitle(locale: Locale) -> String {
+        let language = AppLanguage(locale: locale)
+        return switch self {
+        case .moveInNow:
+            language.localized("map.filter.option.moveInNow")
+        case .femaleOnly:
+            language.localized("map.filter.option.femaleOnly")
+        case .mealsIncluded:
+            language.localized("map.filter.option.mealsIncluded")
+        case .doubleRoom:
+            language.localized("map.filter.option.doubleRoom")
+        case .privateBathroom:
+            language.localized("map.filter.option.privateBathroom")
+        case .englishSupport:
+            language.localized("map.filter.option.englishSupport")
+        case .addressRegistration:
+            language.localized("map.filter.option.addressRegistration")
+        case .noMaintenanceFee:
+            language.localized("map.filter.option.noMaintenanceFee")
+        case .noARCRequired:
+            language.localized("map.filter.option.noARCRequired")
         }
     }
 }

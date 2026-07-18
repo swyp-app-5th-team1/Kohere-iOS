@@ -66,7 +66,7 @@ extension LoginView {
             Spacer()
             
             VStack(spacing: 24) {
-                Text("Here you are, in Korea")
+                Text("login.tagline")
                     .kohereTextStyle(.body1Regular)
                     .foregroundColor(.black)
                 
@@ -79,7 +79,7 @@ extension LoginView {
             Spacer()
             
             VStack(spacing: 12) {
-                Text("In just a minute!")
+                Text("login.quickStartBadge")
                     .kohereTextStyle(.label3Medium)
                     .foregroundColor(.neutral80)
                     .padding(.horizontal, 27)
@@ -99,7 +99,7 @@ extension LoginView {
                             .resizable()
                             .frame(width: 24, height: 24)
                         
-                        Text("Sign in with Google")
+                        Text("login.googleButton")
                             .kohereTextStyle(.label1Semibold)
                             .foregroundColor(.common100)
                     }
@@ -123,7 +123,7 @@ extension LoginView {
                             .frame(width: 16, height: 18)
                             .tint(.white)
                         
-                        Text("Sign in with Apple")
+                        Text("login.appleButton")
                             .kohereTextStyle(.label1Semibold)
                             .foregroundColor(.white)
                     }
@@ -134,18 +134,6 @@ extension LoginView {
                 }
                 .disabled(store.isLoginRequesting)
 
-                Button {
-                    store.send(.landlordAdminLoginButtonTapped)
-                } label: {
-                    Text("Sign in as Landlord Admin")
-                        .kohereTextStyle(.label1Semibold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                        .background(.primaryNormal)
-                        .cornerRadius(16)
-                }
-                .disabled(store.isLoginRequesting)
             }
             .padding(.horizontal, 40)
             .padding(.bottom, 150)

@@ -2,8 +2,8 @@ import Foundation
 
 extension ListingDetailModel {
     enum ServerCodeNamespace: String {
-        case listingType = "listing.type"
         case listingStatus = "listing.status"
+        case listingType = "listing.type"
         case listingRentalType = "listing.rentalType"
         case listingGenderPolicy = "listing.genderPolicy"
         case addressCity = "address.city"
@@ -59,15 +59,6 @@ extension ListingDetailModel {
         localizedServerCode(code, namespace: .propertyPolicies) ?? code
     }
 
-    static func typeTitle(_ type: String) -> String {
-        localizedServerCode(type, namespace: .listingType) ?? (type.isEmpty ? "매물" : type)
-    }
-
-    static func rentalTypeTitle(_ rentalType: String) -> String {
-        localizedServerCode(rentalType, namespace: .listingRentalType)
-            ?? (rentalType.isEmpty ? "임대 유형 정보 없음" : rentalType)
-    }
-
     static func transitTitle(_ transit: ListingDetailNearestTransit?) -> String {
         guard let transit else { return "교통 정보 없음" }
         return transitTitle(transit)
@@ -83,16 +74,21 @@ extension ListingDetailModel {
         return name
     }
 
-    static func commonSpaceTitles(_ commonSpaces: [ListingDetailCommonSpace]) -> [String] {
+    static func commonSpaceTitles(
+        _ commonSpaces: [ListingDetailCommonSpace],
+        language: AppLanguage
+    ) -> [String] {
         commonSpaces.map { commonSpace in
-            let typeTitle = localizedServerCode(commonSpace.type, namespace: .facilitiesCommonSpaces)
-                ?? commonSpace.type
-
-            if let count = commonSpace.count {
-                return "\(typeTitle) \(count)개"
-            }
-
-            return typeTitle
+            let type = localizedServerCode(
+                commonSpace.type,
+                namespace: .facilitiesCommonSpaces,
+                language: language
+            ) ?? commonSpace.type
+            return ListingDetailValueFormatter.commonSpaceTitle(
+                type: type,
+                count: commonSpace.count,
+                language: language
+            )
         }
     }
 
@@ -144,7 +140,8 @@ extension ListingDetailModel {
 
     static func localizedServerCode(
         _ code: String?,
-        namespace: ServerCodeNamespace
+        namespace: ServerCodeNamespace,
+        language: AppLanguage = .systemDefault
     ) -> String? {
         guard let code = code?.trimmingCharacters(in: .whitespacesAndNewlines),
               !code.isEmpty else {
@@ -156,7 +153,7 @@ extension ListingDetailModel {
             return nil
         }
 
-        return localized(localization.key, fallback: localization.fallback)
+        return language.localized(localization.key, fallback: localization.fallback)
     }
 
     static func localized(_ key: String, fallback: String) -> String {
@@ -188,21 +185,7 @@ extension ListingDetailModel {
             .replacingOccurrences(of: "-", with: "_")
             .replacingOccurrences(of: " ", with: "_")
 
-        switch namespace {
-        case .listingType:
-            switch normalizedCode {
-            case "GOSHIWON":
-                return "GOSHIWON"
-            case "COLIVING":
-                return "CO_LIVING"
-            case "SHAREHOUSE":
-                return "SHARE_HOUSE"
-            default:
-                return normalizedCode
-            }
-        default:
-            return normalizedCode
-        }
+        return normalizedCode
     }
 
     private static let addressTermLocalizations: [AddressTermLocalization] = [
@@ -217,10 +200,10 @@ extension ListingDetailModel {
     ]
 
     private static let serverCodeLocalizations: [String: ServerCodeLocalization] = [
-        "listing.type.GOSHIWON": .init(key: "listing.type.GOSHIWON", fallback: "고시원"),
-        "listing.type.CO_LIVING": .init(key: "listing.type.CO_LIVING", fallback: "코리빙"),
-        "listing.type.SHARE_HOUSE": .init(key: "listing.type.SHARE_HOUSE", fallback: "쉐어하우스"),
         "listing.status.PUBLISHED": .init(key: "listing.status.PUBLISHED", fallback: "공개 중"),
+        "listing.type.CO_LIVING": .init(key: "listing.type.CO_LIVING", fallback: "코리빙"),
+        "listing.type.GOSHIWON": .init(key: "listing.type.GOSHIWON", fallback: "고시원"),
+        "listing.type.SHARE_HOUSE": .init(key: "listing.type.SHARE_HOUSE", fallback: "쉐어하우스"),
         "listing.rentalType.MONTHLY_RENT": .init(key: "listing.rentalType.MONTHLY_RENT", fallback: "월세"),
         "listing.genderPolicy.ANY": .init(key: "listing.genderPolicy.ANY", fallback: "혼성"),
         "listing.genderPolicy.FEMALE_ONLY": .init(key: "listing.genderPolicy.FEMALE_ONLY", fallback: "여성 전용"),
@@ -311,7 +294,6 @@ extension ListingDetailModel {
         "refundPolicy.code.PARTIAL_REFUND": .init(key: "refundPolicy.code.PARTIAL_REFUND", fallback: "부분 환불"),
         "propertyPolicies.arcRequired": .init(key: "propertyPolicies.arcRequired", fallback: "ARC 필요"),
         "propertyPolicies.residentRegistrationAvailable": .init(key: "propertyPolicies.residentRegistrationAvailable", fallback: "전입신고 가능"),
-        "propertyPolicies.studySuitable": .init(key: "propertyPolicies.studySuitable", fallback: "학습 적합"),
         "propertyPolicies.mealsProvided": .init(key: "propertyPolicies.mealsProvided", fallback: "식사 제공"),
         "propertyPolicies.englishAvailable": .init(key: "propertyPolicies.englishAvailable", fallback: "영어 소통 가능")
     ]

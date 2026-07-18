@@ -43,16 +43,10 @@
 	<false/>
 	<key>KOHERE_API_BASE_URL</key>
 	<string>$(KOHERE_API_BASE_URL)</string>
-	<key>KOHERE_LANDLORD_ADMIN_ID_TOKEN</key>
-	<string>$(KOHERE_LANDLORD_ADMIN_ID_TOKEN)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NMFNcpKeyId</key>
 	<string>$(NAVER_MAP_CLIENT_ID)</string>
-	<key>NAVER_SEARCH_CLIENT_ID</key>
-	<string>$(NAVER_SEARCH_CLIENT_ID)</string>
-	<key>NAVER_SEARCH_CLIENT_SECRET</key>
-	<string>$(NAVER_SEARCH_CLIENT_SECRET)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>지도에서 주변 매물 정보를 제공하기 위해 위치 정보 접근 권한이 필요합니다.</string>
 	<key>UIAppFonts</key>

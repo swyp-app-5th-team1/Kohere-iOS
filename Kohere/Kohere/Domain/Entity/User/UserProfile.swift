@@ -32,16 +32,43 @@ struct UserProfile: Equatable, Sendable {
 }
 
 struct UserProfileUpdate: Equatable, Sendable {
-    let firstName: String
-    let lastName: String
+    let firstName: String?
+    let lastName: String?
     let gender: Gender?
     let birthDate: String?
     let country: String?
-    let occupation: Occupation
-    let visaType: VisaType
+    let occupation: Occupation?
+    let visaType: VisaType?
     let name: String?
     let phoneNumber: String?
     let marketingAgreed: Bool?
+    let lang: String?
+
+    init(
+        firstName: String? = nil,
+        lastName: String? = nil,
+        gender: Gender? = nil,
+        birthDate: String? = nil,
+        country: String? = nil,
+        occupation: Occupation? = nil,
+        visaType: VisaType? = nil,
+        name: String? = nil,
+        phoneNumber: String? = nil,
+        marketingAgreed: Bool? = nil,
+        lang: String? = nil
+    ) {
+        self.firstName = firstName
+        self.lastName = lastName
+        self.gender = gender
+        self.birthDate = birthDate
+        self.country = country
+        self.occupation = occupation
+        self.visaType = visaType
+        self.name = name
+        self.phoneNumber = phoneNumber
+        self.marketingAgreed = marketingAgreed
+        self.lang = lang
+    }
 }
 
 enum UserType: String, Equatable, Sendable {

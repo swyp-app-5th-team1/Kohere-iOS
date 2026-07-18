@@ -33,40 +33,71 @@ struct ListingDetailView: View {
 
     var body: some View {
         ScrollViewReader { scrollProxy in
-            ZStack(alignment: .top) {
-                detailScrollView(scrollProxy: scrollProxy)
-
-                topChromeOverlay(scrollProxy: scrollProxy)
-
-                if store.isApplicationSheetPresented {
-                    applicationSheetOverlay
+            Group {
+                if let detail = store.detail {
+                    loadedContent(detail: detail, scrollProxy: scrollProxy)
+                } else {
+                    Color.neutral5
+                        .ignoresSafeArea()
                 }
             }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                if store.showsTenantActionBar && !store.isApplicationSheetPresented {
-                    bottomBar
-                }
-            }
-            .background(.neutral5)
-            .ignoresSafeArea(edges: .top)
-            .animation(.easeInOut(duration: 0.2), value: store.isApplicationSheetPresented)
             .onAppear {
                 store.send(.onAppear)
+            }
+            .background {
+                ListingDetailSwipeBackEnabler()
             }
         }
     }
 
-    private func detailScrollView(scrollProxy: ScrollViewProxy) -> some View {
+    private func loadedContent(
+        detail: ListingDetailModel,
+        scrollProxy: ScrollViewProxy
+    ) -> some View {
+        ZStack(alignment: .top) {
+            detailScrollView(detail: detail, scrollProxy: scrollProxy)
+                .accessibilityHidden(store.isApplicationSheetPresented)
+
+            topChromeOverlay(detail: detail, scrollProxy: scrollProxy)
+                .accessibilityHidden(store.isApplicationSheetPresented)
+
+            if store.isApplicationSheetPresented {
+                ListingDetailApplicationSheetOverlay(
+                    roomOffers: detail.roomOffers,
+                    selectedRoomOfferID: store.selectedRoomOfferID,
+                    isRoomTypeSelectorPresented: store.isRoomTypeSelectorPresented,
+                    validationMessage: store.roomTypeValidationMessage,
+                    onDismiss: { store.send(.applicationSheetDismissed) },
+                    onRoomTypeSelectorTap: { store.send(.roomTypeSelectorTapped) },
+                    onRoomOfferTap: { store.send(.roomOfferSelected($0)) },
+                    onApplyTap: { store.send(.applyButtonTapped) }
+                )
+            }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if store.showsTenantActionBar && !store.isApplicationSheetPresented {
+                bottomBar(detail: detail)
+            }
+        }
+        .background(.neutral5)
+        .ignoresSafeArea(edges: .top)
+        .animation(.easeInOut(duration: 0.2), value: store.isApplicationSheetPresented)
+    }
+
+    private func detailScrollView(
+        detail: ListingDetailModel,
+        scrollProxy: ScrollViewProxy
+    ) -> some View {
         Group {
             if #available(iOS 18.0, *) {
-                baseScrollView(scrollProxy: scrollProxy)
+                baseScrollView(detail: detail, scrollProxy: scrollProxy)
                     .onScrollGeometryChange(for: CGFloat.self) { geometry in
                         geometry.contentOffset.y
                     } action: { _, offset in
                         updateScrollPosition(offset)
                     }
             } else {
-                baseScrollView(scrollProxy: scrollProxy)
+                baseScrollView(detail: detail, scrollProxy: scrollProxy)
                     .onPreferenceChange(ListingDetailScrollOffsetPreferenceKey.self) { minY in
                         if fallbackScrollOffsetBaseline == nil {
                             fallbackScrollOffsetBaseline = minY
@@ -79,36 +110,43 @@ struct ListingDetailView: View {
         }
     }
 
-    private func baseScrollView(scrollProxy: ScrollViewProxy) -> some View {
+    private func baseScrollView(
+        detail: ListingDetailModel,
+        scrollProxy: ScrollViewProxy
+    ) -> some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 0) {
                 scrollOffsetReader
 
                 VStack(spacing: 16) {
-                    ListingDetailHeroSection(overview: store.detail.overview)
-                    tabsAndRoomOffersSection(scrollProxy: scrollProxy)
+                    ListingDetailHeroSection(overview: detail.overview)
+                    tabsAndRoomOffersSection(detail: detail, scrollProxy: scrollProxy)
                     trackedSection(.price) {
-                        ListingDetailInfoSection(title: "가격 정보", rows: store.detail.priceInfo)
+                        ListingDetailInfoSection(title: String(localized: "listingDetail.tab.price"), rows: detail.priceInfo)
                     }
                     trackedSection(.property) {
-                        ListingDetailInfoSection(title: "매물 정보", rows: store.detail.propertyInfo)
+                        ListingDetailPropertySection(
+                            title: String(localized: "listingDetail.tab.property"),
+                            rows: detail.propertyInfo,
+                            features: detail.propertyFeatures
+                        )
                     }
                     trackedSection(.building) {
-                        ListingDetailInfoSection(title: "건물 정보", rows: store.detail.buildingInfo)
+                        ListingDetailInfoSection(title: String(localized: "listingDetail.tab.building"), rows: detail.buildingInfo)
                     }
                     trackedSection(.facility) {
-                        ListingDetailInfoSection(title: "공용 시설", rows: store.detail.facilityInfo)
+                        ListingDetailInfoSection(title: String(localized: "listingDetail.tab.facility"), rows: detail.facilityInfo)
                     }
                     trackedSection(.location) {
                         ListingDetailLocationSection(
-                            locationInfo: store.detail.locationInfo,
+                            locationInfo: detail.locationInfo,
                             onMapPreviewTapped: {
                                 store.send(.mapPreviewTapped)
                             }
                         )
                     }
                     trackedSection(.review) {
-                        ListingDetailReviewSection(reviewCount: store.detail.overview.reviewCount)
+                        ListingDetailReviewSection(reviewCount: detail.overview.reviewCount)
                     }
                 }
                 .padding(.bottom, bottomContentPadding)
@@ -266,7 +304,10 @@ struct ListingDetailView: View {
         return scrollView.isTracking || scrollView.isDragging || scrollView.isDecelerating
     }
 
-    private func topChromeOverlay(scrollProxy: ScrollViewProxy) -> some View {
+    private func topChromeOverlay(
+        detail: ListingDetailModel,
+        scrollProxy: ScrollViewProxy
+    ) -> some View {
         VStack(spacing: 0) {
             ListingDetailTopNavigationBar(
                 progress: topChromeProgress,
@@ -276,31 +317,40 @@ struct ListingDetailView: View {
             )
 
             if showsPinnedTabs {
-                sectionTabs(scrollProxy: scrollProxy)
+                sectionTabs(detail: detail, scrollProxy: scrollProxy)
             }
         }
         .frame(maxWidth: .infinity, alignment: .top)
         .zIndex(2)
     }
 
-    private func sectionTabs(scrollProxy: ScrollViewProxy) -> some View {
+    private func sectionTabs(
+        detail: ListingDetailModel,
+        scrollProxy: ScrollViewProxy
+    ) -> some View {
         ListingDetailSectionTabs(
             selectedSection: selectedSection,
-            title: title(for:),
+            title: { title(for: $0, detail: detail) },
             onTap: { section in
                 scrollToSection(section, scrollProxy: scrollProxy)
             }
         )
     }
 
-    private func title(for section: ListingDetailSection) -> String {
+    private func title(
+        for section: ListingDetailSection,
+        detail: ListingDetailModel
+    ) -> String {
         let index = section.rawValue
-        guard store.detail.tabs.indices.contains(index) else { return section.fallbackTitle }
-        return store.detail.tabs[index]
+        guard detail.tabs.indices.contains(index) else { return section.fallbackTitle }
+        return detail.tabs[index]
     }
 
-    private func contentSectionTabs(scrollProxy: ScrollViewProxy) -> some View {
-        sectionTabs(scrollProxy: scrollProxy)
+    private func contentSectionTabs(
+        detail: ListingDetailModel,
+        scrollProxy: ScrollViewProxy
+    ) -> some View {
+        sectionTabs(detail: detail, scrollProxy: scrollProxy)
             .opacity(showsPinnedTabs ? 0 : 1)
     }
 
@@ -323,18 +373,21 @@ struct ListingDetailView: View {
         }
     }
 
-    private func tabsAndRoomOffersSection(scrollProxy: ScrollViewProxy) -> some View {
+    private func tabsAndRoomOffersSection(
+        detail: ListingDetailModel,
+        scrollProxy: ScrollViewProxy
+    ) -> some View {
         VStack(spacing: 0) {
-            contentSectionTabs(scrollProxy: scrollProxy)
+            contentSectionTabs(detail: detail, scrollProxy: scrollProxy)
             trackedSection(.roomOffers) {
-                ListingDetailRoomOffersSection(roomOffers: store.detail.roomOffers)
+                ListingDetailRoomOffersSection(roomOffers: detail.roomOffers)
             }
         }
     }
 
-    private var bottomBar: some View {
+    private func bottomBar(detail: ListingDetailModel) -> some View {
         ListingDetailBottomBar(
-            isLiked: store.detail.overview.isLiked,
+            isLiked: detail.overview.isLiked,
             showsLikeButton: store.canUseFavoriteFeatures,
             isApplyEnabled: store.canUseApplicationFeatures,
             onLikeTap: { store.send(.likeButtonTapped) },
@@ -342,30 +395,4 @@ struct ListingDetailView: View {
         )
     }
 
-    private var applicationSheetOverlay: some View {
-        ZStack(alignment: .bottom) {
-            Color.materialDimmer
-                .ignoresSafeArea()
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    store.send(.applicationSheetDismissed)
-                }
-
-            applicationSheet
-        }
-        .transition(.opacity)
-        .zIndex(3)
-    }
-
-    private var applicationSheet: some View {
-        ListingDetailApplicationPanel(
-            roomOffers: store.detail.roomOffers,
-            selectedRoomOfferID: store.selectedRoomOfferID,
-            isRoomTypeSelectorPresented: store.isRoomTypeSelectorPresented,
-            validationMessage: store.roomTypeValidationMessage,
-            onRoomTypeSelectorTap: { store.send(.roomTypeSelectorTapped) },
-            onRoomOfferTap: { roomOfferID in store.send(.roomOfferSelected(roomOfferID)) },
-            onApplyTap: { store.send(.applyButtonTapped) }
-        )
-    }
 }

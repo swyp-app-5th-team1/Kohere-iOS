@@ -1,123 +1,132 @@
+import Foundation
+
 extension ListingDetailModel {
-    init(listingDetail: ListingDetail) {
+    init(
+        listingDetail: ListingDetail,
+        exchangeRate: KRWToUSDExchangeRate?,
+        convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase,
+        language: AppLanguage
+    ) {
         let roomPricings = listingDetail.roomOffers.compactMap(\.pricing)
         let monthlyRents = roomPricings.compactMap(\.monthlyRent)
         let deposits = roomPricings.compactMap(\.deposit)
         let maintenanceFees = roomPricings.compactMap(\.maintenanceFee)
+        let convertedMonthlyRents = exchangeRate.map { exchangeRate in
+            monthlyRents.map {
+                convertMonthlyRentCurrencyUseCase.execute($0, exchangeRate)
+            }
+        } ?? []
 
         id = listingDetail.listingID
         overview = ListingDetailOverviewModel(
             id: listingDetail.listingID,
             title: listingDetail.title,
-            typeTag: Self.typeTitle(listingDetail.type),
+            typeTag: Self.localizedServerCode(listingDetail.type, namespace: .listingType)
+                ?? listingDetail.type,
             imageURLs: listingDetail.imageURLs,
-            monthlyRentText: MonthlyRentPriceFormatter.wonTitle(
+            monthlyRentText: ListingDetailValueFormatter.monthlyRentTitle(
                 min: monthlyRents.min(),
-                max: monthlyRents.max()
+                max: monthlyRents.max(),
+                language: language
             ),
-            convertedMonthlyRentText: "",
-            depositText: Self.rangeTitle(
-                prefix: "보증금",
+            convertedMonthlyRentText: MonthlyRentPriceFormatter.usdTitle(
+                min: convertedMonthlyRents.min(),
+                max: convertedMonthlyRents.max()
+            ),
+            depositText: ListingDetailValueFormatter.overviewDepositTitle(
                 min: deposits.min(),
                 max: deposits.max(),
-                fallback: "보증금 정보 없음"
+                language: language
             ),
-            maintenanceFeeText: Self.maintenanceFeeTitle(
+            maintenanceFeeText: ListingDetailValueFormatter.overviewMaintenanceFeeTitle(
                 min: maintenanceFees.min(),
                 max: maintenanceFees.max(),
-                conditions: listingDetail.conditions
+                language: language
             ),
-            transitText: Self.transitTitle(listingDetail.nearestTransit),
+            transitText: ListingDetailValueFormatter.transitTitle(
+                listingDetail.nearestTransit,
+                language: language
+            ),
             imageCountText: Self.imageCountTitle(listingDetail.imageURLs.count),
             reviewCount: 0,
             isLiked: listingDetail.isFavorited,
             favoriteCount: listingDetail.favoriteCount
         )
         tabs = Self.tabs
-        roomOffers = listingDetail.roomOffers.map { Self.roomOfferModel($0) }
+        roomOffers = listingDetail.roomOffers.map { Self.roomOfferModel($0, language: language) }
         priceInfo = Self.priceRows(
             listingDetail: listingDetail,
             monthlyRents: monthlyRents,
             deposits: deposits,
-            maintenanceFees: maintenanceFees
+            maintenanceFees: maintenanceFees,
+            language: language
         )
-        propertyInfo = Self.propertyRows(listingDetail)
-        buildingInfo = Self.buildingRows(listingDetail.building)
-        facilityInfo = Self.facilityRows(listingDetail.facilities)
-        locationInfo = Self.locationInfo(listingDetail)
+        propertyInfo = Self.propertyRows(listingDetail, language: language)
+        propertyFeatures = Self.propertyFeatures(listingDetail.conditions)
+        buildingInfo = Self.buildingRows(listingDetail.building, language: language)
+        facilityInfo = Self.facilityRows(listingDetail.facilities, language: language)
+        locationInfo = Self.locationInfo(listingDetail, language: language)
     }
 
-    private static func roomOfferModel(_ offer: ListingDetailRoomOffer) -> ListingRoomOfferModel {
+    private static func roomOfferModel(
+        _ offer: ListingDetailRoomOffer,
+        language: AppLanguage
+    ) -> ListingRoomOfferModel {
         ListingRoomOfferModel(
             id: offer.id,
             name: offer.name,
             imageURLs: offer.roomImageURLs,
-            pricingText: roomOfferPricingTitle(offer.pricing),
+            pricingText: ListingDetailValueFormatter.roomOfferPricingTitle(
+                offer.pricing,
+                language: language
+            ),
             tags: roomOfferTags(offer)
         )
     }
 
-    private static func roomOfferPricingTitle(_ pricing: ListingDetailRoomPricing?) -> String {
-        guard let pricing else { return "가격 정보 없음" }
-
-        let monthlyRentTitle = rangeTitle(
-            prefix: "월세",
-            min: pricing.monthlyRent,
-            max: pricing.monthlyRent,
-            fallback: ""
-        )
-        let depositTitle = rangeTitle(
-            prefix: "보증금",
-            min: pricing.deposit,
-            max: pricing.deposit,
-            fallback: ""
-        )
-
-        let titles = [monthlyRentTitle, depositTitle].filter { !$0.isEmpty }
-        return titles.isEmpty ? "가격 정보 없음" : titles.joined(separator: " · ")
-    }
-
     private static func roomOfferTags(_ offer: ListingDetailRoomOffer) -> [String] {
-        let mappedTags = offer.filterTagCodes.compactMap {
-            localizedServerCode($0, namespace: .roomOfferFilterTags)
-        }
-        guard mappedTags.isEmpty else { return mappedTags }
-
-        let conditionTitles = offer.filterTags.map(\.displayTitle)
-        guard conditionTitles.isEmpty else { return conditionTitles }
-
-        return offer.filterTagCodes
+        localizedServerCodes(offer.filterTags, namespace: .roomOfferFilterTags)
     }
 
     private static func priceRows(
         listingDetail: ListingDetail,
         monthlyRents: [Int],
         deposits: [Int],
-        maintenanceFees: [Int]
+        maintenanceFees: [Int],
+        language: AppLanguage
     ) -> [ListingDetailInfoRowModel] {
         var rows: [ListingDetailInfoRowModel] = [
             ListingDetailInfoRowModel(
                 id: "rental-type",
-                title: "임대 유형",
-                value: rentalTypeTitle(listingDetail.rentalType)
+                title: String(localized: "listingDetail.field.rentType"),
+                value: localizedServerCode(listingDetail.rentalType, namespace: .listingRentalType)
+                    ?? String(localized: "listingDetail.value.noRentalTypeInfo")
             ),
             ListingDetailInfoRowModel(
                 id: "deposit",
-                title: "보증금",
-                value: rangeValue(min: deposits.min(), max: deposits.max())
+                title: String(localized: "listingDetail.field.deposit"),
+                value: ListingDetailValueFormatter.priceRowValue(
+                    min: deposits.min(),
+                    max: deposits.max(),
+                    language: language
+                )
             ),
             ListingDetailInfoRowModel(
                 id: "monthly-rent",
-                title: "월세",
-                value: rangeValue(min: monthlyRents.min(), max: monthlyRents.max())
+                title: String(localized: "listingDetail.field.monthlyRent"),
+                value: ListingDetailValueFormatter.priceRowValue(
+                    min: monthlyRents.min(),
+                    max: monthlyRents.max(),
+                    language: language
+                )
             ),
             ListingDetailInfoRowModel(
                 id: "maintenance-fee",
-                title: "관리비",
-                value: maintenanceFeeValue(
+                title: String(localized: "listingDetail.field.maintenanceFee"),
+                value: ListingDetailValueFormatter.maintenanceFeeRowValue(
                     min: maintenanceFees.min(),
                     max: maintenanceFees.max(),
-                    conditions: listingDetail.conditions
+                    language: language
                 )
             )
         ]
@@ -126,7 +135,7 @@ extension ListingDetailModel {
             rows.append(
                 ListingDetailInfoRowModel(
                     id: "refund-policy",
-                    title: "환불 규정",
+                    title: String(localized: "listingDetail.field.refundPolicy"),
                     value: refundPolicyTitle(refundPolicy)
                 )
             )
@@ -135,222 +144,148 @@ extension ListingDetailModel {
         return rows
     }
 
-    private static func propertyRows(_ listingDetail: ListingDetail) -> [ListingDetailInfoRowModel] {
+    private static func propertyRows(
+        _ listingDetail: ListingDetail,
+        language: AppLanguage
+    ) -> [ListingDetailInfoRowModel] {
         var rows: [ListingDetailInfoRowModel] = []
 
-        if let contractTitle = contractTitle(listingDetail.contract) {
-            rows.append(ListingDetailInfoRowModel(id: "stay", title: "이용 기간", value: contractTitle))
+        if let contractTitle = ListingDetailValueFormatter.stayTitle(
+            listingDetail.contract,
+            language: language
+        ) {
+            rows.append(ListingDetailInfoRowModel(id: "stay", title: String(localized: "listingDetail.field.usagePeriod"), value: contractTitle))
         }
 
-        if let genderPolicy = localizedServerCode(listingDetail.genderPolicy, namespace: .listingGenderPolicy) {
-            rows.append(ListingDetailInfoRowModel(id: "gender", title: "남녀구분", value: genderPolicy))
-        }
-
-        let conditionTitles = listingDetail.conditionCodes.compactMap {
-            localizedServerCode($0, namespace: .roomOfferFilterTags)
-        }
-        if !conditionTitles.isEmpty {
-            rows.append(
-                ListingDetailInfoRowModel(
-                    id: "features",
-                    title: "기타사항",
-                    value: conditionTitles.joined(separator: ", ")
-                )
-            )
-        }
-
-        if let policies = listingDetail.propertyPolicies {
-            rows.append(contentsOf: propertyPolicyRows(policies))
+        if let genderPolicy = localizedServerCode(
+            listingDetail.genderPolicy,
+            namespace: .listingGenderPolicy
+        ) {
+            rows.append(ListingDetailInfoRowModel(id: "gender", title: String(localized: "listingDetail.field.genderPolicy"), value: genderPolicy))
         }
 
         return rows
     }
 
-    private static func propertyPolicyRows(
-        _ policies: ListingDetailPropertyPolicies
-    ) -> [ListingDetailInfoRowModel] {
-        [
-            booleanRow(
-                id: "arc-required",
-                title: localizedPropertyPolicyTitle("arcRequired"),
-                value: policies.arcRequired
-            ),
-            booleanRow(
-                id: "resident-registration",
-                title: localizedPropertyPolicyTitle("residentRegistrationAvailable"),
-                value: policies.residentRegistrationAvailable
-            ),
-            booleanRow(
-                id: "study-suitable",
-                title: localizedPropertyPolicyTitle("studySuitable"),
-                value: policies.studySuitable
-            ),
-            booleanRow(
-                id: "meals-provided",
-                title: localizedPropertyPolicyTitle("mealsProvided"),
-                value: policies.mealsProvided
-            ),
-            booleanRow(
-                id: "english-available",
-                title: localizedPropertyPolicyTitle("englishAvailable"),
-                value: policies.englishAvailable
-            )
-        ]
-        .compactMap { $0 }
+    private static func propertyFeatures(_ conditionCodes: [String]) -> [String] {
+        localizedServerCodes(conditionCodes, namespace: .roomOfferFilterTags)
     }
 
-    private static func buildingRows(_ building: ListingDetailBuilding?) -> [ListingDetailInfoRowModel] {
+    private static func buildingRows(
+        _ building: ListingDetailBuilding?,
+        language: AppLanguage
+    ) -> [ListingDetailInfoRowModel] {
         guard let building else { return [] }
 
         return [
             optionalRow(
                 id: "building-type",
-                title: "건물 형태",
+                title: String(localized: "listingDetail.field.buildingType"),
                 value: localizedServerCode(building.type, namespace: .buildingType)
             ),
-            optionalRow(id: "floor", title: "층수", value: floorTitle(building)),
-            booleanRow(id: "parking", title: "주차", value: building.parkingAvailable),
-            booleanRow(id: "elevator", title: "엘리베이터", value: building.elevatorAvailable)
+            optionalRow(
+                id: "floor",
+                title: String(localized: "listingDetail.field.floor"),
+                value: ListingDetailValueFormatter.floorTitle(building, language: language)
+            ),
+            optionalRow(
+                id: "parking",
+                title: String(localized: "listingDetail.field.parking"),
+                value: ListingDetailValueFormatter.availabilityTitle(
+                    building.parkingAvailable,
+                    availableKey: "listingDetail.value.parkingAvailable",
+                    unavailableKey: "listingDetail.value.noParking",
+                    language: language
+                )
+            ),
+            optionalRow(
+                id: "elevator",
+                title: String(localized: "listingDetail.field.elevator"),
+                value: ListingDetailValueFormatter.availabilityTitle(
+                    building.elevatorAvailable,
+                    availableKey: "listingDetail.value.elevatorAvailable",
+                    unavailableKey: "listingDetail.value.noElevator",
+                    language: language
+                )
+            )
         ]
         .compactMap { $0 }
     }
 
-    private static func facilityRows(_ facilities: ListingDetailFacilities?) -> [ListingDetailInfoRowModel] {
+    private static func facilityRows(
+        _ facilities: ListingDetailFacilities?,
+        language: AppLanguage
+    ) -> [ListingDetailInfoRowModel] {
         guard let facilities else { return [] }
 
         return [
             listRow(
                 id: "heating",
-                title: "난방시설",
+                title: String(localized: "listingDetail.field.heatingFacility"),
                 values: localizedServerCodes(facilities.heatingSystem, namespace: .facilitiesHeatingSystem)
             ),
             listRow(
                 id: "laundry",
-                title: "세탁시설",
+                title: String(localized: "listingDetail.field.laundryFacility"),
                 values: localizedServerCodes(facilities.laundry, namespace: .facilitiesLaundry)
             ),
             listRow(
                 id: "kitchen",
-                title: "주방시설",
+                title: String(localized: "listingDetail.field.kitchenFacility"),
                 values: localizedServerCodes(facilities.kitchen, namespace: .facilitiesKitchen)
             ),
             listRow(
                 id: "amenities",
-                title: "생활시설",
+                title: String(localized: "listingDetail.field.livingFacility"),
                 values: localizedServerCodes(facilities.livingAmenities, namespace: .facilitiesLivingAmenities)
             ),
             listRow(
                 id: "security",
-                title: "안전시설",
+                title: String(localized: "listingDetail.field.safetyFacility"),
                 values: localizedServerCodes(facilities.securityFeatures, namespace: .facilitiesSecurityFeatures)
             ),
             listRow(
                 id: "common-areas",
-                title: "공간시설",
-                values: commonSpaceTitles(facilities.commonSpaces)
+                title: String(localized: "listingDetail.field.spaceFacility"),
+                values: commonSpaceTitles(facilities.commonSpaces, language: language)
             ),
             listRow(
                 id: "supplies",
-                title: "제공비품",
+                title: String(localized: "listingDetail.field.providedSupplies"),
                 values: localizedServerCodes(facilities.providedSupplies, namespace: .facilitiesProvidedSupplies)
             )
         ]
         .compactMap { $0 }
     }
 
-    private static func locationInfo(_ listingDetail: ListingDetail) -> ListingLocationInfoModel {
+    private static func locationInfo(
+        _ listingDetail: ListingDetail,
+        language: AppLanguage
+    ) -> ListingLocationInfoModel {
         let transits = listingDetail.nearestTransit.map { transit in
             [
                 ListingTransitInfoModel(
                     id: transit.name,
                     lineText: transitLineText(transit),
                     lineColorName: "green60",
-                    description: transitTitle(transit)
+                    description: ListingDetailValueFormatter.transitTitle(
+                        transit,
+                        includesFrom: true,
+                        language: language
+                    )
                 )
             ]
         } ?? []
 
         return ListingLocationInfoModel(
-            sectionTitle: "위치 및 주변시설",
+            sectionTitle: String(localized: "listingDetail.section.locationAndNearby"),
             addressText: localizedAddressText(listingDetail.address),
             transits: transits,
             coordinate: listingDetail.coordinate,
-            nearbyPlacesTitle: "주변 편의시설",
+            nearbyPlacesTitle: String(localized: "listingDetail.field.nearbyAmenities"),
             nearbyPlacesText: listingDetail.nearestTransit?.nearbyPlacesDescription
-                ?? "주변 편의시설 정보 없음"
+                ?? String(localized: "listingDetail.value.noNearbyAmenities")
         )
-    }
-
-    private static func rangeTitle(prefix: String, min: Int?, max: Int?, fallback: String) -> String {
-        let title = MonthlyRentPriceFormatter.rangeTitle(prefix: prefix, min: min, max: max)
-        return title.isEmpty ? fallback : title
-    }
-
-    private static func rangeValue(min: Int?, max: Int?) -> String {
-        MonthlyRentPriceFormatter.wonRangeTitle(min: min, max: max) ?? "정보 없음"
-    }
-
-    private static func maintenanceFeeTitle(
-        min: Int?,
-        max: Int?,
-        conditions: [RoomCondition]
-    ) -> String {
-        "관리비 \(maintenanceFeeValue(min: min, max: max, conditions: conditions))"
-    }
-
-    private static func maintenanceFeeValue(
-        min: Int?,
-        max: Int?,
-        conditions: [RoomCondition]
-    ) -> String {
-        if min == nil, max == nil, conditions.contains(.noMaintenanceFee) {
-            return "없음"
-        }
-
-        return MonthlyRentPriceFormatter.wonRangeTitle(min: min, max: max) ?? "정보 없음"
-    }
-
-    private static func contractTitle(_ contract: ListingDetailContract?) -> String? {
-        guard let contract else { return nil }
-
-        switch (contract.minStayMonths, contract.maxStayMonths) {
-        case let (min?, max?) where min == max:
-            return "\(min)개월"
-        case let (min?, max?):
-            return "최소 \(min)개월~최대 \(max)개월"
-        case let (min?, nil):
-            return "최소 \(min)개월"
-        case let (nil, max?):
-            return "최대 \(max)개월"
-        case (nil, nil):
-            return nil
-        }
-    }
-
-    private static func floorTitle(_ building: ListingDetailBuilding) -> String? {
-        let usedFloorTitle: String?
-        switch (building.usedFloorMin, building.usedFloorMax) {
-        case let (min?, max?) where min == max:
-            usedFloorTitle = "\(min)층"
-        case let (min?, max?):
-            usedFloorTitle = "\(min)층~\(max)층"
-        case let (min?, nil):
-            usedFloorTitle = "\(min)층 이상"
-        case let (nil, max?):
-            usedFloorTitle = "\(max)층 이하"
-        case (nil, nil):
-            usedFloorTitle = nil
-        }
-
-        guard let usedFloorTitle else {
-            return building.totalFloors.map { "전체 \($0)층" }
-        }
-
-        if let totalFloors = building.totalFloors {
-            return "\(usedFloorTitle) / 전체 \(totalFloors)층"
-        }
-
-        return usedFloorTitle
     }
 
     private static func transitLineText(_ transit: ListingDetailNearestTransit) -> String {
@@ -378,15 +313,6 @@ extension ListingDetailModel {
     ) -> ListingDetailInfoRowModel? {
         guard !values.isEmpty else { return nil }
         return ListingDetailInfoRowModel(id: id, title: title, value: values.joined(separator: ", "))
-    }
-
-    private static func booleanRow(
-        id: String,
-        title: String,
-        value: Bool?
-    ) -> ListingDetailInfoRowModel? {
-        guard let value else { return nil }
-        return ListingDetailInfoRowModel(id: id, title: title, value: value ? "가능" : "불가능")
     }
 
 }
