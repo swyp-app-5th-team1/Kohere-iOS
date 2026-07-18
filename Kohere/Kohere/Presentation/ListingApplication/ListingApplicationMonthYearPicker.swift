@@ -9,6 +9,8 @@ import SwiftUI
 import UIKit
 
 struct ListingApplicationMonthPicker: View {
+    @Environment(\.locale)
+    private var locale
     let onSelect: (Int, Int) -> Void
 
     private let minimumDate: Date
@@ -59,6 +61,7 @@ struct ListingApplicationMonthPicker: View {
                 selectedMonth: $selectedMonth,
                 years: years,
                 months: months,
+                locale: locale,
                 onSelect: handleSelection
             )
         }
@@ -128,6 +131,7 @@ struct UIKitMonthYearPicker: UIViewRepresentable {
 
     let years: [Int]
     let months: [Int]
+    let locale: Locale
     let onSelect: (Int, Int) -> Void
 
     func makeUIView(context: Context) -> SelectionlessPickerView {
@@ -226,22 +230,22 @@ struct UIKitMonthYearPicker: UIViewRepresentable {
         private func title(for value: Int, component: Int) -> String {
             if component == 0 {
                 return String(
-                    format: String(localized: "listingApplication.format.year"),
-                    locale: ListingApplicationFeature.State.displayLocale,
+                    format: String(localized: "listingApplication.format.year", locale: parent.locale),
+                    locale: parent.locale,
                     String(value)
                 )
             }
 
-            if ListingApplicationFeature.State.displayLocale.identifier.hasPrefix("ko") {
+            if parent.locale.identifier.hasPrefix("ko") {
                 return String(
-                    format: String(localized: "listingApplication.format.month"),
-                    locale: ListingApplicationFeature.State.displayLocale,
+                    format: String(localized: "listingApplication.format.month", locale: parent.locale),
+                    locale: parent.locale,
                     String(value)
                 )
             }
 
             let formatter = monthFormatter(
-                for: ListingApplicationFeature.State.displayLocale
+                for: parent.locale
             )
             let symbols = formatter.shortMonthSymbols ?? []
             return symbols.indices.contains(value - 1) ? symbols[value - 1] : "\(value)"

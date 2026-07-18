@@ -13,6 +13,8 @@ struct NotificationsView: View {
     // MARK: - Property
     
     let store: StoreOf<NotificationsFeature>
+    @Environment(\.locale)
+    private var locale
     
     // MARK: - Body
     
@@ -20,7 +22,7 @@ struct NotificationsView: View {
         VStack(spacing: 0) {
             KohereNavigationBar(
                 left: .backButton({ store.send(.backButtonTapped) }),
-                center: .text(String(localized: "notifications.title")),
+                center: .text(String(localized: "notifications.title", locale: locale)),
                 right: .none
             )
             
@@ -28,7 +30,7 @@ struct NotificationsView: View {
                 .foregroundStyle(.lineNeutral)
                 .frame(height: 1)
             
-            KohereEmptyView(title: String(localized: "notifications.empty.title"))
+            KohereEmptyView(title: String(localized: "notifications.empty.title", locale: locale))
         }
         .background(.backgroundNormalNormal)
     }

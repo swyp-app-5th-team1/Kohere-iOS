@@ -9,6 +9,8 @@ import ComposableArchitecture
 import SwiftUI
 
 struct TenantOnboardingView: View {
+    @Environment(\.locale)
+    private var locale
 
     // MARK: - Properties
 
@@ -96,7 +98,7 @@ private extension TenantOnboardingView {
             } label: {
                 Text(
                     store.isOnboardingSubmitting
-                        ? String(localized: "common.loading")
+                        ? String(localized: "common.loading", locale: locale)
                         : store.primaryButtonTitle
                 )
                     .kohereTextStyle(.label1Semibold)

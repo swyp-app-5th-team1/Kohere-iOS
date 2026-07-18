@@ -118,6 +118,9 @@ struct ListingDetailInfoSection: View {
 }
 
 struct ListingDetailPropertySection: View {
+    @Environment(\.locale)
+    private var locale
+
     let title: String
     let rows: [ListingDetailInfoRowModel]
     let features: [String]
@@ -137,7 +140,7 @@ struct ListingDetailPropertySection: View {
 
             if !features.isEmpty {
                 HStack(alignment: .top, spacing: 0) {
-                    Text(String(localized: "listingDetail.field.otherDetails"))
+                    Text(String(localized: "listingDetail.field.otherDetails", locale: locale))
                         .kohereTextStyle(.body2Regular)
                         .foregroundStyle(.common100)
                         .frame(width: 110, alignment: .leading)
@@ -261,20 +264,23 @@ struct ListingDetailTransitView: View {
 }
 
 struct ListingDetailReviewSection: View {
+    let title: String
     let reviewCount: Int
+    let emptyMessage: String
+    let promptMessage: String
 
     var body: some View {
         VStack(spacing: 16) {
             ListingDetailSectionHeader(
-                title: String(localized: "listingDetail.tab.review"),
+                title: title,
                 count: reviewCount,
                 showsChevron: false
             )
 
             Text(
                 reviewCount == 0
-                    ? String(localized: "listingDetail.review.empty")
-                    : String(localized: "listingDetail.review.prompt")
+                    ? emptyMessage
+                    : promptMessage
             )
                 .kohereTextStyle(.caption1Regular)
                 .foregroundStyle(.labelAlternative)

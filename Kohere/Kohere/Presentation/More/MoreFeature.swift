@@ -140,7 +140,8 @@ struct MoreFeature {
                             listingTitle: listingTitle,
                             roomOfferID: roomOfferID,
                             roomTypeName: roomTypeName,
-                            roomPricingText: roomPricingText
+                            roomPricingText: roomPricingText,
+                            appLanguage: state.selectedLanguage
                         )
                     )
                 )
@@ -161,7 +162,10 @@ struct MoreFeature {
             case let .path(.element(id: _, action: .listingApplication(.delegate(.privacyDocumentRequested(section))))):
                 state.path.append(
                     .listingApplicationPrivacyWeb(
-                        ListingApplicationPrivacyWebFeature.State(section: section)
+                        ListingApplicationPrivacyWebFeature.State(
+                            section: section,
+                            appLanguage: state.selectedLanguage
+                        )
                     )
                 )
                 return .none

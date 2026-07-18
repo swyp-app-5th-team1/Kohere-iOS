@@ -29,6 +29,8 @@ struct RangeSliderValue: Equatable {
 }
 
 struct RangeSlider: View {
+    @Environment(\.locale)
+    private var locale
     @State private var activeThumb: SliderThumb?
 
     private let thumbSize: CGFloat = 24
@@ -99,7 +101,7 @@ struct RangeSlider: View {
                     .stroke(.lineNeutral.opacity(0.16), lineWidth: 1)
             }
             .contentShape(Circle())
-            .accessibilityLabel(Text(thumb.accessibilityLabel))
+            .accessibilityLabel(Text(thumb.accessibilityLabel(locale: locale)))
             .accessibilityValue(Text("\(thumb.value(in: value))"))
             .accessibilityAdjustableAction { direction in
                 adjust(thumb, direction: direction)
@@ -162,12 +164,12 @@ struct RangeSlider: View {
         case minimum
         case maximum
 
-        var accessibilityLabel: String {
+        func accessibilityLabel(locale: Locale) -> String {
             switch self {
             case .minimum:
-                String(localized: "최소값")
+                String(localized: "rangeSlider.accessibility.minimum", locale: locale)
             case .maximum:
-                String(localized: "최대값")
+                String(localized: "rangeSlider.accessibility.maximum", locale: locale)
             }
         }
 

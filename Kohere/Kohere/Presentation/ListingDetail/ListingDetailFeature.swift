@@ -134,7 +134,9 @@ struct ListingDetailFeature {
 
             case .detailResponse(.failure):
                 state.isDetailLoading = false
-                return .send(.popupRequested(Self.detailLoadFailurePopup))
+                return .send(
+                    .popupRequested(Self.detailLoadFailurePopup(language: state.appLanguage))
+                )
 
             case let .exchangeRateResponse(.success(exchangeRate)):
                 state.krwToUSDExchangeRate = exchangeRate
@@ -305,11 +307,11 @@ private extension ListingDetailFeature {
         )
     }
 
-    static var detailLoadFailurePopup: AppPopup {
+    static func detailLoadFailurePopup(language: AppLanguage) -> AppPopup {
         .notice(
             AppPopup.Notice(
-                message: String(localized: "listingDetail.error.loadFailed"),
-                confirmTitle: String(localized: "common.confirm"),
+                message: language.localized("listingDetail.error.loadFailed"),
+                confirmTitle: language.localized("common.confirm"),
                 confirmRoute: .dismissListingDetail
             )
         )

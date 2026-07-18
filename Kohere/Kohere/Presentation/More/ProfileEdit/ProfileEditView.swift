@@ -13,6 +13,8 @@ struct ProfileEditView: View {
     // MARK: - Property
 
     @Bindable var store: StoreOf<ProfileEditFeature>
+    @Environment(\.locale)
+    private var locale
     @State private var activeField: ProfileEditField?
     @FocusState private var keyboardField: ProfileEditField?
 
@@ -38,7 +40,7 @@ private extension ProfileEditView {
     var navigationBar: some View {
         KohereNavigationBar(
             left: .backButton({ store.send(.backButtonTapped) }),
-            center: .text("Edit Profile"),
+            center: .text(String(localized: "profileEdit.title", locale: locale)),
             right: .checkButton(
                 isEnabled: store.isSaveButtonEnabled,
                 action: { store.send(.saveButtonTapped) }
@@ -101,7 +103,7 @@ private extension ProfileEditView {
     var nameFields: some View {
         VStack(spacing: 16) {
             ProfileEditTextField(
-                title: "First Name",
+                title: String(localized: "onboarding.profile.firstName", locale: locale),
                 text: $store.firstName,
                 activeField: $activeField,
                 keyboardField: $keyboardField,
@@ -112,7 +114,7 @@ private extension ProfileEditView {
             .id(ProfileEditField.firstName)
 
             ProfileEditTextField(
-                title: "Last Name",
+                title: String(localized: "onboarding.profile.lastName", locale: locale),
                 text: $store.lastName,
                 activeField: $activeField,
                 keyboardField: $keyboardField,
@@ -126,7 +128,7 @@ private extension ProfileEditView {
     var nationalityAndGenderFields: some View {
         HStack(spacing: 8) {
             ProfileEditDropdownField(
-                title: "Nationality",
+                title: "onboarding.profile.nationality",
                 selectedOption: $store.selectedNationality,
                 activeField: $activeField,
                 keyboardField: $keyboardField,
@@ -138,7 +140,7 @@ private extension ProfileEditView {
             .zIndex(2)
 
             ProfileEditDropdownField(
-                title: "Gender",
+                title: "onboarding.profile.gender",
                 selectedOption: $store.selectedGender,
                 activeField: $activeField,
                 keyboardField: $keyboardField,
@@ -153,7 +155,7 @@ private extension ProfileEditView {
 
     var visaStatusField: some View {
         ProfileEditDropdownField(
-            title: "Visa Status",
+            title: "onboarding.profile.visaStatus",
             selectedOption: $store.selectedVisa,
             activeField: $activeField,
             keyboardField: $keyboardField,
@@ -167,7 +169,7 @@ private extension ProfileEditView {
 
     var occupationField: some View {
         ProfileEditDropdownField(
-            title: "Occupation",
+            title: "onboarding.profile.occupation",
             selectedOption: $store.selectedOccupation,
             activeField: $activeField,
             keyboardField: $keyboardField,

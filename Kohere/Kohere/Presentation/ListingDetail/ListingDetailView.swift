@@ -122,20 +122,29 @@ struct ListingDetailView: View {
                     ListingDetailHeroSection(overview: detail.overview)
                     tabsAndRoomOffersSection(detail: detail, scrollProxy: scrollProxy)
                     trackedSection(.price) {
-                        ListingDetailInfoSection(title: String(localized: "listingDetail.tab.price"), rows: detail.priceInfo)
+                        ListingDetailInfoSection(
+                            title: title(for: .price, detail: detail),
+                            rows: detail.priceInfo
+                        )
                     }
                     trackedSection(.property) {
                         ListingDetailPropertySection(
-                            title: String(localized: "listingDetail.tab.property"),
+                            title: title(for: .property, detail: detail),
                             rows: detail.propertyInfo,
                             features: detail.propertyFeatures
                         )
                     }
                     trackedSection(.building) {
-                        ListingDetailInfoSection(title: String(localized: "listingDetail.tab.building"), rows: detail.buildingInfo)
+                        ListingDetailInfoSection(
+                            title: title(for: .building, detail: detail),
+                            rows: detail.buildingInfo
+                        )
                     }
                     trackedSection(.facility) {
-                        ListingDetailInfoSection(title: String(localized: "listingDetail.tab.facility"), rows: detail.facilityInfo)
+                        ListingDetailInfoSection(
+                            title: title(for: .facility, detail: detail),
+                            rows: detail.facilityInfo
+                        )
                     }
                     trackedSection(.location) {
                         ListingDetailLocationSection(
@@ -146,7 +155,12 @@ struct ListingDetailView: View {
                         )
                     }
                     trackedSection(.review) {
-                        ListingDetailReviewSection(reviewCount: detail.overview.reviewCount)
+                        ListingDetailReviewSection(
+                            title: title(for: .review, detail: detail),
+                            reviewCount: detail.overview.reviewCount,
+                            emptyMessage: store.appLanguage.localized("listingDetail.review.empty"),
+                            promptMessage: store.appLanguage.localized("listingDetail.review.prompt")
+                        )
                     }
                 }
                 .padding(.bottom, bottomContentPadding)
@@ -342,7 +356,9 @@ struct ListingDetailView: View {
         detail: ListingDetailModel
     ) -> String {
         let index = section.rawValue
-        guard detail.tabs.indices.contains(index) else { return section.fallbackTitle }
+        guard detail.tabs.indices.contains(index) else {
+            return section.fallbackTitle(language: store.appLanguage)
+        }
         return detail.tabs[index]
     }
 
@@ -380,7 +396,10 @@ struct ListingDetailView: View {
         VStack(spacing: 0) {
             contentSectionTabs(detail: detail, scrollProxy: scrollProxy)
             trackedSection(.roomOffers) {
-                ListingDetailRoomOffersSection(roomOffers: detail.roomOffers)
+                ListingDetailRoomOffersSection(
+                    title: title(for: .roomOffers, detail: detail),
+                    roomOffers: detail.roomOffers
+                )
             }
         }
     }

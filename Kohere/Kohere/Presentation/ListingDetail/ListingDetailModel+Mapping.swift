@@ -21,7 +21,11 @@ extension ListingDetailModel {
         overview = ListingDetailOverviewModel(
             id: listingDetail.listingID,
             title: listingDetail.title,
-            typeTag: Self.localizedServerCode(listingDetail.type, namespace: .listingType)
+            typeTag: Self.localizedServerCode(
+                listingDetail.type,
+                namespace: .listingType,
+                language: language
+            )
                 ?? listingDetail.type,
             imageURLs: listingDetail.imageURLs,
             monthlyRentText: ListingDetailValueFormatter.monthlyRentTitle(
@@ -52,7 +56,7 @@ extension ListingDetailModel {
             isLiked: listingDetail.isFavorited,
             favoriteCount: listingDetail.favoriteCount
         )
-        tabs = Self.tabs
+        tabs = Self.tabs(language: language)
         roomOffers = listingDetail.roomOffers.map { Self.roomOfferModel($0, language: language) }
         priceInfo = Self.priceRows(
             listingDetail: listingDetail,
@@ -62,7 +66,7 @@ extension ListingDetailModel {
             language: language
         )
         propertyInfo = Self.propertyRows(listingDetail, language: language)
-        propertyFeatures = Self.propertyFeatures(listingDetail.conditions)
+        propertyFeatures = Self.propertyFeatures(listingDetail.conditions, language: language)
         buildingInfo = Self.buildingRows(listingDetail.building, language: language)
         facilityInfo = Self.facilityRows(listingDetail.facilities, language: language)
         locationInfo = Self.locationInfo(listingDetail, language: language)
@@ -80,12 +84,19 @@ extension ListingDetailModel {
                 offer.pricing,
                 language: language
             ),
-            tags: roomOfferTags(offer)
+            tags: roomOfferTags(offer, language: language)
         )
     }
 
-    private static func roomOfferTags(_ offer: ListingDetailRoomOffer) -> [String] {
-        localizedServerCodes(offer.filterTags, namespace: .roomOfferFilterTags)
+    private static func roomOfferTags(
+        _ offer: ListingDetailRoomOffer,
+        language: AppLanguage
+    ) -> [String] {
+        localizedServerCodes(
+            offer.filterTags,
+            namespace: .roomOfferFilterTags,
+            language: language
+        )
     }
 
     private static func priceRows(
@@ -98,13 +109,16 @@ extension ListingDetailModel {
         var rows: [ListingDetailInfoRowModel] = [
             ListingDetailInfoRowModel(
                 id: "rental-type",
-                title: String(localized: "listingDetail.field.rentType"),
-                value: localizedServerCode(listingDetail.rentalType, namespace: .listingRentalType)
-                    ?? String(localized: "listingDetail.value.noRentalTypeInfo")
+                title: language.localized("listingDetail.field.rentType"),
+                value: localizedServerCode(
+                    listingDetail.rentalType,
+                    namespace: .listingRentalType,
+                    language: language
+                ) ?? language.localized("listingDetail.value.noRentalTypeInfo")
             ),
             ListingDetailInfoRowModel(
                 id: "deposit",
-                title: String(localized: "listingDetail.field.deposit"),
+                title: language.localized("listingDetail.field.deposit"),
                 value: ListingDetailValueFormatter.priceRowValue(
                     min: deposits.min(),
                     max: deposits.max(),
@@ -113,7 +127,7 @@ extension ListingDetailModel {
             ),
             ListingDetailInfoRowModel(
                 id: "monthly-rent",
-                title: String(localized: "listingDetail.field.monthlyRent"),
+                title: language.localized("listingDetail.field.monthlyRent"),
                 value: ListingDetailValueFormatter.priceRowValue(
                     min: monthlyRents.min(),
                     max: monthlyRents.max(),
@@ -122,7 +136,7 @@ extension ListingDetailModel {
             ),
             ListingDetailInfoRowModel(
                 id: "maintenance-fee",
-                title: String(localized: "listingDetail.field.maintenanceFee"),
+                title: language.localized("listingDetail.field.maintenanceFee"),
                 value: ListingDetailValueFormatter.maintenanceFeeRowValue(
                     min: maintenanceFees.min(),
                     max: maintenanceFees.max(),
@@ -135,8 +149,8 @@ extension ListingDetailModel {
             rows.append(
                 ListingDetailInfoRowModel(
                     id: "refund-policy",
-                    title: String(localized: "listingDetail.field.refundPolicy"),
-                    value: refundPolicyTitle(refundPolicy)
+                    title: language.localized("listingDetail.field.refundPolicy"),
+                    value: refundPolicyTitle(refundPolicy, language: language)
                 )
             )
         }
@@ -154,21 +168,41 @@ extension ListingDetailModel {
             listingDetail.contract,
             language: language
         ) {
-            rows.append(ListingDetailInfoRowModel(id: "stay", title: String(localized: "listingDetail.field.usagePeriod"), value: contractTitle))
+            rows.append(
+                ListingDetailInfoRowModel(
+                    id: "stay",
+                    title: language.localized("listingDetail.field.usagePeriod"),
+                    value: contractTitle
+                )
+            )
         }
 
         if let genderPolicy = localizedServerCode(
             listingDetail.genderPolicy,
-            namespace: .listingGenderPolicy
+            namespace: .listingGenderPolicy,
+            language: language
         ) {
-            rows.append(ListingDetailInfoRowModel(id: "gender", title: String(localized: "listingDetail.field.genderPolicy"), value: genderPolicy))
+            rows.append(
+                ListingDetailInfoRowModel(
+                    id: "gender",
+                    title: language.localized("listingDetail.field.genderPolicy"),
+                    value: genderPolicy
+                )
+            )
         }
 
         return rows
     }
 
-    private static func propertyFeatures(_ conditionCodes: [String]) -> [String] {
-        localizedServerCodes(conditionCodes, namespace: .roomOfferFilterTags)
+    private static func propertyFeatures(
+        _ conditionCodes: [String],
+        language: AppLanguage
+    ) -> [String] {
+        localizedServerCodes(
+            conditionCodes,
+            namespace: .roomOfferFilterTags,
+            language: language
+        )
     }
 
     private static func buildingRows(
@@ -180,17 +214,21 @@ extension ListingDetailModel {
         return [
             optionalRow(
                 id: "building-type",
-                title: String(localized: "listingDetail.field.buildingType"),
-                value: localizedServerCode(building.type, namespace: .buildingType)
+                title: language.localized("listingDetail.field.buildingType"),
+                value: localizedServerCode(
+                    building.type,
+                    namespace: .buildingType,
+                    language: language
+                )
             ),
             optionalRow(
                 id: "floor",
-                title: String(localized: "listingDetail.field.floor"),
+                title: language.localized("listingDetail.field.floor"),
                 value: ListingDetailValueFormatter.floorTitle(building, language: language)
             ),
             optionalRow(
                 id: "parking",
-                title: String(localized: "listingDetail.field.parking"),
+                title: language.localized("listingDetail.field.parking"),
                 value: ListingDetailValueFormatter.availabilityTitle(
                     building.parkingAvailable,
                     availableKey: "listingDetail.value.parkingAvailable",
@@ -200,7 +238,7 @@ extension ListingDetailModel {
             ),
             optionalRow(
                 id: "elevator",
-                title: String(localized: "listingDetail.field.elevator"),
+                title: language.localized("listingDetail.field.elevator"),
                 value: ListingDetailValueFormatter.availabilityTitle(
                     building.elevatorAvailable,
                     availableKey: "listingDetail.value.elevatorAvailable",
@@ -221,38 +259,62 @@ extension ListingDetailModel {
         return [
             listRow(
                 id: "heating",
-                title: String(localized: "listingDetail.field.heatingFacility"),
-                values: localizedServerCodes(facilities.heatingSystem, namespace: .facilitiesHeatingSystem)
+                title: language.localized("listingDetail.field.heatingFacility"),
+                values: localizedServerCodes(
+                    facilities.heatingSystem,
+                    namespace: .facilitiesHeatingSystem,
+                    language: language
+                )
             ),
             listRow(
                 id: "laundry",
-                title: String(localized: "listingDetail.field.laundryFacility"),
-                values: localizedServerCodes(facilities.laundry, namespace: .facilitiesLaundry)
+                title: language.localized("listingDetail.field.laundryFacility"),
+                values: localizedServerCodes(
+                    facilities.laundry,
+                    namespace: .facilitiesLaundry,
+                    language: language
+                )
             ),
             listRow(
                 id: "kitchen",
-                title: String(localized: "listingDetail.field.kitchenFacility"),
-                values: localizedServerCodes(facilities.kitchen, namespace: .facilitiesKitchen)
+                title: language.localized("listingDetail.field.kitchenFacility"),
+                values: localizedServerCodes(
+                    facilities.kitchen,
+                    namespace: .facilitiesKitchen,
+                    language: language
+                )
             ),
             listRow(
                 id: "amenities",
-                title: String(localized: "listingDetail.field.livingFacility"),
-                values: localizedServerCodes(facilities.livingAmenities, namespace: .facilitiesLivingAmenities)
+                title: language.localized("listingDetail.field.livingFacility"),
+                values: localizedServerCodes(
+                    facilities.livingAmenities,
+                    namespace: .facilitiesLivingAmenities,
+                    language: language
+                )
             ),
             listRow(
                 id: "security",
-                title: String(localized: "listingDetail.field.safetyFacility"),
-                values: localizedServerCodes(facilities.securityFeatures, namespace: .facilitiesSecurityFeatures)
+                title: language.localized("listingDetail.field.safetyFacility"),
+                values: localizedServerCodes(
+                    facilities.securityFeatures,
+                    namespace: .facilitiesSecurityFeatures,
+                    language: language
+                )
             ),
             listRow(
                 id: "common-areas",
-                title: String(localized: "listingDetail.field.spaceFacility"),
+                title: language.localized("listingDetail.field.spaceFacility"),
                 values: commonSpaceTitles(facilities.commonSpaces, language: language)
             ),
             listRow(
                 id: "supplies",
-                title: String(localized: "listingDetail.field.providedSupplies"),
-                values: localizedServerCodes(facilities.providedSupplies, namespace: .facilitiesProvidedSupplies)
+                title: language.localized("listingDetail.field.providedSupplies"),
+                values: localizedServerCodes(
+                    facilities.providedSupplies,
+                    namespace: .facilitiesProvidedSupplies,
+                    language: language
+                )
             )
         ]
         .compactMap { $0 }
@@ -278,13 +340,13 @@ extension ListingDetailModel {
         } ?? []
 
         return ListingLocationInfoModel(
-            sectionTitle: String(localized: "listingDetail.section.locationAndNearby"),
-            addressText: localizedAddressText(listingDetail.address),
+            sectionTitle: language.localized("listingDetail.section.locationAndNearby"),
+            addressText: localizedAddressText(listingDetail.address, language: language),
             transits: transits,
             coordinate: listingDetail.coordinate,
-            nearbyPlacesTitle: String(localized: "listingDetail.field.nearbyAmenities"),
+            nearbyPlacesTitle: language.localized("listingDetail.field.nearbyAmenities"),
             nearbyPlacesText: listingDetail.nearestTransit?.nearbyPlacesDescription
-                ?? String(localized: "listingDetail.value.noNearbyAmenities")
+                ?? language.localized("listingDetail.value.noNearbyAmenities")
         )
     }
 

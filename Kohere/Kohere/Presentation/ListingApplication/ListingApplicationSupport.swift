@@ -18,10 +18,12 @@ enum ListingApplicationPrivacySection: String, CaseIterable, Equatable, Hashable
 
     var id: String { rawValue }
 
-    var title: String {
+    func title(language: AppLanguage) -> String {
         switch self {
-        case .collection: String(localized: "listingApplication.privacy.collection.title")
-        case .thirdParty: String(localized: "listingApplication.privacy.thirdParty.title")
+        case .collection:
+            language.localized("listingApplication.privacy.collection.title")
+        case .thirdParty:
+            language.localized("listingApplication.privacy.thirdParty.title")
         }
     }
 
@@ -58,45 +60,52 @@ extension ListingApplicationFeature.State {
 
     nonisolated static var calendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.locale = displayLocale
+        calendar.locale = Locale(identifier: "en_US_POSIX")
         calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
         return calendar
     }
 
-    nonisolated static var displayLocale: Locale {
-        let language = Bundle.main.preferredLocalizations.first ?? "en"
-        return Locale(identifier: language.hasPrefix("ko") ? "ko_KR" : "en_US")
+    nonisolated var displayLocale: Locale {
+        appLanguage == .korean
+            ? Locale(identifier: "ko_KR")
+            : Locale(identifier: "en_US")
     }
 
-    nonisolated static var monthFormatter: DateFormatter {
-        dateFormatter(
+    nonisolated var monthFormatter: DateFormatter {
+        Self.dateFormatter(
+            language: appLanguage,
             koreanFormat: "yyyy년 M월",
             englishFormat: "MMMM yyyy"
         )
     }
 
-    nonisolated static var compactDateFormatter: DateFormatter {
-        dateFormatter(
+    nonisolated var compactDateFormatter: DateFormatter {
+        Self.dateFormatter(
+            language: appLanguage,
             koreanFormat: "yyyy.MM.dd (E)",
             englishFormat: "MMM d, yyyy (EEE)"
         )
     }
 
-    nonisolated static var reviewDateFormatter: DateFormatter {
-        dateFormatter(
+    nonisolated var reviewDateFormatter: DateFormatter {
+        Self.dateFormatter(
+            language: appLanguage,
             koreanFormat: "yyyy년 M월 d일(E)",
             englishFormat: "MMM d, yyyy (EEE)"
         )
     }
 
     nonisolated private static func dateFormatter(
+        language: AppLanguage,
         koreanFormat: String,
         englishFormat: String
     ) -> DateFormatter {
         let formatter = DateFormatter()
-        formatter.locale = displayLocale
+        formatter.locale = language == .korean
+            ? Locale(identifier: "ko_KR")
+            : Locale(identifier: "en_US")
         formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        formatter.dateFormat = displayLocale.identifier.hasPrefix("ko")
+        formatter.dateFormat = language == .korean
             ? koreanFormat
             : englishFormat
         return formatter
@@ -153,7 +162,7 @@ extension ListingApplicationFeature {
 
     nonisolated static func applicantSummary(
         from profile: UserProfile,
-        locale: Locale = State.displayLocale
+        locale: Locale = Locale(identifier: "en_US")
     ) -> String {
         let name = firstNonEmpty([
             profile.name,

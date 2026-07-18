@@ -42,6 +42,7 @@ struct TenantOnboardingFeature {
 
     @ObservableState
     struct State: Equatable {
+        var appLanguage: AppLanguage = .systemDefault
         var currentStep: Step = .nameAndBirth
 
         var lastName: String = ""
@@ -151,7 +152,7 @@ struct TenantOnboardingFeature {
                 state.lastVerificationCodeSentEmail = requestedEmail
                 state.verificationCode = ""
                 state.isEmailVerified = false
-                state.emailMessage = String(localized: "onboarding.verification.emailSent")
+                state.emailMessage = state.appLanguage.localized("onboarding.verification.emailSent")
                 state.emailVerificationCodeErrorMessage = nil
                 Self.debugLogEmailVerification(
                     "send code succeeded. email=\(Self.maskedEmail(requestedEmail)), message=\(response.message ?? "nil")"
@@ -193,14 +194,14 @@ struct TenantOnboardingFeature {
                 state.emailMessage = nil
                 state.emailVerificationCodeErrorMessage = response.verified
                     ? nil
-                    : String(localized: "onboarding.verification.codeIncorrect")
+                    : state.appLanguage.localized("onboarding.verification.codeIncorrect")
                 return .none
 
             case let .confirmVerificationCodeResponse(.failure(error)):
                 state.isEmailVerificationRequesting = false
                 if case let .serverError(code, _) = error, code == "AUTH_EMAIL_VERIFICATION_FAILED" {
-                    state.emailVerificationCodeErrorMessage = String(
-                        localized: "onboarding.verification.codeIncorrectOrExpired"
+                    state.emailVerificationCodeErrorMessage = state.appLanguage.localized(
+                        "onboarding.verification.codeIncorrectOrExpired"
                     )
                 }
                 return .none

@@ -60,15 +60,18 @@ struct ChatFeature {
         var path = StackState<Path.State>()
         var chatRooms: [ChatRoomModel] = []
         var participantRole: ChatParticipantRole
+        var appLanguage: AppLanguage
         var isLoading = false
         var errorMessage: String?
         
         init(
             chatRooms: [ChatRoomModel] = [],
-            participantRole: ChatParticipantRole = .landlord
+            participantRole: ChatParticipantRole = .landlord,
+            appLanguage: AppLanguage = .systemDefault
         ) {
             self.chatRooms = chatRooms
             self.participantRole = participantRole
+            self.appLanguage = appLanguage
         }
     }
     
@@ -130,7 +133,10 @@ struct ChatFeature {
 
             case let .swipeActionTapped(swipeAction, roomID):
                 guard state.chatRooms.contains(where: { $0.id == roomID }) else { return .none }
-                return .send(.popupRequested(Self.popup(for: swipeAction)))
+                return .send(.popupRequested(Self.popup(
+                    for: swipeAction,
+                    language: state.appLanguage
+                )))
 
             case .popupRequested:
                 return .none
@@ -152,6 +158,7 @@ struct ChatFeature {
                         ListingDetailFeature.State(
                             listingID: listingID,
                             userType: state.participantRole.userType,
+                            appLanguage: state.appLanguage,
                             isApplicationDisabled: true
                         )
                     )
@@ -178,8 +185,8 @@ struct ChatFeature {
 }
 
 private extension ChatFeature {
-    static func popup(for action: SwipeAction) -> AppPopup {
-        let content: (messageKey: String.LocalizationValue, primaryTitleKey: String.LocalizationValue)
+    static func popup(for action: SwipeAction, language: AppLanguage) -> AppPopup {
+        let content: (messageKey: String, primaryTitleKey: String)
 
         switch action {
         case .report:
@@ -192,9 +199,9 @@ private extension ChatFeature {
 
         return .action(
             AppPopup.Action(
-                message: String(localized: content.messageKey),
-                primaryTitle: String(localized: content.primaryTitleKey),
-                secondaryTitle: String(localized: "common.cancel")
+                message: language.localized(content.messageKey),
+                primaryTitle: language.localized(content.primaryTitleKey),
+                secondaryTitle: language.localized("common.cancel")
             )
         )
     }

@@ -10,6 +10,8 @@ import SwiftUI
 
 struct ListingApplicationView: View {
     @Bindable var store: StoreOf<ListingApplicationFeature>
+    @Environment(\.locale)
+    private var locale
     @FocusState private var isPhoneNumberFocused: Bool
 
     var body: some View {
@@ -93,14 +95,14 @@ struct ListingApplicationView: View {
     private var dateSelectionBottomBar: some View {
         HStack(spacing: 8) {
             ListingApplicationBottomButton(
-                title: String(localized: "listingApplication.action.back"),
+                title: String(localized: "listingApplication.action.back", locale: locale),
                 style: .secondary
             ) {
                 store.send(.previousButtonTapped)
             }
 
             ListingApplicationBottomButton(
-                title: String(localized: "listingApplication.action.apply"),
+                title: String(localized: "listingApplication.action.apply", locale: locale),
                 style: .primary
             ) {
                 store.send(.dateSelectionApplyButtonTapped)
@@ -225,6 +227,8 @@ struct ListingApplicationView: View {
 }
 
 private struct ListingApplicationCompletionPopup: View {
+    @Environment(\.locale)
+    private var locale
     let applicationTitle: String
     let moveInDateText: String
     let moveOutDateText: String
@@ -288,10 +292,10 @@ private struct ListingApplicationCompletionPopup: View {
                 .foregroundStyle(.coolNeutral80)
 
             VStack(spacing: 12) {
-                summaryRow(title: String(localized: "listingApplication.field.moveInDate"), value: moveInDateText)
-                summaryRow(title: String(localized: "listingApplication.field.moveOutDate"), value: moveOutDateText)
-                summaryRow(title: String(localized: "listingApplication.field.contractPeriod"), value: rentalPeriodText)
-                summaryRow(title: String(localized: "listingApplication.review.field.cost"), value: priceText)
+                summaryRow(title: String(localized: "listingApplication.field.moveInDate", locale: locale), value: moveInDateText)
+                summaryRow(title: String(localized: "listingApplication.field.moveOutDate", locale: locale), value: moveOutDateText)
+                summaryRow(title: String(localized: "listingApplication.field.contractPeriod", locale: locale), value: rentalPeriodText)
+                summaryRow(title: String(localized: "listingApplication.review.field.cost", locale: locale), value: priceText)
             }
         }
         .padding(.horizontal, 16)
@@ -320,13 +324,13 @@ private struct ListingApplicationCompletionPopup: View {
     private var buttons: some View {
         HStack(spacing: 8) {
             popupButton(
-                title: String(localized: "listingApplication.action.close"),
+                title: String(localized: "listingApplication.action.close", locale: locale),
                 style: .secondary,
                 action: onCloseTap
             )
 
             popupButton(
-                title: String(localized: "listingApplication.action.view"),
+                title: String(localized: "listingApplication.action.view", locale: locale),
                 style: .primary,
                 action: onConfirmTap
             )

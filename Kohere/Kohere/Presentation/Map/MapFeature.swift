@@ -134,7 +134,10 @@ struct MapFeature {
                 return .none
 
             case .searchButtonTapped:
-                state.path.append(.search(SearchFeature.initialState(userDefaultsClient: userDefaultsClient)))
+                state.path.append(.search(SearchFeature.initialState(
+                    userDefaultsClient: userDefaultsClient,
+                    appLanguage: state.appLanguage
+                )))
                 return .none
 
             case let .path(pathAction):

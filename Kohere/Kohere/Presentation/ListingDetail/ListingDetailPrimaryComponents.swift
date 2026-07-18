@@ -144,6 +144,9 @@ struct ListingDetailBottomBar: View {
 }
 
 struct ListingDetailApplicationPanel: View {
+    @Environment(\.locale)
+    private var locale
+
     let roomOffers: [ListingRoomOfferModel]
     let selectedRoomOfferID: String?
     let isRoomTypeSelectorPresented: Bool
@@ -229,7 +232,10 @@ struct ListingDetailApplicationPanel: View {
     private var roomTypeSelector: some View {
         Button(action: onRoomTypeSelectorTap) {
             HStack(spacing: 12) {
-                Text(selectedRoomOffer?.name ?? String(localized: "listingDetail.field.roomType"))
+                Text(
+                    selectedRoomOffer?.name
+                        ?? String(localized: "listingDetail.field.roomType", locale: locale)
+                )
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(isRoomTypeSelectorPresented || selectedRoomOffer != nil ? .labelStrong : .labelNeutral)
 

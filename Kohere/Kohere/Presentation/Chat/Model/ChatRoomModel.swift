@@ -13,6 +13,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     let listingName: String
     let location: String
     let thumbnailURL: String?
+    let createdAt: Date?
     let dateText: String
     let timeText: String
     let applicantName: String
@@ -36,6 +37,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
             listingID: "\(entity.id)",
             propertyType: entity.accommodationType
         )
+        self.createdAt = entity.lastMessageAt
         self.dateText = Self.dateText(entity.lastMessageAt)
         self.timeText = "2분 전"
         self.applicantName = entity.applicantName
@@ -61,6 +63,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
                 listingID: summary.listingID,
                 propertyType: nil
             )
+        self.createdAt = summary.createdAt
         self.dateText = Self.dateText(summary.createdAt)
         self.timeText = Self.timeText(summary.createdAt)
         self.applicantName = "N/A"
@@ -82,6 +85,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         self.listingName = detail.title
         self.location = detail.address
         self.thumbnailURL = detail.thumbnailURL?.absoluteString ?? fallback.thumbnailURL
+        self.createdAt = detail.createdAt
         self.dateText = Self.dateText(detail.createdAt)
         self.timeText = Self.timeText(detail.createdAt)
         self.applicantName = Self.displayText(detail.applicantName)
@@ -100,6 +104,14 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     private static func displayText(_ value: String) -> String {
         let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmedValue.isEmpty ? "N/A" : trimmedValue
+    }
+
+    func localizedDateText(language: AppLanguage) -> String {
+        guard let createdAt else { return "" }
+        let formatter = DateFormatter()
+        formatter.locale = language.locale
+        formatter.dateFormat = language == .korean ? "yyyy.M.d E" : "M/d/yyyy EEE"
+        return formatter.string(from: createdAt)
     }
 
     private static func dateText(_ date: Date?) -> String {
