@@ -29,7 +29,8 @@ final class AuthRepository: AuthInterface {
         let environment = try environmentProvider()
         let requestDTO = SocialLoginRequestDTO(credential)
         let responseDTO: SocialLoginResponseDTO = try await networkService.request(
-            AuthRouter.socialLogin(requestDTO, environment)
+            AuthRouter.socialLogin(requestDTO, environment),
+            debugRawJSONLabel: "Auth.socialLogin"
         )
         
         return responseDTO.toEntity()

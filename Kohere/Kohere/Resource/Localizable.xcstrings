@@ -298,99 +298,275 @@
       }
     },
     "chat.applicationCard.accessibility.copyEmail" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy email" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "이메일 복사" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy email"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이메일 복사"
+          }
+        }
       }
     },
     "chat.applicationCard.accessibility.emailCopied" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Email copied" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "이메일 복사됨" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email copied"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이메일 복사됨"
+          }
+        }
       }
     },
     "chat.applicationCard.field.applicant" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Applicant" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "이름" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applicant"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이름"
+          }
+        }
       }
     },
     "chat.applicationCard.field.deposit" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Deposit" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "보증금" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deposit"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보증금"
+          }
+        }
       }
     },
     "chat.applicationCard.field.email" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Email" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "이메일" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이메일"
+          }
+        }
       }
     },
     "chat.applicationCard.field.gender" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Gender" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "성별" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gender"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "성별"
+          }
+        }
       }
     },
     "chat.applicationCard.field.leaseTerm" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Lease Term" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "희망입주기간" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lease Term"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "희망입주기간"
+          }
+        }
       }
     },
     "chat.applicationCard.field.moveInDate" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Move-in Date" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "입주희망일" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move-in Date"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "입주희망일"
+          }
+        }
       }
     },
     "chat.applicationCard.field.nationality" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Nationality" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "국적" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nationality"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "국적"
+          }
+        }
       }
     },
     "chat.applicationCard.field.roomType" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Room Type" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "객실 타입" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Room Type"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "객실 타입"
+          }
+        }
       }
     },
     "chat.applicationCard.field.totalCost" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Total Cost" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "총 초기비용" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total Cost"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "총 초기비용"
+          }
+        }
       }
     },
     "chat.applicationCard.value.gender.female" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Female" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "여" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Female"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여"
+          }
+        }
       }
     },
     "chat.applicationCard.value.gender.male" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Male" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "남" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Male"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "남"
+          }
+        }
       }
     },
     "chat.applicationCard.value.leaseTerm" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%d-month" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "%d개월" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d-month"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d개월"
+          }
+        }
       }
     },
     "chat.applicationCard.value.monthlyPrice" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "%@/mo" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "%@/월" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/mo"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/월"
+          }
+        }
       }
     },
     "chat.applicationCard.value.notAvailable" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "N/A" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "해당없음" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N/A"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "해당없음"
+          }
+        }
       }
     },
     "chat.applicationReceived.message" : {
@@ -6485,9 +6661,6 @@
         }
       }
     },
-    "Sign in as Landlord Admin" : {
-
-    },
     "tab.chat" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6619,15 +6792,6 @@
     "이름" : {
       "comment" : "A label describing a user's name.",
       "isCommentAutoGenerated" : true
-    },
-    "이메일" : {
-
-    },
-    "이메일 복사" : {
-
-    },
-    "이메일 복사됨" : {
-
     },
     "인증" : {
       "comment" : "A button label that says \"Verify\".",

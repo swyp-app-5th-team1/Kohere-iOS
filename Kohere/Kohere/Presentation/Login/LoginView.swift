@@ -134,18 +134,6 @@ extension LoginView {
                 }
                 .disabled(store.isLoginRequesting)
 
-                Button {
-                    store.send(.landlordAdminLoginButtonTapped)
-                } label: {
-                    Text("Sign in as Landlord Admin")
-                        .kohereTextStyle(.label1Semibold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                        .background(.primaryNormal)
-                        .cornerRadius(16)
-                }
-                .disabled(store.isLoginRequesting)
             }
             .padding(.horizontal, 40)
             .padding(.bottom, 150)
