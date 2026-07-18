@@ -164,7 +164,7 @@ private extension SearchFeature {
     }
 
     func placeSearchFailurePopup(message: String) -> AppPopup {
-        let fallbackMessage = "장소 검색에 실패했어요.\n다시 시도해주세요."
+        let fallbackMessage = String(localized: "search.error.failed")
         let resolvedMessage = message.isEmpty ? fallbackMessage : message
         return .notice(AppPopup.Notice(message: resolvedMessage))
     }
@@ -224,25 +224,16 @@ extension SearchPlaceResult {
 private func placeSearchFailureMessage(for error: Error) -> String {
     let dataError = (error as? DataError) ?? .underlying(message: error.localizedDescription)
     switch dataError {
-    case .missingNaverSearchCredentials:
-        return "장소 검색 설정이 필요해요.\n네이버 검색 API 키를 확인해주세요."
-
-    case let .httpStatus(code, _) where code == 403:
-        return "장소 검색 권한을 확인해주세요.\n네이버 개발자센터의 검색 API 설정이 필요해요."
-
     case let .serverError(code, _):
         switch code {
-        case "SE01", "SE06":
-            return "검색어를 확인해주세요.\n다시 입력해 주세요."
-
-        case "SE99":
-            return "네이버 장소 검색이 잠시 불안정해요.\n조금 뒤 다시 시도해주세요."
+        case "INVALID_INPUT":
+            return String(localized: "search.error.invalidInput")
 
         default:
-            return "장소 검색에 실패했어요.\n다시 시도해주세요."
+            return String(localized: "search.error.failed")
         }
 
     default:
-        return "장소 검색에 실패했어요.\n다시 시도해주세요."
+        return String(localized: "search.error.failed")
     }
 }

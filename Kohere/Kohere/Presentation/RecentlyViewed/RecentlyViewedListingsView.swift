@@ -18,14 +18,18 @@ struct RecentlyViewedListingsView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            KohereNavigationBar(left: .backButton({ store.send(.backButtonTapped) }), center: .text("Recently Viewed"), right: .none)
+            KohereNavigationBar(
+                left: .backButton({ store.send(.backButtonTapped) }),
+                center: .text(String(localized: "recentListings.title")),
+                right: .none
+            )
             
             Rectangle()
                 .foregroundStyle(.lineNeutral)
                 .frame(height: 1)
             
             if store.items.isEmpty {
-                KohereEmptyView(title: "No viewed listings yet")
+                KohereEmptyView(title: String(localized: "recentListings.empty.title"))
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0) {

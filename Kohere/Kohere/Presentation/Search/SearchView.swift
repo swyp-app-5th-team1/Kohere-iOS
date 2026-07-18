@@ -56,12 +56,13 @@ struct SearchView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text("search.accessibility.back"))
     }
 
     private var searchField: some View {
         HStack(spacing: 0) {
             TextField(
-                "지역, 학교, 지하철역",
+                "search.placeholder",
                 text: Binding(
                     get: { store.searchText },
                     set: { text in
@@ -89,6 +90,7 @@ struct SearchView: View {
                     .frame(width: 16, height: 16)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(Text("search.accessibility.clearInput"))
         }
         .padding(.horizontal, 16)
         .frame(height: 48)
@@ -109,7 +111,7 @@ struct SearchView: View {
                     .resizable()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                Text("딱 맞는 방,\n1분 만에 모아보기")
+                Text("common.roomFinderBanner.title")
                     .kohereTextStyle(.heading3Semibold)
                     .foregroundStyle(.neutral5)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -124,7 +126,7 @@ struct SearchView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text("딱 맞는 방 1분 만에 모아보기"))
+        .accessibilityLabel(Text("common.roomFinderBanner.accessibility"))
     }
 
     @ViewBuilder private var searchContent: some View {
@@ -158,7 +160,7 @@ struct SearchView: View {
 
     private var recentSearchHeader: some View {
         HStack(alignment: .center, spacing: 0) {
-            Text("최근 검색어")
+            Text("search.recent.title")
                 .kohereTextStyle(.label3Semibold)
                 .foregroundStyle(.labelNeutral)
 
@@ -168,7 +170,7 @@ struct SearchView: View {
                 Button {
                     store.send(.clearRecentSearchesButtonTapped)
                 } label: {
-                    Text("전체 삭제")
+                    Text("search.recent.clearAll")
                         .kohereTextStyle(.body3Regular)
                         .foregroundStyle(.neutral50)
                 }
@@ -224,6 +226,14 @@ struct SearchView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(
+                Text(
+                    String(
+                        format: String(localized: "search.recent.delete.accessibility"),
+                        recentSearch.keyword
+                    )
+                )
+            )
         }
         .frame(height: 36)
     }
@@ -284,7 +294,7 @@ struct SearchView: View {
                 .frame(width: 80, height: 80)
                 .foregroundStyle(.labelAssistive)
 
-            Text("검색 결과가 없습니다")
+            Text("search.empty.noResults")
                 .kohereTextStyle(.label2Medium)
                 .foregroundStyle(.labelAlternative)
         }

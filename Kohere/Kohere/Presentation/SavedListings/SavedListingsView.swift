@@ -18,7 +18,11 @@ struct SavedListingsView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            KohereNavigationBar(left: .backButton({ store.send(.backButtonTapped) }), center: .text("Saved listings"), right: .none)
+            KohereNavigationBar(
+                left: .backButton({ store.send(.backButtonTapped) }),
+                center: .text(String(localized: "savedListings.title")),
+                right: .none
+            )
             
             Rectangle()
                 .foregroundStyle(.lineNeutral)
@@ -30,7 +34,7 @@ struct SavedListingsView: View {
             } else if let errorMessage = store.errorMessage, store.items.isEmpty {
                 KohereEmptyView(title: errorMessage)
             } else if store.items.isEmpty {
-                KohereEmptyView(title: "No saved listings yet")
+                KohereEmptyView(title: String(localized: "savedListings.empty.title"))
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0) {

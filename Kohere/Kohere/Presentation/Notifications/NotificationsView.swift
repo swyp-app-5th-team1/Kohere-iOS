@@ -18,13 +18,17 @@ struct NotificationsView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            KohereNavigationBar(left: .backButton({ store.send(.backButtonTapped) }), center: .text("Notifications"), right: .none)
+            KohereNavigationBar(
+                left: .backButton({ store.send(.backButtonTapped) }),
+                center: .text(String(localized: "notifications.title")),
+                right: .none
+            )
             
             Rectangle()
                 .foregroundStyle(.lineNeutral)
                 .frame(height: 1)
             
-            KohereEmptyView(title: "No notifications yet")
+            KohereEmptyView(title: String(localized: "notifications.empty.title"))
         }
         .background(.backgroundNormalNormal)
     }
