@@ -23,6 +23,7 @@ struct EmailVerificationStepView: View {
             Text("onboarding.tenant.email.title")
                 .kohereTextStyle(.heading1Bold)
                 .foregroundColor(.coolNeutral90)
+                .padding(.top, 40)
 
             VStack(alignment: .leading, spacing: 16) {
                 Text("onboarding.profile.email")
