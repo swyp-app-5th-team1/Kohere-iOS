@@ -13,6 +13,12 @@ struct DiagnosisQuestionResponseDTO: Decodable {
     let options: [DiagnosisOptionResponseDTO]
 }
 
+struct DiagnosisFlowResponseDTO: Decodable {
+    let resultCode: String
+    let question: DiagnosisQuestionResponseDTO?
+    let diagnosisId: Int?
+}
+
 struct DiagnosisSelectResponseDTO: Decodable {
     let type: String
     let max: Int?

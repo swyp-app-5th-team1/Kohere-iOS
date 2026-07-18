@@ -3,12 +3,10 @@ import Foundation
 
 @Reducer
 struct ChatBotFeature {
-    @Dependency(\.fetchDiagnosisQuestionUseCase)
-    var fetchDiagnosisQuestionUseCase
-    @Dependency(\.saveDiagnosisAnswerUseCase)
-    var saveDiagnosisAnswerUseCase
-    @Dependency(\.submitDiagnosisUseCase)
-    var submitDiagnosisUseCase
+    @Dependency(\.startDiagnosisFlowUseCase)
+    var startDiagnosisFlowUseCase
+    @Dependency(\.advanceDiagnosisFlowUseCase)
+    var advanceDiagnosisFlowUseCase
 
     enum ChatItem: Equatable, Identifiable {
         case bot(id: UUID, text: String, isFirst: Bool)
@@ -31,17 +29,12 @@ struct ChatBotFeature {
         var currentQuestion: Diagnosis?
         var selectedOptionCodes: Set<String> = []
         var budgetRange = Self.defaultBudgetRange
-        var isUnsupportedRegionConfirmationPresented = false
+        var completedDiagnosisID: String?
         var isQuestionLoading = false
         var isAnswerSaving = false
-        var isSubmitting = false
         
         var currentDiagnosis: Diagnosis? {
-            if isUnsupportedRegionConfirmationPresented {
-                return Self.unsupportedRegionConfirmation
-            }
-
-            return currentQuestion
+            currentQuestion
         }
         
         var isConfirmButtonEnabled: Bool {
@@ -50,7 +43,7 @@ struct ChatBotFeature {
         }
         
         var isFindButtonEnabled: Bool {
-            return currentStep >= 7
+            completedDiagnosisID != nil
         }
 
         var budgetSummaryText: String {
@@ -78,18 +71,6 @@ struct ChatBotFeature {
             bounds: MapFilterPriceRange.monthlyRent
         )
 
-        static let unsupportedRegionConfirmation = Diagnosis(
-            step: 0,
-            field: "unsupportedRegionConfirmation",
-            question: "다른 지역 방을 찾아보시겠어요?",
-            selectType: .single,
-            maxSelectCount: 1,
-            options: [
-                DiagnosisOption(id: "YES", title: "네"),
-                DiagnosisOption(id: "NO", title: "아니오")
-            ]
-        )
-
         private static func budgetPriceText(_ value: Int) -> String {
             if value >= 100, value % 100 == 0 {
                 return "₩\(value / 100)M"
@@ -104,15 +85,13 @@ struct ChatBotFeature {
     enum Action {
         case backButtonTapped
         case onAppear
-        case questionResponse(Result<Diagnosis, Error>)
+        case flowResponse(Result<DiagnosisFlowResult, Error>)
         case optionTapped(DiagnosisOption)
         case confirmButtonTapped
         case budgetMinimumChanged(Int)
         case budgetMaximumChanged(Int)
         case budgetConfirmButtonTapped
-        case answerSaved(nextStep: Int, Result<Void, Error>)
         case findButtonTapped
-        case submitResponse(Result<DiagnosisSubmission, Error>)
         case resetButtonTapped
         case mapRequested(MapEntryRequest)
     }
@@ -127,23 +106,20 @@ struct ChatBotFeature {
                 
             case .onAppear:
                 guard state.history.isEmpty else { return .none }
-                
+
                 state.history.append(.bot(id: UUID(), text: "Welcome 👋", isFirst: true))
                 state.isQuestionLoading = true
 
                 return .run { send in
-                    await send(.answerSaved(
-                        nextStep: 2,
-                        Result {
-                            try await saveDiagnosisAnswerUseCase.execute(
-                                .single(field: "region", code: "SEOUL")
-                            )
-                        }
-                    ))
+                    await send(.flowResponse(Result {
+                        try await startDiagnosisFlowUseCase.execute()
+                    }))
                 }
 
-            case let .questionResponse(.success(question)):
+            case let .flowResponse(.success(.nextQuestion(question))):
                 state.isQuestionLoading = false
+                state.isAnswerSaving = false
+                state.selectedOptionCodes.removeAll()
                 state.currentStep = question.step
                 state.currentQuestion = question
                 state.history.append(.bot(
@@ -152,69 +128,50 @@ struct ChatBotFeature {
                     isFirst: state.isNextBotMessageFirst
                 ))
                 return .none
-                
-            case .questionResponse(.failure):
-                state.isQuestionLoading = false
-                return .none
 
-            case let .answerSaved(nextStep, .success):
+            case .flowResponse(.success(.restart)):
+                state.resetConversation()
+                return .send(.onAppear)
+
+            case .flowResponse(.success(.terminated)):
+                state.isQuestionLoading = false
+                state.isAnswerSaving = false
+                return .send(.backButtonTapped)
+
+            case let .flowResponse(.success(.completed(diagnosisID))):
+                state.isQuestionLoading = false
                 state.isAnswerSaving = false
                 state.selectedOptionCodes.removeAll()
                 state.currentQuestion = nil
-                state.currentStep = nextStep
+                state.currentStep = 7
+                state.completedDiagnosisID = diagnosisID
+                return .none
 
-                guard nextStep <= 6 else {
-                    return .none
-                }
-
-                state.isQuestionLoading = true
-                return .run { send in
-                    await send(.questionResponse(Result {
-                        try await fetchDiagnosisQuestionUseCase.execute(nextStep)
-                    }))
-                }
-
-            case .answerSaved(_, .failure):
+            case let .flowResponse(.failure(error)):
+                state.isQuestionLoading = false
                 state.isAnswerSaving = false
+
+                if case let DataError.serverError(code, _) = error,
+                   code == "DIAGNOSIS_SESSION_NOT_FOUND" {
+                    state.resetConversation()
+                    return .send(.onAppear)
+                }
+
                 return .none
                 
             case let .optionTapped(option):
                 guard let diagnosis = state.currentDiagnosis, !state.isAnswerSaving else { return .none }
-
-                if state.isUnsupportedRegionConfirmationPresented {
-                    state.history.append(.user(id: UUID(), text: option.title))
-
-                    switch option.id {
-                    case "YES":
-                        state.resetConversation()
-                        return .send(.onAppear)
-
-                    case "NO":
-                        return .send(.mapRequested(.browseListings))
-
-                    default:
-                        return .none
-                    }
-                }
                 
                 if diagnosis.selectType == .single {
                     state.history.append(.user(id: UUID(), text: option.title))
 
-                    if diagnosis.field == "region", option.id != "SEOUL" {
-                        state.isUnsupportedRegionConfirmationPresented = true
-                        state.appendUnsupportedRegionConfirmation(regionName: option.title)
-                        return .none
-                    }
-
                     state.isAnswerSaving = true
-                    let nextStep = diagnosis.step + 1
                     let answer = DiagnosisAnswer.single(field: diagnosis.field, code: option.id)
 
                     return .run { send in
-                        await send(.answerSaved(
-                            nextStep: nextStep,
-                            Result { try await saveDiagnosisAnswerUseCase.execute(answer) }
-                        ))
+                        await send(.flowResponse(Result {
+                            try await advanceDiagnosisFlowUseCase.execute(answer)
+                        }))
                     }
                 }
                 
@@ -245,15 +202,13 @@ struct ChatBotFeature {
                 let selectedCodes = diagnosis.options
                     .map(\.id)
                     .filter { state.selectedOptionCodes.contains($0) }
-                let nextStep = diagnosis.step + 1
                 let answer = DiagnosisAnswer.multiple(field: diagnosis.field, codes: selectedCodes)
 
                 state.isAnswerSaving = true
                 return .run { send in
-                    await send(.answerSaved(
-                        nextStep: nextStep,
-                        Result { try await saveDiagnosisAnswerUseCase.execute(answer) }
-                    ))
+                    await send(.flowResponse(Result {
+                        try await advanceDiagnosisFlowUseCase.execute(answer)
+                    }))
                 }
 
             case let .budgetMinimumChanged(minimum):
@@ -277,35 +232,15 @@ struct ChatBotFeature {
                     min: state.budgetRange.minimum * 10_000,
                     max: state.budgetRange.maximum * 10_000
                 )
-                let nextStep = diagnosis.step + 1
-
                 return .run { send in
-                    await send(.answerSaved(
-                        nextStep: nextStep,
-                        Result { try await saveDiagnosisAnswerUseCase.execute(answer) }
-                    ))
+                    await send(.flowResponse(Result {
+                        try await advanceDiagnosisFlowUseCase.execute(answer)
+                    }))
                 }
                 
             case .findButtonTapped:
-                guard state.isFindButtonEnabled, !state.isSubmitting else { return .none }
-                state.isSubmitting = true
-
-                return .run { send in
-                    await send(.submitResponse(Result {
-                        try await submitDiagnosisUseCase.execute()
-                    }))
-                }
-
-            case let .submitResponse(.success(submission)):
-                state.isSubmitting = false
-                let request = Int(submission.diagnosisID)
-                    .map(MapEntryRequest.diagnosis(id:))
-                    ?? .browseListings
-                return .send(.mapRequested(request))
-
-            case .submitResponse(.failure):
-                state.isSubmitting = false
-                return .none
+                guard let diagnosisID = state.completedDiagnosisID else { return .none }
+                return .send(.mapTabRequested(diagnosisID: diagnosisID))
                 
             case .resetButtonTapped:
                 state.resetConversation()
@@ -335,22 +270,8 @@ private extension ChatBotFeature.State {
         currentQuestion = nil
         selectedOptionCodes.removeAll()
         budgetRange = Self.defaultBudgetRange
-        isUnsupportedRegionConfirmationPresented = false
+        completedDiagnosisID = nil
         isQuestionLoading = false
         isAnswerSaving = false
-        isSubmitting = false
-    }
-
-    mutating func appendUnsupportedRegionConfirmation(regionName: String) {
-        history.append(.bot(
-            id: UUID(),
-            text: "아직 \(regionName) 매물은 준비되지 않았어요😓",
-            isFirst: true
-        ))
-        history.append(.bot(
-            id: UUID(),
-            text: Self.unsupportedRegionConfirmation.question,
-            isFirst: false
-        ))
     }
 }

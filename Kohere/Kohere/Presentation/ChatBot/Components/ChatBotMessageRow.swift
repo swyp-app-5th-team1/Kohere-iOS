@@ -22,7 +22,7 @@ struct BotMessageRow: View {
                 Circle()
                     .stroke(.lineNeutral, lineWidth: 1)
                     .background(Circle().fill(.staticWhite))
-                    .frame(width: 24, height: 24)
+                    .frame(width: 32, height: 32)
                     .overlay(
                         Image(.smallLogo)
                             .resizable()
@@ -31,7 +31,7 @@ struct BotMessageRow: View {
                     )
             } else {
                 Color.clear
-                    .frame(width: 24, height: 24)
+                    .frame(width: 32, height: 32)
             }
             
             ChatBotBubbleView(text: text, isFirstBubble: isFirst)

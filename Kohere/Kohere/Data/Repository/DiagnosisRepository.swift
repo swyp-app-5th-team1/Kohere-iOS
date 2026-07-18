@@ -20,6 +20,25 @@ final class DiagnosisRepository: DiagnosisInterface {
         self.environmentProvider = environmentProvider
     }
 
+    func startFlow() async throws -> DiagnosisFlowResult {
+        let environment = try environmentProvider()
+        let responseDTO: DiagnosisFlowResponseDTO = try await networkService.request(
+            DiagnosisRouter.startFlow(environment: environment)
+        )
+
+        return try responseDTO.toEntity()
+    }
+
+    func advanceFlow(with answer: DiagnosisAnswer) async throws -> DiagnosisFlowResult {
+        let environment = try environmentProvider()
+        let requestDTO = DiagnosisAnswerRequestDTO(answer)
+        let responseDTO: DiagnosisFlowResponseDTO = try await networkService.request(
+            DiagnosisRouter.advanceFlow(requestDTO, environment: environment)
+        )
+
+        return try responseDTO.toEntity()
+    }
+
     func fetchQuestion(step: Int) async throws -> Diagnosis {
         let environment = try environmentProvider()
         let responseDTO: DiagnosisQuestionResponseDTO = try await networkService.request(
@@ -107,11 +126,34 @@ private extension DiagnosisQuestionResponseDTO {
         Diagnosis(
             step: step,
             field: field,
-            question: question,
+            question: question.replacingOccurrences(of: "\\n", with: "\n"),
             selectType: select.type.toSelectType(),
             maxSelectCount: select.max ?? 1,
             options: options.map { $0.toEntity() }
         )
+    }
+}
+
+private extension DiagnosisFlowResponseDTO {
+    func toEntity() throws -> DiagnosisFlowResult {
+        switch resultCode {
+        case "NEXT_QUESTION":
+            guard let question else { throw DataError.decodingFailed }
+            return .nextQuestion(question.toEntity())
+
+        case "RESTART":
+            return .restart
+
+        case "TERMINATED":
+            return .terminated
+
+        case "COMPLETED":
+            guard let diagnosisId else { throw DataError.decodingFailed }
+            return .completed(diagnosisID: String(diagnosisId))
+
+        default:
+            throw DataError.decodingFailed
+        }
     }
 }
 

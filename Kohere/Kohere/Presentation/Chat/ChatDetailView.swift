@@ -105,6 +105,10 @@ private extension ChatDetailView {
                 }
                 
                 MoveInApplicationCardView(item: store.chatRoom)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        store.send(.viewDetailsButtonTapped)
+                    }
             }
             .padding(.horizontal, 16)
             
