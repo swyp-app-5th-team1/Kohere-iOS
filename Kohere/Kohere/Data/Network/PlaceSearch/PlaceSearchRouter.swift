@@ -9,35 +9,38 @@ import Alamofire
 import Foundation
 
 enum PlaceSearchRouter: URLRequestConvertible {
-    case localSearch(query: PlaceSearchQueryDTO, clientID: String, clientSecret: String)
+    case search(query: PlaceSearchQueryDTO, APIEnvironment)
 
     private var method: HTTPMethod {
         switch self {
-        case .localSearch:
+        case .search:
             .get
         }
     }
 
-    private var urlString: String {
+    private var path: String {
         switch self {
-        case .localSearch:
-            "https://openapi.naver.com/v1/search/local.json"
+        case .search:
+            "api/v1/listings/places"
+        }
+    }
+
+    private var environment: APIEnvironment {
+        switch self {
+        case let .search(_, environment):
+            environment
         }
     }
 
     func asURLRequest() throws -> URLRequest {
-        guard let url = URL(string: urlString) else {
-            throw DataError.invalidURL
-        }
-
+        let url = environment.baseURL.appendingPathComponent(path)
         var request = URLRequest(url: url)
         request.method = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         switch self {
-        case let .localSearch(query, clientID, clientSecret):
-            request.setValue(clientID, forHTTPHeaderField: "X-Naver-Client-Id")
-            request.setValue(clientSecret, forHTTPHeaderField: "X-Naver-Client-Secret")
+        case let .search(query, _):
             request = try URLEncodedFormParameterEncoder.default.encode(query, into: request)
         }
 
