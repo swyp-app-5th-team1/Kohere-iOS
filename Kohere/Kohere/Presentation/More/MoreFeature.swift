@@ -224,7 +224,8 @@ struct MoreFeature {
                     .account(
                         AccountFeature.State(
                             userType: state.userType ?? .unknown,
-                            userProfile: state.userProfile
+                            userProfile: state.userProfile,
+                            language: state.selectedLanguage
                         )
                     )
                 )
@@ -354,7 +355,7 @@ struct MoreFeature {
                 )
 
             case .navigationSettingTapped:
-                state.path.append(.setting(SettingFeature.State()))
+                state.path.append(.setting(SettingFeature.State(language: state.selectedLanguage)))
                 return .none
 
             case .announcementsTapped:

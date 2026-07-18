@@ -51,6 +51,12 @@
             "state" : "translated",
             "value" : "Date of birth"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "생년월일"
+          }
         }
       }
     },
@@ -61,6 +67,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete Account"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계정 삭제하기"
+          }
+        }
+      }
+    },
+    "account.gender.female" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Female"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여성"
+          }
+        }
+      }
+    },
+    "account.gender.male" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Male"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "남성"
           }
         }
       }
@@ -73,6 +119,12 @@
             "state" : "translated",
             "value" : "Gender"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "성별"
+          }
         }
       }
     },
@@ -83,6 +135,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Linked E-mail"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "연결된 이메일"
           }
         }
       }
@@ -6623,6 +6681,12 @@
     "settings.account.title" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6634,6 +6698,12 @@
     "settings.appVersion.current" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Version"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6645,10 +6715,33 @@
     "settings.customerTerms.title" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terms of Service"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "고객 이용약관"
+          }
+        }
+      }
+    },
+    "settings.logout.confirmAction" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log out"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그아웃하기"
           }
         }
       }
@@ -6659,13 +6752,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Logging out may limit some features. Are you sure you want to log out?"
+            "value" : "Logging out may limit some features.\nAre you sure you want to log out?"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "로그아웃 시 원활한 이용이 어려울 수 있습니다. 그럼에도 로그아웃하시겠습니까?"
+            "value" : "로그아웃 시 원활한 이용이 어려울 수 있습니다.\n그럼에도 로그아웃하시겠습니까?"
           }
         }
       }
@@ -6673,6 +6766,12 @@
     "settings.logout.title" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log Out"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6684,6 +6783,12 @@
     "settings.marketingConsent.title" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marketing Communications"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6793,9 +6898,32 @@
         }
       }
     },
+    "settings.popup.cancel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "뒤로가기"
+          }
+        }
+      }
+    },
     "settings.privacyPolicy.title" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy Policy"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6804,13 +6932,53 @@
         }
       }
     },
-    "settings.withdrawal.confirmMessage" : {
+    "settings.title" : {
       "extractionState" : "stale",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "탈퇴 시 지금까지의 이용기록이 영구 삭제됩니다. 그럼에도 삭제하시겠습니까?"
+            "value" : "설정"
+          }
+        }
+      }
+    },
+    "settings.withdrawal.confirmAction" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Account"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탈퇴하기"
+          }
+        }
+      }
+    },
+    "settings.withdrawal.confirmMessage" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to continue?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탈퇴 시 지금까지의 이용기록이 영구 삭제됩니다.\n그럼에도 삭제하시겠습니까?"
           }
         }
       }
@@ -6911,10 +7079,7 @@
       "comment" : "A question displayed at the top of the view, asking the user what they are looking to do.",
       "isCommentAutoGenerated" : true
     },
-    "계정 삭제하기" : {
-
-    },
-    "로그아웃" : {
+    "뒤로가기" : {
 
     },
     "반가워요! 가입된 정보가\n맞는지 확인해 드릴게요" : {
@@ -6990,9 +7155,6 @@
     "최소값" : {
       "comment" : "Accessibility label for the minimum slider thumb.",
       "isCommentAutoGenerated" : true
-    },
-    "현재 앱 버전" : {
-
     },
     "확인" : {
       "comment" : "A button label that translates to \"Confirm\".",

@@ -9,6 +9,9 @@ import ComposableArchitecture
 import SwiftUI
 
 struct SettingView: View {
+    @Environment(\.locale)
+    private var locale
+
     let store: StoreOf<SettingFeature>
 
     var body: some View {
@@ -25,7 +28,7 @@ private extension SettingView {
     var navigationBar: some View {
         KohereNavigationBar(
             left: .backButton({ store.send(.backButtonTapped) }),
-            center: .text("설정"),
+            center: .text(localized("settings.title")),
             right: .none,
             backgroundColor: .coolNeutral5
         )
@@ -41,16 +44,16 @@ private extension SettingView {
             VStack(spacing: 12) {
                 SettingMenuSection(
                     items: [
-                        .init(title: "계정", action: .account)
+                        .init(title: localized("settings.account.title"), action: .account)
                     ],
                     onItemTapped: { store.send(.settingItemTapped($0)) }
                 )
 
                 SettingMenuSection(
                     items: [
-                        .init(title: "고객 이용약관", action: .termsOfService),
-                        .init(title: "개인정보처리방침", action: .privacyPolicy),
-                        .init(title: "마케팅 정보동의", action: .marketingAgreement)
+                        .init(title: localized("settings.customerTerms.title"), action: .termsOfService),
+                        .init(title: localized("settings.privacyPolicy.title"), action: .privacyPolicy),
+                        .init(title: localized("settings.marketingConsent.title"), action: .marketingAgreement)
                     ],
                     onItemTapped: { store.send(.settingItemTapped($0)) }
                 )
@@ -68,7 +71,7 @@ private extension SettingView {
 
     var appVersionRow: some View {
         HStack {
-            Text("현재 앱 버전")
+            Text(localized("settings.appVersion.current"))
 
             Spacer()
 
@@ -84,7 +87,7 @@ private extension SettingView {
         Button {
             store.send(.logoutButtonTapped)
         } label: {
-            Text("로그아웃")
+            Text(localized("settings.logout.title"))
                 .kohereTextStyle(.label2Medium)
                 .foregroundStyle(.coolNeutral10)
                 .underline()
@@ -93,6 +96,10 @@ private extension SettingView {
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 4)
+    }
+
+    func localized(_ key: String) -> String {
+        AppLanguage(locale: locale).localized(key)
     }
 }
 
