@@ -28,7 +28,12 @@ struct UserProfile: Equatable, Sendable {
     let termsOfServiceAgreed: Bool
     let privacyPolicyAgreed: Bool
     let marketingAgreed: Bool
+    let lang: String?
     let createdAt: String
+
+    var appLanguage: AppLanguage? {
+        lang.flatMap(AppLanguage.init(rawValue:))
+    }
 }
 
 struct UserProfileUpdate: Equatable, Sendable {

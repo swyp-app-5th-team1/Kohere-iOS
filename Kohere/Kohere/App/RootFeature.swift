@@ -185,6 +185,23 @@ struct RootFeature {
                 }
 
                 state.isCurrentUserLoading = false
+
+                if let language = user.appLanguage,
+                   language != state.appLanguage {
+                    try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
+                    let selectedTab = state.selectedTab
+                    resetMainContent(
+                        language: language,
+                        userProfile: user,
+                        selectedTab: selectedTab,
+                        state: &state
+                    )
+                    return .merge(
+                        .send(.home(.onAppear)),
+                        .send(.more(.onAppear))
+                    )
+                }
+
                 return .send(.more(.userProfileUpdated(user)))
 
             case .currentUserResponse(.failure):
@@ -439,11 +456,12 @@ extension RootFeature {
     func resetMainContent(
         language: AppLanguage,
         userProfile: UserProfile,
+        selectedTab: AppTab = .more,
         state: inout State
     ) {
         state.appLanguage = language
         state.currentUser = userProfile
-        state.selectedTab = .more
+        state.selectedTab = selectedTab
         state.popup = nil
 
         state.home = HomeFeature.State(

@@ -55,6 +55,61 @@ final class LanguageUpdateRequestDTOTests: XCTestCase {
     }
 }
 
+final class OnboardingLocalizationTests: XCTestCase {
+    func testKoreanEmailVerificationCopyIsLocalized() {
+        XCTAssertEqual(
+            AppLanguage.korean.localized("onboarding.email.placeholder"),
+            "이메일을 입력해주세요"
+        )
+        XCTAssertEqual(
+            AppLanguage.korean.localized("onboarding.verification.emailSent"),
+            "이메일로 인증번호를 전송했어요"
+        )
+        XCTAssertEqual(
+            AppLanguage.korean.localized("onboarding.verification.email.placeholder"),
+            "전송된 6자리 코드를 입력해주세요"
+        )
+    }
+}
+
+@MainActor
+final class UserProfileLanguageResponseDTOTests: XCTestCase {
+    func testProfileResponseDecodesLanguage() throws {
+        let data = Data(
+            """
+            {
+              "id": 13,
+              "userType": "LANDLORD",
+              "firstName": null,
+              "lastName": null,
+              "name": "Kohere Host",
+              "nickname": null,
+              "gender": null,
+              "birthDate": null,
+              "country": "KR",
+              "countryName": "대한민국",
+              "countryFlag": null,
+              "occupation": null,
+              "email": "host@kohere.app",
+              "visaType": null,
+              "phoneNumber": null,
+              "businessRegistrationNumber": null,
+              "status": "ACTIVE",
+              "termsOfServiceAgreed": true,
+              "privacyPolicyAgreed": true,
+              "marketingAgreed": false,
+              "lang": "ko",
+              "createdAt": "2026-07-18T00:00:00"
+            }
+            """.utf8
+        )
+
+        let response = try JSONDecoder().decode(UserProfileResponseDTO.self, from: data)
+
+        XCTAssertEqual(response.lang, "ko")
+    }
+}
+
 final class ListingCardLocalizationTests: XCTestCase {
     func testEnglishListingCardUsesCompactKoreanWonAndEnglishLabels() {
         let item = ListingItemModel(listing: makeListing(), language: .english)
@@ -276,6 +331,7 @@ final class LanguageResetTests: XCTestCase {
             termsOfServiceAgreed: true,
             privacyPolicyAgreed: true,
             marketingAgreed: false,
+            lang: "ko",
             createdAt: "2026-07-18T00:00:00"
         )
         var state = RootFeature.State(
@@ -1067,6 +1123,7 @@ final class ListingApplicationFeatureTests: XCTestCase {
             termsOfServiceAgreed: true,
             privacyPolicyAgreed: true,
             marketingAgreed: false,
+            lang: "en",
             createdAt: "2026-07-04T14:19:29.645714Z"
         )
     }

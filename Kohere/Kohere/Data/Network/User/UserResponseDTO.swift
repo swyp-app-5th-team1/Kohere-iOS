@@ -28,5 +28,6 @@ struct UserProfileResponseDTO: Decodable {
     let termsOfServiceAgreed: Bool
     let privacyPolicyAgreed: Bool
     let marketingAgreed: Bool
+    let lang: String?
     let createdAt: String
 }
