@@ -40,6 +40,7 @@ struct RootView: View {
                 popupOverlay(popup)
             }
         }
+        .environment(\.locale, store.appLanguage.locale)
         .animation(.easeInOut(duration: 0.2), value: store.popup)
         .onAppear {
             store.send(.onAppear)
@@ -93,6 +94,7 @@ struct RootView: View {
             .tag(AppTab.more)
         }
         .tint(.primary50)
+        .id(store.appLanguage)
         .onAppear {
             store.send(.mainTabAppeared)
         }

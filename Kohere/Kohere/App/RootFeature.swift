@@ -27,6 +27,7 @@ struct RootFeature {
     struct State: Equatable {
         var authInfo: Auth?
         var currentUser: UserProfile?
+        var appLanguage: AppLanguage = .systemDefault
         var isAuthLoading = true
         var isCurrentUserLoading = false
         var login = LoginFeature.State()
@@ -89,6 +90,12 @@ struct RootFeature {
                 let keychainClient = keychainClient
                 let userDefaultsClient = userDefaultsClient
                 let reissueTokenUseCase = reissueTokenUseCase
+                let storedLanguageRawValue = try? userDefaultsClient.load(for: .appLanguage)
+                let resolvedLanguage = storedLanguageRawValue
+                    .flatMap(AppLanguage.init(rawValue:))
+                    ?? .systemDefault
+                state.appLanguage = resolvedLanguage
+                state.more.selectedLanguage = resolvedLanguage
                 var effects: [Effect<Action>] = [
                     .run { send in
                         for await notification in NotificationCenter.default.notifications(named: .authSessionExpired) {
@@ -153,7 +160,9 @@ struct RootFeature {
             case let .authSessionExpired(context):
                 Self.logSessionExpiration(context)
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                state = State(isAuthLoading: false)
+                let appLanguage = state.appLanguage
+                state = State(appLanguage: appLanguage, isAuthLoading: false)
+                state.more.selectedLanguage = appLanguage
                 return .cancel(id: "RootFeature.fetchCurrentUser")
 
             case .mainTabAppeared:
@@ -251,20 +260,22 @@ struct RootFeature {
                 return .none
 
             case .popupNoticeConfirmButtonTapped:
+                guard case let .notice(popup) = state.popup else { return .none }
                 state.popup = nil
-                return .none
+                guard let route = popup.confirmRoute else { return .none }
+                return handlePopupRoute(route, state: &state)
 
             case .popupActionPrimaryButtonTapped:
                 guard case let .action(popup) = state.popup else { return .none }
                 state.popup = nil
                 guard let route = popup.primaryRoute else { return .none }
-                return handlePopupRoute(route)
+                return handlePopupRoute(route, state: &state)
 
             case .popupActionSecondaryButtonTapped:
                 guard case let .action(popup) = state.popup else { return .none }
                 state.popup = nil
                 guard let route = popup.secondaryRoute else { return .none }
-                return handlePopupRoute(route)
+                return handlePopupRoute(route, state: &state)
 
             case let .map(.path(.element(id: _, action: .chatBot(.mapRequested(request))))):
                 state.map.path.removeAll()
@@ -276,6 +287,12 @@ struct RootFeature {
                 return .none
 
             case let .map(.path(.element(id: _, action: .search(.popupRequested(popup))))):
+                state.popup = popup
+                return .none
+
+            case let .home(.path(.element(id: _, action: .listingDetail(.popupRequested(popup))))),
+                 let .map(.path(.element(id: _, action: .listingDetail(.popupRequested(popup))))),
+                 let .more(.path(.element(id: _, action: .listingDetail(.popupRequested(popup))))):
                 state.popup = popup
                 return .none
 
@@ -329,10 +346,24 @@ struct RootFeature {
 
                 return .merge(effects)
 
+            case let .more(.languageUpdateResponse(language, .success(userProfile))):
+                try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
+                resetMainContent(
+                    language: language,
+                    userProfile: userProfile,
+                    state: &state
+                )
+                return .merge(
+                    .send(.home(.onAppear)),
+                    .send(.more(.onAppear))
+                )
+
             case .more(.logoutConfirmed):
                 userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                state = State(isAuthLoading: false)
+                let appLanguage = state.appLanguage
+                state = State(appLanguage: appLanguage, isAuthLoading: false)
+                state.more.selectedLanguage = appLanguage
 
                 let logoutUseCase = logoutUseCase
                 let keychainClient = keychainClient
@@ -353,7 +384,9 @@ struct RootFeature {
             case .more(.deleteAccountConfirmed):
                 userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                state = State(isAuthLoading: false)
+                let appLanguage = state.appLanguage
+                state = State(appLanguage: appLanguage, isAuthLoading: false)
+                state.more.selectedLanguage = appLanguage
 
                 let deleteCurrentUserUseCase = deleteCurrentUserUseCase
                 let keychainClient = keychainClient
@@ -377,4 +410,31 @@ struct RootFeature {
         }
     }
 
+}
+
+extension RootFeature {
+    func resetMainContent(
+        language: AppLanguage,
+        userProfile: UserProfile,
+        state: inout State
+    ) {
+        state.appLanguage = language
+        state.currentUser = userProfile
+        state.selectedTab = .more
+        state.popup = nil
+
+        state.home = HomeFeature.State(userType: userProfile.userType)
+        state.community = CommunityFeature.State()
+
+        state.map = MapFeature.State()
+        state.map.userType = userProfile.userType
+
+        state.chat = ChatFeature.State()
+        _ = state.chat.applyUserType(userProfile.userType)
+
+        state.more = MoreFeature.State()
+        state.more.userType = userProfile.userType
+        state.more.userProfile = userProfile
+        state.more.selectedLanguage = language
+    }
 }
