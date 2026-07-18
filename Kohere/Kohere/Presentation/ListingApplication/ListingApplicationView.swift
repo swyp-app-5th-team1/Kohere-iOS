@@ -10,8 +10,6 @@ import SwiftUI
 
 struct ListingApplicationView: View {
     @Bindable var store: StoreOf<ListingApplicationFeature>
-    @Environment(\.locale)
-    private var locale
     @FocusState private var isPhoneNumberFocused: Bool
 
     var body: some View {
@@ -95,14 +93,14 @@ struct ListingApplicationView: View {
     private var dateSelectionBottomBar: some View {
         HStack(spacing: 8) {
             ListingApplicationBottomButton(
-                title: String(localized: "listingApplication.action.back", locale: locale),
+                title: store.appLanguage.localized("listingApplication.action.back"),
                 style: .secondary
             ) {
                 store.send(.previousButtonTapped)
             }
 
             ListingApplicationBottomButton(
-                title: String(localized: "listingApplication.action.apply", locale: locale),
+                title: store.appLanguage.localized("listingApplication.action.apply"),
                 style: .primary
             ) {
                 store.send(.dateSelectionApplyButtonTapped)

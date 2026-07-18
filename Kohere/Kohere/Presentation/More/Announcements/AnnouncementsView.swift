@@ -17,11 +17,13 @@ struct AnnouncementsView: View {
         VStack(spacing: 0) {
             KohereNavigationBar(
                 left: .backButton { store.send(.backButtonTapped) },
-                center: .text(String(localized: "more.support.announcements", locale: locale)),
+                center: .text(AppLanguage(locale: locale).localized("more.support.announcements")),
                 right: .none
             )
 
-            KohereEmptyView(title: String(localized: "announcements.empty.title", locale: locale))
+            KohereEmptyView(
+                title: AppLanguage(locale: locale).localized("announcements.empty.title")
+            )
         }
         .background(.backgroundNormalNormal)
     }
