@@ -17,8 +17,7 @@ struct QuizModel: Equatable {
     var options: [String] { choices.map(\.text) }
     var hasAnswered: Bool { selectedChoiceKey != nil && correctChoiceKey != nil }
     var shouldShowExplanation: Bool {
-        guard let selectedChoiceKey, let correctChoiceKey else { return false }
-        return selectedChoiceKey != correctChoiceKey && !(explanation ?? "").isEmpty
+        hasAnswered && !(explanation ?? "").isEmpty
     }
     
     init(entity: Quiz, selectedChoiceKey: String? = nil) {
