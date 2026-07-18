@@ -118,7 +118,9 @@ enum MonthlyRentPriceFormatter {
                 return "₩\(minimum.number)~\(maximum.number)\(maximum.suffix)"
             }
 
-            return "\(compactWonTitle(min))~\(compactWonTitle(max))"
+            let minimumText = "\(minimum.number)\(minimum.suffix)"
+            let maximumText = "\(maximum.number)\(maximum.suffix)"
+            return "₩\(minimumText)~\(maximumText)"
         case let (min?, nil):
             return "\(compactWonTitle(min))~"
         case let (nil, max?):

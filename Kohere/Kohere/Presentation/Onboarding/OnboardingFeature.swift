@@ -24,12 +24,15 @@ struct OnboardingFeature {
         var tenant: TenantOnboardingFeature.State?
         var landlord: LandlordOnboardingFeature.State?
 
-        init(userType: OnboardingUserType = .tenant) {
+        init(
+            userType: OnboardingUserType = .tenant,
+            appLanguage: AppLanguage = .systemDefault
+        ) {
             self.userType = userType
 
             switch userType {
             case .tenant:
-                self.tenant = TenantOnboardingFeature.State()
+                self.tenant = TenantOnboardingFeature.State(appLanguage: appLanguage)
                 self.landlord = nil
             case .landlord:
                 self.tenant = nil

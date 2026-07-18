@@ -9,6 +9,9 @@ import ComposableArchitecture
 import SwiftUI
 
 struct AccountView: View {
+    @Environment(\.locale)
+    private var locale
+
     let store: StoreOf<AccountFeature>
 
     var body: some View {
@@ -25,7 +28,7 @@ private extension AccountView {
     var navigationBar: some View {
         KohereNavigationBar(
             left: .backButton({ store.send(.backButtonTapped) }),
-            center: .text("계정"),
+            center: .text(localized("settings.account.title")),
             right: .none,
             backgroundColor: .coolNeutral5
         )
@@ -56,7 +59,7 @@ private extension AccountView {
         Button {
             store.send(.deleteAccountButtonTapped)
         } label: {
-            Text("계정 삭제하기")
+            Text(localized("account.deleteAccount.title"))
                 .kohereTextStyle(.label2Medium)
                 .foregroundStyle(.coolNeutral10)
                 .underline()
@@ -71,20 +74,20 @@ private extension AccountView {
         switch resolvedUserType {
         case .tenant:
             return [
-                .init(title: "연결된 이메일", value: store.userProfile?.email ?? ""),
-                .init(title: "생년월일", value: formattedBirthDate),
-                .init(title: "성별", value: formattedGender)
+                .init(title: localized("account.linkedEmail.title"), value: store.userProfile?.email ?? ""),
+                .init(title: localized("account.dateOfBirth.title"), value: formattedBirthDate),
+                .init(title: localized("account.gender.title"), value: formattedGender)
             ]
 
         case .landlord:
             return [
-                .init(title: "연결된 이메일", value: store.userProfile?.email ?? ""),
-                .init(title: "생년월일", value: formattedBirthDate)
+                .init(title: localized("account.linkedEmail.title"), value: store.userProfile?.email ?? ""),
+                .init(title: localized("account.dateOfBirth.title"), value: formattedBirthDate)
             ]
 
         case .unknown:
             return [
-                .init(title: "연결된 이메일", value: store.userProfile?.email ?? "")
+                .init(title: localized("account.linkedEmail.title"), value: store.userProfile?.email ?? "")
             ]
         }
     }
@@ -101,14 +104,18 @@ private extension AccountView {
     var formattedGender: String {
         switch store.userProfile?.gender {
         case Gender.male.rawValue:
-            return "남성"
+            return localized("account.gender.male")
         case Gender.female.rawValue:
-            return "여성"
+            return localized("account.gender.female")
         case let gender?:
             return gender
         case nil:
             return ""
         }
+    }
+
+    func localized(_ key: String) -> String {
+        AppLanguage(locale: locale).localized(key)
     }
 }
 

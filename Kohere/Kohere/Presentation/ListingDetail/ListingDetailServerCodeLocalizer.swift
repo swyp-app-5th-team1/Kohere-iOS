@@ -38,13 +38,24 @@ extension ListingDetailModel {
         let fallback: String
     }
 
-    static func refundPolicyTitle(_ refundPolicy: ListingDetailRefundPolicy) -> String {
+    static func refundPolicyTitle(
+        _ refundPolicy: ListingDetailRefundPolicy,
+        language: AppLanguage
+    ) -> String {
         if let description = refundPolicy.description,
-           let localizedDescription = localizedServerCode(description, namespace: .refundPolicyCode) {
+           let localizedDescription = localizedServerCode(
+               description,
+               namespace: .refundPolicyCode,
+               language: language
+           ) {
             return localizedDescription
         }
 
-        if let codeTitle = localizedServerCode(refundPolicy.code, namespace: .refundPolicyCode) {
+        if let codeTitle = localizedServerCode(
+            refundPolicy.code,
+            namespace: .refundPolicyCode,
+            language: language
+        ) {
             return codeTitle
         }
 
@@ -92,10 +103,15 @@ extension ListingDetailModel {
         }
     }
 
-    static func localizedAddressText(_ address: ListingDetailAddress?) -> String {
-        guard let address else { return "주소 정보 없음" }
+    static func localizedAddressText(
+        _ address: ListingDetailAddress?,
+        language: AppLanguage
+    ) -> String {
+        guard let address else {
+            return language.localized("listingDetail.value.noAddressInfo")
+        }
 
-        let fullAddress = localizedFullAddress(address.fullAddress)
+        let fullAddress = localizedFullAddress(address.fullAddress, language: language)
         let detail = address.detail?.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let addressParts = [fullAddress, detail]
@@ -107,17 +123,22 @@ extension ListingDetailModel {
         }
 
         let locationParts = [
-            localizedServerCode(address.city, namespace: .addressCity),
-            localizedServerCode(address.district, namespace: .addressDistrict),
+            localizedServerCode(address.city, namespace: .addressCity, language: language),
+            localizedServerCode(address.district, namespace: .addressDistrict, language: language),
             detail
         ]
         .compactMap { $0 }
         .filter { !$0.isEmpty }
 
-        return locationParts.isEmpty ? "주소 정보 없음" : locationParts.joined(separator: " ")
+        return locationParts.isEmpty
+            ? language.localized("listingDetail.value.noAddressInfo")
+            : locationParts.joined(separator: " ")
     }
 
-    static func localizedFullAddress(_ fullAddress: String?) -> String? {
+    static func localizedFullAddress(
+        _ fullAddress: String?,
+        language: AppLanguage
+    ) -> String? {
         guard let fullAddress = fullAddress?.trimmingCharacters(in: .whitespacesAndNewlines),
               !fullAddress.isEmpty else {
             return nil
@@ -126,16 +147,19 @@ extension ListingDetailModel {
         return addressTermLocalizations.reduce(fullAddress) { localizedAddress, localization in
             localizedAddress.replacingOccurrences(
                 of: localization.source,
-                with: localized(localization.key, fallback: localization.fallback)
+                with: language.localized(localization.key, fallback: localization.fallback)
             )
         }
     }
 
     static func localizedServerCodes(
         _ codes: [String],
-        namespace: ServerCodeNamespace
+        namespace: ServerCodeNamespace,
+        language: AppLanguage = .systemDefault
     ) -> [String] {
-        codes.map { localizedServerCode($0, namespace: namespace) ?? $0 }
+        codes.map {
+            localizedServerCode($0, namespace: namespace, language: language) ?? $0
+        }
     }
 
     static func localizedServerCode(

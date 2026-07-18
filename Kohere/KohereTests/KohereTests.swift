@@ -114,6 +114,17 @@ final class ListingCardLocalizationTests: XCTestCase {
 }
 
 final class ListingDetailValueFormatterLocalizationTests: XCTestCase {
+    func testDepositRangeUsesSingleWonSymbolAcrossDifferentUnits() {
+        XCTAssertEqual(
+            ListingDetailValueFormatter.priceRowValue(
+                min: 0,
+                max: 3_000_000,
+                language: .english
+            ),
+            "₩0~3M"
+        )
+    }
+
     func testMonthlyRentUsesExplicitAppLanguage() {
         XCTAssertEqual(
             ListingDetailValueFormatter.monthlyRentTitle(
@@ -911,7 +922,8 @@ final class ListingApplicationFeatureTests: XCTestCase {
                 listingTitle: "Hongdae Stay",
                 roomOfferID: "room-offer-1",
                 roomTypeName: "Single Room",
-                roomPricingText: "₩500,000 / month"
+                roomPricingText: "₩500,000 / month",
+                appLanguage: .english
             ),
             reducer: { ListingApplicationFeature() },
             withDependencies: {
@@ -1072,7 +1084,10 @@ final class ListingRecentResponseDTOTests: XCTestCase {
                   {
                     "listingId": "listing-1",
                     "title": "회기 고시원",
-                    "type": "GOSHIWON",
+                    "type": {
+                      "code": "GOSHIWON",
+                      "label": "고시원"
+                    },
                     "contract": {
                       "minStayMonths": 1,
                       "maxStayMonths": 3

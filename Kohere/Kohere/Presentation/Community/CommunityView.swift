@@ -10,8 +10,10 @@ import SwiftUI
 
 struct CommunityView: View {
     let store: StoreOf<CommunityFeature>
+    @Environment(\.locale)
+    private var locale
 
     var body: some View {
-        PlaceholderTabView(title: "커뮤니티")
+        PlaceholderTabView(title: String(localized: "tab.community", locale: locale))
     }
 }

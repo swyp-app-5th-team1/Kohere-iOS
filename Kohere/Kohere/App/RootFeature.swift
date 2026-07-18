@@ -95,8 +95,10 @@ struct RootFeature {
                     .flatMap(AppLanguage.init(rawValue:))
                     ?? .systemDefault
                 state.appLanguage = resolvedLanguage
+                state.onboarding.tenant?.appLanguage = resolvedLanguage
                 state.home.appLanguage = resolvedLanguage
                 state.map.appLanguage = resolvedLanguage
+                state.chat.appLanguage = resolvedLanguage
                 state.more.selectedLanguage = resolvedLanguage
                 var effects: [Effect<Action>] = [
                     .run { send in
@@ -150,7 +152,10 @@ struct RootFeature {
                 }
 
                 if let pendingOnboardingUserType {
-                    state.onboarding = OnboardingFeature.State(userType: pendingOnboardingUserType)
+                    state.onboarding = OnboardingFeature.State(
+                        userType: pendingOnboardingUserType,
+                        appLanguage: state.appLanguage
+                    )
                 } else {
                     state.authInfo = nil
                     state.login.authInfo = auth
@@ -166,6 +171,7 @@ struct RootFeature {
                 state = State(appLanguage: appLanguage, isAuthLoading: false)
                 state.home.appLanguage = appLanguage
                 state.map.appLanguage = appLanguage
+                state.chat.appLanguage = appLanguage
                 state.more.selectedLanguage = appLanguage
                 return .cancel(id: "RootFeature.fetchCurrentUser")
 
@@ -195,7 +201,10 @@ struct RootFeature {
                       let authInfo = state.login.authInfo else { return .none }
                 try? userDefaultsClient.save(userType.rawValue, for: .pendingOnboardingUserType)
                 state.authInfo = authInfo
-                state.onboarding = OnboardingFeature.State(userType: userType)
+                state.onboarding = OnboardingFeature.State(
+                    userType: userType,
+                    appLanguage: state.appLanguage
+                )
                 return .none
                 
             case let .onboarding(.onboardingResponse(.success(auth))):
@@ -373,6 +382,7 @@ struct RootFeature {
                 state = State(appLanguage: appLanguage, isAuthLoading: false)
                 state.home.appLanguage = appLanguage
                 state.map.appLanguage = appLanguage
+                state.chat.appLanguage = appLanguage
                 state.more.selectedLanguage = appLanguage
 
                 let logoutUseCase = logoutUseCase
@@ -398,6 +408,7 @@ struct RootFeature {
                 state = State(appLanguage: appLanguage, isAuthLoading: false)
                 state.home.appLanguage = appLanguage
                 state.map.appLanguage = appLanguage
+                state.chat.appLanguage = appLanguage
                 state.more.selectedLanguage = appLanguage
 
                 let deleteCurrentUserUseCase = deleteCurrentUserUseCase
@@ -444,7 +455,7 @@ extension RootFeature {
         state.map = MapFeature.State(appLanguage: language)
         state.map.userType = userProfile.userType
 
-        state.chat = ChatFeature.State()
+        state.chat = ChatFeature.State(appLanguage: language)
         _ = state.chat.applyUserType(userProfile.userType)
 
         state.more = MoreFeature.State()

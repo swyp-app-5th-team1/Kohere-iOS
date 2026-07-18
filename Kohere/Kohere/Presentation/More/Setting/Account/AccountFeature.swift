@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 @Reducer
 struct AccountFeature {
@@ -13,6 +14,7 @@ struct AccountFeature {
     struct State: Equatable {
         var userType: UserType
         var userProfile: UserProfile?
+        var language: AppLanguage = .systemDefault
     }
 
     enum Action: Equatable {
@@ -22,13 +24,13 @@ struct AccountFeature {
     }
 
     var body: some Reducer<State, Action> {
-        Reduce { _, action in
+        Reduce { state, action in
             switch action {
             case .backButtonTapped:
                 return .none
 
             case .deleteAccountButtonTapped:
-                return .send(.popupRequested(Self.deleteAccountPopup))
+                return .send(.popupRequested(Self.deleteAccountPopup(language: state.language)))
 
             case .popupRequested:
                 return .none
@@ -38,14 +40,18 @@ struct AccountFeature {
 }
 
 private extension AccountFeature {
-    static var deleteAccountPopup: AppPopup {
+    static func deleteAccountPopup(language: AppLanguage) -> AppPopup {
         .action(
             AppPopup.Action(
-                message: "탈퇴 시 지금까지의 이용기록이 영구 삭제됩니다.\n그럼에도 삭제하시겠습니까?",
-                primaryTitle: "뒤로가기",
-                secondaryTitle: "탈퇴하기",
+                message: localized("settings.withdrawal.confirmMessage", language: language),
+                primaryTitle: localized("settings.popup.cancel", language: language),
+                secondaryTitle: localized("settings.withdrawal.confirmAction", language: language),
                 secondaryRoute: .deleteAccount
             )
         )
+    }
+
+    static func localized(_ key: String, language: AppLanguage) -> String {
+        language.localized(key)
     }
 }

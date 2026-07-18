@@ -10,6 +10,8 @@ import SwiftUI
 
 struct SearchView: View {
     let store: StoreOf<SearchFeature>
+    @Environment(\.locale)
+    private var locale
     @FocusState private var isSearchFocused: Bool
 
     var body: some View {
@@ -229,7 +231,7 @@ struct SearchView: View {
             .accessibilityLabel(
                 Text(
                     String(
-                        format: String(localized: "search.recent.delete.accessibility"),
+                        format: String(localized: "search.recent.delete.accessibility", locale: locale),
                         recentSearch.keyword
                     )
                 )

@@ -13,6 +13,8 @@ struct ChatDetailView: View {
     // MARK: - Property
     
     let store: StoreOf<ChatDetailFeature>
+    @Environment(\.locale)
+    private var locale
     
     // MARK: - Body
     
@@ -26,8 +28,11 @@ struct ChatDetailView: View {
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 12) {
-                    if !store.chatRoom.dateText.isEmpty {
-                        Text(store.chatRoom.dateText)
+                    let dateText = store.chatRoom.localizedDateText(
+                        language: AppLanguage(locale: locale)
+                    )
+                    if !dateText.isEmpty {
+                        Text(dateText)
                             .kohereTextStyle(.caption1Regular)
                             .foregroundColor(.neutral40)
                     }

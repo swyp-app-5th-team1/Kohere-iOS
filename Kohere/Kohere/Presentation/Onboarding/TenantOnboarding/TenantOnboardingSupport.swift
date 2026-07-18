@@ -14,8 +14,8 @@ extension TenantOnboardingFeature.State {
 
     var primaryButtonTitle: String {
         currentStep == .emailVerification
-            ? String(localized: "common.start")
-            : String(localized: "common.next")
+            ? appLanguage.localized("common.start")
+            : appLanguage.localized("common.next")
     }
 
     var isNextButtonEnabled: Bool {

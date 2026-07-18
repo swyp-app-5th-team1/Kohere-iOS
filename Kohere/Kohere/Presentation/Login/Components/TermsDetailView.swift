@@ -15,14 +15,14 @@ enum TermsDetailKind: String, Equatable, Identifiable {
     
     var id: String { rawValue }
     
-    var title: String {
+    func title(language: AppLanguage) -> String {
         switch self {
         case .service:
-            String(localized: "login.terms.service.title")
+            language.localized("login.terms.service.title")
         case .privacy:
-            String(localized: "login.terms.privacy.title")
+            language.localized("login.terms.privacy.title")
         case .marketing:
-            String(localized: "login.terms.marketing.title")
+            language.localized("login.terms.marketing.title")
         }
     }
 
@@ -45,6 +45,8 @@ struct TermsDetailView: View {
     let kind: TermsDetailKind
     let onBackTapped: () -> Void
     let onAgreeTapped: () -> Void
+    @Environment(\.locale)
+    private var locale
     @State private var isLoading = true
     
     // MARK: - Body
@@ -53,7 +55,7 @@ struct TermsDetailView: View {
         VStack(spacing: 0) {
             KohereNavigationBar(
                 left: .backButton(onBackTapped),
-                center: .text(kind.title),
+                center: .text(kind.title(language: AppLanguage(locale: locale))),
                 backgroundColor: .common0,
                 height: 48
             )

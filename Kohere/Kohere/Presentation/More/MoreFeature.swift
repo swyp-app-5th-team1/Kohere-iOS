@@ -140,7 +140,8 @@ struct MoreFeature {
                             listingTitle: listingTitle,
                             roomOfferID: roomOfferID,
                             roomTypeName: roomTypeName,
-                            roomPricingText: roomPricingText
+                            roomPricingText: roomPricingText,
+                            appLanguage: state.selectedLanguage
                         )
                     )
                 )
@@ -161,7 +162,10 @@ struct MoreFeature {
             case let .path(.element(id: _, action: .listingApplication(.delegate(.privacyDocumentRequested(section))))):
                 state.path.append(
                     .listingApplicationPrivacyWeb(
-                        ListingApplicationPrivacyWebFeature.State(section: section)
+                        ListingApplicationPrivacyWebFeature.State(
+                            section: section,
+                            appLanguage: state.selectedLanguage
+                        )
                     )
                 )
                 return .none
@@ -224,7 +228,8 @@ struct MoreFeature {
                     .account(
                         AccountFeature.State(
                             userType: state.userType ?? .unknown,
-                            userProfile: state.userProfile
+                            userProfile: state.userProfile,
+                            language: state.selectedLanguage
                         )
                     )
                 )
@@ -354,7 +359,7 @@ struct MoreFeature {
                 )
 
             case .navigationSettingTapped:
-                state.path.append(.setting(SettingFeature.State()))
+                state.path.append(.setting(SettingFeature.State(language: state.selectedLanguage)))
                 return .none
 
             case .announcementsTapped:

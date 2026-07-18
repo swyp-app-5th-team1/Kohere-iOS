@@ -13,6 +13,8 @@ struct RecentlyViewedListingsView: View {
     // MARK: - Property
     
     let store: StoreOf<RecentlyViewedFeature>
+    @Environment(\.locale)
+    private var locale
     
     // MARK: - Body
     
@@ -20,7 +22,7 @@ struct RecentlyViewedListingsView: View {
         VStack(spacing: 0) {
             KohereNavigationBar(
                 left: .backButton({ store.send(.backButtonTapped) }),
-                center: .text(String(localized: "recentListings.title")),
+                center: .text(AppLanguage(locale: locale).localized("recentListings.title")),
                 right: .none
             )
             
@@ -29,7 +31,9 @@ struct RecentlyViewedListingsView: View {
                 .frame(height: 1)
             
             if store.items.isEmpty {
-                KohereEmptyView(title: String(localized: "recentListings.empty.title"))
+                KohereEmptyView(
+                    title: AppLanguage(locale: locale).localized("recentListings.empty.title")
+                )
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0) {

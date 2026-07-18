@@ -292,7 +292,10 @@ struct HomeFeature {
                 return handlePathAction(pathAction, state: &state)
                 
             case .navigationSearchTapped:
-                state.path.append(.search(SearchFeature.initialState(userDefaultsClient: userDefaultsClient)))
+                state.path.append(.search(SearchFeature.initialState(
+                    userDefaultsClient: userDefaultsClient,
+                    appLanguage: state.appLanguage
+                )))
                 return .none
                 
             case .navigationHeartTapped:

@@ -24,6 +24,7 @@ struct ListingApplicationFeature {
         let roomTypeName: String
         let roomPricingText: String
         let minimumMoveInDate: Date
+        let appLanguage: AppLanguage
 
         var moveInDate: Date
         var displayedMonth: Date
@@ -44,15 +45,17 @@ struct ListingApplicationFeature {
 
         var navigationTitle: String {
             switch step {
-            case .dateSelection: String(localized: "listingApplication.navigation.dateSelection")
-            case .review: String(localized: "listingApplication.navigation.review")
+            case .dateSelection:
+                appLanguage.localized("listingApplication.navigation.dateSelection")
+            case .review:
+                appLanguage.localized("listingApplication.navigation.review")
             }
         }
 
         var applicationTitle: String {
             String(
-                format: String(localized: "listingApplication.format.applicationTitle"),
-                locale: Self.displayLocale,
+                format: appLanguage.localized("listingApplication.format.applicationTitle"),
+                locale: displayLocale,
                 listingTitle
             )
         }
@@ -62,30 +65,30 @@ struct ListingApplicationFeature {
         }
 
         var displayedMonthTitle: String {
-            Self.monthFormatter.string(from: displayedMonth)
+            monthFormatter.string(from: displayedMonth)
         }
 
         var moveInCompactText: String {
-            Self.compactDateFormatter.string(from: moveInDate)
+            compactDateFormatter.string(from: moveInDate)
         }
 
         var moveOutCompactText: String {
-            Self.compactDateFormatter.string(from: moveOutDate)
+            compactDateFormatter.string(from: moveOutDate)
         }
 
         var moveInReviewText: String {
-            Self.reviewDateFormatter.string(from: moveInDate)
+            reviewDateFormatter.string(from: moveInDate)
         }
 
         var moveOutReviewText: String {
-            Self.reviewDateFormatter.string(from: moveOutDate)
+            reviewDateFormatter.string(from: moveOutDate)
         }
 
         var rentalPeriodText: String {
             let format = rentalMonths == 1
-                ? String(localized: "listingApplication.format.rentalPeriod.one")
-                : String(localized: "listingApplication.format.rentalPeriod.other")
-            return String(format: format, locale: Self.displayLocale, String(rentalMonths))
+                ? appLanguage.localized("listingApplication.format.rentalPeriod.one")
+                : appLanguage.localized("listingApplication.format.rentalPeriod.other")
+            return String(format: format, locale: displayLocale, String(rentalMonths))
         }
 
         var isSubmitButtonEnabled: Bool {
@@ -97,7 +100,7 @@ struct ListingApplicationFeature {
         }
 
         var submitButtonTitle: String {
-            String(localized: "listingApplication.action.submit")
+            appLanguage.localized("listingApplication.action.submit")
         }
 
         var normalizedPhoneNumber: String {
@@ -149,13 +152,15 @@ struct ListingApplicationFeature {
             listingTitle: String,
             roomOfferID: String,
             roomTypeName: String,
-            roomPricingText: String
+            roomPricingText: String,
+            appLanguage: AppLanguage = .systemDefault
         ) {
             self.listingID = listingID
             self.listingTitle = listingTitle
             self.roomOfferID = roomOfferID
             self.roomTypeName = roomTypeName
             self.roomPricingText = roomPricingText
+            self.appLanguage = appLanguage
 
             let today = Self.calendar.startOfDay(for: Date())
             minimumMoveInDate = today
@@ -226,7 +231,10 @@ struct ListingApplicationFeature {
                 state.isApplicantProfileLoading = false
                 state.hasLoadedApplicantProfile = true
                 state.applicantProfileErrorMessage = nil
-                state.applicantSummary = Self.applicantSummary(from: profile)
+                state.applicantSummary = Self.applicantSummary(
+                    from: profile,
+                    locale: state.displayLocale
+                )
 
                 if state.phoneNumber.isEmpty,
                    let phoneNumber = profile.phoneNumber?.filter(\.isNumber),
@@ -239,7 +247,9 @@ struct ListingApplicationFeature {
                 state.isApplicantProfileLoading = false
                 state.hasLoadedApplicantProfile = false
                 state.applicantProfileErrorMessage = error.localizedDescription
-                state.applicantSummary = String(localized: "listingApplication.applicant.profile.loadFailed")
+                state.applicantSummary = state.appLanguage.localized(
+                    "listingApplication.applicant.profile.loadFailed"
+                )
                 return .none
 
             case .backButtonTapped:
