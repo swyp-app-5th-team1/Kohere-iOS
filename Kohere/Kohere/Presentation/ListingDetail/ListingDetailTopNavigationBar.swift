@@ -11,7 +11,6 @@ struct ListingDetailTopNavigationBar: View {
     let progress: CGFloat
     let height: CGFloat
     let onBackTap: () -> Void
-    let onShareTap: () -> Void
 
     var body: some View {
         HStack {
@@ -22,12 +21,6 @@ struct ListingDetailTopNavigationBar: View {
             )
 
             Spacer()
-
-            chromeButton(
-                imageName: "share_ios_24",
-                accessibilityLabel: "공유하기",
-                action: onShareTap
-            )
         }
         .padding(.horizontal, 10)
         .padding(.top, 56)

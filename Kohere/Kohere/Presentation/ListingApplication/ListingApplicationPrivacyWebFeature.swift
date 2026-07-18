@@ -18,9 +18,10 @@ struct ListingApplicationPrivacyWebFeature {
 
         init(
             section: ListingApplicationPrivacySection,
+            appLanguage: AppLanguage = .systemDefault,
             isLoading: Bool = true
         ) {
-            title = section.title
+            title = section.title(language: appLanguage)
             url = section.url
             self.isLoading = isLoading
         }

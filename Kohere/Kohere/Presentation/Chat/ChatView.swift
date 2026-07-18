@@ -14,6 +14,8 @@ struct ChatView: View {
     // MARK: - Property
     
     let store: StoreOf<ChatFeature>
+    @Environment(\.locale)
+    private var locale
     @State private var revealedChatRoomID: Int?
     
     // MARK: - Body
@@ -22,14 +24,14 @@ struct ChatView: View {
         VStack(spacing: 8) {
             KohereNavigationBar(
                 left: .smallLogo,
-                center: .text(String(localized: "chat.title"), style: .label1Semibold)
+                center: .text(String(localized: "chat.title", locale: locale), style: .label1Semibold)
             )
             
             roomFinderBanner
             
             if store.chatRooms.isEmpty {
                 KohereEmptyView(
-                    title: String(localized: "chat.empty.title"),
+                    title: String(localized: "chat.empty.title", locale: locale),
                     fontStyle: .label2Semibold,
                     fontColor: .neutral40
                 )

@@ -38,7 +38,8 @@ extension MapFeature {
                         listingTitle: listingTitle,
                         roomOfferID: roomOfferID,
                         roomTypeName: roomTypeName,
-                        roomPricingText: roomPricingText
+                        roomPricingText: roomPricingText,
+                        appLanguage: state.appLanguage
                     )
                 )
             )
@@ -53,7 +54,10 @@ extension MapFeature {
         ):
             state.path.append(
                 .listingApplicationPrivacyWeb(
-                    ListingApplicationPrivacyWebFeature.State(section: section)
+                    ListingApplicationPrivacyWebFeature.State(
+                        section: section,
+                        appLanguage: state.appLanguage
+                    )
                 )
             )
             return .none

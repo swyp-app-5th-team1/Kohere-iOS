@@ -13,13 +13,17 @@ struct MapFilterView: View {
     private var locale
     @Bindable var store: StoreOf<MapFeature>
 
+    private var language: AppLanguage {
+        AppLanguage(locale: locale)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             KohereNavigationBar(
                 left: .closeButton {
                     store.send(.filterDismissed)
                 },
-                center: .text(String(localized: "map.filter.title"))
+                center: .text(language.localized("map.filter.title"))
             )
 
             ScrollView(.vertical, showsIndicators: false) {
@@ -43,7 +47,7 @@ struct MapFilterView: View {
     }
 
     private var filterOptionsSection: some View {
-        MapFilterSection(title: String(localized: "map.filter.section.options")) {
+        MapFilterSection(title: language.localized("map.filter.section.options")) {
             MapFilterFlowLayout(spacing: 8, rowSpacing: 8) {
                 ForEach(RoomCondition.allCases, id: \.self) { option in
                     MapFilterSelectionChip(
@@ -58,10 +62,10 @@ struct MapFilterView: View {
     }
 
     private var priceSection: some View {
-        MapFilterSection(title: String(localized: "map.filter.section.price")) {
+        MapFilterSection(title: language.localized("map.filter.section.price")) {
             VStack(spacing: 16) {
                 MapPriceRangeControl(
-                    title: String(localized: "map.filter.monthlyRent"),
+                    title: language.localized("map.filter.monthlyRent"),
                     selection: store.editingFilter.monthlyRentRange,
                     bounds: MapFilterPriceRange.monthlyRent,
                     middleLabel: MapFilterPriceFormatter.amountText(50, locale: locale),
@@ -71,7 +75,7 @@ struct MapFilterView: View {
                 )
 
                 MapPriceRangeControl(
-                    title: String(localized: "map.filter.deposit"),
+                    title: language.localized("map.filter.deposit"),
                     selection: store.editingFilter.depositRange,
                     bounds: MapFilterPriceRange.deposit,
                     middleLabel: MapFilterPriceFormatter.amountText(150, locale: locale),
@@ -84,7 +88,7 @@ struct MapFilterView: View {
     }
 
     private var propertyTypeSection: some View {
-        MapFilterSection(title: String(localized: "map.filter.section.propertyType")) {
+        MapFilterSection(title: language.localized("map.filter.section.propertyType")) {
             MapFilterFlowLayout(spacing: 8, rowSpacing: 8) {
                 ForEach(MapPropertyType.allCases, id: \.self) { propertyType in
                     MapFilterSelectionChip(

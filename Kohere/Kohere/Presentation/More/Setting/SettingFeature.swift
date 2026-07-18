@@ -20,9 +20,14 @@ struct SettingFeature {
     @ObservableState
     struct State: Equatable {
         var appVersion: String
+        var language: AppLanguage
 
-        init(appVersion: String = Bundle.main.shortVersionString) {
+        init(
+            appVersion: String = Bundle.main.shortVersionString,
+            language: AppLanguage = .systemDefault
+        ) {
             self.appVersion = appVersion
+            self.language = language
         }
     }
 
@@ -34,14 +39,14 @@ struct SettingFeature {
     }
 
     var body: some Reducer<State, Action> {
-        Reduce { _, action in
+        Reduce { state, action in
             switch action {
             case .backButtonTapped,
                  .settingItemTapped:
                 return .none
 
             case .logoutButtonTapped:
-                return .send(.popupRequested(Self.logoutPopup))
+                return .send(.popupRequested(Self.logoutPopup(language: state.language)))
 
             case .popupRequested:
                 return .none
@@ -51,15 +56,19 @@ struct SettingFeature {
 }
 
 private extension SettingFeature {
-    static var logoutPopup: AppPopup {
+    static func logoutPopup(language: AppLanguage) -> AppPopup {
         .action(
             AppPopup.Action(
-                message: "로그아웃 시 원활한 이용이 어려울 수 있습니다.\n그럼에도 로그아웃하시겠습니까?",
-                primaryTitle: "뒤로가기",
-                secondaryTitle: "로그아웃하기",
+                message: localized("settings.logout.confirmMessage", language: language),
+                primaryTitle: localized("settings.popup.cancel", language: language),
+                secondaryTitle: localized("settings.logout.confirmAction", language: language),
                 secondaryRoute: .logout
             )
         )
+    }
+
+    static func localized(_ key: String, language: AppLanguage) -> String {
+        language.localized(key)
     }
 }
 

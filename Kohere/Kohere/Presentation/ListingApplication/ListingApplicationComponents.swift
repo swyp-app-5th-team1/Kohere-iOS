@@ -106,6 +106,8 @@ struct ListingApplicationBottomButton: View {
 }
 
 struct ListingApplicationSummaryCard: View {
+    @Environment(\.locale)
+    private var locale
     let title: String
     let roomTypeName: String
     let moveInDateText: String
@@ -122,13 +124,13 @@ struct ListingApplicationSummaryCard: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 VStack(spacing: 12) {
-                    badgeRow(title: String(localized: "listingApplication.review.field.roomType"), value: roomTypeName)
-                    badgeRow(title: String(localized: "listingApplication.review.field.moveInDate"), value: moveInDateText)
-                    badgeRow(title: String(localized: "listingApplication.review.field.moveOutDate"), value: moveOutDateText)
+                    badgeRow(title: String(localized: "listingApplication.review.field.roomType", locale: locale), value: roomTypeName)
+                    badgeRow(title: String(localized: "listingApplication.review.field.moveInDate", locale: locale), value: moveInDateText)
+                    badgeRow(title: String(localized: "listingApplication.review.field.moveOutDate", locale: locale), value: moveOutDateText)
                 }
 
-                plainRow(title: String(localized: "listingApplication.review.field.leaseTerm"), value: rentalPeriodText)
-                plainRow(title: String(localized: "listingApplication.review.field.cost"), value: priceText)
+                plainRow(title: String(localized: "listingApplication.review.field.leaseTerm", locale: locale), value: rentalPeriodText)
+                plainRow(title: String(localized: "listingApplication.review.field.cost", locale: locale), value: priceText)
             }
         }
         .padding(16)
@@ -281,6 +283,8 @@ struct ListingApplicationApplicantCard: View {
 }
 
 struct ListingApplicationPrivacySectionView: View {
+    @Environment(\.locale)
+    private var locale
     let onSectionTap: (ListingApplicationPrivacySection) -> Void
 
     var body: some View {
@@ -303,7 +307,7 @@ struct ListingApplicationPrivacySectionView: View {
             onSectionTap(section)
         } label: {
             HStack(spacing: 12) {
-                Text(section.title)
+                Text(section.title(language: AppLanguage(locale: locale)))
                     .kohereTextStyle(.label2Medium)
                     .foregroundStyle(.neutral70)
 

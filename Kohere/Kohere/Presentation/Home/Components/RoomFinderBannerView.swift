@@ -45,14 +45,12 @@ struct RoomFinderBannerView: View {
                     Text("common.roomFinderBanner.title")
                         .kohereTextStyle(.heading2Bold)
                         .foregroundColor(.staticBlack)
-                        .lineSpacing(4)
                         .padding(.top, 20)
                     
                     Text("home.roomFinder.subtitle")
                         .kohereTextStyle(.body1Regular)
                         .foregroundColor(.labelNeutral)
-                        .lineSpacing(2)
-                        .padding(.top, 12)
+                        .padding(.top, 16)
                     
                     Spacer()
                 }

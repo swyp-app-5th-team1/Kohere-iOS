@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct ListingDetailRoomOffersSection: View {
+    let title: String
     let roomOffers: [ListingRoomOfferModel]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             ListingDetailSectionHeader(
-                title: String(localized: "listingDetail.section.roomOffers"),
+                title: title,
                 count: roomOffers.count,
                 showsChevron: false
             )

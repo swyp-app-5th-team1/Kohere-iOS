@@ -111,15 +111,15 @@ struct ListingTransitInfoModel: Equatable, Identifiable {
 }
 
 extension ListingDetailModel {
-    static var tabs: [String] {
+    static func tabs(language: AppLanguage) -> [String] {
         [
-            String(localized: "listingDetail.tab.roomOffers"),
-            String(localized: "listingDetail.tab.price"),
-            String(localized: "listingDetail.tab.property"),
-            String(localized: "listingDetail.tab.building"),
-            String(localized: "listingDetail.tab.facility"),
-            String(localized: "listingDetail.tab.location"),
-            String(localized: "listingDetail.tab.review")
+            language.localized("listingDetail.tab.roomOffers"),
+            language.localized("listingDetail.tab.price"),
+            language.localized("listingDetail.tab.property"),
+            language.localized("listingDetail.tab.building"),
+            language.localized("listingDetail.tab.facility"),
+            language.localized("listingDetail.tab.location"),
+            language.localized("listingDetail.tab.review")
         ]
     }
 }

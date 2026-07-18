@@ -18,6 +18,7 @@ struct SearchFeature {
 
     @ObservableState
     struct State: Equatable {
+        var appLanguage: AppLanguage = .systemDefault
         var searchText = ""
         var contentState: SearchContentState = .recentSearches
         var recentSearches: [SearchRecentSearch] = []
@@ -61,6 +62,7 @@ struct SearchFeature {
                 let keyword = state.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !keyword.isEmpty else { return .none }
                 let placeSearchClient = placeSearchClient
+                let appLanguage = state.appLanguage
                 state.placeResults = []
                 state.contentState = .searching
                 return .run { send in
@@ -74,7 +76,7 @@ struct SearchFeature {
                         guard !Task.isCancelled else { return }
                         await send(.placeSearchFailed(
                             requestedKeyword: keyword,
-                            message: placeSearchFailureMessage(for: error)
+                            message: placeSearchFailureMessage(for: error, language: appLanguage)
                         ))
                     }
                 }
@@ -118,7 +120,10 @@ struct SearchFeature {
                 }
                 state.placeResults = []
                 state.contentState = .typing
-                return .send(.popupRequested(placeSearchFailurePopup(message: message)))
+                return .send(.popupRequested(placeSearchFailurePopup(
+                    message: message,
+                    language: state.appLanguage
+                )))
 
             case .popupRequested:
                 return .none
@@ -128,8 +133,14 @@ struct SearchFeature {
 }
 
 extension SearchFeature {
-    static func initialState(userDefaultsClient: UserDefaultsClient) -> State {
-        State(recentSearches: loadRecentSearches(userDefaultsClient: userDefaultsClient))
+    static func initialState(
+        userDefaultsClient: UserDefaultsClient,
+        appLanguage: AppLanguage = .systemDefault
+    ) -> State {
+        State(
+            appLanguage: appLanguage,
+            recentSearches: loadRecentSearches(userDefaultsClient: userDefaultsClient)
+        )
     }
 }
 
@@ -163,8 +174,8 @@ private extension SearchFeature {
         )
     }
 
-    func placeSearchFailurePopup(message: String) -> AppPopup {
-        let fallbackMessage = String(localized: "search.error.failed")
+    func placeSearchFailurePopup(message: String, language: AppLanguage) -> AppPopup {
+        let fallbackMessage = language.localized("search.error.failed")
         let resolvedMessage = message.isEmpty ? fallbackMessage : message
         return .notice(AppPopup.Notice(message: resolvedMessage))
     }
@@ -221,19 +232,19 @@ extension SearchPlaceResult {
     }
 }
 
-private func placeSearchFailureMessage(for error: Error) -> String {
+private func placeSearchFailureMessage(for error: Error, language: AppLanguage) -> String {
     let dataError = (error as? DataError) ?? .underlying(message: error.localizedDescription)
     switch dataError {
     case let .serverError(code, _):
         switch code {
         case "INVALID_INPUT":
-            return String(localized: "search.error.invalidInput")
+            return language.localized("search.error.invalidInput")
 
         default:
-            return String(localized: "search.error.failed")
+            return language.localized("search.error.failed")
         }
 
     default:
-        return String(localized: "search.error.failed")
+        return language.localized("search.error.failed")
     }
 }
