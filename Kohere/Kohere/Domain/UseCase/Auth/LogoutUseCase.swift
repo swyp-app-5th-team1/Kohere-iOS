@@ -7,6 +7,11 @@
 
 import ComposableArchitecture
 
+enum LogoutError: Error {
+    case remoteRequestFailed
+    case localAuthCleanupFailed
+}
+
 struct LogoutUseCase {
     var execute: () async throws -> Void
 }

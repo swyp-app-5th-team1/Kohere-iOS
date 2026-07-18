@@ -30,6 +30,8 @@ struct RootFeature {
         var appLanguage: AppLanguage = .systemDefault
         var isAuthLoading = true
         var isCurrentUserLoading = false
+        var isLogoutRequesting = false
+        var isDeleteAccountRequesting = false
         var login = LoginFeature.State()
         var onboarding = OnboardingFeature.State()
         var selectedTab: AppTab = .home
@@ -47,6 +49,9 @@ struct RootFeature {
         case storedAuthLoaded(Auth?, OnboardingUserType?)
         case authSessionExpired(AuthSessionExpirationContext?)
         case currentUserResponse(Result<UserProfile, Error>)
+        case logoutResponse(Result<Void, Error>)
+        case deleteAccountResponse(Result<Void, Error>)
+        case deleteAccountLocalCleanupResponse(Result<Void, Error>)
         case login(LoginFeature.Action)
         case saveAuthResponse(Result<Auth, Error>)
         case onboarding(OnboardingFeature.Action)
@@ -116,6 +121,17 @@ struct RootFeature {
                     effects.append(
                         .run { send in
                             let hasLaunchedBefore = try userDefaultsClient.load(for: .hasLaunchedBefore) ?? false
+
+                            let requiresAuthCleanup = try userDefaultsClient.load(for: .requiresAuthCleanup) ?? false
+                            if requiresAuthCleanup {
+                                do {
+                                    try keychainClient.delete(for: .auth)
+                                    userDefaultsClient.delete(for: .requiresAuthCleanup)
+                                } catch {
+                                    await send(.storedAuthLoaded(nil, nil))
+                                    return
+                                }
+                            }
 
                             if !hasLaunchedBefore {
                                 Self.logFirstLaunchAuthReset()
@@ -193,6 +209,7 @@ struct RootFeature {
 
             case let .login(.loginAuthStored(auth)):
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
+                userDefaultsClient.delete(for: .requiresAuthCleanup)
                 state.authInfo = auth
                 return .none
                 
@@ -219,6 +236,7 @@ struct RootFeature {
             
             case let .saveAuthResponse(.success(updatedAuthInfo)):
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
+                userDefaultsClient.delete(for: .requiresAuthCleanup)
                 state.authInfo = updatedAuthInfo
                 return .none
 
@@ -376,56 +394,79 @@ struct RootFeature {
                 )
 
             case .more(.logoutConfirmed):
-                userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
-                userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                let appLanguage = state.appLanguage
-                state = State(appLanguage: appLanguage, isAuthLoading: false)
-                state.home.appLanguage = appLanguage
-                state.map.appLanguage = appLanguage
-                state.chat.appLanguage = appLanguage
-                state.more.selectedLanguage = appLanguage
-
+                guard !state.isLogoutRequesting else { return .none }
+                state.isLogoutRequesting = true
                 let logoutUseCase = logoutUseCase
-                let keychainClient = keychainClient
 
-                return .merge(
-                    .cancel(id: "RootFeature.fetchCurrentUser"),
-                    .run { _ in
-                        defer {
-                            try? keychainClient.delete(for: .auth)
-                        }
-
-                        do {
-                            try await logoutUseCase.execute()
-                        } catch {}
+                return .run { send in
+                    do {
+                        try await logoutUseCase.execute()
+                        await send(.logoutResponse(.success(())))
+                    } catch {
+                        await send(.logoutResponse(.failure(error)))
                     }
-                )
+                }
+                .cancellable(id: "RootFeature.logout", cancelInFlight: true)
+
+            case .logoutResponse(.success):
+                return completeLogout(state: &state)
+
+            case let .logoutResponse(.failure(error)):
+                if case LogoutError.localAuthCleanupFailed = error {
+                    state.isLogoutRequesting = false
+                    state.popup = .notice(
+                        AppPopup.Notice(
+                            message: state.appLanguage.localized("settings.logout.failure")
+                        )
+                    )
+                    return .none
+                }
+
+                return completeLogout(state: &state)
 
             case .more(.deleteAccountConfirmed):
-                userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
-                userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                let appLanguage = state.appLanguage
-                state = State(appLanguage: appLanguage, isAuthLoading: false)
-                state.home.appLanguage = appLanguage
-                state.map.appLanguage = appLanguage
-                state.chat.appLanguage = appLanguage
-                state.more.selectedLanguage = appLanguage
-
+                guard !state.isDeleteAccountRequesting else { return .none }
+                state.isDeleteAccountRequesting = true
                 let deleteCurrentUserUseCase = deleteCurrentUserUseCase
+
+                return .run { send in
+                    do {
+                        try await deleteCurrentUserUseCase.execute()
+                        await send(.deleteAccountResponse(.success(())))
+                    } catch {
+                        await send(.deleteAccountResponse(.failure(error)))
+                    }
+                }
+                .cancellable(id: "RootFeature.deleteAccount", cancelInFlight: true)
+
+            case .deleteAccountResponse(.success):
+                try? userDefaultsClient.save(true, for: .requiresAuthCleanup)
                 let keychainClient = keychainClient
 
-                return .merge(
-                    .cancel(id: "RootFeature.fetchCurrentUser"),
-                    .run { _ in
-                        defer {
-                            try? keychainClient.delete(for: .auth)
-                        }
-
-                        do {
-                            try await deleteCurrentUserUseCase.execute()
-                        } catch {}
+                return .run { send in
+                    do {
+                        try keychainClient.delete(for: .auth)
+                        await send(.deleteAccountLocalCleanupResponse(.success(())))
+                    } catch {
+                        await send(.deleteAccountLocalCleanupResponse(.failure(error)))
                     }
+                }
+
+            case .deleteAccountResponse(.failure):
+                state.isDeleteAccountRequesting = false
+                state.popup = .notice(
+                    AppPopup.Notice(
+                        message: state.appLanguage.localized("settings.withdrawal.failure")
+                    )
                 )
+                return .none
+
+            case .deleteAccountLocalCleanupResponse(.success):
+                userDefaultsClient.delete(for: .requiresAuthCleanup)
+                return completeLogout(state: &state)
+
+            case .deleteAccountLocalCleanupResponse(.failure):
+                return completeLogout(state: &state)
                 
             case .login, .onboarding, .home, .community, .map, .chat, .more:
                 return .none

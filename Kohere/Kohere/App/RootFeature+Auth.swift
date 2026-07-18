@@ -195,4 +195,30 @@ extension RootFeature {
         )
     }
 
+    func completeLogout(state: inout State) -> Effect<Action> {
+        userDefaultsClient.delete(for: .mapDiagnosisButtonLastExpandedAt)
+        userDefaultsClient.delete(for: .pendingOnboardingUserType)
+        userDefaultsClient.delete(for: .recentSearchKeywords)
+
+        let appLanguage = state.appLanguage
+        state = State(appLanguage: appLanguage, isAuthLoading: false)
+        state.home.appLanguage = appLanguage
+        state.map.appLanguage = appLanguage
+        state.chat.appLanguage = appLanguage
+        state.more.selectedLanguage = appLanguage
+
+        return .merge(
+            .cancel(id: "RootFeature.fetchCurrentUser"),
+            .cancel(id: SearchFeatureCancelID.placeSearch),
+            .cancel(id: MapEffectID.exchangeRate),
+            .cancel(id: MapEffectID.diagnosisButtonAutoCollapse),
+            .cancel(id: MapEffectID.diagnosisDetail),
+            .cancel(id: MapEffectID.diagnosisRecommendations),
+            .cancel(id: MapEffectID.listingSearch),
+            .cancel(id: "ListingApplication.fetchApplicantProfile"),
+            .cancel(id: "ListingApplication.createBooking"),
+            .cancel(id: "ListingDetail.roomTypeValidationMessage")
+        )
+    }
+
 }
