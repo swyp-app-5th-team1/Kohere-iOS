@@ -271,7 +271,11 @@ struct ListingDetailReviewSection: View {
                 showsChevron: false
             )
 
-            Text(reviewCount == 0 ? String(localized: "listingDetail.review.empty") : "리뷰를 확인해보세요")
+            Text(
+                reviewCount == 0
+                    ? String(localized: "listingDetail.review.empty")
+                    : String(localized: "listingDetail.review.prompt")
+            )
                 .kohereTextStyle(.caption1Regular)
                 .foregroundStyle(.labelAlternative)
                 .frame(maxWidth: .infinity)

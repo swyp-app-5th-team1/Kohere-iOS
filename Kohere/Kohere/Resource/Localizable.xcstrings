@@ -3833,6 +3833,22 @@
         }
       }
     },
+    "listingDetail.review.prompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check out the reviews"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "리뷰를 확인해보세요"
+          }
+        }
+      }
+    },
     "listingDetail.section.locationAndNearby" : {
       "localizations" : {
         "en" : {
