@@ -18,6 +18,7 @@ struct UserDefaultsKey<Value: Codable & Sendable>: Sendable {
 
 extension UserDefaultsKey where Value == Bool {
     nonisolated static let hasLaunchedBefore = Self(rawValue: "hasLaunchedBefore")
+    nonisolated static let requiresAuthCleanup = Self(rawValue: "requiresAuthCleanup")
 }
 
 extension UserDefaultsKey where Value == Date {

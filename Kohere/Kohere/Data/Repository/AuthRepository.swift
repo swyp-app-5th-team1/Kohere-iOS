@@ -46,24 +46,36 @@ final class AuthRepository: AuthInterface {
     }
     
     func logout() async throws {
-        defer {
-            try? keychainClient.delete(for: .auth)
-        }
-        
-        let auth = try loadStoredAuth()
-        guard let refreshToken = auth.refreshToken else {
-            throw AuthRepositoryError.missingRefreshToken
-        }
-        
-        let environment = try environmentProvider()
-        let requestDTO = LogoutRequestDTO(refreshToken: refreshToken)
-        
-        try await authenticatedNetworkService.requestVoid(
-            AuthRouter.logout(
-                requestDTO,
-                environment
+        var remoteLogoutFailed = false
+
+        do {
+            let auth = try loadStoredAuth()
+            guard let refreshToken = auth.refreshToken else {
+                throw AuthRepositoryError.missingRefreshToken
+            }
+
+            let environment = try environmentProvider()
+            let requestDTO = LogoutRequestDTO(refreshToken: refreshToken)
+
+            try await authenticatedNetworkService.requestVoid(
+                AuthRouter.logout(
+                    requestDTO,
+                    environment
+                )
             )
-        )
+        } catch {
+            remoteLogoutFailed = true
+        }
+
+        do {
+            try keychainClient.delete(for: .auth)
+        } catch {
+            throw LogoutError.localAuthCleanupFailed
+        }
+
+        if remoteLogoutFailed {
+            throw LogoutError.remoteRequestFailed
+        }
     }
 
     func sendPhoneVerificationCode(phoneNumber: String) async throws -> PhoneVerificationCode {

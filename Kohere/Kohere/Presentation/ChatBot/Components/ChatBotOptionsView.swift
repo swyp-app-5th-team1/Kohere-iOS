@@ -95,7 +95,7 @@ extension ChatBotOptionsView {
         VStack(alignment: .trailing, spacing: 10) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text("월세")
+                    Text(String(localized: "map.filter.monthlyRent"))
                         .kohereTextStyle(.label2Medium)
                         .foregroundStyle(.labelNeutral)
 

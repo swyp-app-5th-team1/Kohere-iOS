@@ -188,7 +188,7 @@ private extension Array where Element: Hashable {
     }
 }
 
-private nonisolated enum SearchFeatureCancelID: Hashable, Sendable {
+nonisolated enum SearchFeatureCancelID: Hashable, Sendable {
     case placeSearch
 }
 
