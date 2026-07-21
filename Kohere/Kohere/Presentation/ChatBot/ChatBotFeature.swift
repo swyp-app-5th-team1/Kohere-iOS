@@ -46,21 +46,6 @@ struct ChatBotFeature {
             completedDiagnosisID != nil
         }
 
-        var budgetSummaryText: String {
-            let bounds = MapFilterPriceRange.monthlyRent
-
-            switch (budgetRange.minimum, budgetRange.maximum) {
-            case (bounds.lowerBound, bounds.upperBound):
-                return "Any"
-            case (bounds.lowerBound, let maximum):
-                return "Under \(Self.budgetPriceText(maximum))"
-            case (let minimum, bounds.upperBound):
-                return "\(Self.budgetPriceText(minimum))+"
-            case let (minimum, maximum):
-                return "\(Self.budgetPriceText(minimum)) ~ \(Self.budgetPriceText(maximum))"
-            }
-        }
-
         var budgetAnswerText: String {
             "\(budgetRange.minimum)~\(budgetRange.maximum)만원"
         }
@@ -71,7 +56,7 @@ struct ChatBotFeature {
             bounds: MapFilterPriceRange.monthlyRent
         )
 
-        private static func budgetPriceText(_ value: Int) -> String {
+        static func budgetPriceText(_ value: Int) -> String {
             if value >= 100, value % 100 == 0 {
                 return "₩\(value / 100)M"
             }
