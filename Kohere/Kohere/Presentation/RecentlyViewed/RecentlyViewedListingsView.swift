@@ -55,5 +55,6 @@ struct RecentlyViewedListingsView: View {
         .onAppear {
             store.send(.onAppear)
         }
+        .interactivePopGestureEnabled()
     }
 }

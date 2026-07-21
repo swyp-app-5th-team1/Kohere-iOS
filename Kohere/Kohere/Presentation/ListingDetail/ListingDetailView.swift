@@ -44,9 +44,7 @@ struct ListingDetailView: View {
             .onAppear {
                 store.send(.onAppear)
             }
-            .background {
-                ListingDetailSwipeBackEnabler()
-            }
+            .interactivePopGestureEnabled()
         }
     }
 

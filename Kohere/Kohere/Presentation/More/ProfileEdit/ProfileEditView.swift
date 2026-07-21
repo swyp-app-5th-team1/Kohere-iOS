@@ -26,6 +26,7 @@ struct ProfileEditView: View {
             profileForm
         }
         .background(.backgroundNormalAlternative)
+        .interactivePopGestureEnabled()
     }
 }
 
