@@ -32,6 +32,7 @@ struct SearchView: View {
         .onDisappear {
             isSearchFocused = false
         }
+        .interactivePopGestureEnabled()
     }
 
     private var searchHeader: some View {

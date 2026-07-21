@@ -21,6 +21,7 @@ struct AccountView: View {
             content
         }
         .background(.coolNeutral5)
+        .interactivePopGestureEnabled()
     }
 }
 

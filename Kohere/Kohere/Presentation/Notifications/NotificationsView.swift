@@ -35,5 +35,6 @@ struct NotificationsView: View {
             )
         }
         .background(.backgroundNormalNormal)
+        .interactivePopGestureEnabled()
     }
 }

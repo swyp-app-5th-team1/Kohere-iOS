@@ -21,6 +21,7 @@ struct SettingView: View {
             content
         }
         .background(.coolNeutral5)
+        .interactivePopGestureEnabled()
     }
 }
 

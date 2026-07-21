@@ -9,7 +9,8 @@ struct LivingGuide: Equatable, Identifiable {
     let id: Int
     let code: String
     let title: String
-    let subtitle: String
+    let shortDescription: String
+    let longDescription: String
     let iconName: String
     let theme: LivingGuideTheme
     var tips: [LivingGuideTip]
@@ -34,16 +35,17 @@ extension LivingGuide {
         id: Int,
         code: String,
         name: String,
+        shortDescription: String,
+        longDescription: String,
         iconName: String,
         theme: LivingGuideTheme,
         tips: [LivingGuideTip] = []
     ) {
-        let titleParts = name.split(separator: "\n", maxSplits: 1, omittingEmptySubsequences: false)
-
         self.id = id
         self.code = code
-        self.title = titleParts.first.map(String.init) ?? name
-        self.subtitle = titleParts.dropFirst().first.map(String.init) ?? ""
+        self.title = name
+        self.shortDescription = shortDescription
+        self.longDescription = longDescription
         self.iconName = iconName
         self.theme = theme
         self.tips = tips

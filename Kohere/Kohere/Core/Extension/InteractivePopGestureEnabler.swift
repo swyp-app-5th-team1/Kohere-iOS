@@ -1,14 +1,23 @@
 //
-//  ListingDetailSwipeBackSupport.swift
+//  InteractivePopGestureEnabler.swift
 //  Kohere
 //
-//  Created by Codex on 7/17/26.
+//  Created by soomin on 7/21/26.
 //
 
 import SwiftUI
 import UIKit
 
-struct ListingDetailSwipeBackEnabler: UIViewRepresentable {
+extension View {
+    func interactivePopGestureEnabled() -> some View {
+        background {
+            InteractivePopGestureEnabler()
+                .frame(width: 0, height: 0)
+        }
+    }
+}
+
+private struct InteractivePopGestureEnabler: UIViewRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator()
     }
@@ -16,10 +25,10 @@ struct ListingDetailSwipeBackEnabler: UIViewRepresentable {
     func makeUIView(context: Context) -> NavigationControllerResolverView {
         let view = NavigationControllerResolverView()
         view.onResolve = { [weak coordinator = context.coordinator] navigationController in
-            coordinator?.enableSwipeBack(in: navigationController)
+            coordinator?.enableInteractivePopGesture(in: navigationController)
         }
         view.onRemoval = { [weak coordinator = context.coordinator] in
-            coordinator?.restoreSwipeBack()
+            coordinator?.restoreInteractivePopGesture()
         }
         return view
     }
@@ -30,7 +39,7 @@ struct ListingDetailSwipeBackEnabler: UIViewRepresentable {
         _ uiView: NavigationControllerResolverView,
         coordinator: Coordinator
     ) {
-        coordinator.restoreSwipeBack()
+        coordinator.restoreInteractivePopGesture()
     }
 
     final class Coordinator: NSObject {
@@ -39,13 +48,13 @@ struct ListingDetailSwipeBackEnabler: UIViewRepresentable {
         private weak var previousDelegate: UIGestureRecognizerDelegate?
         private var previousIsEnabled = false
 
-        func enableSwipeBack(in navigationController: UINavigationController) {
+        func enableInteractivePopGesture(in navigationController: UINavigationController) {
             guard self.navigationController !== navigationController,
                   let popGestureRecognizer = navigationController.interactivePopGestureRecognizer else {
                 return
             }
 
-            restoreSwipeBack()
+            restoreInteractivePopGesture()
 
             self.navigationController = navigationController
             self.popGestureRecognizer = popGestureRecognizer
@@ -56,10 +65,8 @@ struct ListingDetailSwipeBackEnabler: UIViewRepresentable {
             popGestureRecognizer.isEnabled = navigationController.viewControllers.count > 1
         }
 
-        func restoreSwipeBack() {
-            guard let popGestureRecognizer else {
-                return
-            }
+        func restoreInteractivePopGesture() {
+            guard let popGestureRecognizer else { return }
 
             if popGestureRecognizer.delegate == nil {
                 popGestureRecognizer.delegate = previousDelegate
@@ -86,11 +93,10 @@ struct ListingDetailSwipeBackEnabler: UIViewRepresentable {
 
             DispatchQueue.main.async { [weak self] in
                 guard let self,
-                      window != nil else {
+                      window != nil,
+                      let navigationController else {
                     return
                 }
-
-                guard let navigationController else { return }
 
                 onResolve?(navigationController)
             }
