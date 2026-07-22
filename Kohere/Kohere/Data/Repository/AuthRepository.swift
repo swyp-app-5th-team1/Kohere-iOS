@@ -114,8 +114,7 @@ final class AuthRepository: AuthInterface {
             AuthRouter.sendEmailVerificationCode(
                 requestDTO,
                 environment
-            ),
-            debugRawJSONLabel: "Auth.sendEmailVerificationCode"
+            )
         )
 
         return responseDTO.toEntity()
@@ -191,8 +190,7 @@ final class AuthRepository: AuthInterface {
             AuthRouter.completeLandlordOnboarding(
                 requestDTO,
                 environment
-            ),
-            debugRawJSONLabel: "LandlordOnboarding.complete"
+            )
         )
 
         return responseDTO.toEntity()

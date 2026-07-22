@@ -45,10 +45,6 @@ final class UserRepository: UserInterface {
         try await authenticatedNetworkService.requestVoid(
             UserRouter.deleteMe(environment)
         )
-
-        #if DEBUG
-        print("[UserRepository] delete current user succeeded.")
-        #endif
     }
 }
 

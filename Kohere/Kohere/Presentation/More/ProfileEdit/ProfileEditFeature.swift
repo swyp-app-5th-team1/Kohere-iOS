@@ -163,22 +163,13 @@ struct ProfileEditFeature {
                 state.isSaving = false
                 return .send(.delegate(.profileUpdated(userProfile)))
 
-            case let .updateProfileResponse(.failure(error)):
+            case .updateProfileResponse(.failure):
                 state.isSaving = false
-                Self.debugLogUpdateFailure(error)
                 return .none
 
             case .delegate:
                 return .none
             }
         }
-    }
-}
-
-private extension ProfileEditFeature {
-    static func debugLogUpdateFailure(_ error: DataError) {
-#if DEBUG
-        print("[ProfileEdit] update profile failed: \(error.debugDescription)")
-#endif
     }
 }
