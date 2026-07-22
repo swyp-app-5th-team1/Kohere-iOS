@@ -68,7 +68,6 @@ nonisolated struct AuthOnboardingRequestDTO: Encodable, Sendable {
     let gender: String
     let birthDate: String
     let country: String
-    let occupation: String
     let email: String
     let visaType: String
 }

@@ -11,5 +11,4 @@ enum ProfileEditField: Hashable {
     case nationality
     case gender
     case visaStatus
-    case occupation
 }

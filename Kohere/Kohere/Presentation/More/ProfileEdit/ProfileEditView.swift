@@ -59,10 +59,8 @@ private extension ProfileEditView {
                     nameFields
                     
                     nationalityAndGenderFields
-                        .zIndex(3)
-                    visaStatusField
                         .zIndex(2)
-                    occupationField
+                    visaStatusField
                         .zIndex(1)
                 }
                 .padding(.horizontal, 20)
@@ -166,20 +164,6 @@ private extension ProfileEditView {
             isRequired: true
         )
         .id(ProfileEditField.visaStatus)
-    }
-
-    var occupationField: some View {
-        ProfileEditDropdownField(
-            title: "onboarding.profile.occupation",
-            selectedOption: $store.selectedOccupation,
-            activeField: $activeField,
-            keyboardField: $keyboardField,
-            equals: .occupation,
-            options: DropdownMenuOption.occupations,
-            listHeight: 239,
-            isRequired: true
-        )
-        .id(ProfileEditField.occupation)
     }
 
     func scrollToActiveField(_ field: ProfileEditField?, proxy: ScrollViewProxy) {
