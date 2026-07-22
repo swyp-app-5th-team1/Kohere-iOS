@@ -105,7 +105,7 @@ extension ChatBotView {
                 Button {
                     store.send(.findButtonTapped)
                 } label: {
-                    Text(String(localized: "chatBot.action.find"))
+                    Text(AppLanguage(locale: locale).localized("chatBot.action.find"))
                         .kohereTextStyle(.label1Semibold)
                         .foregroundColor(store.isFindButtonEnabled ? .staticWhite : .labelDisable)
                         .frame(maxWidth: .infinity)

@@ -29,6 +29,7 @@ struct ChatBotFeature {
         var currentQuestion: Diagnosis?
         var selectedOptionCodes: Set<String> = []
         var budgetRange = Self.defaultBudgetRange
+        var diagnosisFilter = MapFilterState()
         var completedDiagnosisID: String?
         var isQuestionLoading = false
         var isAnswerSaving = false
@@ -46,8 +47,12 @@ struct ChatBotFeature {
             completedDiagnosisID != nil
         }
 
-        var budgetAnswerText: String {
-            "\(budgetRange.minimum)~\(budgetRange.maximum)만원"
+        func budgetAnswerText(language: AppLanguage) -> String {
+            let format = language.localized("chatBot.budget.range")
+            let amounts = [budgetRange.minimum, budgetRange.maximum].map {
+                MapFilterPriceFormatter.amountText($0, locale: language.locale) as CVarArg
+            }
+            return String(format: format, locale: language.locale, arguments: amounts)
         }
 
         static let defaultBudgetRange = RangeSliderValue(
@@ -75,7 +80,7 @@ struct ChatBotFeature {
         case confirmButtonTapped
         case budgetMinimumChanged(Int)
         case budgetMaximumChanged(Int)
-        case budgetConfirmButtonTapped
+        case budgetConfirmButtonTapped(AppLanguage)
         case findButtonTapped
         case resetButtonTapped
         case mapRequested(MapEntryRequest)
@@ -150,6 +155,10 @@ struct ChatBotFeature {
                 if diagnosis.selectType == .single {
                     state.history.append(.user(id: UUID(), text: option.title))
 
+                    if let condition = RoomCondition(conditionCode: option.id) {
+                        state.diagnosisFilter.selectedOptions.insert(condition)
+                    }
+
                     state.isAnswerSaving = true
                     let answer = DiagnosisAnswer.single(field: diagnosis.field, code: option.id)
 
@@ -189,6 +198,10 @@ struct ChatBotFeature {
                     .filter { state.selectedOptionCodes.contains($0) }
                 let answer = DiagnosisAnswer.multiple(field: diagnosis.field, codes: selectedCodes)
 
+                state.diagnosisFilter.selectedOptions.formUnion(
+                    selectedCodes.compactMap(RoomCondition.init(conditionCode:))
+                )
+
                 state.isAnswerSaving = true
                 return .run { send in
                     await send(.flowResponse(Result {
@@ -204,13 +217,17 @@ struct ChatBotFeature {
                 state.budgetRange.updateMaximum(maximum, bounds: MapFilterPriceRange.monthlyRent)
                 return .none
 
-            case .budgetConfirmButtonTapped:
+            case let .budgetConfirmButtonTapped(language):
                 guard let diagnosis = state.currentDiagnosis,
                       diagnosis.selectType == .slider,
                       !state.isAnswerSaving else { return .none }
 
-                state.history.append(.user(id: UUID(), text: state.budgetAnswerText))
+                state.history.append(.user(
+                    id: UUID(),
+                    text: state.budgetAnswerText(language: language)
+                ))
                 state.isAnswerSaving = true
+                state.diagnosisFilter.monthlyRentRange = state.budgetRange
 
                 let answer = DiagnosisAnswer.monthlyRent(
                     field: diagnosis.field,
@@ -225,9 +242,9 @@ struct ChatBotFeature {
                 
             case .findButtonTapped:
                 guard let diagnosisID = state.completedDiagnosisID else { return .none }
-                let request = Int(diagnosisID)
-                    .map(MapEntryRequest.diagnosis(id:))
-                    ?? .browseListings
+                let request = Int(diagnosisID).map {
+                    MapEntryRequest.diagnosis(id: $0, filter: state.diagnosisFilter)
+                } ?? .browseListings
                 return .send(.mapRequested(request))
                 
             case .resetButtonTapped:
@@ -258,6 +275,7 @@ private extension ChatBotFeature.State {
         currentQuestion = nil
         selectedOptionCodes.removeAll()
         budgetRange = Self.defaultBudgetRange
+        diagnosisFilter = MapFilterState()
         completedDiagnosisID = nil
         isQuestionLoading = false
         isAnswerSaving = false

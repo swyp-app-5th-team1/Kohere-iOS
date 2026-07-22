@@ -15,24 +15,27 @@ extension RootFeature {
         case .browseListings:
             return .send(.map(.browseListingsRequested))
 
-        case let .diagnosis(id):
-            return .send(.map(.diagnosisResultRequested(diagnosisID: id)))
+        case let .diagnosis(id, filter):
+            return .send(.map(.diagnosisResultRequested(diagnosisID: id, filter: filter)))
         }
     }
 
-    func openListingMapPreview(
-        coordinate: MapCoordinate,
-        state: inout State
-    ) -> Effect<Action> {
+    func openListingMapPreview(coordinate: MapCoordinate, state: inout State) -> Effect<Action> {
         state.selectedTab = .map
         return .send(.map(.listingMapPreviewRequested(coordinate)))
     }
 
-    func handlePopupRoute(
-        _ route: AppPopup.Route,
-        state: inout State
-    ) -> Effect<Action> {
+    func handlePopupRoute(_ route: AppPopup.Route, state: inout State) -> Effect<Action> {
         switch route {
+        case .signIn:
+            state.login = LoginFeature.State()
+            state.isAuthenticationFlowPresented = true
+            return .none
+
+        case .home:
+            state.selectedTab = .home
+            return .none
+
         case .logout:
             return .send(.more(.logoutConfirmed))
 

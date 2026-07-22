@@ -274,7 +274,9 @@ struct MoreFeature {
                 return .none
 
             case .navigationLanguageTapped:
-                guard !state.isLanguageUpdateLoading else { return .none }
+                guard state.userType != .landlord,
+                      !state.isLanguageUpdateLoading
+                else { return .none }
                 state.isLanguagePopoverPresented.toggle()
                 return .none
 
@@ -285,7 +287,9 @@ struct MoreFeature {
             case let .languageSelected(language):
                 state.isLanguagePopoverPresented = false
 
-                guard language != state.selectedLanguage else { return .none }
+                guard state.userType != .landlord,
+                      language != state.selectedLanguage
+                else { return .none }
 
                 return .send(
                     .popupRequested(
@@ -310,7 +314,8 @@ struct MoreFeature {
                 )
 
             case let .languageChangeConfirmed(language):
-                guard language != state.selectedLanguage,
+                guard state.userType != .landlord,
+                      language != state.selectedLanguage,
                       !state.isLanguageUpdateLoading
                 else { return .none }
 
@@ -411,6 +416,7 @@ struct MoreFeature {
                 return .none
 
             case .recentlyViewedListingsTapped:
+                guard state.canUseFavoriteFeatures else { return .none }
                 state.path.append(
                     .recentlyViewedList(
                         RecentlyViewedFeature.State(

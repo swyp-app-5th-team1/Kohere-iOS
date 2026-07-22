@@ -16,24 +16,14 @@ struct RootView: View {
             Color.backgroundNormalNormal
                 .ignoresSafeArea()
             
-            if store.isAuthLoading {
-                // TODO: 키체인 값을 읽어오는 동안 보여줄 화면
-            } else if store.authInfo == nil {
-                LoginView(
-                    store: store.scope(
-                        state: \RootFeature.State.login,
-                        action: \.login
-                    )
-                )
-            } else if store.authInfo?.onboardingRequired == true {
-                OnboardingView(
-                    store: store.scope(
-                        state: \RootFeature.State.onboarding,
-                        action: \.onboarding
-                    )
-                )
-            } else {
+            if !store.isAuthLoading {
                 tabView
+            }
+
+            if store.isAuthenticationFlowPresented {
+                authenticationFlow
+                    .transition(.move(edge: .trailing))
+                    .zIndex(20)
             }
 
             if let popup = store.popup {
@@ -42,8 +32,19 @@ struct RootView: View {
         }
         .environment(\.locale, store.appLanguage.locale)
         .animation(.easeInOut(duration: 0.2), value: store.popup)
+        .animation(.easeInOut(duration: 0.25), value: store.isAuthenticationFlowPresented)
         .onAppear {
             store.send(.onAppear)
+        }
+    }
+
+    @ViewBuilder private var authenticationFlow: some View {
+        if store.authInfo?.onboardingRequired == true {
+            OnboardingView(store: store.scope(state: \RootFeature.State.onboarding, action: \.onboarding))
+            .background(.backgroundNormalNormal)
+        } else {
+            LoginView(store: store.scope(state: \RootFeature.State.login, action: \.login))
+            .background(.backgroundNormalNormal)
         }
     }
     

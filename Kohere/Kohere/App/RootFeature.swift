@@ -20,6 +20,8 @@ struct RootFeature {
     var logoutUseCase
     @Dependency(\.fetchCurrentUserUseCase)
     var fetchCurrentUserUseCase
+    @Dependency(\.updateProfileUseCase)
+    var updateProfileUseCase
     @Dependency(\.deleteCurrentUserUseCase)
     var deleteCurrentUserUseCase
     
@@ -32,6 +34,7 @@ struct RootFeature {
         var isCurrentUserLoading = false
         var isLogoutRequesting = false
         var isDeleteAccountRequesting = false
+        var isAuthenticationFlowPresented = false
         var login = LoginFeature.State()
         var onboarding = OnboardingFeature.State()
         var selectedTab: AppTab = .home
@@ -54,6 +57,7 @@ struct RootFeature {
         case deleteAccountLocalCleanupResponse(Result<Void, Error>)
         case login(LoginFeature.Action)
         case saveAuthResponse(Result<Auth, Error>)
+        case onboardingLanguageUpdateResponse(AppLanguage, Result<UserProfile, Error>)
         case onboarding(OnboardingFeature.Action)
         case selectedTabChanged(AppTab)
         case popupPresented(AppPopup)
@@ -96,9 +100,13 @@ struct RootFeature {
                 let userDefaultsClient = userDefaultsClient
                 let reissueTokenUseCase = reissueTokenUseCase
                 let storedLanguageRawValue = try? userDefaultsClient.load(for: .appLanguage)
-                let resolvedLanguage = storedLanguageRawValue
-                    .flatMap(AppLanguage.init(rawValue:))
-                    ?? .systemDefault
+                let resolvedLanguage: AppLanguage
+                if !state.isAuthLoading, state.authInfo == nil {
+                    resolvedLanguage = .english
+                } else {
+                    resolvedLanguage = storedLanguageRawValue
+                        .flatMap(AppLanguage.init(rawValue:)) ?? .systemDefault
+                }
                 state.appLanguage = resolvedLanguage
                 state.onboarding.tenant?.appLanguage = resolvedLanguage
                 state.home.appLanguage = resolvedLanguage
@@ -162,17 +170,26 @@ struct RootFeature {
                 state.authInfo = auth
                 state.isAuthLoading = false
 
+                if auth == nil {
+                    applyAppLanguage(.english, state: &state)
+                }
+
                 guard auth?.onboardingRequired == true else {
                     userDefaultsClient.delete(for: .pendingOnboardingUserType)
                     return .none
                 }
 
+                state.isAuthenticationFlowPresented = true
+
                 if let pendingOnboardingUserType {
+                    let defaultLanguage = defaultLanguage(for: pendingOnboardingUserType)
+                    applyAppLanguage(defaultLanguage, state: &state)
                     state.onboarding = OnboardingFeature.State(
                         userType: pendingOnboardingUserType,
-                        appLanguage: state.appLanguage
+                        appLanguage: defaultLanguage
                     )
                 } else {
+                    applyAppLanguage(.english, state: &state)
                     state.authInfo = nil
                     state.login.authInfo = auth
                     state.login.currentSheet = .userTypeSelect
@@ -183,8 +200,9 @@ struct RootFeature {
             case let .authSessionExpired(context):
                 Self.logSessionExpiration(context)
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                let appLanguage = state.appLanguage
+                let appLanguage = AppLanguage.english
                 state = State(appLanguage: appLanguage, isAuthLoading: false)
+                state.isAuthenticationFlowPresented = true
                 state.home.appLanguage = appLanguage
                 state.map.appLanguage = appLanguage
                 state.chat.appLanguage = appLanguage
@@ -201,8 +219,13 @@ struct RootFeature {
                 }
 
                 state.isCurrentUserLoading = false
+                let language = user.userType == .landlord ? AppLanguage.korean : user.appLanguage
 
-                if let language = user.appLanguage,
+                if user.userType == .landlord {
+                    try? userDefaultsClient.save(AppLanguage.korean.rawValue, for: .appLanguage)
+                }
+
+                if let language,
                    language != state.appLanguage {
                     try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
                     let selectedTab = state.selectedTab
@@ -228,16 +251,20 @@ struct RootFeature {
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 userDefaultsClient.delete(for: .requiresAuthCleanup)
                 state.authInfo = auth
-                return .none
+                state.isAuthenticationFlowPresented = false
+                return fetchCurrentUserIfNeeded(state: &state)
                 
             case let .login(.userTypeSelected(userType)):
                 guard state.login.isRequiredTermsAgreed,
                       let authInfo = state.login.authInfo else { return .none }
+                let defaultLanguage = defaultLanguage(for: userType)
+                try? userDefaultsClient.save(defaultLanguage.rawValue, for: .appLanguage)
                 try? userDefaultsClient.save(userType.rawValue, for: .pendingOnboardingUserType)
+                applyAppLanguage(defaultLanguage, state: &state)
                 state.authInfo = authInfo
                 state.onboarding = OnboardingFeature.State(
                     userType: userType,
-                    appLanguage: state.appLanguage
+                    appLanguage: defaultLanguage
                 )
                 return .none
                 
@@ -255,7 +282,59 @@ struct RootFeature {
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 userDefaultsClient.delete(for: .requiresAuthCleanup)
                 state.authInfo = updatedAuthInfo
-                return .none
+                let language = defaultLanguage(for: state.onboarding.userType)
+                applyAppLanguage(language, state: &state)
+                let updateProfileUseCase = updateProfileUseCase
+
+                return .run { send in
+                    do {
+                        let profile = try await updateProfileUseCase.execute(
+                            UserProfileUpdate(lang: language.rawValue)
+                        )
+                        await send(.onboardingLanguageUpdateResponse(
+                            language,
+                            .success(profile)
+                        ))
+                    } catch {
+                        await send(.onboardingLanguageUpdateResponse(
+                            language,
+                            .failure(error)
+                        ))
+                    }
+                }
+
+            case let .onboardingLanguageUpdateResponse(language, .success(userProfile)):
+                try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
+                state.isAuthenticationFlowPresented = false
+                let selectedTab = state.selectedTab
+                resetMainContent(
+                    language: language,
+                    userProfile: userProfile,
+                    selectedTab: selectedTab,
+                    state: &state
+                )
+                return .merge(
+                    .send(.home(.onAppear)),
+                    .send(.more(.onAppear))
+                )
+
+            case .onboardingLanguageUpdateResponse(_, .failure):
+                state.isAuthenticationFlowPresented = false
+                return fetchCurrentUserIfNeeded(state: &state)
+
+            case .home(.navigationHeartTapped),
+                 .home(.navigationNoticeTapped),
+                 .home(.seeAllListingsTapped),
+                 .home(.likeButtonTapped),
+                 .map(.listingLikeButtonTapped),
+                 .more(.savedListingsTapped),
+                 .more(.recentlyViewedListingsTapped):
+                return presentAuthenticationGateIfNeeded(state: &state)
+
+            case .home(.path(.element(id: _, action: .listingDetail(.likeButtonTapped)))),
+                 .map(.path(.element(id: _, action: .listingDetail(.likeButtonTapped)))),
+                 .more(.path(.element(id: _, action: .listingDetail(.likeButtonTapped)))):
+                return presentAuthenticationGateIfNeeded(state: &state)
 
             case .saveAuthResponse(.failure):
                 return .none
@@ -301,6 +380,10 @@ struct RootFeature {
                 
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
+                if state.authInfo?.onboardingRequired != false,
+                   tab == .chat || tab == .more {
+                    return presentAuthenticationGateIfNeeded(state: &state, returnsToHomeOnDismiss: true)
+                }
                 return .none
 
             case let .popupPresented(popup):
@@ -384,6 +467,18 @@ struct RootFeature {
                 return .none
 
             case let .more(.userProfileUpdated(userProfile)):
+                if userProfile.userType == .landlord,
+                   state.appLanguage != .korean {
+                    try? userDefaultsClient.save(AppLanguage.korean.rawValue, for: .appLanguage)
+                    let selectedTab = state.selectedTab
+                    resetMainContent(language: .korean,
+                        userProfile: userProfile,
+                        selectedTab: selectedTab,
+                        state: &state
+                    )
+                    return .merge(.send(.home(.onAppear)), .send(.more(.onAppear)))
+                }
+
                 state.currentUser = userProfile
                 state.home.userType = userProfile.userType
                 state.map.userType = userProfile.userType
@@ -399,9 +494,9 @@ struct RootFeature {
                 return .merge(effects)
 
             case let .more(.languageUpdateResponse(language, .success(userProfile))):
-                try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
-                resetMainContent(
-                    language: language,
+                let resolvedLanguage = userProfile.userType == .landlord ? AppLanguage.korean : language
+                try? userDefaultsClient.save(resolvedLanguage.rawValue, for: .appLanguage)
+                resetMainContent(language: resolvedLanguage,
                     userProfile: userProfile,
                     state: &state
                 )
@@ -494,6 +589,39 @@ struct RootFeature {
 }
 
 extension RootFeature {
+    func defaultLanguage(for userType: OnboardingUserType) -> AppLanguage {
+        switch userType {
+        case .tenant:
+            .english
+        case .landlord:
+            .korean
+        }
+    }
+
+    func applyAppLanguage(_ language: AppLanguage, state: inout State) {
+        state.appLanguage = language
+        state.onboarding.tenant?.appLanguage = language
+        state.home.appLanguage = language
+        state.map.appLanguage = language
+        state.chat.appLanguage = language
+        state.more.selectedLanguage = language
+    }
+
+    func presentAuthenticationGateIfNeeded(state: inout State, returnsToHomeOnDismiss: Bool = false) -> Effect<Action> {
+        guard state.authInfo?.onboardingRequired != false else { return .none }
+
+        state.popup = .action(
+            AppPopup.Action(
+                message: state.appLanguage.localized("authGate.message"),
+                primaryTitle: state.appLanguage.localized("authGate.signIn"),
+                secondaryTitle: state.appLanguage.localized("authGate.notNow"),
+                primaryRoute: .signIn,
+                secondaryRoute: returnsToHomeOnDismiss ? .home : nil
+            )
+        )
+        return .none
+    }
+
     func resetMainContent(
         language: AppLanguage,
         userProfile: UserProfile,

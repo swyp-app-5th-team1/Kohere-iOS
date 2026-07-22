@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct RangeSliderValue: Equatable {
+struct RangeSliderValue: Equatable, Sendable {
     var minimum: Int
     var maximum: Int
 

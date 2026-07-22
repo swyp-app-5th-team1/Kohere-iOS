@@ -148,7 +148,7 @@ extension ChatBotOptionsView {
 
             Button {
                 withAnimation(.easeInOut(duration: 0.2)) {
-                    _ = store.send(.budgetConfirmButtonTapped)
+                    _ = store.send(.budgetConfirmButtonTapped(AppLanguage(locale: locale)))
                 }
             } label: {
                 Text("confirm")
