@@ -128,7 +128,7 @@ struct MapListingSheetView: View {
         ForEach(store.listings) { item in
             ListingCardView(
                 item: item,
-                showsLikeButton: store.canUseFavoriteFeatures,
+                showsLikeButton: store.showsFavoriteControls,
                 onCardTapped: {
                     store.send(.listingCardTapped(item.listingID))
                 },
