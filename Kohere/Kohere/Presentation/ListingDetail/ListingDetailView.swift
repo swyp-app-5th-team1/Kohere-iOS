@@ -407,7 +407,7 @@ struct ListingDetailView: View {
     private func bottomBar(detail: ListingDetailModel) -> some View {
         ListingDetailBottomBar(
             isLiked: detail.overview.isLiked,
-            showsLikeButton: store.canUseFavoriteFeatures,
+            showsLikeButton: store.showsFavoriteControl,
             isApplyEnabled: store.canUseApplicationFeatures,
             onLikeTap: { store.send(.likeButtonTapped) },
             onApplyTap: { store.send(.applyButtonTapped) }

@@ -52,6 +52,8 @@ enum AppPopup: Equatable {
     }
 
     enum Route: Equatable {
+        case signIn
+        case home
         case logout
         case deleteAccount
         case dismissListingDetail

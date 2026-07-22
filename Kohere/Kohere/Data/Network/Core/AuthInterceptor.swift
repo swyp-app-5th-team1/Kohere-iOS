@@ -87,6 +87,11 @@ final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
             completion(.doNotRetryWithError(error))
             return
         }
+
+        guard request.request?.value(forHTTPHeaderField: "Authorization") != nil else {
+            completion(.doNotRetryWithError(error))
+            return
+        }
         
         guard request.retryCount == 0 else {
             let attemptID = String(UUID().uuidString.prefix(8))

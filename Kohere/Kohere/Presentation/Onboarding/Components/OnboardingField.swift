@@ -15,7 +15,6 @@ enum OnboardingField: Hashable {
     case birthYear
 
     case visaStatus
-    case occupation
     case nationality
     case gender
 

@@ -25,7 +25,6 @@ struct ProfileEditFeature {
         var selectedNationality: DropdownMenuOption?
         var selectedGender: DropdownMenuOption?
         var selectedVisa: DropdownMenuOption?
-        var selectedOccupation: DropdownMenuOption?
         var isSaving = false
         private let userProfile: UserProfile?
 
@@ -37,7 +36,6 @@ struct ProfileEditFeature {
 
         var profileUpdate: UserProfileUpdate? {
             guard hasRequiredFields,
-                  let occupation = selectedOccupation?.occupation,
                   let visaType = selectedVisa?.visaType
             else { return nil }
 
@@ -47,7 +45,7 @@ struct ProfileEditFeature {
                 gender: selectedGender?.gender,
                 birthDate: userProfile?.birthDate,
                 country: selectedNationality?.nationalityCountryCode ?? userProfile?.country,
-                occupation: occupation,
+                occupation: nil,
                 visaType: visaType,
                 name: userProfile?.name,
                 phoneNumber: userProfile?.phoneNumber,
@@ -59,7 +57,6 @@ struct ProfileEditFeature {
             !Self.normalizedText(firstName).isEmpty
             && !Self.normalizedText(lastName).isEmpty
             && selectedVisa != nil
-            && selectedOccupation != nil
         }
 
         init(userProfile: UserProfile? = nil) {
@@ -71,7 +68,6 @@ struct ProfileEditFeature {
             selectedNationality = Self.nationalityOption(from: userProfile?.country)
             selectedGender = Self.genderOption(from: userProfile?.gender)
             selectedVisa = Self.visaOption(from: userProfile?.visaType)
-            selectedOccupation = Self.occupationOption(from: userProfile?.occupation)
         }
 
         private var hasChanges: Bool {
@@ -80,7 +76,6 @@ struct ProfileEditFeature {
             || selectedNationality != Self.nationalityOption(from: userProfile?.country)
             || selectedGender != Self.genderOption(from: userProfile?.gender)
             || selectedVisa != Self.visaOption(from: userProfile?.visaType)
-            || selectedOccupation != Self.occupationOption(from: userProfile?.occupation)
         }
 
         private static func normalizedText(_ text: String) -> String {
@@ -101,14 +96,6 @@ struct ProfileEditFeature {
             else { return nil }
 
             return DropdownMenuOption(visaType)
-        }
-
-        private static func occupationOption(from rawValue: String?) -> DropdownMenuOption? {
-            guard let rawValue,
-                  let occupation = Occupation(rawValue: rawValue)
-            else { return nil }
-
-            return DropdownMenuOption(occupation)
         }
 
         private static func nationalityOption(from countryCode: String?) -> DropdownMenuOption? {

@@ -17,6 +17,7 @@ struct DiagnosisFlowResponseDTO: Decodable {
     let resultCode: String
     let question: DiagnosisQuestionResponseDTO?
     let diagnosisId: Int?
+    let guestSessionId: String?
 }
 
 struct DiagnosisSelectResponseDTO: Decodable {

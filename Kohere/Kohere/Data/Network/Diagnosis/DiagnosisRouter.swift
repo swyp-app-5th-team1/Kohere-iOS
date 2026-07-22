@@ -10,7 +10,11 @@ import Foundation
 
 enum DiagnosisRouter: URLRequestConvertible {
     case startFlow(environment: APIEnvironment)
-    case advanceFlow(DiagnosisAnswerRequestDTO, environment: APIEnvironment)
+    case advanceFlow(
+        DiagnosisAnswerRequestDTO,
+        guestSessionID: String?,
+        environment: APIEnvironment
+    )
     case question(step: Int, environment: APIEnvironment)
     case saveAnswer(DiagnosisAnswerRequestDTO, environment: APIEnvironment)
     case submit(environment: APIEnvironment)
@@ -18,6 +22,7 @@ enum DiagnosisRouter: URLRequestConvertible {
     case recommendations(
         diagnosisID: Int,
         query: DiagnosisRecommendationsQueryDTO,
+        guestSessionID: String?,
         APIEnvironment
     )
 
@@ -51,7 +56,7 @@ enum DiagnosisRouter: URLRequestConvertible {
         case let .detail(diagnosisID, _):
             "api/v1/diagnoses/\(diagnosisID)"
 
-        case let .recommendations(diagnosisID, _, _):
+        case let .recommendations(diagnosisID, _, _, _):
             "api/v2/diagnoses/\(diagnosisID)/recommendations"
         }
     }
@@ -59,12 +64,12 @@ enum DiagnosisRouter: URLRequestConvertible {
     private var environment: APIEnvironment {
         switch self {
         case let .startFlow(environment),
-             let .advanceFlow(_, environment),
+             let .advanceFlow(_, _, environment),
              let .question(_, environment),
              let .saveAnswer(_, environment),
 			 let .submit(environment),
 			 let .detail(_, environment),
-             let .recommendations(_, _, environment):
+             let .recommendations(_, _, _, environment):
             environment
         }
     }
@@ -77,10 +82,10 @@ enum DiagnosisRouter: URLRequestConvertible {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         switch self {
-        case let .recommendations(_, query, _):
+        case let .recommendations(_, query, _, _):
             request = try URLEncodedFormParameterEncoder.default.encode(query, into: request)
 
-        case let .advanceFlow(requestDTO, _),
+        case let .advanceFlow(requestDTO, _, _),
              let .saveAnswer(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
@@ -88,6 +93,21 @@ enum DiagnosisRouter: URLRequestConvertible {
             break
         }
 
+        if let guestSessionID {
+            request.setValue(guestSessionID, forHTTPHeaderField: "X-Guest-Session-Id")
+        }
+
         return request
+    }
+
+    private var guestSessionID: String? {
+        switch self {
+        case let .advanceFlow(_, guestSessionID, _),
+             let .recommendations(_, _, guestSessionID, _):
+            guestSessionID
+
+        case .startFlow, .question, .saveAnswer, .submit, .detail:
+            nil
+        }
     }
 }

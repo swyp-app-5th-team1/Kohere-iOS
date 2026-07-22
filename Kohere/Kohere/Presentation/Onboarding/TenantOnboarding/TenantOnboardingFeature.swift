@@ -52,7 +52,6 @@ struct TenantOnboardingFeature {
         var selectedYear: DropdownMenuOption?
 
         var selectedVisa: VisaType?
-        var selectedOccupation: Occupation?
         var selectedNationality: DropdownMenuOption?
         var selectedGender: Gender?
 
