@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct MapFilterState: Equatable {
+struct MapFilterState: Equatable, Sendable {
     var selectedOptions: Set<RoomCondition> = []
 
     var monthlyRentRange = MapFilterPriceRange.defaultMonthlyRent
@@ -87,7 +87,7 @@ enum MapFilterPriceRange {
     )
 }
 
-enum MapPropertyType: CaseIterable, Hashable {
+enum MapPropertyType: CaseIterable, Hashable, Sendable {
     case goshiwon
     case coLiving
     case shareHouse

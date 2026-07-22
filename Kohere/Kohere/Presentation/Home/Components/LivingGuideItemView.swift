@@ -8,9 +8,6 @@
 import SwiftUI
 
 struct LivingGuideItemView: View {
-    @Environment(\.locale)
-    private var locale
-    
     // MARK: - Properties
     
     let item: LivingGuide
@@ -27,11 +24,11 @@ struct LivingGuideItemView: View {
                     .frame(width: 32, height: 32)
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(localized(item.theme.titleLocalizationKey))
+                    Text(item.title)
                         .kohereTextStyle(.label2Semibold)
                         .foregroundColor(.labelNormal)
                     
-                    Text(localized(item.theme.subtitleLocalizationKey))
+                    Text(item.shortDescription)
                         .kohereTextStyle(.caption1Regular)
                         .foregroundColor(.labelAlternative)
                         .lineLimit(1)
@@ -55,35 +52,4 @@ struct LivingGuideItemView: View {
         }
     }
 
-    private func localized(_ key: String) -> String {
-        AppLanguage(locale: locale).localized(key)
-    }
-}
-
-private extension LivingGuideTheme {
-    var titleLocalizationKey: String {
-        switch self {
-        case .housingScams:
-            "home.livingGuide.fraud.title"
-        case .bankAccount:
-            "home.livingGuide.bankAccount.title"
-        case .publicTransit:
-            "home.livingGuide.transportation.title"
-        case .healthInsurance:
-            "home.livingGuide.healthInsurance.title"
-        }
-    }
-
-    var subtitleLocalizationKey: String {
-        switch self {
-        case .housingScams:
-            "home.livingGuide.fraud.subtitle"
-        case .bankAccount:
-            "home.livingGuide.bankAccount.subtitle"
-        case .publicTransit:
-            "home.livingGuide.transportation.subtitle"
-        case .healthInsurance:
-            "home.livingGuide.healthInsurance.subtitle"
-        }
-    }
 }

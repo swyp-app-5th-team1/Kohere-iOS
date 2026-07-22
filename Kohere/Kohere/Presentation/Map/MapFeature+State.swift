@@ -83,7 +83,7 @@ extension MapFeature {
         case diagnosisButtonTapped
         case diagnosisButtonCloseButtonTapped
         case diagnosisButtonAutoCollapseDelayFinished
-        case diagnosisResultRequested(diagnosisID: Int)
+        case diagnosisResultRequested(diagnosisID: Int, filter: MapFilterState)
         case diagnosisDetailResponse(Result<DiagnosisDetail, Error>)
         case diagnosisRecommendationsResponse(Result<DiagnosisRecommendations, Error>)
 
@@ -127,5 +127,9 @@ struct MapPendingViewportSearchTarget: Equatable {
 extension MapFeature.State {
     var canUseFavoriteFeatures: Bool {
         userType == .tenant
+    }
+
+    var showsFavoriteControls: Bool {
+        userType != .landlord
     }
 }

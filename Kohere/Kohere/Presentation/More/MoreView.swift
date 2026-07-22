@@ -34,28 +34,32 @@ struct MoreView: View {
                 backgroundColor: .backgroundNormalAlternative
             )
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    profileCard
-                        .padding(.horizontal, 16)
+            if store.userType != nil {
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        profileCard
+                            .padding(.horizontal, 16)
 
-                    VStack(spacing: 12) {
-                        if store.userType == .tenant {
-                            tenantActivitySection
-                            tenantLivingGuideSection
-                        } else if store.userType == .landlord {
-                            landlordServiceSection
+                        VStack(spacing: 12) {
+                            if store.userType == .tenant {
+                                tenantActivitySection
+                                tenantLivingGuideSection
+                            } else if store.userType == .landlord {
+                                landlordServiceSection
+                            }
+
+                            customerSupportSection
                         }
-
-                        customerSupportSection
+                        .padding(16)
+                        .background(.neutral5)
                     }
-                    .padding(16)
-                    .background(.neutral5)
+                    .padding(.top, 8)
+                    .padding(.bottom, 16)
                 }
-                .padding(.top, 8)
-                .padding(.bottom, 16)
+                .background(.backgroundNormalAlternative)
+            } else {
+                Spacer()
             }
-            .background(.backgroundNormalAlternative)
         }
         .background(.backgroundNormalAlternative)
         .onAppear {

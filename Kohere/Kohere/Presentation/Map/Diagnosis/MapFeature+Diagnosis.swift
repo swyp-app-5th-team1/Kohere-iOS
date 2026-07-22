@@ -11,6 +11,7 @@ import Foundation
 extension MapFeature {
     func beginDiagnosisSearch(
         diagnosisID: Int,
+        filter: MapFilterState,
         state: inout State
     ) -> Effect<Action> {
         state.path = StackState<Path.State>()
@@ -20,6 +21,8 @@ extension MapFeature {
         state.sheetMode = .listingList
         state.isFilterPresented = false
         state.appliedFilterSource = .diagnosis
+        state.appliedFilter = filter
+        state.editingFilter = filter
         state.pendingViewportSearchTarget = nil
         state.selectedPlaceSearchTitle = nil
         state.isDiagnosisButtonExpanded = false
@@ -31,28 +34,18 @@ extension MapFeature {
         state.listingSearchResults = []
         clearDiagnosisRecommendationState(state: &state)
         state.isListingSearchLoading = false
-        state.isDiagnosisDetailLoading = true
+        state.isDiagnosisDetailLoading = state.userType != nil
         state.isRecommendationsLoading = true
         state.listingSearchErrorMessage = nil
         state.diagnosisErrorMessage = nil
         state.recommendationsErrorMessage = nil
 
         let diagnosisClient = diagnosisClient
-        return .merge(
+        var effects: [Effect<Action>] = [
             .cancel(id: MapEffectID.diagnosisButtonAutoCollapse),
             .cancel(id: MapEffectID.diagnosisDetail),
             .cancel(id: MapEffectID.diagnosisRecommendations),
             .cancel(id: MapEffectID.listingSearch),
-            .run { send in
-                do {
-                    let detail = try await diagnosisClient.fetchDetail(diagnosisID)
-                    await send(.diagnosisDetailResponse(.success(detail)))
-                } catch {
-                    guard !isDiagnosisRequestCancellation(error) else { return }
-                    await send(.diagnosisDetailResponse(.failure(error)))
-                }
-            }
-            .cancellable(id: MapEffectID.diagnosisDetail, cancelInFlight: true),
             .run { send in
                 do {
                     let input = DiagnosisRecommendationsInput(diagnosisID: diagnosisID)
@@ -64,7 +57,22 @@ extension MapFeature {
                 }
             }
             .cancellable(id: MapEffectID.diagnosisRecommendations, cancelInFlight: true)
-        )
+        ]
+
+        if state.userType != nil {
+            effects.append(.run { send in
+                do {
+                    let detail = try await diagnosisClient.fetchDetail(diagnosisID)
+                    await send(.diagnosisDetailResponse(.success(detail)))
+                } catch {
+                    guard !isDiagnosisRequestCancellation(error) else { return }
+                    await send(.diagnosisDetailResponse(.failure(error)))
+                }
+            }
+            .cancellable(id: MapEffectID.diagnosisDetail, cancelInFlight: true))
+        }
+
+        return .merge(effects)
     }
 
     func handleDiagnosisDetailResponse(

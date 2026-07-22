@@ -11,12 +11,16 @@ import Foundation
 final class DiagnosisRepository: DiagnosisInterface {
     private let networkService: NetworkService
     private let environmentProvider: () throws -> APIEnvironment
+    private let keychainClient: KeychainClient
+    private let guestSessionStore = DiagnosisGuestSessionStore()
 
     init(
         networkService: NetworkService = LiveNetworkServiceFactory.authenticated(),
+        keychainClient: KeychainClient = .liveValue,
         environmentProvider: @escaping () throws -> APIEnvironment = { try APIEnvironment.live() }
     ) {
         self.networkService = networkService
+        self.keychainClient = keychainClient
         self.environmentProvider = environmentProvider
     }
 
@@ -26,14 +30,25 @@ final class DiagnosisRepository: DiagnosisInterface {
             DiagnosisRouter.startFlow(environment: environment)
         )
 
+        if try keychainClient.load(for: .auth) == nil {
+            await guestSessionStore.replace(with: responseDTO.guestSessionId)
+        } else {
+            await guestSessionStore.clear()
+        }
+
         return try responseDTO.toEntity()
     }
 
     func advanceFlow(with answer: DiagnosisAnswer) async throws -> DiagnosisFlowResult {
         let environment = try environmentProvider()
         let requestDTO = DiagnosisAnswerRequestDTO(answer)
+        let guestSessionID = try await guestSessionIDForRequest()
         let responseDTO: DiagnosisFlowResponseDTO = try await networkService.request(
-            DiagnosisRouter.advanceFlow(requestDTO, environment: environment)
+            DiagnosisRouter.advanceFlow(
+                requestDTO,
+                guestSessionID: guestSessionID,
+                environment: environment
+            )
         )
 
         return try responseDTO.toEntity()
@@ -86,16 +101,35 @@ final class DiagnosisRepository: DiagnosisInterface {
 	func fetchRecommendations(input: DiagnosisRecommendationsInput) async throws -> DiagnosisRecommendations {
         let environment = try environmentProvider()
         let queryDTO = DiagnosisRecommendationsQueryDTO(input)
+        let guestSessionID = try await guestSessionIDForRequest()
         let responseDTO: DiagnosisRecommendationsResponseDTO = try await networkService.request(
             DiagnosisRouter.recommendations(
                 diagnosisID: input.diagnosisID,
                 query: queryDTO,
+                guestSessionID: guestSessionID,
                 environment
             ),
             debugRawJSONLabel: "DiagnosisRecommendations"
         )
 
         return responseDTO.toEntity()
+    }
+
+    private func guestSessionIDForRequest() async throws -> String? {
+        guard try keychainClient.load(for: .auth) == nil else { return nil }
+        return await guestSessionStore.value
+    }
+}
+
+private actor DiagnosisGuestSessionStore {
+    private(set) var value: String?
+
+    func replace(with value: String?) {
+        self.value = value
+    }
+
+    func clear() {
+        value = nil
     }
 }
 

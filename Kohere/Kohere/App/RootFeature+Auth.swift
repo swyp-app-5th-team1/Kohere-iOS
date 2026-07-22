@@ -200,7 +200,7 @@ extension RootFeature {
         userDefaultsClient.delete(for: .pendingOnboardingUserType)
         userDefaultsClient.delete(for: .recentSearchKeywords)
 
-        let appLanguage = state.appLanguage
+        let appLanguage = AppLanguage.english
         state = State(appLanguage: appLanguage, isAuthLoading: false)
         state.home.appLanguage = appLanguage
         state.map.appLanguage = appLanguage

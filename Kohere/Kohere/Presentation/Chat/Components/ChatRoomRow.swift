@@ -13,6 +13,7 @@ struct ChatRoomRowCell: View {
     
     let item: ChatRoomModel
     let participantRole: ChatParticipantRole
+    let appLanguage: AppLanguage
     let isRevealed: Bool
     let onTap: (Int) -> Void
     let onReveal: () -> Void
@@ -21,8 +22,6 @@ struct ChatRoomRowCell: View {
     let onBlock: () -> Void
     let onDelete: () -> Void
 
-    @Environment(\.locale)
-    private var locale
     @GestureState private var dragTranslation: CGFloat = 0
 
     private let actionSize: CGFloat = 70
@@ -39,9 +38,9 @@ struct ChatRoomRowCell: View {
     private var statusText: String {
         switch participantRole {
         case .tenant:
-            return String(localized: "chat.applicationSent.title", locale: locale)
+            return appLanguage.localized("chat.applicationSent.title")
         case .landlord:
-            return String(localized: "chat.applicationReceived.title", locale: locale)
+            return appLanguage.localized("chat.applicationReceived.title")
         }
     }
     

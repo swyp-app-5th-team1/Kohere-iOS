@@ -21,7 +21,7 @@ struct HomeView: View {
             KohereNavigationBar(
                 left: .bigLogo, center: .none,
                 right: .homeTab(
-                    showsHeart: store.canUseFavoriteFeatures,
+                    showsHeart: store.showsFavoriteControls,
                     onSearch: { store.send(.navigationSearchTapped) },
                     onHeart: { store.send(.navigationHeartTapped) },
                     onNotice: { store.send(.navigationNoticeTapped) }
@@ -38,7 +38,7 @@ struct HomeView: View {
                     
                     RecentlyViewedView(
                         items: store.recentlyViewedItems,
-                        showsLikeButtons: store.canUseFavoriteFeatures,
+                        showsLikeButtons: store.showsFavoriteControls,
                         onSeeAllTapped: { store.send(.seeAllListingsTapped) },
                         onBrowseTapped: { store.send(.browseListingsTapped) },
                         onCardTapped: { id in store.send(.cardTapped(id: id)) },
@@ -47,7 +47,7 @@ struct HomeView: View {
                     
                     homeDivider
                     
-                    if store.canShowTenantLivingContent {
+                    if store.canShowLivingContent {
                         QuizView(store: store)
 
                         homeDivider

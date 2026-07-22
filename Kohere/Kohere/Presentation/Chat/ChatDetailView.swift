@@ -50,6 +50,7 @@ struct ChatDetailView: View {
         .onAppear {
             store.send(.onAppear)
         }
+        .interactivePopGestureEnabled()
     }
 }
 

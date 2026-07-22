@@ -65,6 +65,8 @@ private extension LifeTipTopicResponseDTO {
             id: index + 1,
             code: code,
             name: name,
+            shortDescription: shortDescription ?? "",
+            longDescription: longDescription ?? "",
             iconName: theme.iconName,
             theme: theme
         )
@@ -87,16 +89,16 @@ private extension LifeTipResponseDTO {
 private extension LivingGuideTheme {
     static func theme(for code: String, index: Int) -> LivingGuideTheme {
         switch code {
-        case "HOUSING_SCAMS", "MOVING_IN":
+        case "HOUSING_SCAM", "HOUSING_SCAMS", "MOVING_IN":
             .housingScams
 
-        case "BANK_ACCOUNT":
+        case "BANK", "BANK_ACCOUNT":
             .bankAccount
 
         case "TRANSPORT":
             .publicTransit
 
-        case "HEALTH_INSURANCE":
+        case "HEALTH", "HEALTH_INSURANCE":
             .healthInsurance
 
         default:

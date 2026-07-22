@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum RoomCondition: String, CaseIterable, Hashable {
+enum RoomCondition: String, CaseIterable, Hashable, Sendable {
     case moveInNow = "Move-in Now"
     case femaleOnly = "Female Only"
     case mealsIncluded = "Meals Included"

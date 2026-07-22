@@ -116,7 +116,8 @@ struct HomeFeature {
             case .onAppear:
                 var effects: [Effect<Action>] = []
 
-                if !state.isRecentlyViewedLoading && !state.isRecentlyViewedLoaded {
+                if state.canUseFavoriteFeatures,
+                   !state.isRecentlyViewedLoading && !state.isRecentlyViewedLoaded {
                     state.isRecentlyViewedLoading = true
                     state.recentlyViewedErrorMessage = nil
 
@@ -143,7 +144,7 @@ struct HomeFeature {
                     })
                 }
 
-                if state.canShowTenantLivingContent,
+                if state.canShowLivingContent,
                    !state.isQuizLoading,
                    !state.isQuizLoaded {
                     state.isQuizLoading = true
@@ -158,10 +159,11 @@ struct HomeFeature {
                             print("[HomeFeature] random quiz failed. error=\(dataError.debugDescription)")
                             await send(.randomQuizResponse(.failure(dataError)))
                         }
-                    })
+                    }
+                    .cancellable(id: HomeEffectID.quiz, cancelInFlight: true))
                 }
 
-                if state.canShowTenantLivingContent,
+                if state.canShowLivingContent,
                    !state.isLivingGuidesLoading,
                    !state.isLivingGuidesLoaded {
                     state.isLivingGuidesLoading = true
@@ -174,7 +176,8 @@ struct HomeFeature {
                         } catch {
                             await send(.lifeTipTopicsResponse(.failure(.from(error))))
                         }
-                    })
+                    }
+                    .cancellable(id: HomeEffectID.lifeTips, cancelInFlight: true))
                 }
 
                 return .merge(effects)
@@ -192,7 +195,7 @@ struct HomeFeature {
                 return .none
 
             case let .quizOptionTapped(index):
-                guard state.canShowTenantLivingContent,
+                guard state.canShowLivingContent,
                       state.isQuizLoaded,
                       !state.quiz.hasAnswered,
                       !state.isQuizAnswerSubmitting,
@@ -320,6 +323,7 @@ struct HomeFeature {
                 return .none
                 
             case .seeAllListingsTapped:
+                guard state.canUseFavoriteFeatures else { return .none }
                 state.path.append(
                     .recentlyViewedList(
                         RecentlyViewedFeature.State(
@@ -381,7 +385,7 @@ struct HomeFeature {
                 return .none
                 
             case let .livingGuideItemTapped(id):
-                guard state.canShowTenantLivingContent,
+                guard state.canShowLivingContent,
                       let guide = state.livingGuides.first(where: { $0.id == id }) else {
                     return .none
                 }
@@ -394,6 +398,11 @@ struct HomeFeature {
         }
         .forEach(\.path, action: \.path)
     }
+}
+
+private enum HomeEffectID {
+    static let quiz = "HomeFeature.quiz"
+    static let lifeTips = "HomeFeature.lifeTips"
 }
 
 extension HomeFeature.Path.State: Equatable {}
@@ -412,7 +421,11 @@ extension HomeFeature.State {
         userType == .tenant
     }
 
-    var canShowTenantLivingContent: Bool {
-        userType == .tenant
+    var showsFavoriteControls: Bool {
+        userType != .landlord
+    }
+
+    var canShowLivingContent: Bool {
+        true
     }
 }

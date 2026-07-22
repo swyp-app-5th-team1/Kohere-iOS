@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import Foundation
 import SwiftUI
 
 struct ChatBotOptionsView: View {
@@ -14,6 +15,8 @@ struct ChatBotOptionsView: View {
 
     let store: StoreOf<ChatBotFeature>
     let diagnosis: Diagnosis
+    @Environment(\.locale)
+    private var locale
 
     private let multiSelectColumns = [
         GridItem(.flexible(), spacing: 8),
@@ -95,13 +98,13 @@ extension ChatBotOptionsView {
         VStack(alignment: .trailing, spacing: 10) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text(String(localized: "map.filter.monthlyRent"))
+                    Text(localized("map.filter.monthlyRent"))
                         .kohereTextStyle(.label2Medium)
                         .foregroundStyle(.labelNeutral)
 
                     Spacer(minLength: 0)
 
-                    Text(store.budgetSummaryText)
+                    Text(budgetSummaryText)
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.primary100)
                 }
@@ -145,7 +148,7 @@ extension ChatBotOptionsView {
 
             Button {
                 withAnimation(.easeInOut(duration: 0.2)) {
-                    _ = store.send(.budgetConfirmButtonTapped)
+                    _ = store.send(.budgetConfirmButtonTapped(AppLanguage(locale: locale)))
                 }
             } label: {
                 Text("confirm")
@@ -156,6 +159,42 @@ extension ChatBotOptionsView {
             }
             .disabled(store.isAnswerSaving)
         }
+    }
+
+    private var budgetSummaryText: String {
+        let bounds = MapFilterPriceRange.monthlyRent
+        let range = store.budgetRange
+
+        switch (range.minimum, range.maximum) {
+        case (bounds.lowerBound, bounds.upperBound):
+            return localized("chatBot.budget.any")
+
+        case (bounds.lowerBound, let maximum):
+            return localized(
+                "chatBot.budget.under",
+                arguments: [ChatBotFeature.State.budgetPriceText(maximum)]
+            )
+
+        case (let minimum, bounds.upperBound):
+            return localized(
+                "chatBot.budget.upperOnly",
+                arguments: [ChatBotFeature.State.budgetPriceText(minimum)]
+            )
+
+        case let (minimum, maximum):
+            return localized(
+                "chatBot.budget.range",
+                arguments: [
+                    ChatBotFeature.State.budgetPriceText(minimum),
+                    ChatBotFeature.State.budgetPriceText(maximum)
+                ]
+            )
+        }
+    }
+
+    private func localized(_ key: String, arguments: [String] = []) -> String {
+        let format = AppLanguage(locale: locale).localized(key)
+        return String(format: format, arguments: arguments.map { $0 as CVarArg })
     }
 
     private var confirmButton: some View {

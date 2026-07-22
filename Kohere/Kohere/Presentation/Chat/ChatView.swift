@@ -14,8 +14,6 @@ struct ChatView: View {
     // MARK: - Property
     
     let store: StoreOf<ChatFeature>
-    @Environment(\.locale)
-    private var locale
     @State private var revealedChatRoomID: Int?
     
     // MARK: - Body
@@ -24,56 +22,58 @@ struct ChatView: View {
         VStack(spacing: 8) {
             KohereNavigationBar(
                 left: .smallLogo,
-                center: .text(String(localized: "chat.title", locale: locale), style: .label1Semibold)
+                center: .text(
+                    store.appLanguage.localized("chat.title"),
+                    style: .label1Semibold
+                )
             )
             
-            roomFinderBanner
-            
-            if store.chatRooms.isEmpty {
-                KohereEmptyView(
-                    title: String(localized: "chat.empty.title", locale: locale),
-                    fontStyle: .label2Semibold,
-                    fontColor: .neutral40
-                )
-                .padding(.bottom, 100)
-            } else {
-                ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 4) {
-                        ForEach(store.chatRooms) { room in
-                            ChatRoomRowCell(
-                                item: room,
-                                participantRole: store.participantRole,
-                                isRevealed: revealedChatRoomID == room.id,
-                                onTap: { id in
-                                    store.send(.chatRoomTapped(id: id))
-                                },
-                                onReveal: {
-                                    revealedChatRoomID = room.id
-                                },
-                                onClose: {
-                                    if revealedChatRoomID == room.id {
-                                        revealedChatRoomID = nil
-                                    }
-                                },
-                                onReport: {
-                                    store.send(.swipeActionTapped(.report, roomID: room.id))
-                                },
-                                onBlock: {
-                                    store.send(.swipeActionTapped(.block, roomID: room.id))
-                                },
-                                onDelete: {
-                                    store.send(.swipeActionTapped(.delete, roomID: room.id))
-                                }
-                            )
+            if store.isContentAvailable {
+                roomFinderBanner
+
+                if store.chatRooms.isEmpty {
+                    KohereEmptyView(
+                        title: store.appLanguage.localized("chat.empty.title"),
+                        fontStyle: .label2Semibold,
+                        fontColor: .neutral40
+                    )
+                    .padding(.bottom, 100)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        LazyVStack(spacing: 4) {
+                            ForEach(store.chatRooms) { room in
+                                chatRoomRow(room)
+                            }
                         }
                     }
                 }
+            } else {
+                Spacer()
             }
         }
         .background(.backgroundNormalNormal)
         .onAppear {
             store.send(.onAppear)
         }
+    }
+
+    private func chatRoomRow(_ room: ChatRoomModel) -> some View {
+        ChatRoomRowCell(
+            item: room,
+            participantRole: store.participantRole,
+            appLanguage: store.appLanguage,
+            isRevealed: revealedChatRoomID == room.id,
+            onTap: { id in store.send(.chatRoomTapped(id: id)) },
+            onReveal: { revealedChatRoomID = room.id },
+            onClose: {
+                if revealedChatRoomID == room.id {
+                    revealedChatRoomID = nil
+                }
+            },
+            onReport: { store.send(.swipeActionTapped(.report, roomID: room.id)) },
+            onBlock: { store.send(.swipeActionTapped(.block, roomID: room.id)) },
+            onDelete: { store.send(.swipeActionTapped(.delete, roomID: room.id)) }
+        )
     }
 
     private var roomFinderBanner: some View {

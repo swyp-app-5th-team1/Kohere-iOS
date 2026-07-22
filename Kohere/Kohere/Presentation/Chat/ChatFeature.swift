@@ -61,6 +61,7 @@ struct ChatFeature {
         var chatRooms: [ChatRoomModel] = []
         var participantRole: ChatParticipantRole
         var appLanguage: AppLanguage
+        var isContentAvailable = false
         var isLoading = false
         var errorMessage: String?
         
@@ -94,7 +95,8 @@ struct ChatFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard !state.isLoading else { return .none }
+                guard state.isContentAvailable, !state.isLoading
+                else { return .none }
                 state.isLoading = true
                 state.errorMessage = nil
                 let fetchBookings = fetchBookingsUseCase
@@ -210,6 +212,7 @@ private extension ChatFeature {
 extension ChatFeature.State {
     mutating func applyUserType(_ userType: UserType) -> Bool {
         guard let updatedParticipantRole = ChatParticipantRole(userType: userType) else { return false }
+        isContentAvailable = true
         guard participantRole != updatedParticipantRole else { return false }
 
         participantRole = updatedParticipantRole

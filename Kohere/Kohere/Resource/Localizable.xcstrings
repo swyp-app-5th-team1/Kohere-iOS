@@ -305,6 +305,57 @@
         }
       }
     },
+    "authGate.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in or create an account\nto use this feature."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "해당 기능은 로그인/회원가입을 해야 이용가능해요.\n로그인/회원가입 하시겠어요?"
+          }
+        }
+      }
+    },
+    "authGate.notNow" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Now"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나중에 하기"
+          }
+        }
+      }
+    },
+    "authGate.signIn" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign In"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인하기"
+          }
+        }
+      }
+    },
     "building.type.OFFICETEL" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -693,6 +744,7 @@
       }
     },
     "chat.empty.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -708,7 +760,110 @@
         }
       }
     },
+    "chat.popup.block.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Block this user?\nOnce blocked, you won't be able to send or receive messages."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 사용자를 차단할까요?\n차단하면 더 이상 메시지를 주고받을 수 없습니다."
+          }
+        }
+      }
+    },
+    "chat.popup.block.primary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Block"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "차단하기"
+          }
+        }
+      }
+    },
+    "chat.popup.delete.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this chat?\nThis action cannot be undone."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "채팅방을 삭제할까요?\n삭제한 채팅방은 복구할 수 없습니다."
+          }
+        }
+      }
+    },
+    "chat.popup.delete.primary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제하기"
+          }
+        }
+      }
+    },
+    "chat.popup.report.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report this user?\nReports will be reviewed according to our policies."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 사용자를 신고할까요?\n신고 내용을 확인한 후 운영 정책에 따라 검토됩니다."
+          }
+        }
+      }
+    },
+    "chat.popup.report.primary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "신고하기"
+          }
+        }
+      }
+    },
     "chat.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -820,7 +975,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "방 구하기"
+            "value" : "내 방 찾아보기"
           }
         }
       }
@@ -896,6 +1051,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "방 보러가기"
+          }
+        }
+      }
+    },
+    "common.cancel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
           }
         }
       }
@@ -4878,6 +5050,7 @@
       }
     },
     "map.filter.monthlyRent" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5955,6 +6128,7 @@
       }
     },
     "onboarding.landlord.phone.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6035,6 +6209,7 @@
       }
     },
     "onboarding.profile.fullName" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6115,6 +6290,7 @@
       }
     },
     "onboarding.profile.phoneNumber" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7259,6 +7435,18 @@
     "뒤로가기" : {
 
     },
+    "반가워요! 가입된 정보가\n맞는지 확인해 드릴게요" : {
+      "comment" : "A welcome message for the user, introducing them to the onboarding process.",
+      "isCommentAutoGenerated" : true
+    },
+    "사장님이 맞는지\n안전하게 확인해볼게요!" : {
+      "comment" : "A title that describes the purpose of this view.",
+      "isCommentAutoGenerated" : true
+    },
+    "생년월일" : {
+      "comment" : "A label displayed above a group of dropdowns for selecting a user's birth year.",
+      "isCommentAutoGenerated" : true
+    },
     "언어 변경" : {
 
     },
@@ -7286,10 +7474,6 @@
       "comment" : "A label describing a phone number field.",
       "isCommentAutoGenerated" : true
     },
-    "월세" : {
-      "comment" : "A label describing the monthly rent.",
-      "isCommentAutoGenerated" : true
-    },
     "지도에서 위치 보기" : {
 
     },
@@ -7311,10 +7495,6 @@
     },
     "확인" : {
       "comment" : "A button label that translates to \"Confirm\".",
-      "isCommentAutoGenerated" : true
-    },
-    "찾아보기" : {
-      "comment" : "A button label that translates to \"Find\" in English.",
       "isCommentAutoGenerated" : true
     }
   },
