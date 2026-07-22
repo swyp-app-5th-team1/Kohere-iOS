@@ -760,6 +760,23 @@
         }
       }
     },
+    "chat.popup.action.failure" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't complete the request. Please try again."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "요청을 처리하지 못했습니다. 다시 시도해 주세요."
+          }
+        }
+      }
+    },
     "chat.popup.block.message" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -790,6 +807,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "차단하기"
+          }
+        }
+      }
+    },
+    "chat.popup.block.success" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This user has been blocked."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용자를 차단했습니다."
           }
         }
       }
@@ -828,6 +862,23 @@
         }
       }
     },
+    "chat.popup.delete.success" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This chat has been deleted."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "채팅방을 삭제했습니다."
+          }
+        }
+      }
+    },
     "chat.popup.report.message" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -839,7 +890,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "이 사용자를 신고할까요?\n신고 내용을 확인한 후 운영 정책에 따라 검토됩니다."
           }
         }
@@ -862,6 +913,23 @@
         }
       }
     },
+    "chat.popup.report.success" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your report has been submitted."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "신고가 접수되었습니다."
+          }
+        }
+      }
+    },
     "chat.title" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -880,6 +948,7 @@
       }
     },
     "chatBot.action.find" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
