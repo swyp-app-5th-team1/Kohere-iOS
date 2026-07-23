@@ -108,8 +108,7 @@ final class DiagnosisRepository: DiagnosisInterface {
                 query: queryDTO,
                 guestSessionID: guestSessionID,
                 environment
-            ),
-            debugRawJSONLabel: "DiagnosisRecommendations"
+            )
         )
 
         return responseDTO.toEntity()

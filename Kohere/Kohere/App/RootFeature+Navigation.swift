@@ -42,6 +42,15 @@ extension RootFeature {
         case .deleteAccount:
             return .send(.more(.deleteAccountConfirmed))
 
+        case let .reportBooking(bookingID):
+            return .send(.chat(.swipeActionConfirmed(.report, roomID: bookingID)))
+
+        case let .blockBooking(bookingID):
+            return .send(.chat(.swipeActionConfirmed(.block, roomID: bookingID)))
+
+        case let .deleteBooking(bookingID):
+            return .send(.chat(.swipeActionConfirmed(.delete, roomID: bookingID)))
+
         case .dismissListingDetail:
             switch state.selectedTab {
             case .home:

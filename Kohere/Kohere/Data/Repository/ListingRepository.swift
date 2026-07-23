@@ -33,8 +33,7 @@ final class ListingRepository: ListingInterface {
     func fetchDetail(listingID: String) async throws -> ListingDetail {
         let environment = try environmentProvider()
         let responseDTO: ListingDetailResponseDTO = try await authenticatedNetworkService.request(
-            ListingRouter.detail(listingID: listingID, environment),
-            debugRawJSONLabel: "Listing.fetchDetail listingID=\(listingID)"
+            ListingRouter.detail(listingID: listingID, environment)
         )
 
         return try responseDTO.toEntity()
@@ -53,8 +52,7 @@ final class ListingRepository: ListingInterface {
     func fetchRecentListings() async throws -> [Listing] {
         let environment = try environmentProvider()
         let responseDTO: ListingRecentListResponseDTO = try await authenticatedNetworkService.request(
-            ListingRouter.recentList(environment),
-            debugRawJSONLabel: "Listing.fetchRecentListings"
+            ListingRouter.recentList(environment)
         )
 
         return responseDTO.toEntity()

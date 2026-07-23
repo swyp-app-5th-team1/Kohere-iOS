@@ -82,7 +82,6 @@ extension MapFeature {
         switch result {
         case let .success(detail):
             guard state.activeDiagnosisID == detail.diagnosisID else { return .none }
-            debugLogDiagnosisDetail(detail)
             let filter = MapFilterState(diagnosisDetail: detail)
             state.appliedFilter = filter
             state.editingFilter = filter
@@ -91,7 +90,6 @@ extension MapFeature {
 
         case let .failure(error):
             guard state.listingSource == .diagnosis else { return .none }
-            debugLogDiagnosisError("detail", error)
             state.isDiagnosisDetailLoading = false
             state.diagnosisErrorMessage = error.localizedDescription
         }
@@ -107,13 +105,11 @@ extension MapFeature {
 
         switch result {
         case let .success(recommendations):
-            debugLogDiagnosisRecommendations(recommendations)
             applyDiagnosisRecommendations(recommendations, to: &state)
             state.isRecommendationsLoading = false
             state.recommendationsErrorMessage = nil
 
         case let .failure(error):
-            debugLogDiagnosisError("recommendations", error)
             state.isRecommendationsLoading = false
             state.recommendationsErrorMessage = error.localizedDescription
             state.diagnosisRecommendationSuggestions = nil

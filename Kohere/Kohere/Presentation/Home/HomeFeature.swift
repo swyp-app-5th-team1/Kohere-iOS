@@ -155,9 +155,7 @@ struct HomeFeature {
                             let quiz = try await quizClient.fetchRandomQuiz()
                             await send(.randomQuizResponse(.success(quiz)))
                         } catch {
-                            let dataError = DataError.from(error)
-                            print("[HomeFeature] random quiz failed. error=\(dataError.debugDescription)")
-                            await send(.randomQuizResponse(.failure(dataError)))
+                            await send(.randomQuizResponse(.failure(.from(error))))
                         }
                     }
                     .cancellable(id: HomeEffectID.quiz, cancelInFlight: true))
@@ -211,9 +209,7 @@ struct HomeFeature {
                         let result = try await quizClient.submitAnswer(quizID, selectedChoiceKey)
                         await send(.quizAnswerResponse(.success(result)))
                     } catch {
-                        let dataError = DataError.from(error)
-                        print("[HomeFeature] quiz answer failed. quizID=\(quizID), selectedChoice=\(selectedChoiceKey), error=\(dataError.debugDescription)")
-                        await send(.quizAnswerResponse(.failure(dataError)))
+                        await send(.quizAnswerResponse(.failure(.from(error))))
                     }
                 }
 

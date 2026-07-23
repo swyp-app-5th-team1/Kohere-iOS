@@ -11,11 +11,18 @@ import Foundation
 enum BookingRouter: URLRequestConvertible {
     case list(query: BookingListQueryDTO, APIEnvironment)
     case detail(bookingID: Int, APIEnvironment)
+    case delete(bookingID: Int, APIEnvironment)
+    case block(bookingID: Int, APIEnvironment)
+    case report(bookingID: Int, APIEnvironment)
     
     private var method: HTTPMethod {
         switch self {
         case .list, .detail:
             .get
+        case .delete:
+            .delete
+        case .block, .report:
+            .post
         }
     }
     
@@ -25,13 +32,22 @@ enum BookingRouter: URLRequestConvertible {
             "api/v1/bookings"
         case let .detail(bookingID, _):
             "api/v1/bookings/\(bookingID)"
+        case let .delete(bookingID, _):
+            "api/v1/bookings/\(bookingID)"
+        case let .block(bookingID, _):
+            "api/v1/bookings/\(bookingID)/block"
+        case let .report(bookingID, _):
+            "api/v1/bookings/\(bookingID)/report"
         }
     }
     
     private var environment: APIEnvironment {
         switch self {
         case let .list(_, environment),
-             let .detail(_, environment):
+             let .detail(_, environment),
+             let .delete(_, environment),
+             let .block(_, environment),
+             let .report(_, environment):
             environment
         }
     }
@@ -53,7 +69,7 @@ enum BookingRouter: URLRequestConvertible {
             }
             request.url = requestURL
             
-        case .detail:
+        case .detail, .delete, .block, .report:
             break
         }
         
