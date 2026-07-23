@@ -23,7 +23,7 @@ extension TenantOnboardingFeature.State {
         case .nameAndBirth:
             return !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && birthDate != nil
         case .details:
-            return selectedVisa != nil && selectedOccupation != nil && selectedNationality != nil && selectedGender != nil
+            return selectedVisa != nil && selectedNationality != nil && selectedGender != nil
         case .emailVerification:
             return isEmailVerified && !isOnboardingSubmitting
         }
@@ -53,7 +53,6 @@ extension TenantOnboardingFeature.State {
         guard let birthDate,
               let gender = selectedGender,
               let country = selectedNationality?.nationalityCountryCode,
-              let occupation = selectedOccupation,
               let visaType = selectedVisa else {
             return nil
         }
@@ -72,7 +71,6 @@ extension TenantOnboardingFeature.State {
             gender: gender,
             birthDate: birthDate,
             country: country,
-            occupation: occupation,
             email: trimmedEmail,
             visaType: visaType
         )

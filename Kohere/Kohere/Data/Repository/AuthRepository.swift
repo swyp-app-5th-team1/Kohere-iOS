@@ -165,7 +165,6 @@ final class AuthRepository: AuthInterface {
             gender: profile.gender.rawValue,
             birthDate: profile.birthDate,
             country: profile.country,
-            occupation: profile.occupation.rawValue,
             email: profile.email,
             visaType: profile.visaType.rawValue
         )

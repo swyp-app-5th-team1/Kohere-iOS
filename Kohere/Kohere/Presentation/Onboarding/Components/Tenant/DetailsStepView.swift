@@ -44,24 +44,6 @@ struct DetailsStepView: View {
                 }
                 .zIndex(4)
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("onboarding.profile.occupation")
-                        .kohereTextStyle(.label2Semibold)
-                        .foregroundStyle(.neutral90)
-                    
-                    KohereDropdownMenu(
-                        selectedOption: selectedOccupationOption,
-                        activeField: $activeField,
-                        equals: .occupation,
-                        options: DropdownMenuOption.occupations,
-                        listHeight: 239,
-                        onExpand: {
-                            keyboardField.wrappedValue = nil
-                        }
-                    )
-                }
-                .zIndex(3)
-                
                 HStack(spacing: 8) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("onboarding.profile.nationality")
@@ -112,17 +94,6 @@ private extension DetailsStepView {
             },
             set: { option in
                 store.selectedVisa = option?.visaType
-            }
-        )
-    }
-
-    var selectedOccupationOption: Binding<DropdownMenuOption?> {
-        Binding(
-            get: {
-                store.selectedOccupation.map(DropdownMenuOption.init)
-            },
-            set: { option in
-                store.selectedOccupation = option?.occupation
             }
         )
     }

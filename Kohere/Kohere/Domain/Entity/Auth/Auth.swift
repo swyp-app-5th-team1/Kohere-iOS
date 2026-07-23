@@ -89,7 +89,6 @@ struct AuthOnboardingProfile: Equatable {
     let gender: Gender
     let birthDate: String
     let country: String
-    let occupation: Occupation
     let email: String
     let visaType: VisaType
 }
