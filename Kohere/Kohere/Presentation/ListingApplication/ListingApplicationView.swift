@@ -214,6 +214,8 @@ struct ListingApplicationView: View {
                 moveOutDateText: store.moveOutReviewText,
                 rentalPeriodText: store.rentalPeriodText,
                 priceText: store.roomPricingText,
+                closeButtonTitle: store.appLanguage.localized("listingApplication.action.close"),
+                confirmButtonTitle: store.appLanguage.localized("listingApplication.action.view"),
                 onCloseTap: { store.send(.completionCloseButtonTapped) },
                 onConfirmTap: { store.send(.completionConfirmButtonTapped) }
             )
@@ -232,6 +234,8 @@ private struct ListingApplicationCompletionPopup: View {
     let moveOutDateText: String
     let rentalPeriodText: String
     let priceText: String
+    let closeButtonTitle: String
+    let confirmButtonTitle: String
     let onCloseTap: () -> Void
     let onConfirmTap: () -> Void
 
@@ -322,13 +326,13 @@ private struct ListingApplicationCompletionPopup: View {
     private var buttons: some View {
         HStack(spacing: 8) {
             popupButton(
-                title: String(localized: "listingApplication.action.close", locale: locale),
+                title: closeButtonTitle,
                 style: .secondary,
                 action: onCloseTap
             )
 
             popupButton(
-                title: String(localized: "listingApplication.action.view", locale: locale),
+                title: confirmButtonTitle,
                 style: .primary,
                 action: onConfirmTap
             )

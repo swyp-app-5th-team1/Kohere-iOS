@@ -2762,6 +2762,7 @@
       }
     },
     "listingApplication.action.close" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2795,6 +2796,7 @@
       }
     },
     "listingApplication.action.view" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6343,6 +6345,7 @@
       }
     },
     "onboarding.profile.occupation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
