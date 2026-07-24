@@ -201,7 +201,11 @@ extension RootFeature {
         userDefaultsClient.delete(for: .recentSearchKeywords)
 
         let appLanguage = AppLanguage.english
-        state = State(appLanguage: appLanguage, isAuthLoading: false)
+        state = State(
+            appLanguage: appLanguage,
+            isAuthLoading: false,
+            isSplashMinimumDurationElapsed: true
+        )
         state.home.appLanguage = appLanguage
         state.map.appLanguage = appLanguage
         state.chat.appLanguage = appLanguage

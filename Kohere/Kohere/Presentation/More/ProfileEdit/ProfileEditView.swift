@@ -41,7 +41,7 @@ private extension ProfileEditView {
     var navigationBar: some View {
         KohereNavigationBar(
             left: .backButton({ store.send(.backButtonTapped) }),
-            center: .text(String(localized: "profileEdit.title", locale: locale)),
+            center: .text(AppLanguage(locale: locale).localized("profileEdit.title")),
             right: .checkButton(
                 isEnabled: store.isSaveButtonEnabled,
                 action: { store.send(.saveButtonTapped) }
@@ -101,7 +101,7 @@ private extension ProfileEditView {
 
     var nameFields: some View {
         ProfileEditReadOnlyField(
-            title: String(localized: "onboarding.profile.fullName", locale: locale),
+            title: AppLanguage(locale: locale).localized("onboarding.profile.fullName"),
             value: store.displayName
         )
     }

@@ -124,7 +124,7 @@ struct RootFeature {
                 state.more.selectedLanguage = resolvedLanguage
                 var effects: [Effect<Action>] = [
                     .run { send in
-                        try await clock.sleep(for: .seconds(1.5))
+                        try await clock.sleep(for: .seconds(1.25))
                         await send(.splashMinimumDurationElapsed)
                     }
                     .cancellable(

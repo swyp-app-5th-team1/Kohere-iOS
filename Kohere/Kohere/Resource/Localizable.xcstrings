@@ -6441,6 +6441,7 @@
       }
     },
     "onboarding.profile.firstName" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6489,6 +6490,7 @@
       }
     },
     "onboarding.profile.lastName" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6763,6 +6765,7 @@
       }
     },
     "profileEdit.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
