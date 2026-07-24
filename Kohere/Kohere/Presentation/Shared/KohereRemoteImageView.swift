@@ -13,14 +13,17 @@ struct KohereRemoteImageView<Placeholder: View>: View {
     let urlString: String?
     let contentMode: SwiftUI.ContentMode
     let placeholder: () -> Placeholder
+    let onImageLoaded: (() -> Void)?
 
     init(
         urlString: String?,
         contentMode: SwiftUI.ContentMode = .fill,
+        onImageLoaded: (() -> Void)? = nil,
         @ViewBuilder placeholder: @escaping () -> Placeholder
     ) {
         self.urlString = urlString
         self.contentMode = contentMode
+        self.onImageLoaded = onImageLoaded
         self.placeholder = placeholder
     }
 
@@ -31,6 +34,9 @@ struct KohereRemoteImageView<Placeholder: View>: View {
                     .placeholder {
                         placeholder()
                     }
+                    .onSuccess { _ in
+                        onImageLoaded?()
+                    }
                     .fade(duration: 0.2)
                     .resizable()
                     .aspectRatio(contentMode: contentMode)
@@ -38,6 +44,9 @@ struct KohereRemoteImageView<Placeholder: View>: View {
                 Image(localAssetName)
                     .resizable()
                     .aspectRatio(contentMode: contentMode)
+                    .onAppear {
+                        onImageLoaded?()
+                    }
             } else {
                 placeholder()
             }
@@ -72,11 +81,13 @@ struct KohereRemoteImageView<Placeholder: View>: View {
 extension KohereRemoteImageView where Placeholder == KohereImageFallbackView {
     init(
         urlString: String?,
-        contentMode: SwiftUI.ContentMode = .fill
+        contentMode: SwiftUI.ContentMode = .fill,
+        onImageLoaded: (() -> Void)? = nil
     ) {
         self.init(
             urlString: urlString,
-            contentMode: contentMode
+            contentMode: contentMode,
+            onImageLoaded: onImageLoaded
         ) {
             KohereImageFallbackView()
         }

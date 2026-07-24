@@ -106,7 +106,13 @@ struct LoginFeature {
                     do {
                         let result = try await appleSignInClient.signIn()
                         await send(
-                            .socialLoginCredentialReceived(.apple(authorizationCode: result.authorizationCode))
+                            .socialLoginCredentialReceived(
+                                .apple(
+                                    authorizationCode: result.authorizationCode,
+                                    email: result.email,
+                                    name: result.name
+                                )
+                            )
                         )
                     } catch {
                         await send(.loginFailure(error.localizedDescription))

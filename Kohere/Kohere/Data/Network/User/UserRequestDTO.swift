@@ -8,8 +8,6 @@
 import Foundation
 
 nonisolated struct UpdateProfileRequestDTO: Encodable, Sendable {
-    let firstName: String?
-    let lastName: String?
     let gender: String?
     let birthDate: String?
     let country: String?
@@ -21,8 +19,6 @@ nonisolated struct UpdateProfileRequestDTO: Encodable, Sendable {
     let lang: String?
 
     init(_ update: UserProfileUpdate) {
-        firstName = update.firstName
-        lastName = update.lastName
         gender = update.gender?.rawValue
         birthDate = update.birthDate
         country = update.country

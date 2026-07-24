@@ -60,8 +60,6 @@ private extension UserProfileResponseDTO {
         UserProfile(
             id: id,
             userType: UserType(rawValue: userType) ?? .unknown,
-            firstName: firstName,
-            lastName: lastName,
             name: name,
             nickname: nickname ?? "",
             gender: gender,
