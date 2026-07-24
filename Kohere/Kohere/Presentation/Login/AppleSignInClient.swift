@@ -7,10 +7,13 @@
 
 import AuthenticationServices
 import ComposableArchitecture
+import Foundation
 import UIKit
 
 struct AppleSignInResult: Equatable, Sendable {
     let authorizationCode: String
+    let email: String?
+    let name: String?
 }
 
 struct AppleSignInClient {
@@ -34,8 +37,27 @@ extension AppleSignInClient: DependencyKey {
             throw DataError.underlying(message: "Apple authorizationCode를 가져오지 못했습니다.")
         }
 
-        return AppleSignInResult(authorizationCode: authorizationCode)
+        let name = Self.formattedName(from: credential.fullName)
+
+        return AppleSignInResult(
+            authorizationCode: authorizationCode,
+            email: credential.email,
+            name: name
+        )
     }
+
+    private static func formattedName(from components: PersonNameComponents?) -> String? {
+        guard let components else { return nil }
+
+        let formatter = PersonNameComponentsFormatter()
+        formatter.style = .long
+
+        let name = formatter.string(from: components)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return name.isEmpty ? nil : name
+    }
+
 }
 
 extension DependencyValues {

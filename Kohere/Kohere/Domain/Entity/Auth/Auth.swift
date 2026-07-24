@@ -56,7 +56,11 @@ nonisolated enum AuthStatus: String, Equatable, Codable {
 
 enum SocialLoginCredential: Equatable, Sendable {
     case google(idToken: String, email: String?, name: String?)
-    case apple(authorizationCode: String)
+    case apple(
+        authorizationCode: String,
+        email: String?,
+        name: String?
+    )
 }
 
 struct PhoneVerificationCode: Equatable {

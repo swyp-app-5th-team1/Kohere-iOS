@@ -13,7 +13,7 @@ final class AuthRepository: AuthInterface {
     private let authenticatedNetworkService: NetworkService
     private let keychainClient: KeychainClient
     private let environmentProvider: () throws -> APIEnvironment
-    
+
     init(
         networkService: NetworkService = .plain(),
         authenticatedNetworkService: NetworkService = LiveNetworkServiceFactory.authenticated(),
@@ -38,7 +38,7 @@ final class AuthRepository: AuthInterface {
             fallbackName: credential.name
         )
     }
-    
+
     func reissue(refreshToken: String) async throws -> AuthToken {
         let environment = try environmentProvider()
         let requestDTO = ReissueTokenRequestDTO(refreshToken: refreshToken)
@@ -218,8 +218,8 @@ private extension SocialLoginRequestDTO {
         case let .google(idToken, email, name):
             self = .google(idToken: idToken, email: email, name: name)
 
-        case let .apple(authorizationCode):
-            self = .apple(authorizationCode: authorizationCode)
+        case let .apple(authorizationCode, email, name):
+            self = .apple(authorizationCode: authorizationCode, email: email, name: name)
         }
     }
 }
