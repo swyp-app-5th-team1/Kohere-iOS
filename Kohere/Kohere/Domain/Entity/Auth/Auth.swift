@@ -15,6 +15,8 @@ nonisolated struct Auth: Equatable, Codable {
     let refreshToken: String?
     let expiresIn: Int
     let expiresAt: Date?
+    let email: String?
+    let name: String?
 
     init(
         onboardingRequired: Bool,
@@ -23,7 +25,9 @@ nonisolated struct Auth: Equatable, Codable {
         accessToken: String,
         refreshToken: String?,
         expiresIn: Int,
-        expiresAt: Date? = nil
+        expiresAt: Date? = nil,
+        email: String? = nil,
+        name: String? = nil
     ) {
         self.onboardingRequired = onboardingRequired
         self.status = status
@@ -32,6 +36,8 @@ nonisolated struct Auth: Equatable, Codable {
         self.refreshToken = refreshToken
         self.expiresIn = expiresIn
         self.expiresAt = expiresAt
+        self.email = email
+        self.name = name
     }
 }
 
@@ -49,7 +55,7 @@ nonisolated enum AuthStatus: String, Equatable, Codable {
 }
 
 enum SocialLoginCredential: Equatable, Sendable {
-    case google(idToken: String)
+    case google(idToken: String, email: String?, name: String?)
     case apple(authorizationCode: String)
 }
 
@@ -84,17 +90,14 @@ struct TermsAgreement: Equatable {
 }
 
 struct AuthOnboardingProfile: Equatable {
-    let firstName: String
-    let lastName: String
     let gender: Gender
     let birthDate: String
     let country: String
-    let email: String
     let visaType: VisaType
+    let lang: String
 }
 
 struct LandlordOnboardingProfile: Equatable {
-    let name: String
     let phoneNumber: String
     let birthDate: String
 }
@@ -127,7 +130,9 @@ extension Auth {
             expiresAt: Self.expirationDate(
                 expiresIn: token.expiresIn,
                 issuedAt: issuedAt
-            )
+            ),
+            email: email,
+            name: name
         )
     }
 }

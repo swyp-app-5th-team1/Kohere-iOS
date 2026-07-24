@@ -186,7 +186,8 @@ struct RootFeature {
                     applyAppLanguage(defaultLanguage, state: &state)
                     state.onboarding = OnboardingFeature.State(
                         userType: pendingOnboardingUserType,
-                        appLanguage: defaultLanguage
+                        appLanguage: defaultLanguage,
+                        socialName: auth?.name
                     )
                 } else {
                     applyAppLanguage(.english, state: &state)
@@ -264,7 +265,8 @@ struct RootFeature {
                 state.authInfo = authInfo
                 state.onboarding = OnboardingFeature.State(
                     userType: userType,
-                    appLanguage: defaultLanguage
+                    appLanguage: defaultLanguage,
+                    socialName: authInfo.name
                 )
                 return .none
                 

@@ -48,6 +48,7 @@ struct LandlordOnboardingView: View {
                     .padding(.horizontal, 20)
             }
         }
+        .environment(\.locale, AppLanguage.korean.locale)
     }
 }
 

@@ -9,8 +9,14 @@ import ComposableArchitecture
 import GoogleSignIn
 import UIKit
 
+struct GoogleSignInResult: Equatable, Sendable {
+    let idToken: String
+    let email: String?
+    let name: String?
+}
+
 struct GoogleSignInClient {
-    var signIn: @MainActor () async throws -> String
+    var signIn: @MainActor () async throws -> GoogleSignInResult
 }
 
 extension GoogleSignInClient: DependencyKey {
@@ -47,8 +53,19 @@ extension GoogleSignInClient: DependencyKey {
         guard let idToken = result.user.idToken?.tokenString else {
             throw DataError.underlying(message: "Google idToken을 가져오지 못했습니다.")
         }
+
+        let profile = result.user.profile
+        let name = profile?.name.nilIfBlank
+            ?? [profile?.givenName, profile?.familyName]
+                .compactMap { $0?.nilIfBlank }
+                .joined(separator: " ")
+                .nilIfBlank
         
-        return idToken
+        return GoogleSignInResult(
+            idToken: idToken,
+            email: profile?.email.nilIfBlank,
+            name: name
+        )
     }
 }
 
@@ -56,6 +73,13 @@ extension DependencyValues {
     var googleSignInClient: GoogleSignInClient {
         get { self[GoogleSignInClient.self] }
         set { self[GoogleSignInClient.self] = newValue }
+    }
+}
+
+private extension String {
+    var nilIfBlank: String? {
+        let trimmed = trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 }
 
