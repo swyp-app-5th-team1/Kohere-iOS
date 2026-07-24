@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct KohereDropdownMenu<Field: Hashable>: View {
+    @Environment(\.locale)
+    private var locale
 
     // MARK: - Properties
 
@@ -38,7 +40,10 @@ struct KohereDropdownMenu<Field: Hashable>: View {
             }
         } label: {
             HStack {
-                Text(selectedOption?.option ?? "Select")
+                Text(
+                    selectedOption?.localizedTitle(locale: locale)
+                        ?? AppLanguage(locale: locale).localized("common.select")
+                )
                     .kohereTextStyle(.label2Medium)
                     .foregroundColor(
                         selectedOption == nil

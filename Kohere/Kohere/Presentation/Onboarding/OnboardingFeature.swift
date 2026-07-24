@@ -26,17 +26,23 @@ struct OnboardingFeature {
 
         init(
             userType: OnboardingUserType = .tenant,
-            appLanguage: AppLanguage = .systemDefault
+            appLanguage: AppLanguage = .systemDefault,
+            socialName: String? = nil
         ) {
             self.userType = userType
 
             switch userType {
             case .tenant:
-                self.tenant = TenantOnboardingFeature.State(appLanguage: appLanguage)
+                self.tenant = TenantOnboardingFeature.State(
+                    appLanguage: appLanguage,
+                    name: socialName ?? ""
+                )
                 self.landlord = nil
             case .landlord:
                 self.tenant = nil
-                self.landlord = LandlordOnboardingFeature.State()
+                self.landlord = LandlordOnboardingFeature.State(
+                    name: socialName ?? ""
+                )
             }
         }
     }

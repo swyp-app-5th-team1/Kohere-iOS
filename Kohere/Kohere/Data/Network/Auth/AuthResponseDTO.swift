@@ -12,6 +12,8 @@ struct SocialLoginResponseDTO: Decodable {
     let accessToken: String
     let refreshToken: String?
     let expiresIn: Int
+    let email: String?
+    let name: String?
 }
 
 struct TokenResponseDTO: Decodable {

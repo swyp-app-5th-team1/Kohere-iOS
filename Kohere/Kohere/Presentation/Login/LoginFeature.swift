@@ -87,8 +87,12 @@ struct LoginFeature {
 
                 return .run { send in
                     do {
-                        let idToken = try await googleSignInClient.signIn()
-                        await send(.socialLoginCredentialReceived(.google(idToken: idToken)))
+                        let result = try await googleSignInClient.signIn()
+                        await send(.socialLoginCredentialReceived(.google(
+                            idToken: result.idToken,
+                            email: result.email,
+                            name: result.name
+                        )))
                     } catch {
                         await send(.loginFailure(Self.loginErrorMessage(for: error)))
                     }
