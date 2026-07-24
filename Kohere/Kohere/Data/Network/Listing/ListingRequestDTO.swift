@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ListingListQueryDTO {
+nonisolated struct ListingListQueryDTO {
     let swLat: Double
     let swLng: Double
     let neLat: Double
@@ -51,7 +51,7 @@ nonisolated struct ListingBookingCreateRequestDTO: Encodable, Sendable {
 }
 
 extension ListingListQueryDTO {
-    init(_ input: ListingSearchInput) {
+    nonisolated init(_ input: ListingSearchInput) {
         self.init(
             swLat: input.bounds.southWest.latitude,
             swLng: input.bounds.southWest.longitude,
@@ -70,7 +70,7 @@ extension ListingListQueryDTO {
         )
     }
 
-    var queryItems: [URLQueryItem] {
+    nonisolated var queryItems: [URLQueryItem] {
         var items: [URLQueryItem] = [
             URLQueryItem(name: "swLat", value: String(swLat)),
             URLQueryItem(name: "swLng", value: String(swLng)),
@@ -98,7 +98,7 @@ extension ListingListQueryDTO {
         return items
     }
 
-    private func append(
+    nonisolated private func append(
         _ items: inout [URLQueryItem],
         name: String,
         value: Int?
@@ -107,7 +107,7 @@ extension ListingListQueryDTO {
         items.append(URLQueryItem(name: name, value: String(value)))
     }
 
-    private func append(
+    nonisolated private func append(
         _ items: inout [URLQueryItem],
         name: String,
         value: Bool?
