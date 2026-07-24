@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct KohereDropdownMenuList: View {
+    @Environment(\.locale)
+    private var locale
 
     // MARK: - Properties
 
@@ -23,6 +25,7 @@ struct KohereDropdownMenuList: View {
                 ForEach(options) { option in
                     KohereDropdownMenuListRow(
                         option: option,
+                        locale: locale,
                         onSelectedAction: onSelectedAction
                     )
                 }
@@ -45,6 +48,7 @@ private struct KohereDropdownMenuListRow: View {
     // MARK: - Properties
 
     let option: DropdownMenuOption
+    let locale: Locale
     let onSelectedAction: (_ option: DropdownMenuOption) -> Void
 
     // MARK: - Body
@@ -53,7 +57,7 @@ private struct KohereDropdownMenuListRow: View {
         Button {
             onSelectedAction(option)
         } label: {
-            Text(option.option)
+            Text(option.localizedTitle(locale: locale))
                 .kohereTextStyle(.body3Regular)
                 .foregroundColor(.labelNormal)
                 .frame(maxWidth: .infinity, alignment: .leading)

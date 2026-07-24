@@ -21,6 +21,28 @@ struct DropdownMenuOption: Identifiable, Equatable {
 }
 
 extension DropdownMenuOption {
+    func localizedTitle(locale: Locale) -> String {
+        if let month = Self.monthNumberByOption[option] {
+            return Self.localizedMonth(month, locale: locale)
+        }
+
+        if let countryCode = nationalityCountryCode {
+            return Locale(identifier: locale.identifier).localizedString(forRegionCode: countryCode) ?? option
+        }
+
+        if let gender {
+            return String(localized: String.LocalizationValue(gender.localizationKey), locale: locale)
+        }
+
+        if let visaType {
+            return String(localized: String.LocalizationValue(visaType.localizationKey), locale: locale)
+        }
+
+        return option
+    }
+}
+
+extension DropdownMenuOption {
     static let months: [DropdownMenuOption] = [
         DropdownMenuOption(option: "JAN"),
         DropdownMenuOption(option: "FEB"),
@@ -138,6 +160,17 @@ extension DropdownMenuOption {
         "DEC": 12
     ]
 
+    private static func localizedMonth(_ month: Int, locale: Locale) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+
+        guard formatter.shortStandaloneMonthSymbols.indices.contains(month - 1) else {
+            return months[month - 1].option
+        }
+
+        return formatter.shortStandaloneMonthSymbols[month - 1]
+    }
+
     private static func isValidBirthDate(year: Int, month: Int, day: Int) -> Bool {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? calendar.timeZone
@@ -165,6 +198,15 @@ private extension Gender {
             "Male"
         case .female:
             "Female"
+        }
+    }
+
+    nonisolated var localizationKey: String {
+        switch self {
+        case .male:
+            "account.gender.male"
+        case .female:
+            "account.gender.female"
         }
     }
 }
@@ -213,6 +255,31 @@ private extension VisaType {
             "Diplomatic/Official & Others(A-1, A-2, G-1)"
         case .etc:
             "etc"
+        }
+    }
+
+    nonisolated var localizationKey: String {
+        switch self {
+        case .shortTermVisit:
+            "onboarding.option.visa.shortTermVisit"
+        case .studentsTrainees:
+            "onboarding.option.visa.studentsTrainees"
+        case .nonProfessionalWorkers:
+            "onboarding.option.visa.nonProfessionalWorkers"
+        case .workingHolidayWorkAndVisit:
+            "onboarding.option.visa.workingHolidayWorkAndVisit"
+        case .overseasKoreans:
+            "onboarding.option.visa.overseasKoreans"
+        case .familyMarriageMigrants:
+            "onboarding.option.visa.familyMarriageMigrants"
+        case .permanentResidents:
+            "onboarding.option.visa.permanentResidents"
+        case .professionals:
+            "onboarding.option.visa.professionals"
+        case .diplomaticOfficialAndOthers:
+            "onboarding.option.visa.diplomaticOfficialAndOthers"
+        case .etc:
+            "onboarding.option.visa.etc"
         }
     }
 }
