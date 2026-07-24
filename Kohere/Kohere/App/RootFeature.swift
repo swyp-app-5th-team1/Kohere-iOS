@@ -10,6 +10,8 @@ import Foundation
 
 @Reducer
 struct RootFeature {
+    @Dependency(\.continuousClock)
+    var clock
     @Dependency(\.keychainClient)
     var keychainClient
     @Dependency(\.userDefaultsClient)
@@ -31,6 +33,7 @@ struct RootFeature {
         var currentUser: UserProfile?
         var appLanguage: AppLanguage = .systemDefault
         var isAuthLoading = true
+        var isSplashMinimumDurationElapsed = false
         var isCurrentUserLoading = false
         var isLogoutRequesting = false
         var isDeleteAccountRequesting = false
@@ -44,10 +47,15 @@ struct RootFeature {
         var map = MapFeature.State()
         var chat = ChatFeature.State()
         var more = MoreFeature.State()
+
+        var isSplashPresented: Bool {
+            isAuthLoading || !isSplashMinimumDurationElapsed
+        }
     }
     
     enum Action {
         case onAppear
+        case splashMinimumDurationElapsed
         case mainTabAppeared
         case storedAuthLoaded(Auth?, OnboardingUserType?)
         case authSessionExpired(AuthSessionExpirationContext?)
@@ -96,6 +104,7 @@ struct RootFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
+                let clock = clock
                 let keychainClient = keychainClient
                 let userDefaultsClient = userDefaultsClient
                 let reissueTokenUseCase = reissueTokenUseCase
@@ -114,6 +123,14 @@ struct RootFeature {
                 state.chat.appLanguage = resolvedLanguage
                 state.more.selectedLanguage = resolvedLanguage
                 var effects: [Effect<Action>] = [
+                    .run { send in
+                        try await clock.sleep(for: .seconds(1.5))
+                        await send(.splashMinimumDurationElapsed)
+                    }
+                    .cancellable(
+                        id: "RootFeature.splashMinimumDuration",
+                        cancelInFlight: true
+                    ),
                     .run { send in
                         for await notification in NotificationCenter.default.notifications(named: .authSessionExpired) {
                             await send(.authSessionExpired(notification.object as? AuthSessionExpirationContext))
@@ -165,6 +182,10 @@ struct RootFeature {
                 }
                 
                 return .merge(effects)
+
+            case .splashMinimumDurationElapsed:
+                state.isSplashMinimumDurationElapsed = true
+                return .none
                 
             case let .storedAuthLoaded(auth, pendingOnboardingUserType):
                 state.authInfo = auth
@@ -202,7 +223,11 @@ struct RootFeature {
                 Self.logSessionExpiration(context)
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
                 let appLanguage = AppLanguage.english
-                state = State(appLanguage: appLanguage, isAuthLoading: false)
+                state = State(
+                    appLanguage: appLanguage,
+                    isAuthLoading: false,
+                    isSplashMinimumDurationElapsed: true
+                )
                 state.isAuthenticationFlowPresented = true
                 state.home.appLanguage = appLanguage
                 state.map.appLanguage = appLanguage
