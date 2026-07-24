@@ -29,12 +29,40 @@ struct RootView: View {
             if let popup = store.popup {
                 popupOverlay(popup)
             }
+
+            if store.isSplashPresented {
+                splashView
+                    .zIndex(100)
+            }
         }
         .environment(\.locale, store.appLanguage.locale)
         .animation(.easeInOut(duration: 0.2), value: store.popup)
         .animation(.easeInOut(duration: 0.25), value: store.isAuthenticationFlowPresented)
         .onAppear {
             store.send(.onAppear)
+        }
+    }
+
+    private var splashView: some View {
+        ZStack {
+            Color.secondaryNormal
+                .ignoresSafeArea()
+
+            GeometryReader { proxy in
+                let logoHeight: CGFloat = 48
+                let availableSpacing = max(proxy.size.height - proxy.safeAreaInsets.top
+                                           - proxy.safeAreaInsets.bottom - logoHeight, 0)
+                let topSpacing = availableSpacing * 306 / (306 + 402)
+
+                Image(.typoLogo)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 178, height: logoHeight)
+                    .position(
+                        x: proxy.size.width / 2,
+                        y: proxy.safeAreaInsets.top + topSpacing + logoHeight / 2
+                    )
+            }
         }
     }
 
