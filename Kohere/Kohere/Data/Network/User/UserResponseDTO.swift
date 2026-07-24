@@ -10,8 +10,6 @@ import Foundation
 struct UserProfileResponseDTO: Decodable {
     let id: Int
     let userType: String
-    let firstName: String?
-    let lastName: String?
     let name: String?
     let nickname: String?
     let gender: String?

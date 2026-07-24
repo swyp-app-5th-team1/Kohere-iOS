@@ -80,8 +80,6 @@ final class UserProfileLanguageResponseDTOTests: XCTestCase {
             {
               "id": 13,
               "userType": "LANDLORD",
-              "firstName": null,
-              "lastName": null,
               "name": "Kohere Host",
               "nickname": null,
               "gender": null,
@@ -313,9 +311,7 @@ final class LanguageResetTests: XCTestCase {
         let profile = UserProfile(
             id: 13,
             userType: .tenant,
-            firstName: "Gildong",
-            lastName: "Hong",
-            name: nil,
+            name: "Hong Gildong",
             nickname: "tester",
             gender: nil,
             birthDate: nil,
@@ -836,8 +832,7 @@ final class ListingApplicationFeatureTests: XCTestCase {
 
     func testApplicantSummaryUsesCurrentProfileFields() {
         let profile = makeUserProfile(
-            firstName: "Song",
-            lastName: "NunSeop",
+            name: "Song NunSeop",
             nickname: "DreamyPuma",
             gender: "MALE",
             country: "KR",
@@ -855,8 +850,7 @@ final class ListingApplicationFeatureTests: XCTestCase {
 
     func testApplicantSummaryOmitsMissingName() {
         let profile = makeUserProfile(
-            firstName: nil,
-            lastName: nil,
+            name: nil,
             nickname: "",
             gender: "MALE",
             country: "KR",
@@ -964,8 +958,7 @@ final class ListingApplicationFeatureTests: XCTestCase {
 
     func testOnAppearLoadsApplicantProfileAndPrefillsPhoneNumber() async {
         let profile = makeUserProfile(
-            firstName: "Song",
-            lastName: "NunSeop",
+            name: "Song NunSeop",
             nickname: "DreamyPuma",
             gender: "MALE",
             country: "KR",
@@ -1094,8 +1087,7 @@ final class ListingApplicationFeatureTests: XCTestCase {
     }
 
     private func makeUserProfile(
-        firstName: String?,
-        lastName: String?,
+        name: String?,
         nickname: String,
         gender: String?,
         country: String?,
@@ -1105,9 +1097,7 @@ final class ListingApplicationFeatureTests: XCTestCase {
         UserProfile(
             id: 13,
             userType: .tenant,
-            firstName: firstName,
-            lastName: lastName,
-            name: nil,
+            name: name,
             nickname: nickname,
             gender: gender,
             birthDate: nil,

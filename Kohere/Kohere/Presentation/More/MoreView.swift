@@ -205,14 +205,7 @@ struct MoreView: View {
         switch profile.userType {
         case .tenant:
             let name = profile.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            if !name.isEmpty {
-                return name
-            }
-
-            let fullName = [profile.firstName, profile.lastName]
-                .compactMap { $0 }
-                .joined(separator: " ")
-            return fullName.isEmpty ? profile.nickname : fullName
+            return name.isEmpty ? profile.nickname : name
 
         case .landlord:
             return profile.name ?? profile.nickname

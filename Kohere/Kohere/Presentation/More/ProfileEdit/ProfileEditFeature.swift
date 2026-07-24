@@ -54,13 +54,7 @@ struct ProfileEditFeature {
         }
 
         var displayName: String {
-            let name = Self.normalizedText(userProfile?.name ?? "")
-            guard name.isEmpty else { return name }
-
-            return [userProfile?.firstName, userProfile?.lastName]
-                .compactMap { $0.map(Self.normalizedText) }
-                .filter { !$0.isEmpty }
-                .joined(separator: " ")
+            Self.normalizedText(userProfile?.name ?? "")
         }
 
         init(userProfile: UserProfile? = nil) {
