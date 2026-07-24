@@ -50,6 +50,7 @@ struct TenantOnboardingView: View {
                     .padding(.horizontal, 20)
             }
         }
+        .environment(\.locale, AppLanguage.english.locale)
     }
 }
 

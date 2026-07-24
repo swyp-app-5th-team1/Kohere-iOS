@@ -10,10 +10,6 @@ import Foundation
 
 @Reducer
 struct TenantOnboardingFeature {
-    @Dependency(\.sendEmailVerificationCodeUseCase)
-    var sendEmailVerificationCodeUseCase
-    @Dependency(\.verifyEmailUseCase)
-    var verifyEmailUseCase
     @Dependency(\.completeOnboardingUseCase)
     var completeOnboardingUseCase
 
@@ -42,7 +38,7 @@ struct TenantOnboardingFeature {
         var appLanguage: AppLanguage = .systemDefault
         var currentStep: Step = .nameAndBirth
 
-        var name: String = "Gildong Hong"
+        var name: String = ""
         var selectedMonth: DropdownMenuOption?
         var selectedDay: DropdownMenuOption?
         var selectedYear: DropdownMenuOption?
@@ -50,16 +46,6 @@ struct TenantOnboardingFeature {
         var selectedVisa: VisaType?
         var selectedNationality: DropdownMenuOption?
         var selectedGender: Gender?
-
-        var email: String = ""
-        var verificationCode: String = ""
-        var isEmailVerified: Bool = false
-        var isCodeSent: Bool = false
-        var isEmailVerificationCodeRequesting: Bool = false
-        var isEmailVerificationRequesting: Bool = false
-        var lastVerificationCodeSentEmail: String?
-        var emailMessage: String?
-        var emailVerificationCodeErrorMessage: String?
 
         var isOnboardingSubmitting: Bool = false
     }
@@ -70,10 +56,6 @@ struct TenantOnboardingFeature {
         case binding(BindingAction<State>)
         case nextButtonTapped
         case backButtonTapped
-        case sendVerificationCodeTapped
-        case sendVerificationCodeResponse(String, Result<EmailVerificationCode, DataError>)
-        case confirmVerificationCodeTapped
-        case confirmVerificationCodeResponse(Result<EmailVerification, DataError>)
         case onboardingCompleted
         case onboardingResponse(Result<Auth, DataError>)
     }
@@ -84,13 +66,7 @@ struct TenantOnboardingFeature {
         BindingReducer()
         Reduce { state, action in
             switch action {
-            case .binding(let action):
-                if action.keyPath == \.email {
-                    state.resetEmailVerificationIfNeeded()
-                }
-                if action.keyPath == \.verificationCode {
-                    state.emailVerificationCodeErrorMessage = nil
-                }
+            case .binding:
                 return .none
 
             case .nextButtonTapped:
@@ -108,83 +84,6 @@ struct TenantOnboardingFeature {
                     state.currentStep = .nameAndBirth
                 case .nameAndBirth:
                     break
-                }
-                return .none
-
-            case .sendVerificationCodeTapped:
-                let trimmedEmail = state.email.trimmingCharacters(in: .whitespacesAndNewlines)
-                state.email = trimmedEmail
-                guard state.canSendEmailVerificationCode else {
-                    return .none
-                }
-                state.isEmailVerificationCodeRequesting = true
-                state.emailMessage = nil
-                state.isEmailVerified = false
-                state.emailVerificationCodeErrorMessage = nil
-
-                return .run { send in
-                    do {
-                        let response = try await sendEmailVerificationCodeUseCase.execute(trimmedEmail)
-                        await send(.sendVerificationCodeResponse(trimmedEmail, .success(response)))
-                    } catch {
-                        await send(.sendVerificationCodeResponse(trimmedEmail, .failure(DataError.from(error))))
-                    }
-                }
-
-            case let .sendVerificationCodeResponse(requestedEmail, .success):
-                guard state.email == requestedEmail else {
-                    return .none
-                }
-                state.isEmailVerificationCodeRequesting = false
-                state.isCodeSent = true
-                state.lastVerificationCodeSentEmail = requestedEmail
-                state.verificationCode = ""
-                state.isEmailVerified = false
-                state.emailMessage = state.appLanguage.localized("onboarding.verification.emailSent")
-                state.emailVerificationCodeErrorMessage = nil
-                return .none
-
-            case let .sendVerificationCodeResponse(requestedEmail, .failure):
-                guard state.email == requestedEmail else {
-                    return .none
-                }
-                state.isEmailVerificationCodeRequesting = false
-                return .none
-
-            case .confirmVerificationCodeTapped:
-                let trimmedCode = state.verificationCode.trimmingCharacters(in: .whitespacesAndNewlines)
-                state.verificationCode = trimmedCode
-                guard state.canConfirmEmailVerificationCode else {
-                    return .none
-                }
-                state.isEmailVerificationRequesting = true
-                state.emailVerificationCodeErrorMessage = nil
-                let email = state.email
-
-                return .run { send in
-                    do {
-                        let response = try await verifyEmailUseCase.execute(email, trimmedCode)
-                        await send(.confirmVerificationCodeResponse(.success(response)))
-                    } catch {
-                        await send(.confirmVerificationCodeResponse(.failure(DataError.from(error))))
-                    }
-                }
-
-            case let .confirmVerificationCodeResponse(.success(response)):
-                state.isEmailVerificationRequesting = false
-                state.isEmailVerified = response.verified
-                state.emailMessage = nil
-                state.emailVerificationCodeErrorMessage = response.verified
-                    ? nil
-                    : state.appLanguage.localized("onboarding.verification.codeIncorrect")
-                return .none
-
-            case let .confirmVerificationCodeResponse(.failure(error)):
-                state.isEmailVerificationRequesting = false
-                if case let .serverError(code, _) = error, code == "AUTH_EMAIL_VERIFICATION_FAILED" {
-                    state.emailVerificationCodeErrorMessage = state.appLanguage.localized(
-                        "onboarding.verification.codeIncorrectOrExpired"
-                    )
                 }
                 return .none
 

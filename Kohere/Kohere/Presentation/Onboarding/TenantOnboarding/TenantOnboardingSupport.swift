@@ -21,30 +21,10 @@ extension TenantOnboardingFeature.State {
     var isNextButtonEnabled: Bool {
         switch currentStep {
         case .nameAndBirth:
-            return !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && birthDate != nil
+            return birthDate != nil
         case .details:
             return selectedVisa != nil && selectedNationality != nil && selectedGender != nil
         }
-    }
-
-    var hasEmailFormatError: Bool {
-        guard !email.isEmpty else { return false }
-        let allowedCharacters = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._%+-@")
-        return email.rangeOfCharacter(from: allowedCharacters.inverted) != nil
-    }
-
-    var canSendEmailVerificationCode: Bool {
-        guard !email.isEmpty,
-              !hasEmailFormatError,
-              let atIndex = email.firstIndex(of: "@") else {
-            return false
-        }
-        let domain = email[email.index(after: atIndex)...]
-        return domain.contains(".") && domain.last != "." && !isEmailVerificationCodeRequesting
-    }
-
-    var canConfirmEmailVerificationCode: Bool {
-        isCodeSent && !verificationCode.isEmpty && !isEmailVerificationRequesting
     }
 
     var onboardingProfile: AuthOnboardingProfile? {
@@ -55,38 +35,13 @@ extension TenantOnboardingFeature.State {
             return nil
         }
 
-        let nameParts = name.split(separator: " ", omittingEmptySubsequences: true)
-        let trimmedFirstName = nameParts.dropLast().joined(separator: " ")
-        let trimmedLastName = nameParts.last.map(String.init) ?? ""
-        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        guard !trimmedFirstName.isEmpty, !trimmedLastName.isEmpty, !trimmedEmail.isEmpty else {
-            return nil
-        }
-
         return AuthOnboardingProfile(
-            firstName: trimmedFirstName,
-            lastName: trimmedLastName,
             gender: gender,
             birthDate: birthDate,
             country: country,
-            email: trimmedEmail,
-            visaType: visaType
+            visaType: visaType,
+            lang: appLanguage.rawValue
         )
-    }
-
-    mutating func resetEmailVerificationIfNeeded() {
-        guard email != lastVerificationCodeSentEmail else {
-            return
-        }
-        isCodeSent = false
-        isEmailVerified = false
-        isEmailVerificationCodeRequesting = false
-        isEmailVerificationRequesting = false
-        lastVerificationCodeSentEmail = nil
-        verificationCode = ""
-        emailMessage = nil
-        emailVerificationCodeErrorMessage = nil
     }
 
     private var birthDate: String? {

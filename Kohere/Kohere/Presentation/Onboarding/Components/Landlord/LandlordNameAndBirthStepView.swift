@@ -27,15 +27,23 @@ struct LandlordNameAndBirthStepView: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("이름")
+                    Text("onboarding.profile.fullName")
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
 
-                    Text(store.landlordName)
+                    Text(store.name)
                         .kohereTextStyle(.label2Medium)
                         .foregroundStyle(.labelAssistive)
                         .padding(.horizontal, 16)
                         .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+                        .background(
+                            .backgroundNormalNormal,
+                            in: RoundedRectangle(cornerRadius: 12)
+                        )
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(.lineAlternative, lineWidth: 1)
+                        }
                 }
                 .zIndex(1)
 

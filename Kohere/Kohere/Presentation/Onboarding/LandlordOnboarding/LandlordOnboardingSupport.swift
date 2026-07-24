@@ -19,7 +19,7 @@ extension LandlordOnboardingFeature.State {
     var isNextButtonEnabled: Bool {
         switch currentStep {
         case .nameAndBirth:
-            return !landlordName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && birthDate != nil
+            return birthDate != nil
         case .phoneVerification:
             return isPhoneVerified && !isOnboardingSubmitting
         }
@@ -43,15 +43,13 @@ extension LandlordOnboardingFeature.State {
             return nil
         }
 
-        let trimmedName = landlordName.trimmingCharacters(in: .whitespacesAndNewlines)
         let phoneNumber = normalizedPhoneNumber
 
-        guard !trimmedName.isEmpty, !phoneNumber.isEmpty else {
+        guard !phoneNumber.isEmpty else {
             return nil
         }
 
         return LandlordOnboardingProfile(
-            name: trimmedName,
             phoneNumber: phoneNumber,
             birthDate: birthDate
         )

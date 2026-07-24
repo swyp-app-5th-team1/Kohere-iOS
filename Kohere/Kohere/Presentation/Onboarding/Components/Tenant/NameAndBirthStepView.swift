@@ -30,12 +30,20 @@ struct NameAndBirthStepView: View {
                     Text("onboarding.profile.fullName")
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
-                    
+
                     Text(store.name)
                         .kohereTextStyle(.label2Medium)
                         .foregroundStyle(.labelAssistive)
                         .padding(.horizontal, 16)
                         .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+                        .background(
+                            .backgroundNormalNormal,
+                            in: RoundedRectangle(cornerRadius: 12)
+                        )
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(.lineAlternative, lineWidth: 1)
+                        }
                 }
                 .zIndex(1)
 
