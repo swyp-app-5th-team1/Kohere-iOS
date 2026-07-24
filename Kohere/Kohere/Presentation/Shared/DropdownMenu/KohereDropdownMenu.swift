@@ -42,7 +42,7 @@ struct KohereDropdownMenu<Field: Hashable>: View {
             HStack {
                 Text(
                     selectedOption?.localizedTitle(locale: locale)
-                        ?? String(localized: "common.select", locale: locale)
+                        ?? AppLanguage(locale: locale).localized("common.select")
                 )
                     .kohereTextStyle(.label2Medium)
                     .foregroundColor(

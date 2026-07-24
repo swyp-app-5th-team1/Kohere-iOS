@@ -31,11 +31,11 @@ extension DropdownMenuOption {
         }
 
         if let gender {
-            return String(localized: String.LocalizationValue(gender.localizationKey), locale: locale)
+            return AppLanguage(locale: locale).localized(gender.localizationKey)
         }
 
         if let visaType {
-            return String(localized: String.LocalizationValue(visaType.localizationKey), locale: locale)
+            return AppLanguage(locale: locale).localized(visaType.localizationKey)
         }
 
         return option
@@ -68,8 +68,6 @@ extension DropdownMenuOption {
 
     static let visas = VisaType.allCases.map(DropdownMenuOption.init)
 
-    static let occupations = Occupation.allCases.map(DropdownMenuOption.init)
-
     static let nationalities = ["Korea, Republic of", "United States", "Japan", "China", "Vietnam", "Canada", "United Kingdom", "France", "Spain", "Italy", "Turkey", "Hungary"].map {
         DropdownMenuOption(option: $0)
     }
@@ -100,20 +98,12 @@ extension DropdownMenuOption {
         self.init(option: gender.displayTitle)
     }
 
-    nonisolated init(_ occupation: Occupation) {
-        self.init(option: occupation.displayTitle)
-    }
-
     nonisolated init(_ visaType: VisaType) {
         self.init(option: visaType.displayTitle)
     }
 
     nonisolated var gender: Gender? {
         Gender.allCases.first { $0.displayTitle == option }
-    }
-
-    nonisolated var occupation: Occupation? {
-        Occupation.allCases.first { $0.displayTitle == option }
     }
 
     nonisolated var visaType: VisaType? {
@@ -207,27 +197,6 @@ private extension Gender {
             "account.gender.male"
         case .female:
             "account.gender.female"
-        }
-    }
-}
-
-private extension Occupation {
-    nonisolated var displayTitle: String {
-        switch self {
-        case .undergraduateStudent:
-            "Undergraduate Student"
-        case .graduateStudent:
-            "Graduate Student"
-        case .exchangeStudent:
-            "Exchange Student"
-        case .languageTeaching:
-            "Language Teaching"
-        case .manufacturingProduction:
-            "Manufacturing/Production"
-        case .businessTrade:
-            "Business/Trade"
-        case .etc:
-            "etc"
         }
     }
 }
