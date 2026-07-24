@@ -41,7 +41,7 @@ struct LandlordOnboardingFeature {
     struct State: Equatable {
         var currentStep: Step = .nameAndBirth
 
-        var landlordName: String = ""
+        var landlordName: String = "홍길동"
         var selectedMonth: DropdownMenuOption?
         var selectedDay: DropdownMenuOption?
         var selectedYear: DropdownMenuOption?

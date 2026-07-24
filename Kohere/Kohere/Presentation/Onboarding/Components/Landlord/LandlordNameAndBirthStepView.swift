@@ -31,13 +31,11 @@ struct LandlordNameAndBirthStepView: View {
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
 
-                    OnboardingTextField(
-                        text: $store.landlordName,
-                        activeField: $activeField,
-                        keyboardField: keyboardField,
-                        equals: .landlordName,
-                        placeholder: nil
-                    )
+                    Text(store.landlordName)
+                        .kohereTextStyle(.label2Medium)
+                        .foregroundStyle(.labelAssistive)
+                        .padding(.horizontal, 16)
+                        .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
                 }
                 .zIndex(1)
 

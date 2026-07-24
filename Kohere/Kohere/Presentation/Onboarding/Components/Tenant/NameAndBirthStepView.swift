@@ -27,47 +27,18 @@ struct NameAndBirthStepView: View {
             
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("onboarding.profile.lastName")
+                    Text("onboarding.profile.fullName")
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
                     
-                    OnboardingTextField(
-                        text: $store.lastName,
-                        activeField: $activeField,
-                        keyboardField: keyboardField,
-                        equals: .lastName,
-                        placeholder: nil
-                    )
+                    Text(store.name)
+                        .kohereTextStyle(.label2Medium)
+                        .foregroundStyle(.labelAssistive)
+                        .padding(.horizontal, 16)
+                        .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
                 }
                 .zIndex(1)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("onboarding.profile.firstName")
-                        .kohereTextStyle(.label2Semibold)
-                        .foregroundStyle(.neutral90)
-                    
-                    OnboardingTextField(
-                        text: $store.firstName,
-                        activeField: $activeField,
-                        keyboardField: keyboardField,
-                        equals: .firstName,
-                        placeholder: nil
-                    )
-                    
-                    HStack(spacing: 4) {
-                        Image(.circleInfo24)
-                            .renderingMode(.template)
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                        
-                        Text("onboarding.name.passportHint")
-                            .kohereTextStyle(.caption2Medium)
-                    }
-                    .foregroundStyle(.primaryNormal)
-                    .padding(.top, 8)
-                }
-                .zIndex(2)
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text("onboarding.profile.birthDate")
                         .kohereTextStyle(.label2Semibold)
