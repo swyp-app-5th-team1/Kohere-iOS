@@ -20,8 +20,6 @@ struct ProfileEditFeature {
         var nickname: String
         var email: String
 
-        var firstName: String
-        var lastName: String
         var selectedNationality: DropdownMenuOption?
         var selectedGender: DropdownMenuOption?
         var selectedVisa: DropdownMenuOption?
@@ -40,8 +38,6 @@ struct ProfileEditFeature {
             else { return nil }
 
             return UserProfileUpdate(
-                firstName: Self.normalizedText(firstName),
-                lastName: Self.normalizedText(lastName),
                 gender: selectedGender?.gender,
                 birthDate: userProfile?.birthDate,
                 country: selectedNationality?.nationalityCountryCode ?? userProfile?.country,
@@ -54,31 +50,35 @@ struct ProfileEditFeature {
         }
 
         private var hasRequiredFields: Bool {
-            !Self.normalizedText(firstName).isEmpty
-            && !Self.normalizedText(lastName).isEmpty
-            && selectedVisa != nil
+            selectedVisa != nil
+        }
+
+        var displayName: String {
+            let name = Self.normalizedText(userProfile?.name ?? "")
+            guard name.isEmpty else { return name }
+
+            return [userProfile?.firstName, userProfile?.lastName]
+                .compactMap { $0.map(Self.normalizedText) }
+                .filter { !$0.isEmpty }
+                .joined(separator: " ")
         }
 
         init(userProfile: UserProfile? = nil) {
             self.userProfile = userProfile
             nickname = userProfile?.nickname ?? ""
             email = userProfile?.email ?? ""
-            firstName = userProfile?.firstName ?? ""
-            lastName = userProfile?.lastName ?? ""
             selectedNationality = Self.nationalityOption(from: userProfile?.country)
             selectedGender = Self.genderOption(from: userProfile?.gender)
             selectedVisa = Self.visaOption(from: userProfile?.visaType)
         }
 
         private var hasChanges: Bool {
-            Self.normalizedText(firstName) != Self.normalizedText(userProfile?.firstName ?? "")
-            || Self.normalizedText(lastName) != Self.normalizedText(userProfile?.lastName ?? "")
-            || selectedNationality != Self.nationalityOption(from: userProfile?.country)
+            selectedNationality != Self.nationalityOption(from: userProfile?.country)
             || selectedGender != Self.genderOption(from: userProfile?.gender)
             || selectedVisa != Self.visaOption(from: userProfile?.visaType)
         }
 
-        private static func normalizedText(_ text: String) -> String {
+        nonisolated private static func normalizedText(_ text: String) -> String {
             text.trimmingCharacters(in: .whitespacesAndNewlines)
         }
 

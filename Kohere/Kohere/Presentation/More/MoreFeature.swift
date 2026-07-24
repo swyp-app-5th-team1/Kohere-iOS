@@ -372,6 +372,7 @@ struct MoreFeature {
                 return .none
 
             case .editProfileTapped:
+                guard state.userType == .tenant else { return .none }
                 state.path.append(.profileEdit(ProfileEditFeature.State(userProfile: state.userProfile)))
                 return .none
 
