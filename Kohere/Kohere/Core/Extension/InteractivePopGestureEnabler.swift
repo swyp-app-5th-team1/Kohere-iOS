@@ -33,7 +33,9 @@ private struct InteractivePopGestureEnabler: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ uiView: NavigationControllerResolverView, context: Context) {}
+    func updateUIView(_ uiView: NavigationControllerResolverView, context: Context) {
+        uiView.resolveNavigationController()
+    }
 
     static func dismantleUIView(
         _ uiView: NavigationControllerResolverView,
@@ -49,20 +51,24 @@ private struct InteractivePopGestureEnabler: UIViewRepresentable {
         private var previousIsEnabled = false
 
         func enableInteractivePopGesture(in navigationController: UINavigationController) {
-            guard self.navigationController !== navigationController,
-                  let popGestureRecognizer = navigationController.interactivePopGestureRecognizer else {
+            guard let popGestureRecognizer = navigationController.interactivePopGestureRecognizer else {
                 return
             }
 
-            restoreInteractivePopGesture()
+            if self.navigationController !== navigationController {
+                restoreInteractivePopGesture()
 
-            self.navigationController = navigationController
-            self.popGestureRecognizer = popGestureRecognizer
-            previousDelegate = popGestureRecognizer.delegate
-            previousIsEnabled = popGestureRecognizer.isEnabled
+                self.navigationController = navigationController
+                self.popGestureRecognizer = popGestureRecognizer
+                previousDelegate = popGestureRecognizer.delegate
+                previousIsEnabled = popGestureRecognizer.isEnabled
 
-            popGestureRecognizer.delegate = nil
-            popGestureRecognizer.isEnabled = navigationController.viewControllers.count > 1
+                popGestureRecognizer.delegate = nil
+            }
+
+            // SwiftUI destination이 window에 붙을 때는 push 전이라 화면 수가 1개일 수 있다.
+            // destination update 뒤에도 다시 활성화해 실제 swipe-back을 보장한다.
+            popGestureRecognizer.isEnabled = true
         }
 
         func restoreInteractivePopGesture() {
@@ -91,6 +97,10 @@ private struct InteractivePopGestureEnabler: UIViewRepresentable {
                 return
             }
 
+            resolveNavigationController()
+        }
+
+        func resolveNavigationController() {
             DispatchQueue.main.async { [weak self] in
                 guard let self,
                       window != nil,
