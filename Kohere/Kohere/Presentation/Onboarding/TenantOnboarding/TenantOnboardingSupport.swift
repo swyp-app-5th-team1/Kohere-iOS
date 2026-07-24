@@ -9,11 +9,11 @@ import Foundation
 
 extension TenantOnboardingFeature.State {
     var totalStepCount: Int {
-        3
+        2
     }
 
     var primaryButtonTitle: String {
-        currentStep == .emailVerification
+        currentStep == .details
             ? appLanguage.localized("common.start")
             : appLanguage.localized("common.next")
     }
@@ -21,11 +21,9 @@ extension TenantOnboardingFeature.State {
     var isNextButtonEnabled: Bool {
         switch currentStep {
         case .nameAndBirth:
-            return !lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && birthDate != nil
+            return !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && birthDate != nil
         case .details:
             return selectedVisa != nil && selectedNationality != nil && selectedGender != nil
-        case .emailVerification:
-            return isEmailVerified && !isOnboardingSubmitting
         }
     }
 
@@ -57,8 +55,9 @@ extension TenantOnboardingFeature.State {
             return nil
         }
 
-        let trimmedFirstName = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedLastName = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let nameParts = name.split(separator: " ", omittingEmptySubsequences: true)
+        let trimmedFirstName = nameParts.dropLast().joined(separator: " ")
+        let trimmedLastName = nameParts.last.map(String.init) ?? ""
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedFirstName.isEmpty, !trimmedLastName.isEmpty, !trimmedEmail.isEmpty else {

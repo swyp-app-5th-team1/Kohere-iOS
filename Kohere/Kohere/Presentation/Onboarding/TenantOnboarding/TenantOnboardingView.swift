@@ -40,8 +40,6 @@ struct TenantOnboardingView: View {
                         NameAndBirthStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
                     case .details:
                         DetailsStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
-                    case .emailVerification:
-                        EmailVerificationStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -90,7 +88,7 @@ private extension TenantOnboardingView {
             }
 
             Button {
-                if store.currentStep == .emailVerification {
+                if store.currentStep == .details {
                     store.send(.onboardingCompleted)
                 } else {
                     store.send(.nextButtonTapped)

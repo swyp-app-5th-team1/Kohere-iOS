@@ -20,7 +20,6 @@ struct TenantOnboardingFeature {
     enum Step: Equatable, Comparable {
         case nameAndBirth
         case details
-        case emailVerification
 
         static func < (lhs: Step, rhs: Step) -> Bool {
             lhs.progressIndex < rhs.progressIndex
@@ -32,8 +31,6 @@ struct TenantOnboardingFeature {
                 return 1
             case .details:
                 return 2
-            case .emailVerification:
-                return 3
             }
         }
     }
@@ -45,8 +42,7 @@ struct TenantOnboardingFeature {
         var appLanguage: AppLanguage = .systemDefault
         var currentStep: Step = .nameAndBirth
 
-        var lastName: String = ""
-        var firstName: String = ""
+        var name: String = "Gildong Hong"
         var selectedMonth: DropdownMenuOption?
         var selectedDay: DropdownMenuOption?
         var selectedYear: DropdownMenuOption?
@@ -102,8 +98,6 @@ struct TenantOnboardingFeature {
                 case .nameAndBirth:
                     state.currentStep = .details
                 case .details:
-                    state.currentStep = .emailVerification
-                case .emailVerification:
                     break
                 }
                 return .none
@@ -112,8 +106,6 @@ struct TenantOnboardingFeature {
                 switch state.currentStep {
                 case .details:
                     state.currentStep = .nameAndBirth
-                case .emailVerification:
-                    state.currentStep = .details
                 case .nameAndBirth:
                     break
                 }
