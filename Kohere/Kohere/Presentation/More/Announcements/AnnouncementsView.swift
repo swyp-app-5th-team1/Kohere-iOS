@@ -26,5 +26,6 @@ struct AnnouncementsView: View {
             )
         }
         .background(.backgroundNormalNormal)
+        .interactivePopGestureEnabled()
     }
 }
