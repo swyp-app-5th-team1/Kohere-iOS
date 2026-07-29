@@ -138,93 +138,12 @@ struct MoreView: View {
     }
 
     @ViewBuilder private var profileCard: some View {
-        if store.userType == .landlord {
-            profileCardContent
-        } else {
-            Button {
-                store.send(.editProfileTapped)
-            } label: {
-                profileCardContent
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
-    private var profileCardContent: some View {
-        ZStack {
-            Image(profileBackgroundName)
-                .resizable()
-                .scaledToFill()
-                .frame(height: 76)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-
-            HStack(spacing: 8) {
-                Image(profileIconName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(profileNameText)
-                        .kohereTextStyle(.label1Medium)
-                        .foregroundStyle(profileNameColor)
-
-                    Text(profileNicknameText)
-                        .kohereTextStyle(.caption2Regular)
-                        .foregroundStyle(profileNicknameColor)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                if store.userType != .landlord {
-                    Image("pencil_write_24")
-                        .renderingMode(.template)
-                        .foregroundStyle(.staticWhite)
-                        .frame(width: 24, height: 24)
-                }
-            }
-            .padding(.horizontal, 16)
-        }
-        .frame(height: 76)
-    }
-
-    private var profileBackgroundName: String {
-        store.userType == .landlord ? "landlordProfileBackground" : "tenantProfileBackground"
-    }
-
-    private var profileIconName: String {
-        store.userType == .landlord ? "landlordProfileIcon" : "tenantProfileIcon"
-    }
-
-    private var profileNameText: String {
-        guard let profile = store.userProfile else {
-            return store.userType == .landlord
-                ? localized("more.profile.landlordNamePlaceholder")
-                : localized("more.profile.nicknamePlaceholder")
-        }
-
-        switch profile.userType {
-        case .tenant:
-            let name = profile.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return name.isEmpty ? profile.nickname : name
-
-        case .landlord:
-            return profile.name ?? profile.nickname
-
-        case .unknown:
-            return profile.nickname
-        }
-    }
-
-    private var profileNicknameText: String {
-        store.userProfile?.nickname ?? ""
-    }
-
-    private var profileNameColor: Color {
-        store.userType == .landlord ? .neutral85 : .neutral5
-    }
-
-    private var profileNicknameColor: Color {
-        store.userType == .landlord ? .neutral75 : .primary5
+        MoreProfileCard(
+            userType: store.userType,
+            userProfile: store.userProfile,
+            localized: localized,
+            onEditTap: { store.send(.editProfileTapped) }
+        )
     }
 
     private var tenantActivitySection: some View {

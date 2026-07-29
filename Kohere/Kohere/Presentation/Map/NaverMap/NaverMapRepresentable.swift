@@ -11,6 +11,7 @@ import SwiftUI
 // MARK: - Naver Map Bridge
 
 struct NaverMapRepresentable: UIViewRepresentable {
+    let appLanguage: AppLanguage
     let markers: [MapMarkerItem]
     let selectedMarkerID: String?
     let cameraMoveRequest: MapCameraMoveRequest?
@@ -28,6 +29,7 @@ struct NaverMapRepresentable: UIViewRepresentable {
 
     func makeUIView(context: Context) -> NMFMapView {
         let mapView = InitialLayoutNMFMapView()
+        mapView.locale = appLanguage.rawValue
         mapView.addCameraDelegate(delegate: context.coordinator)
         mapView.onInitialLayout = { [weak coordinator = context.coordinator, weak mapView] in
             guard let mapView else { return }
@@ -37,6 +39,7 @@ struct NaverMapRepresentable: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: NMFMapView, context: Context) {
+        uiView.locale = appLanguage.rawValue
         context.coordinator.updateMarkersIfNeeded(markers, on: uiView)
         context.coordinator.updateSelectedMarkerIfNeeded(selectedMarkerID)
         context.coordinator.moveCameraIfNeeded(to: cameraMoveRequest, on: uiView)

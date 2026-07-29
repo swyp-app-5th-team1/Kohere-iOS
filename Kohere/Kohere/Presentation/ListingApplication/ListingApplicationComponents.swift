@@ -106,8 +106,7 @@ struct ListingApplicationBottomButton: View {
 }
 
 struct ListingApplicationSummaryCard: View {
-    @Environment(\.locale)
-    private var locale
+    let language: AppLanguage
     let title: String
     let roomTypeName: String
     let moveInDateText: String
@@ -124,13 +123,13 @@ struct ListingApplicationSummaryCard: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 VStack(spacing: 12) {
-                    badgeRow(title: String(localized: "listingApplication.review.field.roomType", locale: locale), value: roomTypeName)
-                    badgeRow(title: String(localized: "listingApplication.review.field.moveInDate", locale: locale), value: moveInDateText)
-                    badgeRow(title: String(localized: "listingApplication.review.field.moveOutDate", locale: locale), value: moveOutDateText)
+                    badgeRow(title: language.localized("listingApplication.review.field.roomType"), value: roomTypeName)
+                    badgeRow(title: language.localized("listingApplication.review.field.moveInDate"), value: moveInDateText)
+                    badgeRow(title: language.localized("listingApplication.review.field.moveOutDate"), value: moveOutDateText)
                 }
 
-                plainRow(title: String(localized: "listingApplication.review.field.leaseTerm", locale: locale), value: rentalPeriodText)
-                plainRow(title: String(localized: "listingApplication.review.field.cost", locale: locale), value: priceText)
+                plainRow(title: language.localized("listingApplication.review.field.leaseTerm"), value: rentalPeriodText)
+                plainRow(title: language.localized("listingApplication.review.field.cost"), value: priceText)
             }
         }
         .padding(16)
@@ -182,7 +181,8 @@ struct ListingApplicationSummaryCard: View {
         Text(title)
             .kohereTextStyle(.body3Regular)
             .foregroundStyle(.labelAlternative)
-            .frame(width: 60, alignment: .leading)
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
     }
 }
 
@@ -192,6 +192,7 @@ struct ListingApplicationApplicantCard: View {
     @Binding var phoneNumber: String
     var isPhoneNumberFocused: FocusState<Bool>.Binding
     let showsPhoneNumberError: Bool
+    let onBackgroundTap: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -209,7 +210,11 @@ struct ListingApplicationApplicantCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.common0)
+        .background {
+            Color.common0
+                .contentShape(Rectangle())
+                .onTapGesture(perform: onBackgroundTap)
+        }
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -340,7 +345,7 @@ struct ListingApplicationAgreementCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(alignment: .top, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
                 Image(isChecked ? .check24 : .circle24)
                     .renderingMode(.template)
                     .resizable()

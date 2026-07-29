@@ -155,7 +155,6 @@ private extension ListingBookingResponseDTO {
 private extension ListingListItemResponseDTO {
     func toEntity() -> Listing? {
         guard let listingId else { return nil }
-        let propertyTypeCode = type?.code ?? ""
         let propertyTypeLabel = type?.label ?? ""
 
         let coordinate: MapCoordinate?
@@ -182,11 +181,7 @@ private extension ListingListItemResponseDTO {
             maxMaintenanceFee: maintenanceFees.max(),
             minStayMonths: contract?.minStayMonths,
             maxStayMonths: contract?.maxStayMonths,
-            thumbnailURL: firstImageURL(imageUrls)
-                ?? MockListingImageProvider.listingImageName(
-                    listingID: listingId,
-                    propertyType: propertyTypeCode
-                ),
+            thumbnailURL: firstImageURL(imageUrls),
             coordinate: coordinate,
             address: address?.fullAddress,
             nearestTransit: nearestTransit?.toEntity(),

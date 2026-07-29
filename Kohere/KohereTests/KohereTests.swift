@@ -217,14 +217,14 @@ final class ListingDetailValueFormatterLocalizationTests: XCTestCase {
 }
 
 final class ChatApplicationCardFormatterTests: XCTestCase {
-    func testChatRoomSummaryDoesNotFabricateMissingApplicantDetails() {
+    func testChatRoomDetailDoesNotFabricateMissingApplicantDetails() {
         let model = makeChatRoomModel(deposit: 0)
 
         XCTAssertEqual(model.applicantGenderCode, "")
         XCTAssertEqual(model.applicantCountryCode, "")
         XCTAssertEqual(model.applicantCountryName, "")
-        XCTAssertEqual(model.applicantEmail, "")
-        XCTAssertEqual(model.roomType, "")
+        XCTAssertEqual(model.applicantEmail, "N/A")
+        XCTAssertEqual(model.roomType, "N/A")
     }
 
     func testZeroDepositIsDisplayedAsValidAmount() {
@@ -237,21 +237,43 @@ final class ChatApplicationCardFormatterTests: XCTestCase {
     }
 
     private func makeChatRoomModel(deposit: Int) -> ChatRoomModel {
-        ChatRoomModel(
-            entity: ChatRoom(
-                id: 1,
-                listingName: "Listing",
-                regionName: "Seoul",
-                accommodationType: "Co-living",
-                status: "SUBMITTED",
-                lastMessageAt: Date(timeIntervalSince1970: 0),
-                applicantName: "Applicant",
+        let summaryModel = ChatRoomModel(
+            summary: BookingSummary(
+                bookingID: 1,
+                listingID: "listing-1",
+                title: "Listing",
+                thumbnailURL: nil,
+                roomOfferID: "room-1",
                 moveInDate: Date(timeIntervalSince1970: 0),
-                minStayMonths: 1,
-                deposit: deposit,
-                totalCostKRW: 0,
-                pricePerMonthKRW: 0
+                contractPeriod: 1,
+                status: "SUBMITTED",
+                createdAt: Date(timeIntervalSince1970: 0)
             )
+        )
+
+        return ChatRoomModel(
+            detail: BookingDetail(
+                bookingID: 1,
+                status: "SUBMITTED",
+                listingID: "listing-1",
+                roomOfferID: "room-1",
+                title: "Listing",
+                thumbnailURL: nil,
+                address: "Seoul",
+                roomOfferName: "",
+                createdAt: Date(timeIntervalSince1970: 0),
+                moveInDate: Date(timeIntervalSince1970: 0),
+                contractPeriod: 1,
+                applicantName: "Applicant",
+                applicantGender: "",
+                applicantCountry: "",
+                applicantCountryName: "",
+                applicantEmail: "",
+                tenantName: "Applicant",
+                deposit: deposit,
+                totalAmount: 0
+            ),
+            fallback: summaryModel
         )
     }
 }
@@ -768,7 +790,7 @@ final class MapDiagnosisRecommendationTests: XCTestCase {
             maxMonthlyRent: 300_000,
             minDeposit: 0,
             maxDeposit: 100_000,
-            thumbnailURL: "listing_goshiwon_01",
+            thumbnailURL: nil,
             coordinate: coordinate
         )
     }
