@@ -61,6 +61,7 @@ struct MapView: View {
     private var mapContent: some View {
         ZStack(alignment: .top) {
             NaverMapRepresentable(
+                appLanguage: store.appLanguage,
                 markers: store.markers,
                 selectedMarkerID: store.selectedMarkerID,
                 cameraMoveRequest: store.cameraMoveRequest,
