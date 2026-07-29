@@ -3165,7 +3165,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The host will review your application and notify you by email."
+            "value" : "The host will review your application\nand notify you by email."
           }
         },
         "ko" : {
