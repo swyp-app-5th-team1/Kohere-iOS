@@ -40,6 +40,8 @@ struct ListingDetailSectionHeader: View {
 struct ListingDetailRoomOfferCard: View {
     let offer: ListingRoomOfferModel
 
+    @State private var isImageLoaded = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Spacer()
@@ -66,11 +68,12 @@ struct ListingDetailRoomOfferCard: View {
                         .frame(height: 22)
                         .background {
                             RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                .fill(.ultraThinMaterial)
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                        .fill(.backgroundTransparentAlternative)
-                                }
+                                .fill(isImageLoaded ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(.backgroundTransparentAlternative))
+
+                            if isImageLoaded {
+                                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                    .fill(.backgroundTransparentAlternative)
+                            }
                         }
                 }
             }
@@ -82,21 +85,25 @@ struct ListingDetailRoomOfferCard: View {
         .padding(.bottom, 13)
         .frame(width: 285, height: 160, alignment: .bottomLeading)
         .background {
-            KohereRemoteImageView(urlString: displayedImageURL)
+            KohereRemoteImageView(
+                urlString: displayedImageURL,
+                onImageLoaded: { isImageLoaded = true },
+                placeholder: { Color.neutral20 }
+            )
                 .frame(width: 285, height: 160)
                 .clipped()
                 .overlay {
-                    LinearGradient(
-                        stops: [
-                            Gradient.Stop(color: .common100.opacity(0.4), location: 0.31762),
-                            Gradient.Stop(color: .common0.opacity(0), location: 0.87658)
-                        ],
-                        startPoint: UnitPoint(x: 0, y: 0.634),
-                        endPoint: UnitPoint(x: 1, y: 0.366)
-                    )
+                    if isImageLoaded {
+                        roomOfferGradient
+                    } else {
+                        fallbackRoomOfferGradient
+                    }
                 }
         }
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .onChange(of: displayedImageURL) {
+            isImageLoaded = false
+        }
     }
 
     private var displayedImageURL: String? {
@@ -105,6 +112,25 @@ struct ListingDetailRoomOfferCard: View {
         #else
         return offer.imageURLs.first
         #endif
+    }
+
+    private var roomOfferGradient: some View {
+        roomOfferGradient(startColor: .common100.opacity(0.4))
+    }
+
+    private var fallbackRoomOfferGradient: some View {
+        roomOfferGradient(startColor: .neutral80.opacity(0.3))
+    }
+
+    private func roomOfferGradient(startColor: Color) -> some View {
+        LinearGradient(
+            stops: [
+                Gradient.Stop(color: startColor, location: 0.31762),
+                Gradient.Stop(color: .common0.opacity(0), location: 0.87658)
+            ],
+            startPoint: UnitPoint(x: 0, y: 0.634),
+            endPoint: UnitPoint(x: 1, y: 0.366)
+        )
     }
 }
 

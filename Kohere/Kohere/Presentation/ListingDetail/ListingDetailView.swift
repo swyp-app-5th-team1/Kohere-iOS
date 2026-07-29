@@ -119,50 +119,15 @@ struct ListingDetailView: View {
                 VStack(spacing: 16) {
                     ListingDetailHeroSection(overview: detail.overview)
                     tabsAndRoomOffersSection(detail: detail, scrollProxy: scrollProxy)
-                    trackedSection(.price) {
-                        ListingDetailInfoSection(
-                            title: title(for: .price, detail: detail),
-                            rows: detail.priceInfo
-                        )
-                    }
-                    trackedSection(.property) {
-                        ListingDetailPropertySection(
-                            title: title(for: .property, detail: detail),
-                            rows: detail.propertyInfo,
-                            featuresTitle: store.appLanguage.localized(
-                                "listingDetail.field.otherDetails"
-                            ),
-                            features: detail.propertyFeatures
-                        )
-                    }
-                    trackedSection(.building) {
-                        ListingDetailInfoSection(
-                            title: title(for: .building, detail: detail),
-                            rows: detail.buildingInfo
-                        )
-                    }
-                    trackedSection(.facility) {
-                        ListingDetailInfoSection(
-                            title: title(for: .facility, detail: detail),
-                            rows: detail.facilityInfo
-                        )
-                    }
-                    trackedSection(.location) {
-                        ListingDetailLocationSection(
-                            locationInfo: detail.locationInfo,
-                            onMapPreviewTapped: {
-                                store.send(.mapPreviewTapped)
-                            }
-                        )
-                    }
-                    trackedSection(.review) {
-                        ListingDetailReviewSection(
-                            title: title(for: .review, detail: detail),
-                            reviewCount: detail.overview.reviewCount,
-                            emptyMessage: store.appLanguage.localized("listingDetail.review.empty"),
-                            promptMessage: store.appLanguage.localized("listingDetail.review.prompt")
-                        )
-                    }
+                    ListingDetailContentSections(
+                        detail: detail,
+                        appLanguage: store.appLanguage,
+                        title: { title(for: $0, detail: detail) },
+                        onMapPreviewTapped: { store.send(.mapPreviewTapped) },
+                        sectionWrapper: { section, content in
+                            AnyView(trackedSection(section) { content })
+                        }
+                    )
                 }
                 .padding(.bottom, bottomContentPadding)
             }
