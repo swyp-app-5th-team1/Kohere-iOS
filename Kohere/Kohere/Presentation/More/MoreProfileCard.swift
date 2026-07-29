@@ -29,7 +29,9 @@ struct MoreProfileCard: View {
             Image(userType == .landlord ? "landlordProfileBackground" : "tenantProfileBackground")
                 .resizable()
                 .scaledToFill()
+                .frame(maxWidth: .infinity)
                 .frame(height: 76)
+                .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 16))
 
             HStack(spacing: 8) {
@@ -52,6 +54,8 @@ struct MoreProfileCard: View {
                 if userType != .landlord {
                     Image("pencil_write_24")
                         .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
                         .foregroundStyle(.staticWhite)
                         .frame(width: 24, height: 24)
                 }

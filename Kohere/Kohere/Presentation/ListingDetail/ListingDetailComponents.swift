@@ -107,11 +107,7 @@ struct ListingDetailRoomOfferCard: View {
     }
 
     private var displayedImageURL: String? {
-        #if DEBUG
-        return nil
-        #else
-        return offer.imageURLs.first
-        #endif
+        offer.imageURLs.first
     }
 
     private var roomOfferGradient: some View {
