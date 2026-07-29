@@ -11,8 +11,6 @@ extension ListingDetailResponseDTO {
     func toEntity() throws -> ListingDetail {
         guard let listingId else { throw DataError.decodingFailed }
 
-        let propertyTypeCode = type?.code ?? ""
-
         let listingImageURLs = nonEmptyImageURLs(imageUrls)
 
         return ListingDetail(
@@ -32,16 +30,9 @@ extension ListingDetailResponseDTO {
             propertyPolicies: propertyPolicies?.toDetailEntity(),
             facilities: facilities?.toDetailEntity(),
             conditions: (conditions ?? []).map(\.label),
-            roomOffers: (roomOffers ?? []).compactMap {
-                $0.toDetailEntity(listingID: listingId, propertyType: propertyTypeCode)
-            },
+            roomOffers: (roomOffers ?? []).compactMap { $0.toDetailEntity() },
             descriptions: descriptions?.toDetailEntity(),
-            imageURLs: listingImageURLs.isEmpty
-                ? MockListingImageProvider.listingImageNames(
-                    listingID: listingId,
-                    propertyType: propertyTypeCode
-                )
-                : listingImageURLs,
+            imageURLs: listingImageURLs,
             isFavorited: favorited ?? false,
             favoriteCount: favoriteCount ?? 0,
             createdAt: createdAt,
@@ -155,7 +146,7 @@ private extension ListingCommonSpaceResponseDTO {
 }
 
 private extension ListingRoomOfferResponseDTO {
-    func toDetailEntity(listingID: String, propertyType: String?) -> ListingDetailRoomOffer? {
+    func toDetailEntity() -> ListingDetailRoomOffer? {
         guard let roomOfferId else { return nil }
 
         let imageURLs = nonEmptyImageURLs(roomImageUrls)
@@ -167,13 +158,7 @@ private extension ListingRoomOfferResponseDTO {
             pricing: pricing?.toDetailEntity(),
             inventory: inventory?.toDetailEntity(),
             filterTags: (filterTags ?? []).map(\.label),
-            roomImageURLs: imageURLs.isEmpty
-                ? MockListingImageProvider.roomImageNames(
-                    listingID: listingID,
-                    roomOfferID: roomOfferId,
-                    propertyType: propertyType
-                )
-                : imageURLs
+            roomImageURLs: imageURLs
         )
     }
 }

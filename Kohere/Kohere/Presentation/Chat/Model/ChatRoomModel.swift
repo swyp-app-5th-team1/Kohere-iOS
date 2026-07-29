@@ -28,41 +28,12 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     let totalCostAmount: Int?
     let pricePerMonthAmount: Int?
     
-    init(entity: ChatRoom) {
-        self.id = entity.id
-        self.listingID = "\(entity.id)"
-        self.listingName = entity.listingName
-        self.location = "\(entity.regionName) · \(entity.accommodationType)"
-        self.thumbnailURL = MockListingImageProvider.listingImageName(
-            listingID: "\(entity.id)",
-            propertyType: entity.accommodationType
-        )
-        self.createdAt = entity.lastMessageAt
-        self.dateText = Self.dateText(entity.lastMessageAt)
-        self.timeText = "2분 전"
-        self.applicantName = entity.applicantName
-        self.applicantGenderCode = ""
-        self.applicantCountryCode = ""
-        self.applicantCountryName = ""
-        self.applicantEmail = ""
-        self.roomType = ""
-        self.moveInDate = entity.moveInDate
-        self.leaseTermMonths = entity.minStayMonths
-        self.depositAmount = entity.deposit
-        self.totalCostAmount = entity.totalCostKRW
-        self.pricePerMonthAmount = entity.pricePerMonthKRW
-    }
-    
     init(summary: BookingSummary) {
         self.id = summary.bookingID
         self.listingID = summary.listingID
         self.listingName = summary.title
         self.location = ""
         self.thumbnailURL = summary.thumbnailURL?.absoluteString
-            ?? MockListingImageProvider.listingImageName(
-                listingID: summary.listingID,
-                propertyType: nil
-            )
         self.createdAt = summary.createdAt
         self.dateText = Self.dateText(summary.createdAt)
         self.timeText = Self.timeText(summary.createdAt)
@@ -132,41 +103,4 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         return formatter.string(from: date)
     }
     
-}
-
-extension ChatRoomModel {
-    static let mockChatRooms: [ChatRoomModel] = [
-        ChatRoomModel(
-            entity: ChatRoom(
-                id: 1, listingName: "Hongdae Studio share", regionName: "Seogyo-dong, Mapo-gu",
-                accommodationType: "Co-living", status: "SUBMITTED", lastMessageAt: Date().addingTimeInterval(-120),
-                applicantName: "Gil dong Hong", moveInDate: Date().addingTimeInterval(86400 * 14),
-                minStayMonths: 3, deposit: 0, totalCostKRW: 1260000, pricePerMonthKRW: 420000
-            )
-        ),
-        ChatRoomModel(
-            entity: ChatRoom(
-                id: 2, listingName: "Gangnam Premium Room", regionName: "Yeoksam-dong, Gangnam-gu",
-                accommodationType: "Studio", status: "UPDATED", lastMessageAt: Date().addingTimeInterval(-600),
-                applicantName: "John Doe", moveInDate: Date().addingTimeInterval(86400 * 30),
-                minStayMonths: 6, deposit: 1000000, totalCostKRW: 2500000, pricePerMonthKRW: 850000
-            )
-        ),
-        ChatRoomModel(
-            entity: ChatRoom(
-                id: 3, listingName: "Sinchon Cozy House", regionName: "Changcheon-dong, Seodaemun-gu",
-                accommodationType: "Share house", status: "SUBMITTED", lastMessageAt: Date().addingTimeInterval(-3600),
-                applicantName: "Minsoo Kim", moveInDate: Date().addingTimeInterval(86400 * 7),
-                minStayMonths: 2, deposit: 0, totalCostKRW: 900000, pricePerMonthKRW: 450000
-            )
-        ),
-        ChatRoomModel(
-            entity: ChatRoom(
-                id: 4, listingName: "Itaewon View Room", regionName: "Hannam-dong, Yongsan-gu",
-                accommodationType: "Apartment", status: "UPDATED", lastMessageAt: Date().addingTimeInterval(-7200),
-                applicantName: "Sarah Jenkins", moveInDate: Date().addingTimeInterval(86400 * 45),
-                minStayMonths: 12, deposit: 3000000, totalCostKRW: 4800000, pricePerMonthKRW: 1200000
-            )
-        )
-    ]
 }

@@ -251,7 +251,6 @@ private extension DiagnosisRecommendationsResponseDTO {
 
 private extension DiagnosisRecommendedListingResponseDTO {
     func toEntity() -> DiagnosisRecommendedListing {
-        let propertyTypeCode = type?.code ?? ""
         let propertyTypeLabel = type?.label ?? ""
 
         let coordinate: MapCoordinate?
@@ -269,11 +268,7 @@ private extension DiagnosisRecommendedListingResponseDTO {
             maxMonthlyRent: monthlyRentMax,
             minDeposit: minDeposit,
             maxDeposit: maxDeposit,
-            thumbnailURL: nonEmptyThumbnailURL
-                ?? MockListingImageProvider.listingImageName(
-                    listingID: listingId,
-                    propertyType: propertyTypeCode
-                ),
+            thumbnailURL: nonEmptyThumbnailURL,
             coordinate: coordinate
         )
     }

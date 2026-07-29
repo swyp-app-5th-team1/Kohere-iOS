@@ -39,75 +39,72 @@ struct ListingDetailSectionHeader: View {
 
 struct ListingDetailRoomOfferCard: View {
     let offer: ListingRoomOfferModel
-    @State private var isImageLoaded = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            if isImageLoaded {
-                Spacer()
+            Spacer()
 
-                Text(offer.name)
-                    .kohereTextStyle(.label1Semibold)
-                    .foregroundStyle(.common0)
-                    .lineLimit(1)
-                    .padding(.bottom, 4)
+            Text(offer.name)
+                .kohereTextStyle(.label1Semibold)
+                .foregroundStyle(.common0)
+                .lineLimit(1)
+                .padding(.bottom, 4)
 
-                Text(offer.pricingText)
-                    .kohereTextStyle(.body3Regular)
-                    .foregroundStyle(.common0)
-                    .lineLimit(1)
+            Text(offer.pricingText)
+                .kohereTextStyle(.body3Regular)
+                .foregroundStyle(.common0)
+                .lineLimit(1)
 
-                HStack(spacing: 4) {
-                    ForEach(offer.tags, id: \.self) { tag in
-                        Text(tag)
-                            .kohereTextStyle(.caption2Regular)
-                            .foregroundStyle(.neutral5)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                            .padding(4)
-                            .frame(height: 22)
-                            .background {
-                                RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                    .fill(.ultraThinMaterial)
-                                    .overlay {
-                                        RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                            .fill(.backgroundTransparentAlternative)
-                                    }
-                            }
-                    }
+            HStack(spacing: 4) {
+                ForEach(offer.tags, id: \.self) { tag in
+                    Text(tag)
+                        .kohereTextStyle(.caption2Regular)
+                        .foregroundStyle(.neutral5)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .padding(4)
+                        .frame(height: 22)
+                        .background {
+                            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                .fill(.ultraThinMaterial)
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                        .fill(.backgroundTransparentAlternative)
+                                }
+                        }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .clipped()
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .clipped()
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 13)
         .frame(width: 285, height: 160, alignment: .bottomLeading)
         .background {
-            KohereRemoteImageView(
-                urlString: offer.imageURLs.first,
-                onImageLoaded: { isImageLoaded = true }
-            )
+            KohereRemoteImageView(urlString: displayedImageURL)
                 .frame(width: 285, height: 160)
                 .clipped()
                 .overlay {
-                    if isImageLoaded {
-                        LinearGradient(
-                            stops: [
-                                Gradient.Stop(color: .common100.opacity(0.4), location: 0.31762),
-                                Gradient.Stop(color: .common0.opacity(0), location: 0.87658)
-                            ],
-                            startPoint: UnitPoint(x: 0, y: 0.634),
-                            endPoint: UnitPoint(x: 1, y: 0.366)
-                        )
-                    }
+                    LinearGradient(
+                        stops: [
+                            Gradient.Stop(color: .common100.opacity(0.4), location: 0.31762),
+                            Gradient.Stop(color: .common0.opacity(0), location: 0.87658)
+                        ],
+                        startPoint: UnitPoint(x: 0, y: 0.634),
+                        endPoint: UnitPoint(x: 1, y: 0.366)
+                    )
                 }
         }
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .onChange(of: offer.imageURLs.first) { _, _ in
-            isImageLoaded = false
-        }
+    }
+
+    private var displayedImageURL: String? {
+        #if DEBUG
+        return nil
+        #else
+        return offer.imageURLs.first
+        #endif
     }
 }
 
