@@ -3012,6 +3012,7 @@
       }
     },
     "listingApplication.field.moveInDate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3028,6 +3029,7 @@
       }
     },
     "listingApplication.field.moveOutDate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3243,6 +3245,7 @@
       }
     },
     "listingApplication.review.field.cost" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3259,6 +3262,7 @@
       }
     },
     "listingApplication.review.field.leaseTerm" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3275,6 +3279,7 @@
       }
     },
     "listingApplication.review.field.moveInDate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3291,6 +3296,7 @@
       }
     },
     "listingApplication.review.field.moveOutDate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3307,6 +3313,7 @@
       }
     },
     "listingApplication.review.field.roomType" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
