@@ -305,6 +305,57 @@
         }
       }
     },
+    "authGate.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in or create an account\nto use this feature."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "해당 기능은 로그인/회원가입을 해야 이용가능해요.\n로그인/회원가입 하시겠어요?"
+          }
+        }
+      }
+    },
+    "authGate.notNow" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Now"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나중에 하기"
+          }
+        }
+      }
+    },
+    "authGate.signIn" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign In"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인하기"
+          }
+        }
+      }
+    },
     "building.type.OFFICETEL" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -693,6 +744,7 @@
       }
     },
     "chat.empty.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -708,7 +760,178 @@
         }
       }
     },
+    "chat.popup.action.failure" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't complete the request. Please try again."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "요청을 처리하지 못했습니다. 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "chat.popup.block.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Block this user?\nOnce blocked, you won't be able to send or receive messages."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 사용자를 차단할까요?\n차단하면 더 이상 메시지를 주고받을 수 없습니다."
+          }
+        }
+      }
+    },
+    "chat.popup.block.primary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Block"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "차단하기"
+          }
+        }
+      }
+    },
+    "chat.popup.block.success" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This user has been blocked."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용자를 차단했습니다."
+          }
+        }
+      }
+    },
+    "chat.popup.delete.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this chat?\nThis action cannot be undone."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "채팅방을 삭제할까요?\n삭제한 채팅방은 복구할 수 없습니다."
+          }
+        }
+      }
+    },
+    "chat.popup.delete.primary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제하기"
+          }
+        }
+      }
+    },
+    "chat.popup.delete.success" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This chat has been deleted."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "채팅방을 삭제했습니다."
+          }
+        }
+      }
+    },
+    "chat.popup.report.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report this user?\nReports will be reviewed according to our policies."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 사용자를 신고할까요?\n신고 내용을 확인한 후 운영 정책에 따라 검토됩니다."
+          }
+        }
+      }
+    },
+    "chat.popup.report.primary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "신고하기"
+          }
+        }
+      }
+    },
+    "chat.popup.report.success" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your report has been submitted."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "신고가 접수되었습니다."
+          }
+        }
+      }
+    },
     "chat.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -725,6 +948,7 @@
       }
     },
     "chatBot.action.find" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -820,7 +1044,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "방 구하기"
+            "value" : "내 방 찾아보기"
           }
         }
       }
@@ -900,6 +1124,23 @@
         }
       }
     },
+    "common.cancel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        }
+      }
+    },
     "common.close" : {
       "localizations" : {
         "en" : {
@@ -917,6 +1158,7 @@
       }
     },
     "common.confirm" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -983,6 +1225,7 @@
       }
     },
     "common.resend" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1130,6 +1373,7 @@
       }
     },
     "common.verified" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1146,6 +1390,7 @@
       }
     },
     "common.verify" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2521,6 +2766,7 @@
       }
     },
     "listingApplication.action.close" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2554,6 +2800,7 @@
       }
     },
     "listingApplication.action.view" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2765,6 +3012,7 @@
       }
     },
     "listingApplication.field.moveInDate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2781,6 +3029,7 @@
       }
     },
     "listingApplication.field.moveOutDate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2918,7 +3167,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The host will review your application and notify you by email."
+            "value" : "The host will review your application\nand notify you by email."
           }
         },
         "ko" : {
@@ -2996,6 +3245,7 @@
       }
     },
     "listingApplication.review.field.cost" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3012,6 +3262,7 @@
       }
     },
     "listingApplication.review.field.leaseTerm" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3028,6 +3279,7 @@
       }
     },
     "listingApplication.review.field.moveInDate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3044,6 +3296,7 @@
       }
     },
     "listingApplication.review.field.moveOutDate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3060,6 +3313,7 @@
       }
     },
     "listingApplication.review.field.roomType" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4878,6 +5132,7 @@
       }
     },
     "map.filter.monthlyRent" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5922,6 +6177,7 @@
       }
     },
     "onboarding.email.error.invalidFormat" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5955,6 +6211,7 @@
       }
     },
     "onboarding.landlord.phone.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5971,6 +6228,7 @@
       }
     },
     "onboarding.name.passportHint" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5982,6 +6240,176 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "여권에 기재된 대로 성명을 입력해 주세요"
+          }
+        }
+      }
+    },
+    "onboarding.option.visa.diplomaticOfficialAndOthers" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diplomatic/Official & Others(A-1, A-2, G-1)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "외교/공무 및 기타(A-1, A-2, G-1)"
+          }
+        }
+      }
+    },
+    "onboarding.option.visa.etc" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "etc"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기타"
+          }
+        }
+      }
+    },
+    "onboarding.option.visa.familyMarriageMigrants" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Family/Marriage Migrants(F-1, F-2, F-3, F-6)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가족/결혼이민(F-1, F-2, F-3, F-6)"
+          }
+        }
+      }
+    },
+    "onboarding.option.visa.nonProfessionalWorkers" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non-Professional Workers(E-8, E-9, E-10, H-2)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "비전문취업(E-8, E-9, E-10, H-2)"
+          }
+        }
+      }
+    },
+    "onboarding.option.visa.overseasKoreans" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overseas Koreans(F-4)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재외동포(F-4)"
+          }
+        }
+      }
+    },
+    "onboarding.option.visa.permanentResidents" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permanent Residents(F-5)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영주(F-5)"
+          }
+        }
+      }
+    },
+    "onboarding.option.visa.professionals" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Professionals(C-4, D-1, D-7~10, E-1~7)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전문인력(C-4, D-1, D-7~10, E-1~7)"
+          }
+        }
+      }
+    },
+    "onboarding.option.visa.shortTermVisit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Short Term Visit(C-1~4, B)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "단기 방문(C-1~4, B)"
+          }
+        }
+      }
+    },
+    "onboarding.option.visa.studentsTrainees" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Students & Trainees(D-2, D-3, D-4)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "유학 및 연수(D-2, D-3, D-4)"
+          }
+        }
+      }
+    },
+    "onboarding.option.visa.workingHolidayWorkAndVisit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Working Holiday/Work and Visit(H-1, H-2)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "워킹홀리데이/방문취업(H-1, H-2)"
           }
         }
       }
@@ -6003,6 +6431,7 @@
       }
     },
     "onboarding.profile.email" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6019,6 +6448,7 @@
       }
     },
     "onboarding.profile.firstName" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6067,6 +6497,7 @@
       }
     },
     "onboarding.profile.lastName" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6099,6 +6530,7 @@
       }
     },
     "onboarding.profile.occupation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6115,6 +6547,7 @@
       }
     },
     "onboarding.profile.phoneNumber" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6163,6 +6596,7 @@
       }
     },
     "onboarding.tenant.email.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6338,6 +6772,7 @@
       }
     },
     "profileEdit.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7259,15 +7694,23 @@
     "뒤로가기" : {
 
     },
+    "반가워요! 가입된 정보가\n맞는지 확인해 드릴게요" : {
+      "comment" : "A welcome message for the user, introducing them to the onboarding process.",
+      "isCommentAutoGenerated" : true
+    },
+    "사장님이 맞는지\n안전하게 확인해볼게요!" : {
+      "comment" : "A title that describes the purpose of this view.",
+      "isCommentAutoGenerated" : true
+    },
+    "생년월일" : {
+      "comment" : "A label displayed above a group of dropdowns for selecting a user's birth year.",
+      "isCommentAutoGenerated" : true
+    },
     "언어 변경" : {
 
     },
     "원하시는 서비스를 선택해주세요" : {
       "comment" : "A description below the title \"What brings you here?\".",
-      "isCommentAutoGenerated" : true
-    },
-    "이름" : {
-      "comment" : "A label describing a user's name.",
       "isCommentAutoGenerated" : true
     },
     "인증" : {
@@ -7284,10 +7727,6 @@
     },
     "전화번호" : {
       "comment" : "A label describing a phone number field.",
-      "isCommentAutoGenerated" : true
-    },
-    "월세" : {
-      "comment" : "A label describing the monthly rent.",
       "isCommentAutoGenerated" : true
     },
     "지도에서 위치 보기" : {
@@ -7311,10 +7750,6 @@
     },
     "확인" : {
       "comment" : "A button label that translates to \"Confirm\".",
-      "isCommentAutoGenerated" : true
-    },
-    "찾아보기" : {
-      "comment" : "A button label that translates to \"Find\" in English.",
       "isCommentAutoGenerated" : true
     }
   },

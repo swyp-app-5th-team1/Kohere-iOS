@@ -166,7 +166,6 @@ extension ListingApplicationFeature {
     ) -> String {
         let name = firstNonEmpty([
             profile.name,
-            fullName(firstName: profile.firstName, lastName: profile.lastName),
             profile.nickname
         ])
         let gender = readableGender(profile.gender, locale: locale)
@@ -180,15 +179,6 @@ extension ListingApplicationFeature {
             .compactMap { $0 }
             .filter { !$0.isEmpty }
             .joined(separator: " · ")
-    }
-
-    nonisolated private static func fullName(firstName: String?, lastName: String?) -> String? {
-        let parts = [firstName, lastName]
-            .compactMap { normalizedText($0) }
-            .filter { !$0.isEmpty }
-
-        guard !parts.isEmpty else { return nil }
-        return parts.joined(separator: " ")
     }
 
     nonisolated private static func readableGender(

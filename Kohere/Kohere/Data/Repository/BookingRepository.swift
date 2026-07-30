@@ -33,11 +33,26 @@ final class BookingRepository: BookingInterface {
     func fetchBookingDetail(bookingID: Int) async throws -> BookingDetail {
         let environment = try environmentProvider()
         let responseDTO: BookingDetailResponseDTO = try await authenticatedNetworkService.request(
-            BookingRouter.detail(bookingID: bookingID, environment),
-            debugRawJSONLabel: "ChatDetail.bookingDetail bookingID=\(bookingID)"
+            BookingRouter.detail(bookingID: bookingID, environment)
         )
         
         return try responseDTO.toEntity()
+    }
+
+    func mutateBooking(_ mutation: BookingMutation, bookingID: Int) async throws {
+        let environment = try environmentProvider()
+        let router: BookingRouter
+
+        switch mutation {
+        case .report:
+            router = .report(bookingID: bookingID, environment)
+        case .block:
+            router = .block(bookingID: bookingID, environment)
+        case .delete:
+            router = .delete(bookingID: bookingID, environment)
+        }
+
+        try await authenticatedNetworkService.requestVoid(router)
     }
 }
 

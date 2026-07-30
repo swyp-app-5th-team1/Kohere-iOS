@@ -7,7 +7,6 @@
 
 import ComposableArchitecture
 import SwiftUI
-import UIKit
 
 struct LivingGuideDetailView: View {
     
@@ -36,10 +35,7 @@ struct LivingGuideDetailView: View {
             topNavigationBar
         }
         .background(.staticWhite)
-        .background {
-            LivingGuideInteractivePopEnabler()
-                .frame(width: 0, height: 0)
-        }
+        .interactivePopGestureEnabled()
         .ignoresSafeArea(edges: .top)
         .onAppear {
             store.send(.onAppear)
@@ -159,7 +155,7 @@ struct LivingGuideDetailView: View {
                         .kohereTextStyle(.display2Bold)
                         .foregroundStyle(.staticWhite)
                     
-                    Text(store.guide.subtitle)
+                    Text(store.guide.longDescription)
                         .kohereTextStyle(.body1Regular)
                         .foregroundStyle(.staticWhite)
                 }
@@ -168,54 +164,6 @@ struct LivingGuideDetailView: View {
             .padding(.horizontal, 20)
         }
         .frame(height: 210)
-    }
-}
-
-private struct LivingGuideInteractivePopEnabler: UIViewControllerRepresentable {
-    func makeUIViewController(context: Context) -> Controller {
-        Controller()
-    }
-
-    func updateUIViewController(_ uiViewController: Controller, context: Context) {
-        uiViewController.enableInteractivePopGesture()
-    }
-
-    final class Controller: UIViewController {
-        private weak var popGestureRecognizer: UIGestureRecognizer?
-        private weak var originalDelegate: UIGestureRecognizerDelegate?
-
-        override func viewDidAppear(_ animated: Bool) {
-            super.viewDidAppear(animated)
-            enableInteractivePopGesture()
-        }
-
-        override func viewDidDisappear(_ animated: Bool) {
-            super.viewDidDisappear(animated)
-            restoreInteractivePopGestureDelegate()
-        }
-
-        func enableInteractivePopGesture() {
-            DispatchQueue.main.async { [weak self] in
-                guard let self,
-                      let navigationController,
-                      navigationController.viewControllers.count > 1,
-                      let gestureRecognizer = navigationController.interactivePopGestureRecognizer
-                else { return }
-
-                if popGestureRecognizer !== gestureRecognizer {
-                    popGestureRecognizer = gestureRecognizer
-                    originalDelegate = gestureRecognizer.delegate
-                }
-
-                gestureRecognizer.delegate = nil
-                gestureRecognizer.isEnabled = true
-            }
-        }
-
-        private func restoreInteractivePopGestureDelegate() {
-            guard let popGestureRecognizer else { return }
-            popGestureRecognizer.delegate = originalDelegate
-        }
     }
 }
 

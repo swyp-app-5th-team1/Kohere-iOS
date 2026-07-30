@@ -6,10 +6,7 @@
 //
 
 enum ProfileEditField: Hashable {
-    case firstName
-    case lastName
     case nationality
     case gender
     case visaStatus
-    case occupation
 }

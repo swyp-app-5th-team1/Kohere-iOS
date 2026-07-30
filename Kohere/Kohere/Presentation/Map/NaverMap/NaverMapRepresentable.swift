@@ -11,6 +11,7 @@ import SwiftUI
 // MARK: - Naver Map Bridge
 
 struct NaverMapRepresentable: UIViewRepresentable {
+    let appLanguage: AppLanguage
     let markers: [MapMarkerItem]
     let selectedMarkerID: String?
     let cameraMoveRequest: MapCameraMoveRequest?
@@ -27,17 +28,18 @@ struct NaverMapRepresentable: UIViewRepresentable {
     }
 
     func makeUIView(context: Context) -> NMFMapView {
-        let mapView = NMFMapView()
+        let mapView = InitialLayoutNMFMapView()
+        mapView.locale = appLanguage.rawValue
         mapView.addCameraDelegate(delegate: context.coordinator)
-        let cameraUpdate = NMFCameraUpdate(
-            scrollTo: NMGLatLng(lat: 37.5559, lng: 126.9250),
-            zoomTo: 13
-        )
-        mapView.moveCamera(cameraUpdate)
+        mapView.onInitialLayout = { [weak coordinator = context.coordinator, weak mapView] in
+            guard let mapView else { return }
+            coordinator?.moveInitialCameraIfNeeded(on: mapView)
+        }
         return mapView
     }
 
     func updateUIView(_ uiView: NMFMapView, context: Context) {
+        uiView.locale = appLanguage.rawValue
         context.coordinator.updateMarkersIfNeeded(markers, on: uiView)
         context.coordinator.updateSelectedMarkerIfNeeded(selectedMarkerID)
         context.coordinator.moveCameraIfNeeded(to: cameraMoveRequest, on: uiView)
@@ -47,6 +49,7 @@ struct NaverMapRepresentable: UIViewRepresentable {
         private let onViewportChanged: (MapViewport) -> Void
         private let onCameraMoveRequestHandled: () -> Void
         private let onMarkerTapped: (String) -> Void
+        private var hasAppliedInitialCamera = false
         private var handledCameraMoveRequest: MapCameraMoveRequest?
         private var selectedMarkerID: String?
         private var clusterer: NMCClusterer<MapClusteringKey>?
@@ -67,7 +70,20 @@ struct NaverMapRepresentable: UIViewRepresentable {
 
         // 지도 이동이 완전히 끝난 시점의 화면 정보를 TCA 상태로 전달한다.
         func mapViewCameraIdle(_ mapView: NMFMapView) {
+            guard hasAppliedInitialCamera else { return }
             onViewportChanged(makeMapViewport(from: mapView))
+        }
+
+        // 초기 카메라는 지도 View가 실제 크기로 layout된 뒤 한 번만 이동한다.
+        func moveInitialCameraIfNeeded(on mapView: NMFMapView) {
+            guard !hasAppliedInitialCamera else { return }
+            hasAppliedInitialCamera = true
+
+            let cameraUpdate = NMFCameraUpdate(
+                scrollTo: NMGLatLng(lat: 37.5559, lng: 126.9250),
+                zoomTo: 13
+            )
+            mapView.moveCamera(cameraUpdate)
         }
 
         // 마커 데이터 추가, 삭제, 좌표 변경이 있을 때만 클러스터러 데이터를 갱신한다.
@@ -195,6 +211,33 @@ struct NaverMapRepresentable: UIViewRepresentable {
             clusterer.mapView = mapView
             self.clusterer = clusterer
             return clusterer
+        }
+    }
+}
+
+private final class InitialLayoutNMFMapView: NMFMapView {
+    var onInitialLayout: (() -> Void)?
+    private var hasNotifiedInitialLayout = false
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        notifyInitialLayoutIfNeeded()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        notifyInitialLayoutIfNeeded()
+    }
+
+    private func notifyInitialLayoutIfNeeded() {
+        guard !hasNotifiedInitialLayout,
+              window != nil,
+              !bounds.isEmpty
+        else { return }
+
+        hasNotifiedInitialLayout = true
+        DispatchQueue.main.async { [weak self] in
+            self?.onInitialLayout?()
         }
     }
 }

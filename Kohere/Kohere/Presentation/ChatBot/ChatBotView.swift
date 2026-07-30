@@ -13,6 +13,8 @@ struct ChatBotView: View {
     // MARK: - Property
     
     let store: StoreOf<ChatBotFeature>
+    @Environment(\.locale)
+    private var locale
     
     // MARK: - Body
     
@@ -20,7 +22,7 @@ struct ChatBotView: View {
         VStack(alignment: .center, spacing: 0) {
             KohereNavigationBar(
                 left: .backButton({ store.send(.backButtonTapped) }),
-                center: .text("Find My Room"),
+                center: .text(AppLanguage(locale: locale).localized("chatBot.title")),
                 backgroundColor: .backgroundNormalNormal,
                 height: 48
             )
@@ -35,6 +37,7 @@ struct ChatBotView: View {
             bottomButtonArea
         }
         .onAppear { store.send(.onAppear) }
+        .interactivePopGestureEnabled()
     }
 }
 
@@ -102,7 +105,7 @@ extension ChatBotView {
                 Button {
                     store.send(.findButtonTapped)
                 } label: {
-                    Text(String(localized: "chatBot.action.find"))
+                    Text(AppLanguage(locale: locale).localized("chatBot.action.find"))
                         .kohereTextStyle(.label1Semibold)
                         .foregroundColor(store.isFindButtonEnabled ? .staticWhite : .labelDisable)
                         .frame(maxWidth: .infinity)

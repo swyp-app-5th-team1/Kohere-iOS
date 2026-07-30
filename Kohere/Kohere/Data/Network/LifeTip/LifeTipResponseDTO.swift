@@ -14,6 +14,8 @@ struct LifeTipTopicsResponseDTO: Decodable {
 struct LifeTipTopicResponseDTO: Decodable {
     let code: String?
     let name: String?
+    let shortDescription: String?
+    let longDescription: String?
 }
 
 struct LifeTipListResponseDTO: Decodable {

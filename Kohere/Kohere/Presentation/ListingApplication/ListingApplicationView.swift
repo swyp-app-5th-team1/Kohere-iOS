@@ -64,6 +64,7 @@ struct ListingApplicationView: View {
 
     private var dateSelectionView: some View {
         ListingApplicationDateSelectionView(
+            language: store.appLanguage,
             moveInDate: store.moveInDate,
             displayedMonth: store.displayedMonth,
             displayedMonthTitle: store.displayedMonthTitle,
@@ -120,6 +121,7 @@ struct ListingApplicationView: View {
                     .foregroundStyle(.labelNormal)
 
                 ListingApplicationSummaryCard(
+                    language: store.appLanguage,
                     title: store.applicationTitle,
                     roomTypeName: store.roomTypeName,
                     moveInDateText: store.moveInReviewText,
@@ -133,7 +135,10 @@ struct ListingApplicationView: View {
                     profileErrorMessage: store.applicantProfileErrorMessage,
                     phoneNumber: $store.phoneNumber,
                     isPhoneNumberFocused: $isPhoneNumberFocused,
-                    showsPhoneNumberError: store.shouldShowPhoneNumberError
+                    showsPhoneNumberError: store.shouldShowPhoneNumberError,
+                    onBackgroundTap: {
+                        isPhoneNumberFocused = false
+                    }
                 )
 
                 ListingApplicationPrivacySectionView(
@@ -209,11 +214,14 @@ struct ListingApplicationView: View {
                 .ignoresSafeArea()
 
             ListingApplicationCompletionPopup(
+                language: store.appLanguage,
                 applicationTitle: store.applicationTitle,
                 moveInDateText: store.moveInReviewText,
                 moveOutDateText: store.moveOutReviewText,
                 rentalPeriodText: store.rentalPeriodText,
                 priceText: store.roomPricingText,
+                closeButtonTitle: store.appLanguage.localized("listingApplication.action.close"),
+                confirmButtonTitle: store.appLanguage.localized("listingApplication.action.view"),
                 onCloseTap: { store.send(.completionCloseButtonTapped) },
                 onConfirmTap: { store.send(.completionConfirmButtonTapped) }
             )
@@ -225,13 +233,14 @@ struct ListingApplicationView: View {
 }
 
 private struct ListingApplicationCompletionPopup: View {
-    @Environment(\.locale)
-    private var locale
+    let language: AppLanguage
     let applicationTitle: String
     let moveInDateText: String
     let moveOutDateText: String
     let rentalPeriodText: String
     let priceText: String
+    let closeButtonTitle: String
+    let confirmButtonTitle: String
     let onCloseTap: () -> Void
     let onConfirmTap: () -> Void
 
@@ -290,10 +299,10 @@ private struct ListingApplicationCompletionPopup: View {
                 .foregroundStyle(.coolNeutral80)
 
             VStack(spacing: 12) {
-                summaryRow(title: String(localized: "listingApplication.field.moveInDate", locale: locale), value: moveInDateText)
-                summaryRow(title: String(localized: "listingApplication.field.moveOutDate", locale: locale), value: moveOutDateText)
-                summaryRow(title: String(localized: "listingApplication.field.contractPeriod", locale: locale), value: rentalPeriodText)
-                summaryRow(title: String(localized: "listingApplication.review.field.cost", locale: locale), value: priceText)
+                summaryRow(title: language.localized("listingApplication.field.moveInDate"), value: moveInDateText)
+                summaryRow(title: language.localized("listingApplication.field.moveOutDate"), value: moveOutDateText)
+                summaryRow(title: language.localized("listingApplication.review.field.leaseTerm"), value: rentalPeriodText)
+                summaryRow(title: language.localized("listingApplication.review.field.cost"), value: priceText)
             }
         }
         .padding(.horizontal, 16)
@@ -308,27 +317,31 @@ private struct ListingApplicationCompletionPopup: View {
             Text(title)
                 .kohereTextStyle(.caption1Regular)
                 .foregroundStyle(.coolNeutral60)
-                .frame(width: 82, alignment: .leading)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+
+            Spacer(minLength: 12)
 
             Text(value)
                 .kohereTextStyle(.label3Semibold)
                 .foregroundStyle(.coolNeutral80)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
     private var buttons: some View {
         HStack(spacing: 8) {
             popupButton(
-                title: String(localized: "listingApplication.action.close", locale: locale),
+                title: closeButtonTitle,
                 style: .secondary,
                 action: onCloseTap
             )
 
             popupButton(
-                title: String(localized: "listingApplication.action.view", locale: locale),
+                title: confirmButtonTitle,
                 style: .primary,
                 action: onConfirmTap
             )

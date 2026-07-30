@@ -20,12 +20,9 @@ struct ProfileEditFeature {
         var nickname: String
         var email: String
 
-        var firstName: String
-        var lastName: String
         var selectedNationality: DropdownMenuOption?
         var selectedGender: DropdownMenuOption?
         var selectedVisa: DropdownMenuOption?
-        var selectedOccupation: DropdownMenuOption?
         var isSaving = false
         private let userProfile: UserProfile?
 
@@ -37,17 +34,14 @@ struct ProfileEditFeature {
 
         var profileUpdate: UserProfileUpdate? {
             guard hasRequiredFields,
-                  let occupation = selectedOccupation?.occupation,
                   let visaType = selectedVisa?.visaType
             else { return nil }
 
             return UserProfileUpdate(
-                firstName: Self.normalizedText(firstName),
-                lastName: Self.normalizedText(lastName),
                 gender: selectedGender?.gender,
                 birthDate: userProfile?.birthDate,
                 country: selectedNationality?.nationalityCountryCode ?? userProfile?.country,
-                occupation: occupation,
+                occupation: nil,
                 visaType: visaType,
                 name: userProfile?.name,
                 phoneNumber: userProfile?.phoneNumber,
@@ -56,34 +50,29 @@ struct ProfileEditFeature {
         }
 
         private var hasRequiredFields: Bool {
-            !Self.normalizedText(firstName).isEmpty
-            && !Self.normalizedText(lastName).isEmpty
-            && selectedVisa != nil
-            && selectedOccupation != nil
+            selectedVisa != nil
+        }
+
+        var displayName: String {
+            Self.normalizedText(userProfile?.name ?? "")
         }
 
         init(userProfile: UserProfile? = nil) {
             self.userProfile = userProfile
             nickname = userProfile?.nickname ?? ""
             email = userProfile?.email ?? ""
-            firstName = userProfile?.firstName ?? ""
-            lastName = userProfile?.lastName ?? ""
             selectedNationality = Self.nationalityOption(from: userProfile?.country)
             selectedGender = Self.genderOption(from: userProfile?.gender)
             selectedVisa = Self.visaOption(from: userProfile?.visaType)
-            selectedOccupation = Self.occupationOption(from: userProfile?.occupation)
         }
 
         private var hasChanges: Bool {
-            Self.normalizedText(firstName) != Self.normalizedText(userProfile?.firstName ?? "")
-            || Self.normalizedText(lastName) != Self.normalizedText(userProfile?.lastName ?? "")
-            || selectedNationality != Self.nationalityOption(from: userProfile?.country)
+            selectedNationality != Self.nationalityOption(from: userProfile?.country)
             || selectedGender != Self.genderOption(from: userProfile?.gender)
             || selectedVisa != Self.visaOption(from: userProfile?.visaType)
-            || selectedOccupation != Self.occupationOption(from: userProfile?.occupation)
         }
 
-        private static func normalizedText(_ text: String) -> String {
+        nonisolated private static func normalizedText(_ text: String) -> String {
             text.trimmingCharacters(in: .whitespacesAndNewlines)
         }
 
@@ -101,14 +90,6 @@ struct ProfileEditFeature {
             else { return nil }
 
             return DropdownMenuOption(visaType)
-        }
-
-        private static func occupationOption(from rawValue: String?) -> DropdownMenuOption? {
-            guard let rawValue,
-                  let occupation = Occupation(rawValue: rawValue)
-            else { return nil }
-
-            return DropdownMenuOption(occupation)
         }
 
         private static func nationalityOption(from countryCode: String?) -> DropdownMenuOption? {
@@ -163,22 +144,13 @@ struct ProfileEditFeature {
                 state.isSaving = false
                 return .send(.delegate(.profileUpdated(userProfile)))
 
-            case let .updateProfileResponse(.failure(error)):
+            case .updateProfileResponse(.failure):
                 state.isSaving = false
-                Self.debugLogUpdateFailure(error)
                 return .none
 
             case .delegate:
                 return .none
             }
         }
-    }
-}
-
-private extension ProfileEditFeature {
-    static func debugLogUpdateFailure(_ error: DataError) {
-#if DEBUG
-        print("[ProfileEdit] update profile failed: \(error.debugDescription)")
-#endif
     }
 }

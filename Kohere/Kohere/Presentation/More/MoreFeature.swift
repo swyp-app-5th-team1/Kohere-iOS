@@ -78,169 +78,8 @@ struct MoreFeature {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
-            case .path(.element(id: _, action: .account(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case .path(.element(id: _, action: .announcements(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(.element(id: _, action: .account(.popupRequested(popup)))):
-                return .send(.popupRequested(popup))
-
-            case .path(.element(id: _, action: .profileEdit(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case .path(.element(id: _, action: .livingGuideDetail(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(.element(id: _, action: .profileEdit(.delegate(.profileUpdated(userProfile))))):
-                _ = state.path.popLast()
-                return .send(.userProfileUpdated(userProfile))
-
-            case .path(.element(id: _, action: .promoteRoomWeb(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case .path(.element(id: _, action: .savedListings(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case .path(.element(id: _, action: .recentlyViewedList(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(
-                .element(
-                    id: _,
-                    action: .listingDetail(
-                        .delegate(
-                            .applicationRequested(
-                                listingID,
-                                listingTitle,
-                                roomOfferID,
-                                roomTypeName,
-                                roomPricingText
-                            )
-                        )
-                    )
-                )
-            ):
-                state.path.append(
-                    .listingApplication(
-                        ListingApplicationFeature.State(
-                            listingID: listingID,
-                            listingTitle: listingTitle,
-                            roomOfferID: roomOfferID,
-                            roomTypeName: roomTypeName,
-                            roomPricingText: roomPricingText,
-                            appLanguage: state.selectedLanguage
-                        )
-                    )
-                )
-                return .none
-
-            case let .path(.element(id: _, action: .listingDetail(.delegate(.mapPreviewRequested(coordinate))))):
-                state.path.removeAll()
-                return .send(.listingMapPreviewRequested(coordinate))
-
-            case .path(.element(id: _, action: .listingApplication(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case .path(.element(id: _, action: .listingApplicationPrivacyWeb(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(.element(id: _, action: .listingApplication(.delegate(.privacyDocumentRequested(section))))):
-                state.path.append(
-                    .listingApplicationPrivacyWeb(
-                        ListingApplicationPrivacyWebFeature.State(
-                            section: section,
-                            appLanguage: state.selectedLanguage
-                        )
-                    )
-                )
-                return .none
-
-            case let .path(.element(id: _, action: .listingApplication(.delegate(.listingDetailRequested(listingID))))):
-                state.path.removeAll()
-                state.path.append(
-                    .listingDetail(
-                        ListingDetailFeature.State(
-                            listingID: listingID,
-                            userType: state.userType,
-                            appLanguage: state.selectedLanguage,
-                            isApplicationDisabled: true
-                        )
-                    )
-                )
-                return .none
-
-            case .path(.element(id: _, action: .listingApplication(.delegate(.chatTabRequested)))):
-                state.path.removeAll()
-                return .send(.chatTabRequested)
-
-            case let .path(.element(id: _, action: .savedListings(.delegate(.listingDetailRequested(listingID))))):
-                state.path.append(
-                    .listingDetail(
-                        ListingDetailFeature.State(
-                            listingID: listingID,
-                            userType: state.userType,
-                            appLanguage: state.selectedLanguage
-                        )
-                    )
-                )
-                return .none
-
-            case let .path(.element(id: _, action: .recentlyViewedList(.delegate(.listingDetailRequested(listingID))))):
-                state.path.append(
-                    .listingDetail(
-                        ListingDetailFeature.State(
-                            listingID: listingID,
-                            userType: state.userType,
-                            appLanguage: state.selectedLanguage
-                        )
-                    )
-                )
-                return .none
-
-            case .path(.element(id: _, action: .setting(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case .path(.element(id: _, action: .settingDocumentWeb(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(.element(id: _, action: .setting(.popupRequested(popup)))):
-                return .send(.popupRequested(popup))
-
-            case .path(.element(id: _, action: .setting(.settingItemTapped(.account)))):
-                state.path.append(
-                    .account(
-                        AccountFeature.State(
-                            userType: state.userType ?? .unknown,
-                            userProfile: state.userProfile,
-                            language: state.selectedLanguage
-                        )
-                    )
-                )
-                return .none
-
-            case let .path(.element(id: _, action: .setting(.settingItemTapped(item)))):
-                guard let document = item.document else { return .none }
-                state.path.append(
-                    .settingDocumentWeb(SettingDocumentWebFeature.State(document: document))
-                )
-                return .none
+            case let .path(pathAction):
+                return reducePath(pathAction, state: &state)
 
             case .onAppear:
                 guard state.userType == .tenant,
@@ -273,90 +112,12 @@ struct MoreFeature {
                 state.livingGuidesErrorMessage = error.localizedDescription
                 return .none
 
-            case .navigationLanguageTapped:
-                guard !state.isLanguageUpdateLoading else { return .none }
-                state.isLanguagePopoverPresented.toggle()
-                return .none
-
-            case let .languagePopoverPresentationChanged(isPresented):
-                state.isLanguagePopoverPresented = isPresented
-                return .none
-
-            case let .languageSelected(language):
-                state.isLanguagePopoverPresented = false
-
-                guard language != state.selectedLanguage else { return .none }
-
-                return .send(
-                    .popupRequested(
-                        .action(
-                            AppPopup.Action(
-                                message: Self.localized(
-                                    "language.change.resetNotice",
-                                    language: state.selectedLanguage
-                                ),
-                                primaryTitle: Self.localized(
-                                    "language.change.confirm",
-                                    language: state.selectedLanguage
-                                ),
-                                secondaryTitle: Self.localized(
-                                    "language.change.cancel",
-                                    language: state.selectedLanguage
-                                ),
-                                route: .confirmLanguageChange(language)
-                            )
-                        )
-                    )
-                )
-
-            case let .languageChangeConfirmed(language):
-                guard language != state.selectedLanguage,
-                      !state.isLanguageUpdateLoading
-                else { return .none }
-
-                state.isLanguageUpdateLoading = true
-                let updateProfileUseCase = updateProfileUseCase
-
-                return .run { send in
-                    do {
-                        let profile = try await updateProfileUseCase.execute(
-                            UserProfileUpdate(lang: language.rawValue)
-                        )
-                        await send(.languageUpdateResponse(language, .success(profile)))
-                    } catch {
-                        await send(
-                            .languageUpdateResponse(
-                                language,
-                                .failure(DataError.from(error))
-                            )
-                        )
-                    }
-                }
-
-            case let .languageUpdateResponse(language, .success(profile)):
-                state.isLanguageUpdateLoading = false
-                state.selectedLanguage = language
-                state.userProfile = profile
-                return .none
-
-            case .languageUpdateResponse(_, .failure):
-                state.isLanguageUpdateLoading = false
-                return .send(
-                    .popupRequested(
-                        .notice(
-                            AppPopup.Notice(
-                                message: Self.localized(
-                                    "language.change.failure",
-                                    language: state.selectedLanguage
-                                ),
-                                confirmTitle: Self.localized(
-                                    "common.confirm",
-                                    language: state.selectedLanguage
-                                )
-                            )
-                        )
-                    )
-                )
+            case .navigationLanguageTapped,
+                 .languagePopoverPresentationChanged,
+                 .languageSelected,
+                 .languageChangeConfirmed,
+                 .languageUpdateResponse:
+                return reduceLanguage(action, state: &state)
 
             case .navigationSettingTapped:
                 state.path.append(.setting(SettingFeature.State(language: state.selectedLanguage)))
@@ -367,6 +128,7 @@ struct MoreFeature {
                 return .none
 
             case .editProfileTapped:
+                guard state.userType == .tenant else { return .none }
                 state.path.append(.profileEdit(ProfileEditFeature.State(userProfile: state.userProfile)))
                 return .none
 
@@ -411,6 +173,7 @@ struct MoreFeature {
                 return .none
 
             case .recentlyViewedListingsTapped:
+                guard state.canUseFavoriteFeatures else { return .none }
                 state.path.append(
                     .recentlyViewedList(
                         RecentlyViewedFeature.State(
@@ -440,8 +203,6 @@ struct MoreFeature {
                  .deleteAccountConfirmed:
                 return .none
 
-            case .path:
-                return .none
             }
         }
         .forEach(\.path, action: \.path)
@@ -456,22 +217,22 @@ extension MoreFeature.State {
     }
 }
 
-private extension MoreFeature {
-    static let supportEmail = "kohere26@gmail.com"
+extension MoreFeature {
+    private static let supportEmail = "kohere26@gmail.com"
 
-    static func feedbackMailURL(language: AppLanguage) -> URL? {
+    private static func feedbackMailURL(language: AppLanguage) -> URL? {
         mailURL(
             body: language.localized("more.support.feedbackMailBody")
         )
     }
 
-    static func collaborationMailURL(language: AppLanguage) -> URL? {
+    private static func collaborationMailURL(language: AppLanguage) -> URL? {
         mailURL(
             body: language.localized("more.support.collaborationMailBody")
         )
     }
 
-    static func mailURL(body: String) -> URL? {
+    private static func mailURL(body: String) -> URL? {
         var components = URLComponents()
         components.scheme = "mailto"
         components.path = supportEmail

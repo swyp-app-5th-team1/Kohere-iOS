@@ -67,8 +67,12 @@ struct MapFeature {
                 return .none
 
             // 진단 추천 검색
-            case let .diagnosisResultRequested(diagnosisID):
-                return beginDiagnosisSearch(diagnosisID: diagnosisID, state: &state)
+            case let .diagnosisResultRequested(diagnosisID, filter):
+                return beginDiagnosisSearch(
+                    diagnosisID: diagnosisID,
+                    filter: filter,
+                    state: &state
+                )
 
             case let .diagnosisDetailResponse(result):
                 return handleDiagnosisDetailResponse(result, state: &state)

@@ -75,7 +75,7 @@ struct DiagnosisRecommendedListing: Equatable {
     let maxMonthlyRent: Int?
     let minDeposit: Int?
     let maxDeposit: Int?
-    let thumbnailURL: String
+    let thumbnailURL: String?
     let coordinate: MapCoordinate?
 }
 

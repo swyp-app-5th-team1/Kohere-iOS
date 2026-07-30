@@ -10,8 +10,6 @@ import Foundation
 struct UserProfile: Equatable, Sendable {
     let id: Int
     let userType: UserType
-    let firstName: String?
-    let lastName: String?
     let name: String?
     let nickname: String
     let gender: String?
@@ -37,8 +35,6 @@ struct UserProfile: Equatable, Sendable {
 }
 
 struct UserProfileUpdate: Equatable, Sendable {
-    let firstName: String?
-    let lastName: String?
     let gender: Gender?
     let birthDate: String?
     let country: String?
@@ -50,8 +46,6 @@ struct UserProfileUpdate: Equatable, Sendable {
     let lang: String?
 
     init(
-        firstName: String? = nil,
-        lastName: String? = nil,
         gender: Gender? = nil,
         birthDate: String? = nil,
         country: String? = nil,
@@ -62,8 +56,6 @@ struct UserProfileUpdate: Equatable, Sendable {
         marketingAgreed: Bool? = nil,
         lang: String? = nil
     ) {
-        self.firstName = firstName
-        self.lastName = lastName
         self.gender = gender
         self.birthDate = birthDate
         self.country = country

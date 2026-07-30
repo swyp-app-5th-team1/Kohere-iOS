@@ -6,13 +6,14 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 final class AuthRepository: AuthInterface {
     private let networkService: NetworkService
     private let authenticatedNetworkService: NetworkService
     private let keychainClient: KeychainClient
     private let environmentProvider: () throws -> APIEnvironment
-    
+
     init(
         networkService: NetworkService = .plain(),
         authenticatedNetworkService: NetworkService = LiveNetworkServiceFactory.authenticated(),
@@ -32,9 +33,12 @@ final class AuthRepository: AuthInterface {
             AuthRouter.socialLogin(requestDTO, environment)
         )
         
-        return responseDTO.toEntity()
+        return responseDTO.toEntity(
+            fallbackEmail: credential.email,
+            fallbackName: credential.name
+        )
     }
-    
+
     func reissue(refreshToken: String) async throws -> AuthToken {
         let environment = try environmentProvider()
         let requestDTO = ReissueTokenRequestDTO(refreshToken: refreshToken)
@@ -114,8 +118,7 @@ final class AuthRepository: AuthInterface {
             AuthRouter.sendEmailVerificationCode(
                 requestDTO,
                 environment
-            ),
-            debugRawJSONLabel: "Auth.sendEmailVerificationCode"
+            )
         )
 
         return responseDTO.toEntity()
@@ -161,14 +164,11 @@ final class AuthRepository: AuthInterface {
     func completeOnboarding(profile: AuthOnboardingProfile) async throws -> Auth {
         let environment = try environmentProvider()
         let requestDTO = AuthOnboardingRequestDTO(
-            firstName: profile.firstName,
-            lastName: profile.lastName,
             gender: profile.gender.rawValue,
             birthDate: profile.birthDate,
             country: profile.country,
-            occupation: profile.occupation.rawValue,
-            email: profile.email,
-            visaType: profile.visaType.rawValue
+            visaType: profile.visaType.rawValue,
+            lang: profile.lang
         )
         let responseDTO: AuthOnboardingResponseDTO = try await authenticatedNetworkService.request(
             AuthRouter.completeOnboarding(
@@ -183,7 +183,6 @@ final class AuthRepository: AuthInterface {
     func completeLandlordOnboarding(profile: LandlordOnboardingProfile) async throws -> Auth {
         let environment = try environmentProvider()
         let requestDTO = LandlordOnboardingRequestDTO(
-            name: profile.name,
             phoneNumber: profile.phoneNumber,
             birthDate: profile.birthDate
         )
@@ -191,8 +190,7 @@ final class AuthRepository: AuthInterface {
             AuthRouter.completeLandlordOnboarding(
                 requestDTO,
                 environment
-            ),
-            debugRawJSONLabel: "LandlordOnboarding.complete"
+            )
         )
 
         return responseDTO.toEntity()
@@ -217,11 +215,11 @@ extension AuthClient: DependencyKey {
 private extension SocialLoginRequestDTO {
     init(_ credential: SocialLoginCredential) {
         switch credential {
-        case let .google(idToken):
-            self = .google(idToken: idToken)
+        case let .google(idToken, email, name):
+            self = .google(idToken: idToken, email: email, name: name)
 
-        case let .apple(authorizationCode):
-            self = .apple(authorizationCode: authorizationCode)
+        case let .apple(authorizationCode, email, name):
+            self = .apple(authorizationCode: authorizationCode, email: email, name: name)
         }
     }
 }
@@ -229,7 +227,7 @@ private extension SocialLoginRequestDTO {
 // MARK: - Mapper
 
 private extension SocialLoginResponseDTO {
-    func toEntity() -> Auth {
+    func toEntity(fallbackEmail: String?, fallbackName: String?) -> Auth {
         return Auth(
             onboardingRequired: onboardingRequired,
             status: AuthStatus(rawValue: status) ?? .unknown,
@@ -237,8 +235,37 @@ private extension SocialLoginResponseDTO {
             accessToken: accessToken,
             refreshToken: refreshToken,
             expiresIn: expiresIn,
-            expiresAt: Auth.expirationDate(expiresIn: expiresIn)
+            expiresAt: Auth.expirationDate(expiresIn: expiresIn),
+            email: fallbackEmail?.nilIfBlank ?? email?.nilIfBlank,
+            name: fallbackName?.nilIfBlank ?? name?.nilIfBlank
         )
+    }
+}
+
+private extension String {
+    var nilIfBlank: String? {
+        let trimmed = trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+}
+
+private extension SocialLoginCredential {
+    var email: String? {
+        switch self {
+        case let .google(_, email, _):
+            return email
+        case .apple:
+            return nil
+        }
+    }
+
+    var name: String? {
+        switch self {
+        case let .google(_, _, name):
+            return name
+        case .apple:
+            return nil
+        }
     }
 }
 

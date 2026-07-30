@@ -10,6 +10,8 @@ import Foundation
 
 @Reducer
 struct RootFeature {
+    @Dependency(\.continuousClock)
+    var clock
     @Dependency(\.keychainClient)
     var keychainClient
     @Dependency(\.userDefaultsClient)
@@ -20,53 +22,28 @@ struct RootFeature {
     var logoutUseCase
     @Dependency(\.fetchCurrentUserUseCase)
     var fetchCurrentUserUseCase
+    @Dependency(\.updateProfileUseCase)
+    var updateProfileUseCase
     @Dependency(\.deleteCurrentUserUseCase)
     var deleteCurrentUserUseCase
-    
-    @ObservableState
-    struct State: Equatable {
-        var authInfo: Auth?
-        var currentUser: UserProfile?
-        var appLanguage: AppLanguage = .systemDefault
-        var isAuthLoading = true
-        var isCurrentUserLoading = false
-        var isLogoutRequesting = false
-        var isDeleteAccountRequesting = false
-        var login = LoginFeature.State()
-        var onboarding = OnboardingFeature.State()
-        var selectedTab: AppTab = .home
-        var popup: AppPopup?
-        var home = HomeFeature.State()
-        var community = CommunityFeature.State()
-        var map = MapFeature.State()
-        var chat = ChatFeature.State()
-        var more = MoreFeature.State()
-    }
-    
+
     enum Action {
-        case onAppear
-        case mainTabAppeared
+        case onAppear, splashMinimumDurationElapsed, mainTabAppeared
         case storedAuthLoaded(Auth?, OnboardingUserType?)
         case authSessionExpired(AuthSessionExpirationContext?)
         case currentUserResponse(Result<UserProfile, Error>)
         case logoutResponse(Result<Void, Error>)
         case deleteAccountResponse(Result<Void, Error>)
         case deleteAccountLocalCleanupResponse(Result<Void, Error>)
-        case login(LoginFeature.Action)
-        case saveAuthResponse(Result<Auth, Error>)
+        case login(LoginFeature.Action), saveAuthResponse(Result<Auth, Error>)
+        case onboardingLanguageUpdateResponse(AppLanguage, Result<UserProfile, Error>)
         case onboarding(OnboardingFeature.Action)
-        case selectedTabChanged(AppTab)
-        case popupPresented(AppPopup)
-        case popupNoticeConfirmButtonTapped
-        case popupActionPrimaryButtonTapped
-        case popupActionSecondaryButtonTapped
-        case home(HomeFeature.Action)
-        case community(CommunityFeature.Action)
-        case map(MapFeature.Action)
-        case chat(ChatFeature.Action)
-        case more(MoreFeature.Action)
+        case selectedTabChanged(AppTab), popupPresented(AppPopup)
+        case popupNoticeConfirmButtonTapped, popupActionPrimaryButtonTapped, popupActionSecondaryButtonTapped
+        case home(HomeFeature.Action), community(CommunityFeature.Action), map(MapFeature.Action)
+        case chat(ChatFeature.Action), more(MoreFeature.Action)
     }
-    
+
     var body: some Reducer<State, Action> {
         Scope(state: \.login, action: \.login) {
             LoginFeature()
@@ -91,171 +68,32 @@ struct RootFeature {
         }
         Reduce { state, action in
             switch action {
-            case .onAppear:
-                let keychainClient = keychainClient
-                let userDefaultsClient = userDefaultsClient
-                let reissueTokenUseCase = reissueTokenUseCase
-                let storedLanguageRawValue = try? userDefaultsClient.load(for: .appLanguage)
-                let resolvedLanguage = storedLanguageRawValue
-                    .flatMap(AppLanguage.init(rawValue:))
-                    ?? .systemDefault
-                state.appLanguage = resolvedLanguage
-                state.onboarding.tenant?.appLanguage = resolvedLanguage
-                state.home.appLanguage = resolvedLanguage
-                state.map.appLanguage = resolvedLanguage
-                state.chat.appLanguage = resolvedLanguage
-                state.more.selectedLanguage = resolvedLanguage
-                var effects: [Effect<Action>] = [
-                    .run { send in
-                        for await notification in NotificationCenter.default.notifications(named: .authSessionExpired) {
-                            await send(.authSessionExpired(notification.object as? AuthSessionExpirationContext))
-                        }
-                    }
-                    .cancellable(
-                        id: "RootFeature.authSessionObserver",
-                        cancelInFlight: true
-                    )
-                ]
-                
-                if state.authInfo == nil, state.isAuthLoading {
-                    effects.append(
-                        .run { send in
-                            let hasLaunchedBefore = try userDefaultsClient.load(for: .hasLaunchedBefore) ?? false
+            case .onAppear,
+                 .splashMinimumDurationElapsed,
+                 .storedAuthLoaded,
+                 .authSessionExpired,
+                 .mainTabAppeared,
+                 .currentUserResponse,
+                 .login(.loginAuthStored),
+                 .login(.userTypeSelected),
+                 .onboarding(.onboardingResponse(.success)),
+                 .saveAuthResponse(.success),
+                 .onboardingLanguageUpdateResponse:
+                return reduceLifecycle(action, state: &state)
 
-                            let requiresAuthCleanup = try userDefaultsClient.load(for: .requiresAuthCleanup) ?? false
-                            if requiresAuthCleanup {
-                                do {
-                                    try keychainClient.delete(for: .auth)
-                                    userDefaultsClient.delete(for: .requiresAuthCleanup)
-                                } catch {
-                                    await send(.storedAuthLoaded(nil, nil))
-                                    return
-                                }
-                            }
+            case .home(.navigationHeartTapped),
+                 .home(.navigationNoticeTapped),
+                 .home(.seeAllListingsTapped),
+                 .home(.likeButtonTapped),
+                 .map(.listingLikeButtonTapped),
+                 .more(.savedListingsTapped),
+                 .more(.recentlyViewedListingsTapped):
+                return presentAuthenticationGateIfNeeded(state: &state)
 
-                            if !hasLaunchedBefore {
-                                Self.logFirstLaunchAuthReset()
-                                try keychainClient.delete(for: .auth)
-                                try userDefaultsClient.save(true, for: .hasLaunchedBefore)
-                            }
-
-                            let auth = try keychainClient.load(for: .auth)
-                            Self.logStoredAuthLoaded(auth != nil)
-                            let pendingOnboardingUserTypeRawValue = try userDefaultsClient.load(for: .pendingOnboardingUserType)
-                            let pendingOnboardingUserType = pendingOnboardingUserTypeRawValue.flatMap(OnboardingUserType.init(rawValue:))
-                            let resolvedAuth = await Self.resolveStoredAuth(
-                                auth,
-                                keychainClient: keychainClient,
-                                reissueToken: reissueTokenUseCase.execute
-                            )
-                            await send(.storedAuthLoaded(resolvedAuth, pendingOnboardingUserType))
-                        } catch: { error, send in
-                            Self.logStartupAuthLoadFailure(error)
-                            await send(.storedAuthLoaded(nil, nil))
-                        }
-                    )
-                }
-                
-                return .merge(effects)
-                
-            case let .storedAuthLoaded(auth, pendingOnboardingUserType):
-                state.authInfo = auth
-                state.isAuthLoading = false
-
-                guard auth?.onboardingRequired == true else {
-                    userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                    return .none
-                }
-
-                if let pendingOnboardingUserType {
-                    state.onboarding = OnboardingFeature.State(
-                        userType: pendingOnboardingUserType,
-                        appLanguage: state.appLanguage
-                    )
-                } else {
-                    state.authInfo = nil
-                    state.login.authInfo = auth
-                    state.login.currentSheet = .userTypeSelect
-                }
-
-                return .none
-
-            case let .authSessionExpired(context):
-                Self.logSessionExpiration(context)
-                userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                let appLanguage = state.appLanguage
-                state = State(appLanguage: appLanguage, isAuthLoading: false)
-                state.home.appLanguage = appLanguage
-                state.map.appLanguage = appLanguage
-                state.chat.appLanguage = appLanguage
-                state.more.selectedLanguage = appLanguage
-                return .cancel(id: "RootFeature.fetchCurrentUser")
-
-            case .mainTabAppeared:
-                return fetchCurrentUserIfNeeded(state: &state)
-
-            case let .currentUserResponse(.success(user)):
-                guard state.authInfo?.onboardingRequired == false else {
-                    state.isCurrentUserLoading = false
-                    return .none
-                }
-
-                state.isCurrentUserLoading = false
-
-                if let language = user.appLanguage,
-                   language != state.appLanguage {
-                    try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
-                    let selectedTab = state.selectedTab
-                    resetMainContent(
-                        language: language,
-                        userProfile: user,
-                        selectedTab: selectedTab,
-                        state: &state
-                    )
-                    return .merge(
-                        .send(.home(.onAppear)),
-                        .send(.more(.onAppear))
-                    )
-                }
-
-                return .send(.more(.userProfileUpdated(user)))
-
-            case .currentUserResponse(.failure):
-                state.isCurrentUserLoading = false
-                return .none
-
-            case let .login(.loginAuthStored(auth)):
-                userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                userDefaultsClient.delete(for: .requiresAuthCleanup)
-                state.authInfo = auth
-                return .none
-                
-            case let .login(.userTypeSelected(userType)):
-                guard state.login.isRequiredTermsAgreed,
-                      let authInfo = state.login.authInfo else { return .none }
-                try? userDefaultsClient.save(userType.rawValue, for: .pendingOnboardingUserType)
-                state.authInfo = authInfo
-                state.onboarding = OnboardingFeature.State(
-                    userType: userType,
-                    appLanguage: state.appLanguage
-                )
-                return .none
-                
-            case let .onboarding(.onboardingResponse(.success(auth))):
-                let keychainClient = keychainClient
-                
-                return .run { send in
-                    try keychainClient.save(auth, for: .auth)
-                    await send(.saveAuthResponse(.success(auth)))
-                } catch: { error, send in
-                    await send(.saveAuthResponse(.failure(error)))
-                }
-            
-            case let .saveAuthResponse(.success(updatedAuthInfo)):
-                userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                userDefaultsClient.delete(for: .requiresAuthCleanup)
-                state.authInfo = updatedAuthInfo
-                return .none
+            case .home(.path(.element(id: _, action: .listingDetail(.likeButtonTapped)))),
+                 .map(.path(.element(id: _, action: .listingDetail(.likeButtonTapped)))),
+                 .more(.path(.element(id: _, action: .listingDetail(.likeButtonTapped)))):
+                return presentAuthenticationGateIfNeeded(state: &state)
 
             case .saveAuthResponse(.failure):
                 return .none
@@ -301,6 +139,10 @@ struct RootFeature {
                 
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
+                if state.authInfo?.onboardingRequired != false,
+                   tab == .chat || tab == .more {
+                    return presentAuthenticationGateIfNeeded(state: &state, returnsToHomeOnDismiss: true)
+                }
                 return .none
 
             case let .popupPresented(popup):
@@ -384,6 +226,18 @@ struct RootFeature {
                 return .none
 
             case let .more(.userProfileUpdated(userProfile)):
+                if userProfile.userType == .landlord,
+                   state.appLanguage != .korean {
+                    try? userDefaultsClient.save(AppLanguage.korean.rawValue, for: .appLanguage)
+                    let selectedTab = state.selectedTab
+                    resetMainContent(language: .korean,
+                        userProfile: userProfile,
+                        selectedTab: selectedTab,
+                        state: &state
+                    )
+                    return .merge(.send(.home(.onAppear)), .send(.more(.onAppear)))
+                }
+
                 state.currentUser = userProfile
                 state.home.userType = userProfile.userType
                 state.map.userType = userProfile.userType
@@ -399,9 +253,9 @@ struct RootFeature {
                 return .merge(effects)
 
             case let .more(.languageUpdateResponse(language, .success(userProfile))):
-                try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
-                resetMainContent(
-                    language: language,
+                let resolvedLanguage = userProfile.userType == .landlord ? AppLanguage.korean : language
+                try? userDefaultsClient.save(resolvedLanguage.rawValue, for: .appLanguage)
+                resetMainContent(language: resolvedLanguage,
                     userProfile: userProfile,
                     state: &state
                 )
@@ -494,6 +348,21 @@ struct RootFeature {
 }
 
 extension RootFeature {
+    func presentAuthenticationGateIfNeeded(state: inout State, returnsToHomeOnDismiss: Bool = false) -> Effect<Action> {
+        guard state.authInfo?.onboardingRequired != false else { return .none }
+
+        state.popup = .action(
+            AppPopup.Action(
+                message: state.appLanguage.localized("authGate.message"),
+                primaryTitle: state.appLanguage.localized("authGate.signIn"),
+                secondaryTitle: state.appLanguage.localized("authGate.notNow"),
+                primaryRoute: .signIn,
+                secondaryRoute: returnsToHomeOnDismiss ? .home : nil
+            )
+        )
+        return .none
+    }
+
     func resetMainContent(
         language: AppLanguage,
         userProfile: UserProfile,

@@ -61,6 +61,7 @@ struct MapView: View {
     private var mapContent: some View {
         ZStack(alignment: .top) {
             NaverMapRepresentable(
+                appLanguage: store.appLanguage,
                 markers: store.markers,
                 selectedMarkerID: store.selectedMarkerID,
                 cameraMoveRequest: store.cameraMoveRequest,
@@ -161,7 +162,7 @@ struct MapView: View {
         MapSelectedListingSheetView(
             title: store.selectedListingTitle,
             item: item,
-            showsLikeButton: store.canUseFavoriteFeatures,
+            showsLikeButton: store.showsFavoriteControls,
             onCardTapped: {
                 store.send(.selectedListingCardTapped)
             },

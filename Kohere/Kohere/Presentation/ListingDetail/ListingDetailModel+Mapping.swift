@@ -21,12 +21,7 @@ extension ListingDetailModel {
         overview = ListingDetailOverviewModel(
             id: listingDetail.listingID,
             title: listingDetail.title,
-            typeTag: Self.localizedServerCode(
-                listingDetail.type,
-                namespace: .listingType,
-                language: language
-            )
-                ?? listingDetail.type,
+            typeTag: listingDetail.type,
             imageURLs: listingDetail.imageURLs,
             monthlyRentText: ListingDetailValueFormatter.monthlyRentTitle(
                 min: monthlyRents.min(),
@@ -66,7 +61,7 @@ extension ListingDetailModel {
             language: language
         )
         propertyInfo = Self.propertyRows(listingDetail, language: language)
-        propertyFeatures = Self.propertyFeatures(listingDetail.conditions, language: language)
+        propertyFeatures = listingDetail.conditions
         buildingInfo = Self.buildingRows(listingDetail.building, language: language)
         facilityInfo = Self.facilityRows(listingDetail.facilities, language: language)
         locationInfo = Self.locationInfo(listingDetail, language: language)
@@ -84,18 +79,7 @@ extension ListingDetailModel {
                 offer.pricing,
                 language: language
             ),
-            tags: roomOfferTags(offer, language: language)
-        )
-    }
-
-    private static func roomOfferTags(
-        _ offer: ListingDetailRoomOffer,
-        language: AppLanguage
-    ) -> [String] {
-        localizedServerCodes(
-            offer.filterTags,
-            namespace: .roomOfferFilterTags,
-            language: language
+            tags: offer.filterTags
         )
     }
 
@@ -110,11 +94,9 @@ extension ListingDetailModel {
             ListingDetailInfoRowModel(
                 id: "rental-type",
                 title: language.localized("listingDetail.field.rentType"),
-                value: localizedServerCode(
-                    listingDetail.rentalType,
-                    namespace: .listingRentalType,
-                    language: language
-                ) ?? language.localized("listingDetail.value.noRentalTypeInfo")
+                value: listingDetail.rentalType.isEmpty
+                    ? language.localized("listingDetail.value.noRentalTypeInfo")
+                    : listingDetail.rentalType
             ),
             ListingDetailInfoRowModel(
                 id: "deposit",
@@ -150,7 +132,7 @@ extension ListingDetailModel {
                 ListingDetailInfoRowModel(
                     id: "refund-policy",
                     title: language.localized("listingDetail.field.refundPolicy"),
-                    value: refundPolicyTitle(refundPolicy, language: language)
+                    value: refundPolicyValue(refundPolicy)
                 )
             )
         }
@@ -177,11 +159,7 @@ extension ListingDetailModel {
             )
         }
 
-        if let genderPolicy = localizedServerCode(
-            listingDetail.genderPolicy,
-            namespace: .listingGenderPolicy,
-            language: language
-        ) {
+        if let genderPolicy = listingDetail.genderPolicy, !genderPolicy.isEmpty {
             rows.append(
                 ListingDetailInfoRowModel(
                     id: "gender",
@@ -194,17 +172,6 @@ extension ListingDetailModel {
         return rows
     }
 
-    private static func propertyFeatures(
-        _ conditionCodes: [String],
-        language: AppLanguage
-    ) -> [String] {
-        localizedServerCodes(
-            conditionCodes,
-            namespace: .roomOfferFilterTags,
-            language: language
-        )
-    }
-
     private static func buildingRows(
         _ building: ListingDetailBuilding?,
         language: AppLanguage
@@ -215,11 +182,7 @@ extension ListingDetailModel {
             optionalRow(
                 id: "building-type",
                 title: language.localized("listingDetail.field.buildingType"),
-                value: localizedServerCode(
-                    building.type,
-                    namespace: .buildingType,
-                    language: language
-                )
+                value: building.type
             ),
             optionalRow(
                 id: "floor",
@@ -260,61 +223,43 @@ extension ListingDetailModel {
             listRow(
                 id: "heating",
                 title: language.localized("listingDetail.field.heatingFacility"),
-                values: localizedServerCodes(
-                    facilities.heatingSystem,
-                    namespace: .facilitiesHeatingSystem,
-                    language: language
-                )
+                values: facilities.heatingSystem
             ),
             listRow(
                 id: "laundry",
                 title: language.localized("listingDetail.field.laundryFacility"),
-                values: localizedServerCodes(
-                    facilities.laundry,
-                    namespace: .facilitiesLaundry,
-                    language: language
-                )
+                values: facilities.laundry
             ),
             listRow(
                 id: "kitchen",
                 title: language.localized("listingDetail.field.kitchenFacility"),
-                values: localizedServerCodes(
-                    facilities.kitchen,
-                    namespace: .facilitiesKitchen,
-                    language: language
-                )
+                values: facilities.kitchen
             ),
             listRow(
                 id: "amenities",
                 title: language.localized("listingDetail.field.livingFacility"),
-                values: localizedServerCodes(
-                    facilities.livingAmenities,
-                    namespace: .facilitiesLivingAmenities,
-                    language: language
-                )
+                values: facilities.livingAmenities
             ),
             listRow(
                 id: "security",
                 title: language.localized("listingDetail.field.safetyFacility"),
-                values: localizedServerCodes(
-                    facilities.securityFeatures,
-                    namespace: .facilitiesSecurityFeatures,
-                    language: language
-                )
+                values: facilities.securityFeatures
             ),
             listRow(
                 id: "common-areas",
                 title: language.localized("listingDetail.field.spaceFacility"),
-                values: commonSpaceTitles(facilities.commonSpaces, language: language)
+                values: facilities.commonSpaces.map {
+                    ListingDetailValueFormatter.commonSpaceTitle(
+                        type: $0.type,
+                        count: $0.count,
+                        language: language
+                    )
+                }
             ),
             listRow(
                 id: "supplies",
                 title: language.localized("listingDetail.field.providedSupplies"),
-                values: localizedServerCodes(
-                    facilities.providedSupplies,
-                    namespace: .facilitiesProvidedSupplies,
-                    language: language
-                )
+                values: facilities.providedSupplies
             )
         ]
         .compactMap { $0 }
@@ -341,7 +286,7 @@ extension ListingDetailModel {
 
         return ListingLocationInfoModel(
             sectionTitle: language.localized("listingDetail.section.locationAndNearby"),
-            addressText: localizedAddressText(listingDetail.address, language: language),
+            addressText: addressText(listingDetail.address, language: language),
             transits: transits,
             coordinate: listingDetail.coordinate,
             nearbyPlacesTitle: language.localized("listingDetail.field.nearbyAmenities"),
@@ -353,6 +298,42 @@ extension ListingDetailModel {
     private static func transitLineText(_ transit: ListingDetailNearestTransit) -> String {
         guard let type = transit.type, !type.isEmpty else { return "T" }
         return String(type.prefix(1))
+    }
+
+    private static func addressText(
+        _ address: ListingDetailAddress?,
+        language: AppLanguage
+    ) -> String {
+        guard let address else {
+            return language.localized("listingDetail.value.noAddressInfo")
+        }
+
+        let fullAddress = address.fullAddress?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let detail = address.detail?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let addressParts = [fullAddress, detail]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+
+        if !addressParts.isEmpty {
+            return addressParts.joined(separator: " ")
+        }
+
+        let locationParts = [address.city, address.district, detail]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+
+        return locationParts.isEmpty
+            ? language.localized("listingDetail.value.noAddressInfo")
+            : locationParts.joined(separator: " ")
+    }
+
+    private static func refundPolicyValue(_ refundPolicy: ListingDetailRefundPolicy) -> String {
+        let description = refundPolicy.description?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let description, !description.isEmpty {
+            return description
+        }
+
+        return refundPolicy.code
     }
 
     private static func imageCountTitle(_ count: Int) -> String {

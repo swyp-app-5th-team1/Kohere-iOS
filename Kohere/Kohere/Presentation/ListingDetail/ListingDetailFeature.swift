@@ -285,6 +285,10 @@ extension ListingDetailFeature.State {
         showsTenantActionBar && detail != nil
     }
 
+    var showsFavoriteControl: Bool {
+        userType != .landlord && detail != nil
+    }
+
     var selectedRoomOffer: ListingRoomOfferModel? {
         guard let selectedRoomOfferID,
               let detail

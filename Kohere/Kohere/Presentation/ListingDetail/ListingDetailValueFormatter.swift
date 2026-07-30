@@ -133,16 +133,7 @@ enum ListingDetailValueFormatter {
         language: AppLanguage
     ) -> String {
         guard let transit else { return language.localized("listingDetail.value.noTransitInfo") }
-        let localizedName = if language == .korean {
-            ListingDetailModel.localizedServerCode(
-                transit.name,
-                namespace: .nearestTransitName,
-                language: language
-            ) ?? transit.name
-        } else {
-            transit.name
-        }
-        guard let walkMinutes = transit.walkMinutes else { return localizedName }
+        guard let walkMinutes = transit.walkMinutes else { return transit.name }
 
         return format(
             includesFrom
@@ -150,7 +141,7 @@ enum ListingDetailValueFormatter {
                 : "listingDetail.format.transit.overview",
             language: language,
             String(walkMinutes),
-            localizedName
+            transit.name
         )
     }
 

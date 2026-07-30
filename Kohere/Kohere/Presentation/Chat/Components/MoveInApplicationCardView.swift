@@ -73,9 +73,7 @@ struct MoveInApplicationCardView: View {
     // MARK: - SubView
     
     private var thumbnailImage: some View {
-        KohereRemoteImageView(urlString: item.thumbnailURL) {
-            placeholderImage
-        }
+        KohereRemoteImageView(urlString: item.thumbnailURL)
         .frame(width: 255, height: 173)
         .clipped()
         .clipShape(
@@ -88,12 +86,6 @@ struct MoveInApplicationCardView: View {
                 )
             )
         )
-    }
-    
-    private var placeholderImage: some View {
-        Image(.roomPlaceholder)
-            .resizable()
-            .scaledToFill()
     }
     
     @ViewBuilder private var cardInfo: some View {

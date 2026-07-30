@@ -87,8 +87,12 @@ struct LoginFeature {
 
                 return .run { send in
                     do {
-                        let idToken = try await googleSignInClient.signIn()
-                        await send(.socialLoginCredentialReceived(.google(idToken: idToken)))
+                        let result = try await googleSignInClient.signIn()
+                        await send(.socialLoginCredentialReceived(.google(
+                            idToken: result.idToken,
+                            email: result.email,
+                            name: result.name
+                        )))
                     } catch {
                         await send(.loginFailure(Self.loginErrorMessage(for: error)))
                     }
@@ -102,7 +106,13 @@ struct LoginFeature {
                     do {
                         let result = try await appleSignInClient.signIn()
                         await send(
-                            .socialLoginCredentialReceived(.apple(authorizationCode: result.authorizationCode))
+                            .socialLoginCredentialReceived(
+                                .apple(
+                                    authorizationCode: result.authorizationCode,
+                                    email: result.email,
+                                    name: result.name
+                                )
+                            )
                         )
                     } catch {
                         await send(.loginFailure(error.localizedDescription))

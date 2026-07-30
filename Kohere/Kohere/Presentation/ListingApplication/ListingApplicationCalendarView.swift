@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct ListingApplicationDateSelectionView: View {
-    @Environment(\.locale)
-    private var locale
+    let language: AppLanguage
     let moveInDate: Date
     let displayedMonth: Date
     let displayedMonthTitle: String
@@ -143,13 +142,13 @@ struct ListingApplicationDateSelectionView: View {
 
     private var dateSummary: some View {
         HStack(spacing: 0) {
-            summaryColumn(title: String(localized: "listingApplication.field.moveInDate", locale: locale), value: moveInDateText)
+            summaryColumn(title: language.localized("listingApplication.field.moveInDate"), value: moveInDateText)
 
             Rectangle()
                 .fill(.lineNeutral)
                 .frame(width: 1, height: 40)
 
-            summaryColumn(title: String(localized: "listingApplication.field.moveOutDate", locale: locale), value: moveOutDateText)
+            summaryColumn(title: language.localized("listingApplication.field.moveOutDate"), value: moveOutDateText)
         }
         .frame(maxWidth: .infinity)
     }

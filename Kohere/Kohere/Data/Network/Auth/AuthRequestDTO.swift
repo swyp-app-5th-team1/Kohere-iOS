@@ -6,20 +6,24 @@
 //
 
 nonisolated enum SocialLoginRequestDTO: Encodable, Sendable {
-    case google(idToken: String)
-    case apple(authorizationCode: String)
+    case google(idToken: String, email: String?, name: String?)
+    case apple(authorizationCode: String, email: String?, name: String?)
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         switch self {
-        case let .google(idToken):
+        case let .google(idToken, email, name):
             try container.encode("GOOGLE", forKey: .provider)
             try container.encode(idToken, forKey: .idToken)
+            try container.encodeIfPresent(email, forKey: .email)
+            try container.encodeIfPresent(name, forKey: .name)
 
-        case let .apple(authorizationCode):
+        case let .apple(authorizationCode, email, name):
             try container.encode("APPLE", forKey: .provider)
             try container.encode(authorizationCode, forKey: .authorizationCode)
+            try container.encodeIfPresent(email, forKey: .email)
+            try container.encodeIfPresent(name, forKey: .name)
         }
     }
 
@@ -27,6 +31,8 @@ nonisolated enum SocialLoginRequestDTO: Encodable, Sendable {
         case provider
         case idToken
         case authorizationCode
+        case email
+        case name
     }
 }
 
@@ -63,18 +69,14 @@ nonisolated struct TermsAgreementRequestDTO: Encodable, Sendable {
 }
 
 nonisolated struct AuthOnboardingRequestDTO: Encodable, Sendable {
-    let firstName: String
-    let lastName: String
     let gender: String
     let birthDate: String
     let country: String
-    let occupation: String
-    let email: String
     let visaType: String
+    let lang: String
 }
 
 nonisolated struct LandlordOnboardingRequestDTO: Encodable, Sendable {
-    let name: String
     let phoneNumber: String
     let birthDate: String
 }

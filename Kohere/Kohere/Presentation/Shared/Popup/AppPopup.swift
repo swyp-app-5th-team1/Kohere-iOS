@@ -52,8 +52,13 @@ enum AppPopup: Equatable {
     }
 
     enum Route: Equatable {
+        case signIn
+        case home
         case logout
         case deleteAccount
+        case reportBooking(Int)
+        case blockBooking(Int)
+        case deleteBooking(Int)
         case dismissListingDetail
         case confirmLanguageChange(AppLanguage)
     }

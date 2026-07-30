@@ -26,6 +26,7 @@ struct ProfileEditView: View {
             profileForm
         }
         .background(.backgroundNormalAlternative)
+        .interactivePopGestureEnabled()
     }
 }
 
@@ -40,7 +41,7 @@ private extension ProfileEditView {
     var navigationBar: some View {
         KohereNavigationBar(
             left: .backButton({ store.send(.backButtonTapped) }),
-            center: .text(String(localized: "profileEdit.title", locale: locale)),
+            center: .text(AppLanguage(locale: locale).localized("profileEdit.title")),
             right: .checkButton(
                 isEnabled: store.isSaveButtonEnabled,
                 action: { store.send(.saveButtonTapped) }
@@ -58,10 +59,8 @@ private extension ProfileEditView {
                     nameFields
                     
                     nationalityAndGenderFields
-                        .zIndex(3)
-                    visaStatusField
                         .zIndex(2)
-                    occupationField
+                    visaStatusField
                         .zIndex(1)
                 }
                 .padding(.horizontal, 20)
@@ -101,28 +100,10 @@ private extension ProfileEditView {
     }
 
     var nameFields: some View {
-        VStack(spacing: 16) {
-            ProfileEditTextField(
-                title: String(localized: "onboarding.profile.firstName", locale: locale),
-                text: $store.firstName,
-                activeField: $activeField,
-                keyboardField: $keyboardField,
-                equals: .firstName,
-                isRequired: true,
-                characterLimit: 100
-            )
-            .id(ProfileEditField.firstName)
-
-            ProfileEditTextField(
-                title: String(localized: "onboarding.profile.lastName", locale: locale),
-                text: $store.lastName,
-                activeField: $activeField,
-                keyboardField: $keyboardField,
-                equals: .lastName,
-                isRequired: true
-            )
-            .id(ProfileEditField.lastName)
-        }
+        ProfileEditReadOnlyField(
+            title: AppLanguage(locale: locale).localized("onboarding.profile.fullName"),
+            value: store.displayName
+        )
     }
 
     var nationalityAndGenderFields: some View {
@@ -167,25 +148,34 @@ private extension ProfileEditView {
         .id(ProfileEditField.visaStatus)
     }
 
-    var occupationField: some View {
-        ProfileEditDropdownField(
-            title: "onboarding.profile.occupation",
-            selectedOption: $store.selectedOccupation,
-            activeField: $activeField,
-            keyboardField: $keyboardField,
-            equals: .occupation,
-            options: DropdownMenuOption.occupations,
-            listHeight: 239,
-            isRequired: true
-        )
-        .id(ProfileEditField.occupation)
-    }
-
     func scrollToActiveField(_ field: ProfileEditField?, proxy: ScrollViewProxy) {
         guard let field else { return }
 
         withAnimation(.easeInOut) {
             proxy.scrollTo(field, anchor: .center)
+        }
+    }
+}
+
+private struct ProfileEditReadOnlyField: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .kohereTextStyle(.label2Semibold)
+                .foregroundStyle(.coolNeutral40)
+                .padding(.horizontal, 4)
+
+            Text(value)
+                .kohereTextStyle(.label2Medium)
+                .foregroundStyle(.coolNeutral30)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+                .padding(.horizontal, 16)
+                .background(.coolNeutral7)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
     }
 }
