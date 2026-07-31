@@ -14,6 +14,7 @@ struct UserBubbleButton: View {
     let title: String
     let isSelected: Bool
     var fillsAvailableWidth = false
+    var isDisabled = false
     let action: () -> Void
 
     // MARK: - Body
@@ -22,7 +23,7 @@ struct UserBubbleButton: View {
         Button(action: action) {
             Text(title)
                 .kohereTextStyle(.label2Semibold)
-                .foregroundColor(isSelected ? .primaryNormal : .labelNeutral)
+                .foregroundColor(isDisabled ? .labelDisable : isSelected ? .primaryNormal : .labelNeutral)
                 .lineLimit(1)
                 .minimumScaleFactor(0.82)
                 .padding(.horizontal, 16)
@@ -35,5 +36,6 @@ struct UserBubbleButton: View {
                         .stroke(isSelected ? .primaryNormal : .lineAlternative, lineWidth: 1)
                 )
         }
+        .disabled(isDisabled)
     }
 }

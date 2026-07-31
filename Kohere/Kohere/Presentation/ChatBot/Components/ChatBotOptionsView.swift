@@ -79,13 +79,13 @@ extension ChatBotOptionsView {
                     UserBubbleButton(
                         title: option.title,
                         isSelected: store.selectedOptionCodes.contains(option.id),
-                        fillsAvailableWidth: true
+                        fillsAvailableWidth: true,
+                        isDisabled: store.disabledMultiSelectOptionCodes.contains(option.id)
                     ) {
                         withAnimation(.easeInOut(duration: 0.15)) {
                             _ = store.send(.optionTapped(option))
                         }
                     }
-                    .disabled(store.isAnswerSaving)
                 }
             }
             .frame(maxWidth: 352)
@@ -124,12 +124,12 @@ extension ChatBotOptionsView {
 
                         Spacer(minLength: 0)
 
-                        Text("₩500K")
+                        Text(localized("chatBot.budget.sliderMidpoint"))
                             .frame(width: 46, alignment: .center)
 
                         Spacer(minLength: 0)
 
-                        Text("₩1M")
+                        Text(localized("chatBot.budget.sliderMaximum"))
                             .frame(width: 46, alignment: .trailing)
                     }
                     .kohereTextStyle(.caption2Regular)
@@ -151,7 +151,7 @@ extension ChatBotOptionsView {
                     _ = store.send(.budgetConfirmButtonTapped(AppLanguage(locale: locale)))
                 }
             } label: {
-                Text("confirm")
+                Text(localized("common.confirm"))
                     .kohereTextStyle(.label2Medium)
                     .underline()
                     .foregroundColor(.statusRed50)
@@ -170,25 +170,13 @@ extension ChatBotOptionsView {
             return localized("chatBot.budget.any")
 
         case (bounds.lowerBound, let maximum):
-            return localized(
-                "chatBot.budget.under",
-                arguments: [ChatBotFeature.State.budgetPriceText(maximum)]
-            )
+            return localized("chatBot.budget.under", arguments: [MapFilterPriceFormatter.amountText(maximum, locale: locale)])
 
         case (let minimum, bounds.upperBound):
-            return localized(
-                "chatBot.budget.upperOnly",
-                arguments: [ChatBotFeature.State.budgetPriceText(minimum)]
-            )
+            return localized("chatBot.budget.upperOnly", arguments: [MapFilterPriceFormatter.amountText(minimum, locale: locale)])
 
         case let (minimum, maximum):
-            return localized(
-                "chatBot.budget.range",
-                arguments: [
-                    ChatBotFeature.State.budgetPriceText(minimum),
-                    ChatBotFeature.State.budgetPriceText(maximum)
-                ]
-            )
+            return localized("chatBot.budget.range", arguments: [MapFilterPriceFormatter.amountText(minimum, locale: locale), MapFilterPriceFormatter.amountText(maximum, locale: locale)])
         }
     }
 
@@ -203,7 +191,7 @@ extension ChatBotOptionsView {
                 _ = store.send(.confirmButtonTapped)
             }
         } label: {
-            Text("confirm")
+            Text(localized("common.confirm"))
                 .kohereTextStyle(.label2Medium)
                 .underline()
                 .foregroundColor(store.isConfirmButtonEnabled ? .statusRed50 : .neutral20)
