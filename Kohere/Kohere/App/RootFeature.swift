@@ -84,7 +84,7 @@ struct RootFeature {
             case .home(.navigationHeartTapped),
                  .home(.navigationNoticeTapped),
                  .home(.seeAllListingsTapped),
-                 .home(.likeButtonTapped),
+                 .home(.recentlyViewed(.likeButtonTapped)),
                  .map(.listingLikeButtonTapped),
                  .more(.savedListingsTapped),
                  .more(.recentlyViewedListingsTapped):
@@ -125,7 +125,7 @@ struct RootFeature {
                 state.popup = popup
                 return .none
 
-            case let .home(.favoriteStatusResponse(listingID, .success(status))):
+            case let .home(.recentlyViewed(.favoriteStatusResponse(listingID, .success(status)))):
                 synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
 

@@ -12,7 +12,7 @@ struct LivingInKoreaView: View {
     
     // MARK: - Property
     
-    let store: StoreOf<HomeFeature>
+    let store: StoreOf<HomeLivingGuideFeature>
     
     // MARK: - Body
     
@@ -24,9 +24,9 @@ struct LivingInKoreaView: View {
                 .padding(.leading, 8)
             
             VStack(spacing: 8) {
-                ForEach(store.livingGuides) { item in
+                ForEach(store.guides) { item in
                     LivingGuideItemView(item: item) {
-                        store.send(.livingGuideItemTapped(id: item.id))
+                        store.send(.itemTapped(id: item.id))
                     }
                 }
             }

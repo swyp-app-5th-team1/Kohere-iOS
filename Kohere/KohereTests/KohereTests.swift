@@ -1575,13 +1575,19 @@ final class HomeEffectCancellationTests: XCTestCase {
             )
         }
 
-        await store.send(.onAppear) {
+        await store.send(.onAppear)
+        await store.receive(\.recentlyViewed.onAppear) {
             $0.isRecentlyViewedLoading = true
             $0.recentlyViewedErrorMessage = nil
         }
+        await store.receive(\.quiz.onAppear)
+        await store.receive(\.livingGuide.onAppear)
         await fulfillment(of: [spy.started], timeout: 1)
 
         await store.send(.cancelEffects)
+        await store.receive(\.recentlyViewed.cancelEffects)
+        await store.receive(\.quiz.cancelEffects)
+        await store.receive(\.livingGuide.cancelEffects)
         await fulfillment(of: [spy.cancelled], timeout: 1)
         await store.finish()
     }

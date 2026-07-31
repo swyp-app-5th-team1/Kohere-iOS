@@ -8,10 +8,7 @@
 import ComposableArchitecture
 
 extension HomeFeature {
-    func handlePathAction(
-        _ action: StackActionOf<Path>,
-        state: inout State
-    ) -> Effect<Action> {
+    func handlePathAction(_ action: StackActionOf<Path>, state: inout State) -> Effect<Action> {
         switch action {
         case .element(id: _, action: .savedListings(.backButtonTapped)):
             _ = state.path.popLast()
@@ -29,26 +26,14 @@ extension HomeFeature {
             id: _,
             action: .listingDetail(
                 .delegate(
-                    .applicationRequested(
-                        listingID,
-                        listingTitle,
-                        roomOfferID,
-                        roomTypeName,
-                        roomPricingText
-                    )
+                    .applicationRequested(listingID, listingTitle, roomOfferID, roomTypeName, roomPricingText)
                 )
             )
         ):
             state.path.append(
                 .listingApplication(
-                    ListingApplicationFeature.State(
-                        listingID: listingID,
-                        listingTitle: listingTitle,
-                        roomOfferID: roomOfferID,
-                        roomTypeName: roomTypeName,
-                        roomPricingText: roomPricingText,
-                        appLanguage: state.appLanguage
-                    )
+                    ListingApplicationFeature.State(listingID: listingID, listingTitle: listingTitle, roomOfferID: roomOfferID,
+                                                    roomTypeName: roomTypeName, roomPricingText: roomPricingText, appLanguage: state.appLanguage)
                 )
             )
             return .none
@@ -74,10 +59,7 @@ extension HomeFeature {
         ):
             state.path.append(
                 .listingApplicationPrivacyWeb(
-                    ListingApplicationPrivacyWebFeature.State(
-                        section: section,
-                        appLanguage: state.appLanguage
-                    )
+                    ListingApplicationPrivacyWebFeature.State(section: section, appLanguage: state.appLanguage)
                 )
             )
             return .none
@@ -89,12 +71,7 @@ extension HomeFeature {
             state.path.removeAll()
             state.path.append(
                 .listingDetail(
-                    ListingDetailFeature.State(
-                        listingID: listingID,
-                        userType: state.userType,
-                        appLanguage: state.appLanguage,
-                        isApplicationDisabled: true
-                    )
+                    ListingDetailFeature.State(listingID: listingID, userType: state.userType, appLanguage: state.appLanguage, isApplicationDisabled: true)
                 )
             )
             return .none
@@ -107,26 +84,14 @@ extension HomeFeature {
             id: _,
             action: .savedListings(.delegate(.listingDetailRequested(listingID)))
         ):
-            state.path.append(
-                listingDetailState(
-                    listingID,
-                    userType: state.userType,
-                    appLanguage: state.appLanguage
-                )
-            )
+            state.path.append(listingDetailState(listingID, userType: state.userType, appLanguage: state.appLanguage))
             return .none
 
         case let .element(
             id: _,
             action: .recentlyViewedList(.delegate(.listingDetailRequested(listingID)))
         ):
-            state.path.append(
-                listingDetailState(
-                    listingID,
-                    userType: state.userType,
-                    appLanguage: state.appLanguage
-                )
-            )
+            state.path.append(listingDetailState(listingID, userType: state.userType, appLanguage: state.appLanguage))
             return .none
 
         case .element(id: _, action: .notifications(.backButtonTapped)):
@@ -161,17 +126,9 @@ extension HomeFeature {
         }
     }
 
-    private func listingDetailState(
-        _ listingID: String,
-        userType: UserType?,
-        appLanguage: AppLanguage
-    ) -> Path.State {
+    private func listingDetailState(_ listingID: String, userType: UserType?, appLanguage: AppLanguage) -> Path.State {
         .listingDetail(
-            ListingDetailFeature.State(
-                listingID: listingID,
-                userType: userType,
-                appLanguage: appLanguage
-            )
+            ListingDetailFeature.State(listingID: listingID, userType: userType, appLanguage: appLanguage)
         )
     }
 }
