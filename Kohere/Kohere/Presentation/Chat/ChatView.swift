@@ -22,10 +22,7 @@ struct ChatView: View {
         VStack(spacing: 8) {
             KohereNavigationBar(
                 left: .smallLogo,
-                center: .text(
-                    store.appLanguage.localized("chat.title"),
-                    style: .label1Semibold
-                )
+                center: .text(store.appLanguage.localized("chat.title"))
             )
             
             if store.isContentAvailable {

@@ -2,7 +2,7 @@
 //  OnboardingView.swift
 //  Kohere
 //
-//  Created by mandoo on 6/21/26.
+//  Created by soomin on 6/21/26.
 //
 
 import ComposableArchitecture

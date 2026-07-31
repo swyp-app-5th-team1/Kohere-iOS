@@ -2,7 +2,7 @@
 //  OnboardingFeature.swift
 //  Kohere
 //
-//  Created by mandoo on 6/21/26.
+//  Created by soomin on 6/21/26.
 //
 
 import ComposableArchitecture
@@ -33,26 +33,26 @@ struct OnboardingFeature {
 
             switch userType {
             case .tenant:
-                self.tenant = TenantOnboardingFeature.State(
-                    appLanguage: appLanguage,
-                    name: socialName ?? ""
-                )
+                self.tenant = TenantOnboardingFeature.State(appLanguage: appLanguage, name: socialName ?? "")
                 self.landlord = nil
             case .landlord:
                 self.tenant = nil
-                self.landlord = LandlordOnboardingFeature.State(
-                    name: socialName ?? ""
-                )
+                self.landlord = LandlordOnboardingFeature.State(name: socialName ?? "")
             }
         }
     }
 
     // MARK: - Action
 
+    enum Delegate: Equatable {
+        case completed(Auth)
+        case popupRequested(AppPopup)
+    }
+
     enum Action: Equatable {
         case tenant(TenantOnboardingFeature.Action)
         case landlord(LandlordOnboardingFeature.Action)
-        case onboardingResponse(Result<Auth, DataError>)
+        case delegate(Delegate)
     }
 
     // MARK: - Reducer Body
@@ -60,13 +60,17 @@ struct OnboardingFeature {
     var body: some Reducer<State, Action> {
         Reduce { _, action in
             switch action {
-            case let .tenant(.onboardingResponse(result)):
-                return .send(.onboardingResponse(result))
+            case let .tenant(.onboardingResponse(.success(auth))):
+                return .send(.delegate(.completed(auth)))
 
-            case let .landlord(.onboardingResponse(result)):
-                return .send(.onboardingResponse(result))
+            case let .landlord(.onboardingResponse(.success(auth))):
+                return .send(.delegate(.completed(auth)))
 
-            case .tenant, .landlord, .onboardingResponse:
+            case let .tenant(.popupRequested(popup)),
+                 let .landlord(.popupRequested(popup)):
+                return .send(.delegate(.popupRequested(popup)))
+
+            case .tenant, .landlord, .delegate:
                 return .none
             }
         }

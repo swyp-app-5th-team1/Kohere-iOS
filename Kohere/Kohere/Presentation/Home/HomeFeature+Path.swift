@@ -8,10 +8,7 @@
 import ComposableArchitecture
 
 extension HomeFeature {
-    func handlePathAction(
-        _ action: StackActionOf<Path>,
-        state: inout State
-    ) -> Effect<Action> {
+    func handlePathAction(_ action: StackActionOf<Path>, state: inout State) -> Effect<Action> {
         switch action {
         case .element(id: _, action: .savedListings(.backButtonTapped)):
             _ = state.path.popLast()
@@ -29,26 +26,14 @@ extension HomeFeature {
             id: _,
             action: .listingDetail(
                 .delegate(
-                    .applicationRequested(
-                        listingID,
-                        listingTitle,
-                        roomOfferID,
-                        roomTypeName,
-                        roomPricingText
-                    )
+                    .applicationRequested(listingID, listingTitle, roomOfferID, roomTypeName, roomPricingText)
                 )
             )
         ):
             state.path.append(
                 .listingApplication(
-                    ListingApplicationFeature.State(
-                        listingID: listingID,
-                        listingTitle: listingTitle,
-                        roomOfferID: roomOfferID,
-                        roomTypeName: roomTypeName,
-                        roomPricingText: roomPricingText,
-                        appLanguage: state.appLanguage
-                    )
+                    ListingApplicationFeature.State(listingID: listingID, listingTitle: listingTitle, roomOfferID: roomOfferID,
+                                                    roomTypeName: roomTypeName, roomPricingText: roomPricingText, appLanguage: state.appLanguage)
                 )
             )
             return .none
@@ -58,7 +43,17 @@ extension HomeFeature {
             action: .listingDetail(.delegate(.mapPreviewRequested(coordinate)))
         ):
             state.path.removeAll()
-            return .send(.listingMapPreviewRequested(coordinate))
+            return .send(.delegate(.listingMapPreviewRequested(coordinate)))
+
+        case .element(id: _, action: .listingDetail(.likeButtonTapped)) where state.userType == nil:
+            return .send(.delegate(.authenticationRequired))
+
+        case let .element(id: _, action: .listingDetail(.popupRequested(popup))):
+            return .send(.delegate(.popupRequested(popup)))
+
+        case let .element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))):
+            guard let listingID = state.path[id: id, case: \.listingDetail]?.listingID else { return .none }
+            return .send(.delegate(.favoriteStatusChanged(listingID: listingID, status: status)))
 
         case .element(id: _, action: .listingApplication(.backButtonTapped)):
             _ = state.path.popLast()
@@ -74,10 +69,7 @@ extension HomeFeature {
         ):
             state.path.append(
                 .listingApplicationPrivacyWeb(
-                    ListingApplicationPrivacyWebFeature.State(
-                        section: section,
-                        appLanguage: state.appLanguage
-                    )
+                    ListingApplicationPrivacyWebFeature.State(section: section, appLanguage: state.appLanguage)
                 )
             )
             return .none
@@ -89,45 +81,37 @@ extension HomeFeature {
             state.path.removeAll()
             state.path.append(
                 .listingDetail(
-                    ListingDetailFeature.State(
-                        listingID: listingID,
-                        userType: state.userType,
-                        appLanguage: state.appLanguage,
-                        isApplicationDisabled: true
-                    )
+                    ListingDetailFeature.State(listingID: listingID, userType: state.userType, appLanguage: state.appLanguage, isApplicationDisabled: true)
                 )
             )
             return .none
 
         case .element(id: _, action: .listingApplication(.delegate(.chatTabRequested))):
             state.path.removeAll()
-            return .send(.chatTabRequested)
+            return .send(.delegate(.chatTabRequested))
 
         case let .element(
             id: _,
             action: .savedListings(.delegate(.listingDetailRequested(listingID)))
         ):
-            state.path.append(
-                listingDetailState(
-                    listingID,
-                    userType: state.userType,
-                    appLanguage: state.appLanguage
-                )
-            )
+            state.path.append(listingDetailState(listingID, userType: state.userType, appLanguage: state.appLanguage))
             return .none
 
         case let .element(
             id: _,
             action: .recentlyViewedList(.delegate(.listingDetailRequested(listingID)))
         ):
-            state.path.append(
-                listingDetailState(
-                    listingID,
-                    userType: state.userType,
-                    appLanguage: state.appLanguage
-                )
-            )
+            state.path.append(listingDetailState(listingID, userType: state.userType, appLanguage: state.appLanguage))
             return .none
+
+        case let .element(
+            id: _,
+            action: .savedListings(.favoriteStatusResponse(listingID, .success(status)))
+        ), let .element(
+            id: _,
+            action: .recentlyViewedList(.favoriteStatusResponse(listingID, .success(status)))
+        ):
+            return .send(.delegate(.favoriteStatusChanged(listingID: listingID, status: status)))
 
         case .element(id: _, action: .notifications(.backButtonTapped)):
             _ = state.path.popLast()
@@ -146,7 +130,7 @@ extension HomeFeature {
             return .none
 
         case let .element(id: _, action: .chatBot(.mapRequested(request))):
-            return .send(.mapRequested(request))
+            return .send(.delegate(.mapRequested(request)))
 
         case .element(id: _, action: .search(.bannerTapped)):
             state.path.append(.chatBot(ChatBotFeature.State()))
@@ -154,24 +138,19 @@ extension HomeFeature {
 
         case let .element(id: _, action: .search(.placeResultTapped(placeResult))):
             state.path.removeAll()
-            return .send(.mapPlaceSearchRequested(placeResult))
+            return .send(.delegate(.mapPlaceSearchRequested(placeResult)))
+
+        case let .element(id: _, action: .search(.popupRequested(popup))):
+            return .send(.delegate(.popupRequested(popup)))
 
         default:
             return .none
         }
     }
 
-    private func listingDetailState(
-        _ listingID: String,
-        userType: UserType?,
-        appLanguage: AppLanguage
-    ) -> Path.State {
+    private func listingDetailState(_ listingID: String, userType: UserType?, appLanguage: AppLanguage) -> Path.State {
         .listingDetail(
-            ListingDetailFeature.State(
-                listingID: listingID,
-                userType: userType,
-                appLanguage: appLanguage
-            )
+            ListingDetailFeature.State(listingID: listingID, userType: userType, appLanguage: appLanguage)
         )
     }
 }

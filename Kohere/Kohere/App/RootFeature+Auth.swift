@@ -212,6 +212,7 @@ extension RootFeature {
         state.more.selectedLanguage = appLanguage
 
         return .merge(
+            cancelHomeEffects(),
             .cancel(id: "RootFeature.fetchCurrentUser"),
             .cancel(id: SearchFeatureCancelID.placeSearch),
             .cancel(id: MapEffectID.exchangeRate),
@@ -225,4 +226,7 @@ extension RootFeature {
         )
     }
 
+    func cancelHomeEffects() -> Effect<Action> {
+        .send(.home(.cancelEffects))
+    }
 }

@@ -72,7 +72,9 @@ struct SearchView: View {
                         guard store.searchText != text else { return }
                         store.send(.searchTextChanged(text))
                     }
-                )
+                ),
+                prompt: Text("search.placeholder")
+                    .foregroundStyle(.coolNeutral20)
             )
                 .kohereTextStyle(.label1Medium)
                 .foregroundStyle(.coolNeutral80)

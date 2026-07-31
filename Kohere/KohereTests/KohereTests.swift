@@ -1353,3 +1353,285 @@ final class ListingDetailLoadFailureTests: XCTestCase {
         }
     }
 }
+
+@MainActor
+final class OnboardingRequestSafetyTests: XCTestCase {
+    func testLandlordIgnoresVerificationResponseForPreviousPhoneNumber() async {
+        var initialState = LandlordOnboardingFeature.State()
+        initialState.phoneNumber = "01099998888"
+        initialState.phoneVerificationCode = "654321"
+
+        let store = TestStore(initialState: initialState) {
+            LandlordOnboardingFeature()
+        }
+
+        await store.send(
+            .confirmPhoneVerificationCodeResponse(
+                requestedPhoneNumber: "01011112222",
+                requestedCode: "123456",
+                .success(
+                    PhoneVerification(
+                        phoneNumber: "01011112222",
+                        verified: true
+                    )
+                )
+            )
+        )
+
+        XCTAssertFalse(store.state.isPhoneVerified)
+    }
+
+    func testLandlordAppliesVerificationResponseForCurrentInput() async {
+        var initialState = LandlordOnboardingFeature.State()
+        initialState.phoneNumber = "01011112222"
+        initialState.phoneVerificationCode = "123456"
+        initialState.isPhoneVerificationRequesting = true
+
+        let store = TestStore(initialState: initialState) {
+            LandlordOnboardingFeature()
+        }
+
+        await store.send(
+            .confirmPhoneVerificationCodeResponse(
+                requestedPhoneNumber: "01011112222",
+                requestedCode: "123456",
+                .success(
+                    PhoneVerification(
+                        phoneNumber: "01011112222",
+                        verified: true
+                    )
+                )
+            )
+        ) {
+            $0.isPhoneVerificationRequesting = false
+            $0.isPhoneVerified = true
+        }
+    }
+
+    func testTenantDoesNotSubmitOnboardingWhileRequestIsInFlight() async {
+        var initialState = TenantOnboardingFeature.State()
+        initialState.currentStep = .details
+        initialState.selectedMonth = DropdownMenuOption(option: "JAN")
+        initialState.selectedDay = DropdownMenuOption(option: "1")
+        initialState.selectedYear = DropdownMenuOption(option: "2000")
+        initialState.selectedVisa = .studentsTrainees
+        initialState.selectedNationality = DropdownMenuOption(option: "United States")
+        initialState.selectedGender = .female
+        initialState.isOnboardingSubmitting = true
+
+        let store = TestStore(initialState: initialState) {
+            TenantOnboardingFeature()
+        }
+
+        XCTAssertFalse(store.state.isNextButtonEnabled)
+        await store.send(.onboardingCompleted)
+    }
+
+    func testLandlordDoesNotSubmitOnboardingWhileRequestIsInFlight() async {
+        var initialState = LandlordOnboardingFeature.State()
+        initialState.currentStep = .phoneVerification
+        initialState.selectedMonth = DropdownMenuOption(option: "JAN")
+        initialState.selectedDay = DropdownMenuOption(option: "1")
+        initialState.selectedYear = DropdownMenuOption(option: "2000")
+        initialState.phoneNumber = "01011112222"
+        initialState.isPhoneVerified = true
+        initialState.isOnboardingSubmitting = true
+
+        let store = TestStore(initialState: initialState) {
+            LandlordOnboardingFeature()
+        }
+
+        XCTAssertFalse(store.state.isNextButtonEnabled)
+        await store.send(.onboardingCompleted)
+    }
+}
+
+@MainActor
+final class OnboardingErrorPopupTests: XCTestCase {
+    func testOnboardingForwardsChildPopupAsDelegate() async {
+        let popup = OnboardingErrorPopup.make(
+            context: .completeProfile,
+            language: .english
+        )
+        let store = TestStore(
+            initialState: OnboardingFeature.State(
+                userType: .tenant,
+                appLanguage: .english
+            )
+        ) {
+            OnboardingFeature()
+        }
+
+        await store.send(.tenant(.popupRequested(popup)))
+        await store.receive(.delegate(.popupRequested(popup)))
+    }
+
+    func testTenantCompletionFailureRequestsLocalizedPopup() async {
+        var initialState = TenantOnboardingFeature.State(appLanguage: .english)
+        initialState.isOnboardingSubmitting = true
+        let popup = OnboardingErrorPopup.make(
+            context: .completeProfile,
+            language: .english
+        )
+        let store = TestStore(initialState: initialState) {
+            TenantOnboardingFeature()
+        }
+
+        await store.send(.onboardingResponse(.failure(.emptyResponse))) {
+            $0.isOnboardingSubmitting = false
+        }
+        await store.receive(.popupRequested(popup))
+    }
+
+    func testLandlordPhoneSendFailureRequestsLocalizedPopup() async {
+        var initialState = LandlordOnboardingFeature.State()
+        initialState.phoneNumber = "01011112222"
+        initialState.isPhoneVerificationCodeRequesting = true
+        let popup = OnboardingErrorPopup.make(
+            context: .sendPhoneVerificationCode,
+            language: .korean
+        )
+        let store = TestStore(initialState: initialState) {
+            LandlordOnboardingFeature()
+        }
+
+        await store.send(
+            .sendPhoneVerificationCodeResponse(
+                "01011112222",
+                .failure(.transport(message: "offline"))
+            )
+        ) {
+            $0.isPhoneVerificationCodeRequesting = false
+        }
+        await store.receive(.popupRequested(popup))
+    }
+
+    func testInvalidPhoneCodeKeepsInlineErrorWithoutPopup() async {
+        var initialState = LandlordOnboardingFeature.State()
+        initialState.phoneNumber = "01011112222"
+        initialState.phoneVerificationCode = "123456"
+        initialState.isPhoneVerificationRequesting = true
+        let store = TestStore(initialState: initialState) {
+            LandlordOnboardingFeature()
+        }
+
+        await store.send(
+            .confirmPhoneVerificationCodeResponse(
+                requestedPhoneNumber: "01011112222",
+                requestedCode: "123456",
+                .failure(
+                    .serverError(
+                        code: "AUTH_PHONE_VERIFICATION_FAILED",
+                        message: "invalid code"
+                    )
+                )
+            )
+        ) {
+            $0.isPhoneVerificationRequesting = false
+            $0.phoneVerificationCodeErrorMessage = "인증 코드가 올바르지 않거나 만료됐어요. 다시 시도해주세요."
+        }
+    }
+
+    func testOnboardingPopupRequestIsForwardedToRoot() async {
+        let popup = OnboardingErrorPopup.make(
+            context: .completeProfile,
+            language: .english
+        )
+        let store = TestStore(
+            initialState: RootFeature.State(
+                appLanguage: .english,
+                isAuthLoading: false
+            )
+        ) {
+            RootFeature()
+        }
+
+        await store.send(.onboarding(.delegate(.popupRequested(popup)))) {
+            $0.popup = popup
+        }
+    }
+
+    func testAuthenticationSaveFailureRequestsLocalizedPopup() async {
+        let popup = OnboardingErrorPopup.make(
+            context: .saveAuthentication,
+            language: .english
+        )
+        let store = TestStore(
+            initialState: RootFeature.State(
+                appLanguage: .english,
+                isAuthLoading: false
+            )
+        ) {
+            RootFeature()
+        }
+
+        await store.send(.saveAuthResponse(.failure(DataError.emptyResponse))) {
+            $0.popup = popup
+        }
+    }
+}
+
+@MainActor
+final class HomeEffectCancellationTests: XCTestCase {
+    func testGuestFavoriteNavigationRequestsAuthenticationThroughDelegate() async {
+        let store = TestStore(initialState: HomeFeature.State()) {
+            HomeFeature()
+        }
+
+        await store.send(.navigationHeartTapped)
+        await store.receive(\.delegate.authenticationRequired)
+    }
+
+    func testCancelEffectsStopsInFlightRecentListingsRequest() async {
+        let spy = HomeCancellationSpy()
+        var initialState = HomeFeature.State(userType: .tenant)
+        initialState.krwToUSDExchangeRate = KRWToUSDExchangeRate(usdPerKRW: 0.0007)
+        initialState.isQuizLoaded = true
+        initialState.isLivingGuidesLoaded = true
+        let store = TestStore(initialState: initialState) {
+            HomeFeature()
+        } withDependencies: {
+            $0.listingClient = ListingClient(
+                fetchListings: { _ in fatalError("Unexpected fetchListings") },
+                fetchDetail: { _ in fatalError("Unexpected fetchDetail") },
+                fetchFavoriteListings: { _, _ in fatalError("Unexpected fetchFavoriteListings") },
+                fetchRecentListings: { try await spy.fetchRecentListings() },
+                addFavorite: { _ in fatalError("Unexpected addFavorite") },
+                removeFavorite: { _ in fatalError("Unexpected removeFavorite") },
+                createBooking: { _, _ in fatalError("Unexpected createBooking") }
+            )
+        }
+
+        await store.send(.onAppear)
+        await store.receive(\.recentlyViewed.onAppear) {
+            $0.isRecentlyViewedLoading = true
+            $0.recentlyViewedErrorMessage = nil
+        }
+        await store.receive(\.quiz.onAppear)
+        await store.receive(\.livingGuide.onAppear)
+        await fulfillment(of: [spy.started], timeout: 1)
+
+        await store.send(.cancelEffects)
+        await store.receive(\.recentlyViewed.cancelEffects)
+        await store.receive(\.quiz.cancelEffects)
+        await store.receive(\.livingGuide.cancelEffects)
+        await fulfillment(of: [spy.cancelled], timeout: 1)
+        await store.finish()
+    }
+}
+
+private final class HomeCancellationSpy: @unchecked Sendable {
+    let started = XCTestExpectation(description: "Home request started")
+    let cancelled = XCTestExpectation(description: "Home request cancelled")
+
+    func fetchRecentListings() async throws -> [Listing] {
+        started.fulfill()
+
+        return try await withTaskCancellationHandler {
+            try await Task.sleep(nanoseconds: UInt64.max)
+            return []
+        } onCancel: {
+            self.cancelled.fulfill()
+        }
+    }
+}

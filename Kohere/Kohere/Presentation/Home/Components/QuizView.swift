@@ -12,7 +12,7 @@ struct QuizView: View {
     
     // MARK: - Property
     
-    let store: StoreOf<HomeFeature>
+    let store: StoreOf<HomeQuizFeature>
     
     // MARK: - Body
     
@@ -37,7 +37,7 @@ struct QuizView: View {
                         let style = store.quiz.optionStyle(for: index)
                         
                         Button {
-                            store.send(.quizOptionTapped(index: index))
+                            store.send(.optionTapped(index: index))
                         } label: {
                             HStack(spacing: 8) {
                                 Text(optionText)
@@ -62,7 +62,7 @@ struct QuizView: View {
                             )
                             .cornerRadius(8)
                         }
-                        .disabled(!store.isQuizLoaded || store.quiz.hasAnswered || store.isQuizAnswerSubmitting)
+                        .disabled(!store.isLoaded || store.quiz.hasAnswered || store.isAnswerSubmitting)
                     }
                 }
 

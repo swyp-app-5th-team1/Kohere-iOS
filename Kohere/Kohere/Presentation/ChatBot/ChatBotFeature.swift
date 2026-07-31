@@ -42,6 +42,13 @@ struct ChatBotFeature {
             guard let maxCount = currentDiagnosis?.maxSelectCount else { return false }
             return !selectedOptionCodes.isEmpty && selectedOptionCodes.count <= maxCount
         }
+
+        var disabledMultiSelectOptionCodes: Set<String> {
+            guard let diagnosis = currentDiagnosis else { return [] }
+            if isAnswerSaving { return Set(diagnosis.options.map(\.id)) }
+            guard selectedOptionCodes.count >= diagnosis.maxSelectCount else { return [] }
+            return Set(diagnosis.options.map(\.id)).subtracting(selectedOptionCodes)
+        }
         
         var isFindButtonEnabled: Bool {
             completedDiagnosisID != nil
