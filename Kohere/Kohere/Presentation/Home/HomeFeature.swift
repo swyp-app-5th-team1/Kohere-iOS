@@ -87,6 +87,7 @@ struct HomeFeature {
         case listingMapPreviewRequested(MapCoordinate)
         case chatTabRequested
         case onAppear
+        case cancelEffects
         case recentListingsResponse(Result<[Listing], DataError>)
         case exchangeRateResponse(Result<KRWToUSDExchangeRate, Error>)
         case randomQuizResponse(Result<Quiz, DataError>)
@@ -128,7 +129,8 @@ struct HomeFeature {
                         } catch {
                             await send(.recentListingsResponse(.failure(.from(error))))
                         }
-                    })
+                    }
+                    .cancellable(id: HomeEffectID.recentListings, cancelInFlight: true))
                 }
 
                 if state.krwToUSDExchangeRate == nil && !state.isExchangeRateLoading {
@@ -141,7 +143,8 @@ struct HomeFeature {
                         } catch {
                             await send(.exchangeRateResponse(.failure(error)))
                         }
-                    })
+                    }
+                    .cancellable(id: HomeEffectID.exchangeRate, cancelInFlight: true))
                 }
 
                 if state.canShowLivingContent,
@@ -179,6 +182,9 @@ struct HomeFeature {
                 }
 
                 return .merge(effects)
+
+            case .cancelEffects:
+                return .merge(HomeEffectID.all.map { .cancel(id: $0) })
                 
             case let .randomQuizResponse(.success(quiz)):
                 state.quiz = QuizModel(entity: quiz)
@@ -212,6 +218,7 @@ struct HomeFeature {
                         await send(.quizAnswerResponse(.failure(.from(error))))
                     }
                 }
+                .cancellable(id: HomeEffectID.quizAnswer, cancelInFlight: true)
 
             case let .quizAnswerResponse(.success(result)):
                 state.quiz.apply(answerResult: result)
@@ -368,6 +375,7 @@ struct HomeFeature {
                         await send(.favoriteStatusResponse(listingID: id, .failure(.from(error))))
                     }
                 }
+                .cancellable(id: HomeEffectID.favorite)
 
             case let .favoriteStatusResponse(listingID, .success(status)):
                 state.favoriteUpdatingIDs.remove(listingID)
@@ -397,8 +405,14 @@ struct HomeFeature {
 }
 
 private enum HomeEffectID {
+    static let recentListings = "HomeFeature.recentListings"
+    static let exchangeRate = "HomeFeature.exchangeRate"
     static let quiz = "HomeFeature.quiz"
+    static let quizAnswer = "HomeFeature.quizAnswer"
     static let lifeTips = "HomeFeature.lifeTips"
+    static let favorite = "HomeFeature.favorite"
+
+    static let all = [recentListings, exchangeRate, quiz, quizAnswer, lifeTips, favorite]
 }
 
 extension HomeFeature.Path.State: Equatable {}

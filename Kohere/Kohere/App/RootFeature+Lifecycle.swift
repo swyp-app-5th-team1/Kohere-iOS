@@ -117,7 +117,7 @@ extension RootFeature {
             state = State(appLanguage: .english, isAuthLoading: false, isSplashMinimumDurationElapsed: true)
             state.isAuthenticationFlowPresented = true
             applyAppLanguage(.english, state: &state)
-            return .cancel(id: "RootFeature.fetchCurrentUser")
+            return .merge(cancelHomeEffects(), .cancel(id: "RootFeature.fetchCurrentUser"))
 
         case .mainTabAppeared:
             return fetchCurrentUserIfNeeded(state: &state)
@@ -132,8 +132,8 @@ extension RootFeature {
             if user.userType == .landlord { try? userDefaultsClient.save(AppLanguage.korean.rawValue, for: .appLanguage) }
             if let language, language != state.appLanguage {
                 try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
-                resetMainContent(language: language, userProfile: user, selectedTab: state.selectedTab, state: &state)
-                return .merge(.send(.home(.onAppear)), .send(.more(.onAppear)))
+                let cancellation = resetMainContent(language: language, userProfile: user, selectedTab: state.selectedTab, state: &state)
+                return .concatenate(cancellation, .merge(.send(.home(.onAppear)), .send(.more(.onAppear))))
             }
             return .send(.more(.userProfileUpdated(user)))
 
@@ -186,8 +186,8 @@ extension RootFeature {
         case let .onboardingLanguageUpdateResponse(language, .success(userProfile)):
             try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
             state.isAuthenticationFlowPresented = false
-            resetMainContent(language: language, userProfile: userProfile, selectedTab: state.selectedTab, state: &state)
-            return .merge(.send(.home(.onAppear)), .send(.more(.onAppear)))
+            let cancellation = resetMainContent(language: language, userProfile: userProfile, selectedTab: state.selectedTab, state: &state)
+            return .concatenate(cancellation, .merge(.send(.home(.onAppear)), .send(.more(.onAppear))))
 
         case .onboardingLanguageUpdateResponse(_, .failure):
             state.isAuthenticationFlowPresented = false

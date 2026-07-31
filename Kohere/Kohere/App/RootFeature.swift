@@ -96,6 +96,11 @@ struct RootFeature {
                 return presentAuthenticationGateIfNeeded(state: &state)
 
             case .saveAuthResponse(.failure):
+                state.popup = OnboardingErrorPopup.make(context: .saveAuthentication, language: state.appLanguage)
+                return .none
+
+            case let .onboarding(.popupRequested(popup)):
+                state.popup = popup
                 return .none
 
             case let .home(.mapRequested(request)):
@@ -230,12 +235,9 @@ struct RootFeature {
                    state.appLanguage != .korean {
                     try? userDefaultsClient.save(AppLanguage.korean.rawValue, for: .appLanguage)
                     let selectedTab = state.selectedTab
-                    resetMainContent(language: .korean,
-                        userProfile: userProfile,
-                        selectedTab: selectedTab,
-                        state: &state
-                    )
-                    return .merge(.send(.home(.onAppear)), .send(.more(.onAppear)))
+                    let cancellation = resetMainContent(language: .korean, userProfile: userProfile,
+                                                        selectedTab: selectedTab, state: &state)
+                    return .concatenate(cancellation, .merge(.send(.home(.onAppear)), .send(.more(.onAppear))))
                 }
 
                 state.currentUser = userProfile
@@ -255,14 +257,8 @@ struct RootFeature {
             case let .more(.languageUpdateResponse(language, .success(userProfile))):
                 let resolvedLanguage = userProfile.userType == .landlord ? AppLanguage.korean : language
                 try? userDefaultsClient.save(resolvedLanguage.rawValue, for: .appLanguage)
-                resetMainContent(language: resolvedLanguage,
-                    userProfile: userProfile,
-                    state: &state
-                )
-                return .merge(
-                    .send(.home(.onAppear)),
-                    .send(.more(.onAppear))
-                )
+                let cancellation = resetMainContent(language: resolvedLanguage, userProfile: userProfile, state: &state)
+                return .concatenate(cancellation, .merge(.send(.home(.onAppear)), .send(.more(.onAppear))))
 
             case .more(.logoutConfirmed):
                 guard !state.isLogoutRequesting else { return .none }
@@ -285,11 +281,7 @@ struct RootFeature {
             case let .logoutResponse(.failure(error)):
                 if case LogoutError.localAuthCleanupFailed = error {
                     state.isLogoutRequesting = false
-                    state.popup = .notice(
-                        AppPopup.Notice(
-                            message: state.appLanguage.localized("settings.logout.failure")
-                        )
-                    )
+                    state.popup = .notice(AppPopup.Notice(message: state.appLanguage.localized("settings.logout.failure")))
                     return .none
                 }
 
@@ -325,11 +317,7 @@ struct RootFeature {
 
             case .deleteAccountResponse(.failure):
                 state.isDeleteAccountRequesting = false
-                state.popup = .notice(
-                    AppPopup.Notice(
-                        message: state.appLanguage.localized("settings.withdrawal.failure")
-                    )
-                )
+                state.popup = .notice(AppPopup.Notice(message: state.appLanguage.localized("settings.withdrawal.failure")))
                 return .none
 
             case .deleteAccountLocalCleanupResponse(.success):
@@ -352,32 +340,20 @@ extension RootFeature {
         guard state.authInfo?.onboardingRequired != false else { return .none }
 
         state.popup = .action(
-            AppPopup.Action(
-                message: state.appLanguage.localized("authGate.message"),
-                primaryTitle: state.appLanguage.localized("authGate.signIn"),
-                secondaryTitle: state.appLanguage.localized("authGate.notNow"),
-                primaryRoute: .signIn,
-                secondaryRoute: returnsToHomeOnDismiss ? .home : nil
-            )
+            AppPopup.Action(message: state.appLanguage.localized("authGate.message"), primaryTitle: state.appLanguage.localized("authGate.signIn"),
+                            secondaryTitle: state.appLanguage.localized("authGate.notNow"), primaryRoute: .signIn, secondaryRoute: returnsToHomeOnDismiss ? .home : nil)
         )
         return .none
     }
 
-    func resetMainContent(
-        language: AppLanguage,
-        userProfile: UserProfile,
-        selectedTab: AppTab = .more,
-        state: inout State
-    ) {
+    @discardableResult
+    func resetMainContent(language: AppLanguage, userProfile: UserProfile, selectedTab: AppTab = .more, state: inout State) -> Effect<Action> {
         state.appLanguage = language
         state.currentUser = userProfile
         state.selectedTab = selectedTab
         state.popup = nil
 
-        state.home = HomeFeature.State(
-            userType: userProfile.userType,
-            appLanguage: language
-        )
+        state.home = HomeFeature.State(userType: userProfile.userType, appLanguage: language)
         state.community = CommunityFeature.State()
 
         state.map = MapFeature.State(appLanguage: language)
@@ -390,5 +366,7 @@ extension RootFeature {
         state.more.userType = userProfile.userType
         state.more.userProfile = userProfile
         state.more.selectedLanguage = language
+
+        return cancelHomeEffects()
     }
 }
