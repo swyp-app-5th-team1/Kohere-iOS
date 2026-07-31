@@ -134,10 +134,7 @@ struct LandlordOnboardingFeature {
                         await send(.sendPhoneVerificationCodeResponse(phoneNumber, .failure(DataError.from(error))))
                     }
                 }
-                .cancellable(
-                    id: LandlordOnboardingEffectID.sendPhoneVerificationCode,
-                    cancelInFlight: true
-                )
+                .cancellable(id: LandlordOnboardingEffectID.sendPhoneVerificationCode, cancelInFlight: true)
                 
             case let .sendPhoneVerificationCodeResponse(requestedPhoneNumber, .success):
                 guard state.normalizedPhoneNumber == requestedPhoneNumber else {
@@ -157,9 +154,7 @@ struct LandlordOnboardingFeature {
                     return .none
                 }
                 state.isPhoneVerificationCodeRequesting = false
-                return .send(
-                    .popupRequested(OnboardingErrorPopup.make(context: .sendPhoneVerificationCode, language: .korean))
-                )
+                return .send(.popupRequested(OnboardingErrorPopup.make(context: .sendPhoneVerificationCode, language: .korean)))
                 
             case .confirmPhoneVerificationCodeTapped:
                 let trimmedCode = state.phoneVerificationCode.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -193,11 +188,7 @@ struct LandlordOnboardingFeature {
                 state.phoneVerificationCodeErrorMessage = response.verified ? nil : "인증 코드가 올바르지 않아요. 다시 시도해주세요."
                 return .none
                 
-            case let .confirmPhoneVerificationCodeResponse(
-                requestedPhoneNumber,
-                requestedCode,
-                .failure(error)
-            ):
+            case let .confirmPhoneVerificationCodeResponse(requestedPhoneNumber, requestedCode, .failure(error)):
                 guard state.normalizedPhoneNumber == requestedPhoneNumber,
                       state.phoneVerificationCode == requestedCode else {
                     return .none
@@ -207,9 +198,7 @@ struct LandlordOnboardingFeature {
                     state.phoneVerificationCodeErrorMessage = "인증 코드가 올바르지 않거나 만료됐어요. 다시 시도해주세요."
                     return .none
                 }
-                return .send(
-                    .popupRequested(OnboardingErrorPopup.make(context: .verifyPhone, language: .korean))
-                )
+                return .send(.popupRequested(OnboardingErrorPopup.make(context: .verifyPhone, language: .korean)))
                 
             case .onboardingCompleted:
                 guard !state.isOnboardingSubmitting,
@@ -226,10 +215,7 @@ struct LandlordOnboardingFeature {
                         await send(.onboardingResponse(.failure(DataError.from(error))))
                     }
                 }
-                .cancellable(
-                    id: LandlordOnboardingEffectID.completeOnboarding,
-                    cancelInFlight: true
-                )
+                .cancellable(id: LandlordOnboardingEffectID.completeOnboarding, cancelInFlight: true)
                 
             case .onboardingResponse(.success):
                 state.isOnboardingSubmitting = false
@@ -237,9 +223,7 @@ struct LandlordOnboardingFeature {
                 
             case .onboardingResponse(.failure):
                 state.isOnboardingSubmitting = false
-                return .send(
-                    .popupRequested(OnboardingErrorPopup.make(context: .completeProfile, language: .korean))
-                )
+                return .send(.popupRequested(OnboardingErrorPopup.make(context: .completeProfile, language: .korean)))
 
             case .popupRequested:
                 return .none

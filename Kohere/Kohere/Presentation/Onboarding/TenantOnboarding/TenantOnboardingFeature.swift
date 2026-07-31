@@ -107,10 +107,7 @@ struct TenantOnboardingFeature {
                         await send(.onboardingResponse(.failure(DataError.from(error))))
                     }
                 }
-                .cancellable(
-                    id: TenantOnboardingEffectID.completeOnboarding,
-                    cancelInFlight: true
-                )
+                .cancellable(id: TenantOnboardingEffectID.completeOnboarding, cancelInFlight: true)
 
             case .onboardingResponse(.success):
                 state.isOnboardingSubmitting = false
@@ -118,9 +115,7 @@ struct TenantOnboardingFeature {
 
             case .onboardingResponse(.failure):
                 state.isOnboardingSubmitting = false
-                return .send(
-                    .popupRequested(OnboardingErrorPopup.make(context: .completeProfile, language: state.appLanguage))
-                )
+                return .send(.popupRequested(OnboardingErrorPopup.make(context: .completeProfile, language: state.appLanguage)))
 
             case .popupRequested:
                 return .none

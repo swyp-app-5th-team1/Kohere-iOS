@@ -13,7 +13,6 @@ private extension HomeLivingGuideFeature {
         static let lifeTips = "HomeFeature.lifeTips"
     }
 }
-
 @Reducer
 struct HomeLivingGuideFeature {
     @Dependency(\.lifeTipClient)
@@ -84,4 +83,3 @@ struct HomeLivingGuideFeature {
         }
     }
 }
-

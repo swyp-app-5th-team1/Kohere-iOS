@@ -158,7 +158,7 @@ extension RootFeature {
             state.onboarding = OnboardingFeature.State(userType: userType, appLanguage: language, socialName: authInfo.name)
             return .none
 
-        case let .onboarding(.onboardingResponse(.success(auth))):
+        case let .onboarding(.delegate(.completed(auth))):
             let keychainClient = keychainClient
             return .run { send in
                 try keychainClient.save(auth, for: .auth)

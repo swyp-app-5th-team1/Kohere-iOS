@@ -25,7 +25,7 @@ struct HomeFeature {
         case livingGuideDetail(LivingGuideDetailFeature)
         case search(SearchFeature)
     }
-    
+
     // MARK: - State
     
     @ObservableState
@@ -49,13 +49,21 @@ struct HomeFeature {
     }
     
     // MARK: - Action
-    
-    enum Action {
-        case path(StackActionOf<Path>)
+
+    @CasePathable
+    enum Delegate {
+        case authenticationRequired
         case mapRequested(MapEntryRequest)
         case mapPlaceSearchRequested(SearchPlaceResult)
         case listingMapPreviewRequested(MapCoordinate)
         case chatTabRequested
+        case popupRequested(AppPopup)
+        case favoriteStatusChanged(listingID: String, status: ListingFavoriteStatus)
+    }
+
+    enum Action {
+        case path(StackActionOf<Path>)
+        case delegate(Delegate)
         case onAppear
         case cancelEffects
         case recentlyViewed(HomeRecentlyViewedFeature.Action)
@@ -105,26 +113,26 @@ struct HomeFeature {
                 return handlePathAction(pathAction, state: &state)
                 
             case .navigationSearchTapped:
-                state.path.append(.search(SearchFeature.initialState(
-                    userDefaultsClient: userDefaultsClient,
-                    appLanguage: state.appLanguage
-                )))
+                state.path.append(.search(SearchFeature.initialState(userDefaultsClient: userDefaultsClient, appLanguage: state.appLanguage)))
                 return .none
                 
             case .navigationHeartTapped:
+                guard state.userType != nil else {
+                    return .send(.delegate(.authenticationRequired))
+                }
                 guard state.canUseFavoriteFeatures else { return .none }
                 state.path.append(
                     .savedListings(
-                        SavedListingsFeature.State(
-                            userType: state.userType,
-                            appLanguage: state.appLanguage,
-                            krwToUSDExchangeRate: state.krwToUSDExchangeRate
-                        )
+                        SavedListingsFeature.State(userType: state.userType, appLanguage: state.appLanguage,
+                                                   krwToUSDExchangeRate: state.krwToUSDExchangeRate)
                     )
                 )
                 return .none
                 
             case .navigationNoticeTapped:
+                guard state.userType != nil else {
+                    return .send(.delegate(.authenticationRequired))
+                }
                 state.path.append(.notifications(NotificationsFeature.State()))
                 return .none
                 
@@ -133,25 +141,25 @@ struct HomeFeature {
                 return .none
                 
             case .seeAllListingsTapped:
+                guard state.userType != nil else {
+                    return .send(.delegate(.authenticationRequired))
+                }
                 guard state.canUseFavoriteFeatures else { return .none }
                 state.path.append(
                     .recentlyViewedList(
-                        RecentlyViewedFeature.State(userType: state.userType, appLanguage: state.appLanguage, krwToUSDExchangeRate: state.krwToUSDExchangeRate)
+                        RecentlyViewedFeature.State(userType: state.userType, appLanguage: state.appLanguage,
+                                                    krwToUSDExchangeRate: state.krwToUSDExchangeRate)
                     )
                 )
                 return .none
                 
             case .browseListingsTapped:
-                return .send(.mapRequested(.browseListings))
+                return .send(.delegate(.mapRequested(.browseListings)))
                 
             case let .cardTapped(id):
                 state.path.append(
                     .listingDetail(
-                        ListingDetailFeature.State(
-                            listingID: id,
-                            userType: state.userType,
-                            appLanguage: state.appLanguage
-                        )
+                        ListingDetailFeature.State(listingID: id, userType: state.userType, appLanguage: state.appLanguage)
                     )
                 )
                 return .none
@@ -164,10 +172,16 @@ struct HomeFeature {
                 state.path.append(.livingGuideDetail(LivingGuideDetailFeature.State(guide: guide)))
                 return .none
 
+            case .recentlyViewed(.likeButtonTapped) where state.userType == nil:
+                return .send(.delegate(.authenticationRequired))
+
+            case let .recentlyViewed(.favoriteStatusResponse(listingID, .success(status))):
+                return .send(.delegate(.favoriteStatusChanged(listingID: listingID, status: status)))
+
             case .recentlyViewed, .quiz, .livingGuide:
                 return .none
 
-            case .mapRequested, .mapPlaceSearchRequested, .listingMapPreviewRequested, .chatTabRequested:
+            case .delegate:
                 return .none
             }
         }

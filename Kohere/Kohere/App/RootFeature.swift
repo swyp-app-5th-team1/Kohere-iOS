@@ -76,22 +76,18 @@ struct RootFeature {
                  .currentUserResponse,
                  .login(.loginAuthStored),
                  .login(.userTypeSelected),
-                 .onboarding(.onboardingResponse(.success)),
+                 .onboarding(.delegate(.completed)),
                  .saveAuthResponse(.success),
                  .onboardingLanguageUpdateResponse:
                 return reduceLifecycle(action, state: &state)
 
-            case .home(.navigationHeartTapped),
-                 .home(.navigationNoticeTapped),
-                 .home(.seeAllListingsTapped),
-                 .home(.recentlyViewed(.likeButtonTapped)),
+            case .home(.delegate(.authenticationRequired)),
                  .map(.listingLikeButtonTapped),
                  .more(.savedListingsTapped),
                  .more(.recentlyViewedListingsTapped):
                 return presentAuthenticationGateIfNeeded(state: &state)
 
-            case .home(.path(.element(id: _, action: .listingDetail(.likeButtonTapped)))),
-                 .map(.path(.element(id: _, action: .listingDetail(.likeButtonTapped)))),
+            case .map(.path(.element(id: _, action: .listingDetail(.likeButtonTapped)))),
                  .more(.path(.element(id: _, action: .listingDetail(.likeButtonTapped)))):
                 return presentAuthenticationGateIfNeeded(state: &state)
 
@@ -99,46 +95,33 @@ struct RootFeature {
                 state.popup = OnboardingErrorPopup.make(context: .saveAuthentication, language: state.appLanguage)
                 return .none
 
-            case let .onboarding(.popupRequested(popup)):
+            case let .onboarding(.delegate(.popupRequested(popup))):
                 state.popup = popup
                 return .none
 
-            case let .home(.mapRequested(request)):
+            case let .home(.delegate(.mapRequested(request))):
                 state.home.path.removeAll()
                 return openMap(request: request, state: &state)
 
-            case let .home(.mapPlaceSearchRequested(placeResult)):
+            case let .home(.delegate(.mapPlaceSearchRequested(placeResult))):
                 state.home.path.removeAll()
                 state.selectedTab = .map
                 return .send(.map(.placeSearchResultSelected(placeResult)))
 
-            case let .home(.listingMapPreviewRequested(coordinate)):
+            case let .home(.delegate(.listingMapPreviewRequested(coordinate))):
                 state.home.path.removeAll()
                 return openListingMapPreview(coordinate: coordinate, state: &state)
 
-            case .home(.chatTabRequested):
+            case .home(.delegate(.chatTabRequested)):
                 state.home.path.removeAll()
                 state.selectedTab = .chat
                 return .none
 
-            case let .home(.path(.element(id: _, action: .search(.popupRequested(popup))))):
+            case let .home(.delegate(.popupRequested(popup))):
                 state.popup = popup
                 return .none
 
-            case let .home(.recentlyViewed(.favoriteStatusResponse(listingID, .success(status)))):
-                synchronizeFavoriteStatus(status, for: listingID, state: &state)
-                return .none
-
-            case let .home(.path(.element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))))):
-                guard let listingID = state.home.path[id: id, case: \.listingDetail]?.listingID else { return .none }
-                synchronizeFavoriteStatus(status, for: listingID, state: &state)
-                return .none
-
-            case let .home(.path(.element(id: _, action: .savedListings(.favoriteStatusResponse(listingID, .success(status)))))):
-                synchronizeFavoriteStatus(status, for: listingID, state: &state)
-                return .none
-
-            case let .home(.path(.element(id: _, action: .recentlyViewedList(.favoriteStatusResponse(listingID, .success(status)))))):
+            case let .home(.delegate(.favoriteStatusChanged(listingID, status))):
                 synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
                 
@@ -185,8 +168,7 @@ struct RootFeature {
                 state.popup = popup
                 return .none
 
-            case let .home(.path(.element(id: _, action: .listingDetail(.popupRequested(popup))))),
-                 let .map(.path(.element(id: _, action: .listingDetail(.popupRequested(popup))))),
+            case let .map(.path(.element(id: _, action: .listingDetail(.popupRequested(popup))))),
                  let .more(.path(.element(id: _, action: .listingDetail(.popupRequested(popup))))):
                 state.popup = popup
                 return .none
