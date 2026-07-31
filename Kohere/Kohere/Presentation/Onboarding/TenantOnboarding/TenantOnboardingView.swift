@@ -2,18 +2,18 @@
 //  TenantOnboardingView.swift
 //  Kohere
 //
-//  Created by mandoo on 7/4/26.
+//  Created by soomin on 7/4/26.
 //
 
 import ComposableArchitecture
 import SwiftUI
 
 struct TenantOnboardingView: View {
-    @Environment(\.locale)
-    private var locale
 
     // MARK: - Properties
 
+    @Environment(\.locale)
+    private var locale
     @Bindable var store: StoreOf<TenantOnboardingFeature>
     @State private var activeField: OnboardingField?
     @FocusState private var keyboardField: OnboardingField?
@@ -95,11 +95,7 @@ private extension TenantOnboardingView {
                     store.send(.nextButtonTapped)
                 }
             } label: {
-                Text(
-                    store.isOnboardingSubmitting
-                        ? String(localized: "common.loading", locale: locale)
-                        : store.primaryButtonTitle
-                )
+                Text(store.isOnboardingSubmitting ? String(localized: "common.loading", locale: locale) : store.primaryButtonTitle)
                     .kohereTextStyle(.label1Semibold)
                     .foregroundColor(.staticWhite)
                     .frame(maxWidth: .infinity)

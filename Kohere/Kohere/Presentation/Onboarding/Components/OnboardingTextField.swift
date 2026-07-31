@@ -2,24 +2,40 @@
 //  OnboardingTextField.swift
 //  Kohere
 //
-//  Created by mandoo on 6/21/26.
+//  Created by soomin on 6/21/26.
 //
 
 import SwiftUI
 
 struct OnboardingTextField: View {
-
+    
     // MARK: - Properties
-
+    
     @Binding var text: String
     @Binding var activeField: OnboardingField?
     var keyboardField: FocusState<OnboardingField?>.Binding
-
+    
     let equals: OnboardingField
     let placeholder: String?
     let keyboardType: UIKeyboardType
     let hasError: Bool
-
+    
+    private var isActive: Bool {
+        activeField == equals
+    }
+    
+    private var borderColor: Color {
+        if hasError {
+            return .statusDanger
+        } else if isActive {
+            return .labelNormal
+        } else {
+            return .lineAlternative
+        }
+    }
+    
+    // MARK: - Initializer
+    
     init(
         text: Binding<String>,
         activeField: Binding<OnboardingField?>,
@@ -37,21 +53,12 @@ struct OnboardingTextField: View {
         self.keyboardType = keyboardType
         self.hasError = hasError
     }
-
-    private var isActive: Bool {
-        activeField == equals
-    }
-
+    
     // MARK: - Body
-
+    
     var body: some View {
         HStack {
-            TextField(
-                "",
-                text: $text,
-                prompt: Text(placeholder ?? "")
-                    .foregroundStyle(.labelAssistive)
-            )
+            TextField("", text: $text, prompt: Text(placeholder ?? "").foregroundStyle(.labelAssistive))
                 .kohereTextStyle(.label2Medium)
                 .foregroundColor(.labelNeutral)
                 .autocorrectionDisabled()
@@ -65,7 +72,7 @@ struct OnboardingTextField: View {
                         activeField = nil
                     }
                 }
-
+            
             if !text.isEmpty && isActive {
                 Button {
                     text = ""
@@ -89,20 +96,7 @@ struct OnboardingTextField: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay {
             RoundedRectangle(cornerRadius: 12)
-                .stroke(
-                    borderColor,
-                    lineWidth: 1
-                )
-        }
-    }
-
-    private var borderColor: Color {
-        if hasError {
-            return .statusDanger
-        } else if isActive {
-            return .labelNormal
-        } else {
-            return .lineAlternative
+                .stroke(borderColor, lineWidth: 1)
         }
     }
 }

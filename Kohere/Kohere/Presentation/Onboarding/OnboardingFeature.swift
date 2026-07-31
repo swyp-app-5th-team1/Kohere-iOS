@@ -2,7 +2,7 @@
 //  OnboardingFeature.swift
 //  Kohere
 //
-//  Created by mandoo on 6/21/26.
+//  Created by soomin on 6/21/26.
 //
 
 import ComposableArchitecture
@@ -33,16 +33,11 @@ struct OnboardingFeature {
 
             switch userType {
             case .tenant:
-                self.tenant = TenantOnboardingFeature.State(
-                    appLanguage: appLanguage,
-                    name: socialName ?? ""
-                )
+                self.tenant = TenantOnboardingFeature.State(appLanguage: appLanguage, name: socialName ?? "")
                 self.landlord = nil
             case .landlord:
                 self.tenant = nil
-                self.landlord = LandlordOnboardingFeature.State(
-                    name: socialName ?? ""
-                )
+                self.landlord = LandlordOnboardingFeature.State(name: socialName ?? "")
             }
         }
     }

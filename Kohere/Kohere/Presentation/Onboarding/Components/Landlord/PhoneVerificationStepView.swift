@@ -2,7 +2,7 @@
 //  PhoneVerificationStepView.swift
 //  Kohere
 //
-//  Created by mandoo on 7/2/26.
+//  Created by soomin on 7/2/26.
 //
 
 import ComposableArchitecture
@@ -32,14 +32,8 @@ struct PhoneVerificationStepView: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
-                        OnboardingTextField(
-                            text: $store.phoneNumber,
-                            activeField: $activeField,
-                            keyboardField: keyboardField,
-                            equals: .phoneNumber,
-                            placeholder: "'-'를 제외하고 숫자만 입력해주세요",
-                            keyboardType: .phonePad
-                        )
+                        OnboardingTextField(text: $store.phoneNumber, activeField: $activeField, keyboardField: keyboardField,
+                                            equals: .phoneNumber, placeholder: "'-'를 제외하고 숫자만 입력해주세요", keyboardType: .phonePad)
                         .allowsHitTesting(!store.isPhoneVerified && !store.isPhoneVerificationCodeRequesting)
 
                         Button {

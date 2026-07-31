@@ -2,7 +2,7 @@
 //  LandlordOnboardingView.swift
 //  Kohere
 //
-//  Created by mandoo on 7/4/26.
+//  Created by soomin on 7/4/26.
 //
 
 import ComposableArchitecture
@@ -55,11 +55,6 @@ struct LandlordOnboardingView: View {
 // MARK: - Subviews
 
 private extension LandlordOnboardingView {
-    func dismissKeyboard() {
-        activeField = nil
-        keyboardField = nil
-    }
-
     var topProgressBar: some View {
         HStack(spacing: 8) {
             ForEach(1...store.totalStepCount, id: \.self) { index in
@@ -104,4 +99,10 @@ private extension LandlordOnboardingView {
             .disabled(!store.isNextButtonEnabled)
         }
     }
+
+    func dismissKeyboard() {
+        activeField = nil
+        keyboardField = nil
+    }
+
 }
