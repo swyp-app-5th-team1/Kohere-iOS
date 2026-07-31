@@ -1448,6 +1448,24 @@ final class OnboardingRequestSafetyTests: XCTestCase {
 
 @MainActor
 final class OnboardingErrorPopupTests: XCTestCase {
+    func testOnboardingForwardsChildPopupAsDelegate() async {
+        let popup = OnboardingErrorPopup.make(
+            context: .completeProfile,
+            language: .english
+        )
+        let store = TestStore(
+            initialState: OnboardingFeature.State(
+                userType: .tenant,
+                appLanguage: .english
+            )
+        ) {
+            OnboardingFeature()
+        }
+
+        await store.send(.tenant(.popupRequested(popup)))
+        await store.receive(.delegate(.popupRequested(popup)))
+    }
+
     func testTenantCompletionFailureRequestsLocalizedPopup() async {
         var initialState = TenantOnboardingFeature.State(appLanguage: .english)
         initialState.isOnboardingSubmitting = true
@@ -1528,7 +1546,7 @@ final class OnboardingErrorPopupTests: XCTestCase {
             RootFeature()
         }
 
-        await store.send(.onboarding(.popupRequested(popup))) {
+        await store.send(.onboarding(.delegate(.popupRequested(popup)))) {
             $0.popup = popup
         }
     }
@@ -1555,6 +1573,15 @@ final class OnboardingErrorPopupTests: XCTestCase {
 
 @MainActor
 final class HomeEffectCancellationTests: XCTestCase {
+    func testGuestFavoriteNavigationRequestsAuthenticationThroughDelegate() async {
+        let store = TestStore(initialState: HomeFeature.State()) {
+            HomeFeature()
+        }
+
+        await store.send(.navigationHeartTapped)
+        await store.receive(\.delegate.authenticationRequired)
+    }
+
     func testCancelEffectsStopsInFlightRecentListingsRequest() async {
         let spy = HomeCancellationSpy()
         var initialState = HomeFeature.State(userType: .tenant)
