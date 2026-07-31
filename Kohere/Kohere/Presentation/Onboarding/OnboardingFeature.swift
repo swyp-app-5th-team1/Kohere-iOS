@@ -48,6 +48,7 @@ struct OnboardingFeature {
         case tenant(TenantOnboardingFeature.Action)
         case landlord(LandlordOnboardingFeature.Action)
         case onboardingResponse(Result<Auth, DataError>)
+        case popupRequested(AppPopup)
     }
 
     // MARK: - Reducer Body
@@ -55,13 +56,17 @@ struct OnboardingFeature {
     var body: some Reducer<State, Action> {
         Reduce { _, action in
             switch action {
-            case let .tenant(.onboardingResponse(result)):
-                return .send(.onboardingResponse(result))
+            case let .tenant(.onboardingResponse(.success(auth))):
+                return .send(.onboardingResponse(.success(auth)))
 
-            case let .landlord(.onboardingResponse(result)):
-                return .send(.onboardingResponse(result))
+            case let .landlord(.onboardingResponse(.success(auth))):
+                return .send(.onboardingResponse(.success(auth)))
 
-            case .tenant, .landlord, .onboardingResponse:
+            case let .tenant(.popupRequested(popup)),
+                 let .landlord(.popupRequested(popup)):
+                return .send(.popupRequested(popup))
+
+            case .tenant, .landlord, .onboardingResponse, .popupRequested:
                 return .none
             }
         }

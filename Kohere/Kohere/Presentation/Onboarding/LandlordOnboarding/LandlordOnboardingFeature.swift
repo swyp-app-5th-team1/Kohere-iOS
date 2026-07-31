@@ -77,6 +77,7 @@ struct LandlordOnboardingFeature {
         case confirmPhoneVerificationCodeResponse(requestedPhoneNumber: String, requestedCode: String, Result<PhoneVerification, DataError>)
         case onboardingCompleted
         case onboardingResponse(Result<Auth, DataError>)
+        case popupRequested(AppPopup)
     }
     
     // MARK: - Reducer Body
@@ -156,7 +157,9 @@ struct LandlordOnboardingFeature {
                     return .none
                 }
                 state.isPhoneVerificationCodeRequesting = false
-                return .none
+                return .send(
+                    .popupRequested(OnboardingErrorPopup.make(context: .sendPhoneVerificationCode, language: .korean))
+                )
                 
             case .confirmPhoneVerificationCodeTapped:
                 let trimmedCode = state.phoneVerificationCode.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -202,8 +205,11 @@ struct LandlordOnboardingFeature {
                 state.isPhoneVerificationRequesting = false
                 if case let .serverError(code, _) = error, code == "AUTH_PHONE_VERIFICATION_FAILED" {
                     state.phoneVerificationCodeErrorMessage = "인증 코드가 올바르지 않거나 만료됐어요. 다시 시도해주세요."
+                    return .none
                 }
-                return .none
+                return .send(
+                    .popupRequested(OnboardingErrorPopup.make(context: .verifyPhone, language: .korean))
+                )
                 
             case .onboardingCompleted:
                 guard !state.isOnboardingSubmitting,
@@ -231,6 +237,11 @@ struct LandlordOnboardingFeature {
                 
             case .onboardingResponse(.failure):
                 state.isOnboardingSubmitting = false
+                return .send(
+                    .popupRequested(OnboardingErrorPopup.make(context: .completeProfile, language: .korean))
+                )
+
+            case .popupRequested:
                 return .none
             }
         }

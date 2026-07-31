@@ -6176,6 +6176,70 @@
         }
       }
     },
+    "onboarding.error.completeProfile" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't complete your profile. Please try again."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로필 등록을 완료하지 못했어요. 다시 시도해주세요."
+          }
+        }
+      }
+    },
+    "onboarding.error.saveAuthentication" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't finish signing you in. Please try again."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인을 완료하지 못했어요. 다시 시도해주세요."
+          }
+        }
+      }
+    },
+    "onboarding.error.sendPhoneVerificationCode" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't send a verification code. Please try again."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인증번호를 보내지 못했어요. 다시 시도해주세요."
+          }
+        }
+      }
+    },
+    "onboarding.error.verifyPhone" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't verify the code. Please try again."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인증번호를 확인하지 못했어요. 다시 시도해주세요."
+          }
+        }
+      }
+    },
     "onboarding.email.error.invalidFormat" : {
       "extractionState" : "stale",
       "localizations" : {

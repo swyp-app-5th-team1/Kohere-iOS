@@ -62,6 +62,7 @@ struct TenantOnboardingFeature {
         case backButtonTapped
         case onboardingCompleted
         case onboardingResponse(Result<Auth, DataError>)
+        case popupRequested(AppPopup)
     }
 
     // MARK: - Reducer Body
@@ -117,6 +118,11 @@ struct TenantOnboardingFeature {
 
             case .onboardingResponse(.failure):
                 state.isOnboardingSubmitting = false
+                return .send(
+                    .popupRequested(OnboardingErrorPopup.make(context: .completeProfile, language: state.appLanguage))
+                )
+
+            case .popupRequested:
                 return .none
             }
         }
