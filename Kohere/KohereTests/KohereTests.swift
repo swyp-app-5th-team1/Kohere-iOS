@@ -114,7 +114,7 @@ final class ListingCardLocalizationTests: XCTestCase {
 
         XCTAssertEqual(item.formattedPrice, "₩380~400K/mo")
         XCTAssertEqual(item.detailsDescription, "Dep. ₩200K · Maint. ₩20K")
-        XCTAssertEqual(item.locationDescription, "8-min walk Hongdae Sta.")
+        XCTAssertEqual(item.locationDescription, "8-min walk Hongdae Station")
         XCTAssertEqual(item.period, "1 mo~")
     }
 
@@ -123,7 +123,7 @@ final class ListingCardLocalizationTests: XCTestCase {
 
         XCTAssertEqual(item.formattedPrice, "월세 38~40만원")
         XCTAssertEqual(item.detailsDescription, "보증금 20만원 · 관리비 2만원")
-        XCTAssertEqual(item.locationDescription, "Hongdae 도보 8분")
+        XCTAssertEqual(item.locationDescription, "Hongdae Station 도보 8분")
         XCTAssertEqual(item.period, "한달 이상")
     }
 
@@ -156,7 +156,7 @@ final class ListingCardLocalizationTests: XCTestCase {
             address: nil,
             nearestTransit: ListingNearestTransit(
                 type: "SUBWAY",
-                name: "Hongdae",
+                name: "Hongdae Station",
                 walkMinutes: 8
             ),
             distanceMeters: nil,
@@ -197,21 +197,27 @@ final class ListingDetailValueFormatterLocalizationTests: XCTestCase {
         )
     }
 
-    func testTransitUsesExplicitAppLanguage() {
+    /// 서버는 `name`에 "Anguk Station"처럼 완성된 역명을 내려준다.
+    /// 앱 포맷은 소요 시간만 조합하고 역/정류장 접미사를 덧붙이지 않아야 한다.
+    func testTransitDoesNotAppendStationSuffixToServerName() {
         let transit = ListingDetailNearestTransit(
             type: "SUBWAY",
-            name: "Anguk",
+            name: "Anguk Station",
             walkMinutes: 8,
             nearbyPlacesDescription: nil
         )
 
         XCTAssertEqual(
             ListingDetailValueFormatter.transitTitle(transit, language: .english),
-            "8-min walk Anguk Sta."
+            "8-min walk Anguk Station"
+        )
+        XCTAssertEqual(
+            ListingDetailValueFormatter.transitTitle(transit, includesFrom: true, language: .english),
+            "8-min walk from Anguk Station"
         )
         XCTAssertEqual(
             ListingDetailValueFormatter.transitTitle(transit, language: .korean),
-            "안국역 도보 8분"
+            "Anguk Station 도보 8분"
         )
     }
 }
