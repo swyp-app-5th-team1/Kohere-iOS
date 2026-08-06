@@ -7,7 +7,7 @@
 
 struct BookingListResponseDTO: Decodable {
     let content: [BookingListItemResponseDTO]?
-    let page: BookingPageResponseDTO?
+    let page: PageResponseDTO?
 }
 
 struct BookingListItemResponseDTO: Decodable {
@@ -44,10 +44,3 @@ struct BookingDetailResponseDTO: Decodable {
     let totalAmount: Int?
 }
 
-struct BookingPageResponseDTO: Decodable {
-    let number: Int?
-    let size: Int?
-    let totalElements: Int?
-    let totalPages: Int?
-    let hasNext: Bool?
-}

@@ -25,13 +25,13 @@ extension MapFeature {
         var listingSearchResults: [Listing] = []
         var isListingSearchLoading = false
         var listingSearchErrorMessage: String?
-        var listingPageInfo: ListingSearchPageInfo?
+        var listingPageInfo: PageInfo?
 
         // 진단 추천 검색
         var activeDiagnosisID: Int?
         var diagnosisRecommendedListings: [DiagnosisRecommendedListing] = []
         var diagnosisRecommendationSuggestions: DiagnosisRecommendationSuggestions?
-        var diagnosisRecommendationPageInfo: DiagnosisRecommendationPage?
+        var diagnosisRecommendationPageInfo: PageInfo?
         var isDiagnosisDetailLoading = false
         var isRecommendationsLoading = false
         var diagnosisErrorMessage: String?
@@ -72,7 +72,7 @@ extension MapFeature {
         // 일반 매물 검색
         case initialLocationSearchRequested
         case browseListingsRequested
-        case listingSearchResponse(Result<ListingSearchPage, Error>)
+        case listingSearchResponse(Result<ListingSearchPage, Error>, isFirstPage: Bool)
         case placeSearchResultSelected(SearchPlaceResult)
         case listingMapPreviewRequested(MapCoordinate)
         case placeSearchDisplayClearButtonTapped
@@ -85,7 +85,7 @@ extension MapFeature {
         case diagnosisButtonAutoCollapseDelayFinished
         case diagnosisResultRequested(diagnosisID: Int, filter: MapFilterState)
         case diagnosisDetailResponse(Result<DiagnosisDetail, Error>)
-        case diagnosisRecommendationsResponse(Result<DiagnosisRecommendations, Error>)
+        case diagnosisRecommendationsResponse(Result<DiagnosisRecommendations, Error>, isFirstPage: Bool)
 
         // 지도 viewport / 카메라
         case viewportChanged(MapViewport)

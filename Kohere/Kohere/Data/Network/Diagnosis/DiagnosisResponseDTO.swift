@@ -52,7 +52,7 @@ struct DiagnosisDetailResponseDTO: Decodable {
 
 struct DiagnosisRecommendationsResponseDTO: Decodable {
     let content: [DiagnosisRecommendedListingResponseDTO]?
-    let page: DiagnosisRecommendationPageResponseDTO?
+    let page: PageResponseDTO?
     let suggestions: DiagnosisSuggestionsResponseDTO?
 }
 
@@ -67,14 +67,6 @@ struct DiagnosisRecommendedListingResponseDTO: Decodable {
     let thumbnailUrl: String?
     let lat: Double?
     let lng: Double?
-}
-
-struct DiagnosisRecommendationPageResponseDTO: Decodable {
-    let number: Int?
-    let size: Int?
-    let totalElements: Int?
-    let totalPages: Int?
-    let hasNext: Bool?
 }
 
 struct DiagnosisSuggestionsResponseDTO: Decodable {

@@ -154,9 +154,9 @@ extension MapFeature {
 
             do {
                 let page = try await listingClient.fetchListings(input)
-                await send(.listingSearchResponse(.success(page)))
+                await send(.listingSearchResponse(.success(page), isFirstPage: true))
             } catch {
-                await send(.listingSearchResponse(.failure(error)))
+                await send(.listingSearchResponse(.failure(error), isFirstPage: true))
             }
         }
         .cancellable(id: MapEffectID.listingSearch, cancelInFlight: true)
@@ -164,6 +164,7 @@ extension MapFeature {
 
     func handleListingSearchResponse(
         _ result: Result<ListingSearchPage, Error>,
+        isFirstPage: Bool,
         state: inout State
     ) -> Effect<Action> {
         guard state.listingSource == .locationSearch else { return .none }
@@ -173,7 +174,7 @@ extension MapFeature {
             debugLogListingSearchResponse(page)
             state.isListingSearchLoading = false
             state.listingSearchErrorMessage = nil
-            applyListingSearchPage(page, to: &state)
+            applyListingSearchPage(page, isFirstPage: isFirstPage, to: &state)
 
         case let .failure(error):
             debugLogListingSearchError(error)
@@ -228,9 +229,9 @@ extension MapFeature {
 
             do {
                 let page = try await listingClient.fetchListings(input)
-                await send(.listingSearchResponse(.success(page)))
+                await send(.listingSearchResponse(.success(page), isFirstPage: false))
             } catch {
-                await send(.listingSearchResponse(.failure(error)))
+                await send(.listingSearchResponse(.failure(error), isFirstPage: false))
             }
         }
         .cancellable(id: MapEffectID.listingSearch, cancelInFlight: true)
@@ -238,36 +239,26 @@ extension MapFeature {
 
     // MARK: - Result Mapping
 
-    func applyListingSearchPage(_ page: ListingSearchPage, to state: inout State) {
-        let pageNumber = page.page?.number ?? 0
-        let shouldAppendPage = pageNumber > 0 && !state.listingSearchResults.isEmpty
+    func applyListingSearchPage(
+        _ page: ListingSearchPage,
+        isFirstPage: Bool,
+        to state: inout State
+    ) {
         state.listingPageInfo = page.page
 
-        if shouldAppendPage {
-            appendUniqueListings(page.content, to: &state.listingSearchResults)
-        } else {
+        if isFirstPage {
             state.listingSearchResults = page.content
+        } else {
+            state.listingSearchResults.appendUnique(contentsOf: page.content)
         }
 
+        state.markers = state.listingSearchResults.markerItems
         rebuildListingItems(to: &state)
-        state.markers = state.listingSearchResults.compactMap { listing in
-            guard let coordinate = listing.coordinate else { return nil }
-            return MapMarkerItem(id: listing.id, coordinate: coordinate)
-        }
 
         if let selectedMarkerID = state.selectedMarkerID,
            !state.markers.contains(where: { $0.id == selectedMarkerID }) {
             state.selectedMarkerID = nil
         }
-    }
-
-    private func appendUniqueListings(
-        _ newListings: [Listing],
-        to listings: inout [Listing]
-    ) {
-        var existingIDs = Set(listings.map(\.id))
-        let uniqueListings = newListings.filter { existingIDs.insert($0.id).inserted }
-        listings.append(contentsOf: uniqueListings)
     }
 
     // MARK: - Shared Listing Presentation

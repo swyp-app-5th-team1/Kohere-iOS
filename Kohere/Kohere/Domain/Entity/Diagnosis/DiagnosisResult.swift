@@ -63,11 +63,13 @@ nonisolated struct DiagnosisRecommendationSort: Equatable {
 
 struct DiagnosisRecommendations: Equatable {
     let listings: [DiagnosisRecommendedListing]
-    let page: DiagnosisRecommendationPage?
+    let page: PageInfo?
     let suggestions: DiagnosisRecommendationSuggestions?
 }
 
-struct DiagnosisRecommendedListing: Equatable {
+struct DiagnosisRecommendedListing: Equatable, Identifiable {
+    nonisolated var id: String { listingID }
+
     let listingID: String
     let title: String
     let type: String
@@ -77,14 +79,6 @@ struct DiagnosisRecommendedListing: Equatable {
     let maxDeposit: Int?
     let thumbnailURL: String?
     let coordinate: MapCoordinate?
-}
-
-struct DiagnosisRecommendationPage: Equatable {
-    let number: Int?
-    let size: Int?
-    let totalElements: Int?
-    let totalPages: Int?
-    let hasNext: Bool?
 }
 
 struct DiagnosisRecommendationSuggestions: Equatable {

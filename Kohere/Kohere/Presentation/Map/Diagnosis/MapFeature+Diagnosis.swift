@@ -50,10 +50,10 @@ extension MapFeature {
                 do {
                     let input = DiagnosisRecommendationsInput(diagnosisID: diagnosisID)
                     let recommendations = try await diagnosisClient.fetchRecommendations(input)
-                    await send(.diagnosisRecommendationsResponse(.success(recommendations)))
+                    await send(.diagnosisRecommendationsResponse(.success(recommendations), isFirstPage: true))
                 } catch {
                     guard !isDiagnosisRequestCancellation(error) else { return }
-                    await send(.diagnosisRecommendationsResponse(.failure(error)))
+                    await send(.diagnosisRecommendationsResponse(.failure(error), isFirstPage: true))
                 }
             }
             .cancellable(id: MapEffectID.diagnosisRecommendations, cancelInFlight: true)
@@ -99,13 +99,14 @@ extension MapFeature {
 
     func handleDiagnosisRecommendationsResponse(
         _ result: Result<DiagnosisRecommendations, Error>,
+        isFirstPage: Bool,
         state: inout State
     ) -> Effect<Action> {
         guard state.listingSource == .diagnosis else { return .none }
 
         switch result {
         case let .success(recommendations):
-            applyDiagnosisRecommendations(recommendations, to: &state)
+            applyDiagnosisRecommendations(recommendations, isFirstPage: isFirstPage, to: &state)
             state.isRecommendationsLoading = false
             state.recommendationsErrorMessage = nil
 
@@ -144,10 +145,10 @@ extension MapFeature {
         return .run { [diagnosisClient] send in
             do {
                 let recommendations = try await diagnosisClient.fetchRecommendations(input)
-                await send(.diagnosisRecommendationsResponse(.success(recommendations)))
+                await send(.diagnosisRecommendationsResponse(.success(recommendations), isFirstPage: false))
             } catch {
                 guard !isDiagnosisRequestCancellation(error) else { return }
-                await send(.diagnosisRecommendationsResponse(.failure(error)))
+                await send(.diagnosisRecommendationsResponse(.failure(error), isFirstPage: false))
             }
         }
         .cancellable(id: MapEffectID.diagnosisRecommendations, cancelInFlight: true)
@@ -155,15 +156,12 @@ extension MapFeature {
 
     func applyDiagnosisRecommendations(
         _ recommendations: DiagnosisRecommendations,
+        isFirstPage: Bool,
         to state: inout State
     ) {
-        let pageNumber = recommendations.page?.number ?? 0
-        let shouldAppendPage = pageNumber > 0 && !state.diagnosisRecommendedListings.isEmpty
         state.diagnosisRecommendationPageInfo = recommendations.page
 
-        if shouldAppendPage {
-            appendUniqueRecommendations(recommendations.listings, to: &state.diagnosisRecommendedListings)
-        } else {
+        if isFirstPage {
             state.selectedMarkerID = nil
             state.sheetMode = .listingList
             state.diagnosisRecommendedListings = recommendations.listings
@@ -176,12 +174,11 @@ extension MapFeature {
             if cameraCoordinate == nil {
                 state.lastSearchedViewport = state.currentViewport
             }
+        } else {
+            state.diagnosisRecommendedListings.appendUnique(contentsOf: recommendations.listings)
         }
 
-        state.markers = state.diagnosisRecommendedListings.compactMap { listing in
-            guard let coordinate = listing.coordinate else { return nil }
-            return MapMarkerItem(id: listing.listingID, coordinate: coordinate)
-        }
+        state.markers = state.diagnosisRecommendedListings.markerItems
         rebuildListingItems(to: &state)
     }
 
@@ -198,15 +195,6 @@ extension MapFeature {
             .cancel(id: MapEffectID.diagnosisDetail),
             .cancel(id: MapEffectID.diagnosisRecommendations)
         )
-    }
-
-    private func appendUniqueRecommendations(
-        _ newRecommendations: [DiagnosisRecommendedListing],
-        to recommendations: inout [DiagnosisRecommendedListing]
-    ) {
-        var existingIDs = Set(recommendations.map(\.listingID))
-        let uniqueRecommendations = newRecommendations.filter { existingIDs.insert($0.listingID).inserted }
-        recommendations.append(contentsOf: uniqueRecommendations)
     }
 
 }

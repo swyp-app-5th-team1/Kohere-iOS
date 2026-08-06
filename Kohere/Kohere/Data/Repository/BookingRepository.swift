@@ -118,18 +118,6 @@ private extension BookingDetailResponseDTO {
     }
 }
 
-private extension BookingPageResponseDTO {
-    func toEntity() -> BookingPageInfo {
-        BookingPageInfo(
-            number: number,
-            size: size,
-            totalElements: totalElements,
-            totalPages: totalPages,
-            hasNext: hasNext
-        )
-    }
-}
-
 private enum DateParser {
     private static let iso8601WithFractionalSeconds: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()

@@ -279,18 +279,6 @@ private extension DiagnosisRecommendedListingResponseDTO {
     }
 }
 
-private extension DiagnosisRecommendationPageResponseDTO {
-    func toEntity() -> DiagnosisRecommendationPage {
-        DiagnosisRecommendationPage(
-            number: number,
-            size: size,
-            totalElements: totalElements,
-            totalPages: totalPages,
-            hasNext: hasNext
-        )
-    }
-}
-
 private extension DiagnosisSuggestionsResponseDTO {
     func toEntity() -> DiagnosisRecommendationSuggestions {
         DiagnosisRecommendationSuggestions(

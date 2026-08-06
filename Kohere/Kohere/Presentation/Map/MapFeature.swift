@@ -56,8 +56,8 @@ struct MapFeature {
             case .researchButtonTapped:
                 return beginLocationSearch(.researchCurrentViewport, state: &state)
 
-            case let .listingSearchResponse(result):
-                return handleListingSearchResponse(result, state: &state)
+            case let .listingSearchResponse(result, isFirstPage):
+                return handleListingSearchResponse(result, isFirstPage: isFirstPage, state: &state)
 
             case let .listingRowAppeared(listingID):
                 return handleListingRowAppeared(listingID, state: &state)
@@ -77,8 +77,12 @@ struct MapFeature {
             case let .diagnosisDetailResponse(result):
                 return handleDiagnosisDetailResponse(result, state: &state)
 
-            case let .diagnosisRecommendationsResponse(result):
-                return handleDiagnosisRecommendationsResponse(result, state: &state)
+            case let .diagnosisRecommendationsResponse(result, isFirstPage):
+                return handleDiagnosisRecommendationsResponse(
+                    result,
+                    isFirstPage: isFirstPage,
+                    state: &state
+                )
 
             case .diagnosisButtonTapped:
                 state.path.append(.chatBot(ChatBotFeature.State()))

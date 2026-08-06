@@ -146,7 +146,10 @@ final class MapLocationSearchFlowTests: XCTestCase {
             $0.lastSearchedViewport = targetViewport
             $0.isListingSearchLoading = true
         }
-        await store.receive(\.listingSearchResponse.success) {
+        await store.receive {
+            guard case .listingSearchResponse(.success, _) = $0 else { return false }
+            return true
+        } assert: {
             $0.isListingSearchLoading = false
         }
     }
