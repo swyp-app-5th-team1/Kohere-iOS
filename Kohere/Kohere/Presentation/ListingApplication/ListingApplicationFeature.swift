@@ -46,18 +46,14 @@ struct ListingApplicationFeature {
         var navigationTitle: String {
             switch step {
             case .dateSelection:
-                appLanguage.localized("listingApplication.navigation.dateSelection")
+                appLanguage.localized(.listingApplicationNavigationDateSelection)
             case .review:
-                appLanguage.localized("listingApplication.navigation.review")
+                appLanguage.localized(.listingApplicationNavigationReview)
             }
         }
 
         var applicationTitle: String {
-            String(
-                format: appLanguage.localized("listingApplication.format.applicationTitle"),
-                locale: displayLocale,
-                listingTitle
-            )
+            appLanguage.localized(.listingApplicationFormatApplicationTitle(listingTitle))
         }
 
         var moveOutDate: Date {
@@ -85,10 +81,9 @@ struct ListingApplicationFeature {
         }
 
         var rentalPeriodText: String {
-            let format = rentalMonths == 1
-                ? appLanguage.localized("listingApplication.format.rentalPeriod.one")
-                : appLanguage.localized("listingApplication.format.rentalPeriod.other")
-            return String(format: format, locale: displayLocale, String(rentalMonths))
+            rentalMonths == 1
+                ? appLanguage.localized(.listingApplicationFormatRentalPeriodOne(String(rentalMonths)))
+                : appLanguage.localized(.listingApplicationFormatRentalPeriodOther(String(rentalMonths)))
         }
 
         var isSubmitButtonEnabled: Bool {
@@ -100,7 +95,7 @@ struct ListingApplicationFeature {
         }
 
         var submitButtonTitle: String {
-            appLanguage.localized("listingApplication.action.submit")
+            appLanguage.localized(.listingApplicationActionSubmit)
         }
 
         var normalizedPhoneNumber: String {
@@ -153,7 +148,7 @@ struct ListingApplicationFeature {
             roomOfferID: String,
             roomTypeName: String,
             roomPricingText: String,
-            appLanguage: AppLanguage = .systemDefault
+            appLanguage: AppLanguage = .english
         ) {
             self.listingID = listingID
             self.listingTitle = listingTitle
@@ -248,7 +243,7 @@ struct ListingApplicationFeature {
                 state.hasLoadedApplicantProfile = false
                 state.applicantProfileErrorMessage = error.localizedDescription
                 state.applicantSummary = state.appLanguage.localized(
-                    "listingApplication.applicant.profile.loadFailed"
+                    .listingApplicationApplicantProfileLoadFailed
                 )
                 return .none
 

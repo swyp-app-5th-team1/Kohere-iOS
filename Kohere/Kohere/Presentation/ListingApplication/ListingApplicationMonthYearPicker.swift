@@ -229,18 +229,14 @@ struct UIKitMonthYearPicker: UIViewRepresentable {
 
         private func title(for value: Int, component: Int) -> String {
             if component == 0 {
-                return String(
-                    format: String(localized: "listingApplication.format.year", locale: parent.locale),
-                    locale: parent.locale,
-                    String(value)
+                return AppLanguage(locale: parent.locale).localized(
+                    .listingApplicationFormatYear(String(value))
                 )
             }
 
             if parent.locale.identifier.hasPrefix("ko") {
-                return String(
-                    format: String(localized: "listingApplication.format.month", locale: parent.locale),
-                    locale: parent.locale,
-                    String(value)
+                return AppLanguage(locale: parent.locale).localized(
+                    .listingApplicationFormatMonth(String(value))
                 )
             }
 
