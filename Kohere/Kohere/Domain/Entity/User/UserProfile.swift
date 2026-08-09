@@ -30,7 +30,7 @@ struct UserProfile: Equatable, Sendable {
     let createdAt: String
 
     var appLanguage: AppLanguage? {
-        lang.flatMap(AppLanguage.init(rawValue:))
+        lang.flatMap(AppLanguage.init(apiCode:))
     }
 }
 
