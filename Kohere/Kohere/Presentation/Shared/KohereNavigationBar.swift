@@ -153,7 +153,7 @@ extension KohereNavigationBar {
                         .foregroundColor(rightColor)
                         .frame(width: 24, height: 24)
                 }
-                .accessibilityLabel(Text("common.accessibility.search"))
+                .accessibilityLabel(Text(.commonAccessibilitySearch))
                 if showsHeart {
                     Button(action: onHeart) {
                         Image(.heart24)
@@ -209,7 +209,7 @@ extension KohereNavigationBar {
                     .foregroundColor(rightColor)
                     .frame(width: 24, height: 24)
             }
-            .accessibilityLabel(Text("common.accessibility.search"))
+            .accessibilityLabel(Text(.commonAccessibilitySearch))
 
         case .checkButton(let isEnabled, let action):
             Button(action: action) {
@@ -219,8 +219,8 @@ extension KohereNavigationBar {
                     .frame(width: 24, height: 24)
             }
             .disabled(!isEnabled)
-            .accessibilityLabel(Text("profileEdit.navigation.save.accessibilityLabel"))
-            .accessibilityHint(Text("profileEdit.navigation.save.accessibilityHint"))
+            .accessibilityLabel(Text(.profileEditNavigationSaveAccessibilityLabel))
+            .accessibilityHint(Text(.profileEditNavigationSaveAccessibilityHint))
         }
     }
 
@@ -235,7 +235,7 @@ extension KohereNavigationBar {
                 .foregroundColor(rightColor)
                 .frame(width: 24, height: 24)
         }
-        .accessibilityLabel("언어 변경")
+        .accessibilityLabel(Text(.commonAccessibilityChangeLanguage))
 
         if let popover {
             button

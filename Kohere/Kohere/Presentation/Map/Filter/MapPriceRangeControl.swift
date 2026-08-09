@@ -22,13 +22,13 @@ struct MapPriceRangeControl: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(title)
+                Text(verbatim: title)
                     .kohereTextStyle(.body2Regular)
                     .foregroundStyle(.labelNeutral)
 
                 Spacer(minLength: 0)
 
-                Text(summaryText)
+                Text(verbatim: summaryText)
                     .kohereTextStyle(.label2Medium)
                     .foregroundStyle(.primary100)
             }
@@ -43,17 +43,17 @@ struct MapPriceRangeControl: View {
                 .frame(height: 24)
 
                 HStack {
-                    Text("\(bounds.lowerBound)")
+                    Text(verbatim: String(bounds.lowerBound))
                         .frame(width: 46, alignment: .leading)
 
                     Spacer(minLength: 0)
 
-                    Text(middleLabel)
+                    Text(verbatim: middleLabel)
                         .frame(width: 46, alignment: .center)
 
                     Spacer(minLength: 0)
 
-                    Text(maximumLabel)
+                    Text(verbatim: maximumLabel)
                         .frame(width: 46, alignment: .trailing)
                 }
                 .kohereTextStyle(.caption2Regular)

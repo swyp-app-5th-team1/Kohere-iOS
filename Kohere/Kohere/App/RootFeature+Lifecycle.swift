@@ -35,7 +35,8 @@ extension RootFeature {
             let storedLanguageRawValue = try? userDefaultsClient.load(for: .appLanguage)
             let resolvedLanguage = (!state.isAuthLoading && state.authInfo == nil)
                 ? AppLanguage.english
-                : storedLanguageRawValue.flatMap(AppLanguage.init(rawValue:)) ?? .systemDefault
+                : storedLanguageRawValue.flatMap(AppLanguage.init(apiCode:))
+                    ?? AppLanguageResolver.resolveSystemLanguage()
             applyAppLanguage(resolvedLanguage, state: &state)
             var effects: [Effect<Action>] = [
                 .run { send in
@@ -129,9 +130,11 @@ extension RootFeature {
             }
             state.isCurrentUserLoading = false
             let language = user.userType == .landlord ? AppLanguage.korean : user.appLanguage
-            if user.userType == .landlord { try? userDefaultsClient.save(AppLanguage.korean.rawValue, for: .appLanguage) }
+            if user.userType == .landlord {
+                try? userDefaultsClient.save(AppLanguage.korean.apiCode, for: .appLanguage)
+            }
             if let language, language != state.appLanguage {
-                try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
+                try? userDefaultsClient.save(language.apiCode, for: .appLanguage)
                 let cancellation = resetMainContent(language: language, userProfile: user, selectedTab: state.selectedTab, state: &state)
                 return .concatenate(cancellation, .merge(.send(.home(.onAppear)), .send(.more(.onAppear))))
             }
@@ -151,7 +154,7 @@ extension RootFeature {
         case let .login(.userTypeSelected(userType)):
             guard state.login.isRequiredTermsAgreed, let authInfo = state.login.authInfo else { return .none }
             let language = defaultLanguage(for: userType)
-            try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
+            try? userDefaultsClient.save(language.apiCode, for: .appLanguage)
             try? userDefaultsClient.save(userType.rawValue, for: .pendingOnboardingUserType)
             applyAppLanguage(language, state: &state)
             state.authInfo = authInfo
@@ -176,7 +179,7 @@ extension RootFeature {
             let updateProfileUseCase = updateProfileUseCase
             return .run { send in
                 do {
-                    let profile = try await updateProfileUseCase.execute(UserProfileUpdate(lang: language.rawValue))
+                    let profile = try await updateProfileUseCase.execute(UserProfileUpdate(lang: language.apiCode))
                     await send(.onboardingLanguageUpdateResponse(language, .success(profile)))
                 } catch {
                     await send(.onboardingLanguageUpdateResponse(language, .failure(error)))
@@ -184,7 +187,7 @@ extension RootFeature {
             }
 
         case let .onboardingLanguageUpdateResponse(language, .success(userProfile)):
-            try? userDefaultsClient.save(language.rawValue, for: .appLanguage)
+            try? userDefaultsClient.save(language.apiCode, for: .appLanguage)
             state.isAuthenticationFlowPresented = false
             let cancellation = resetMainContent(language: language, userProfile: userProfile, selectedTab: state.selectedTab, state: &state)
             return .concatenate(cancellation, .merge(.send(.home(.onAppear)), .send(.more(.onAppear))))

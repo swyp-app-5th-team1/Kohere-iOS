@@ -245,6 +245,17 @@ UI 프레임워크나 외부 데이터 소스(Alamofire, Keychain 등)에 의존
 - xcconfig
 - Info.plist
 
+### Localization
+
+- `Domain/Entity/User/AppLanguage.swift`는 지원 언어와 서버 API 코드, Locale 식별자만 표현한다.
+- 시스템 Locale을 앱 언어로 변환하는 책임은 `Core/Localization/AppLanguageResolver.swift`에 둔다.
+- String Catalog 리소스와 문자열 Key를 실제 `String`으로 해석하는 책임은
+  `Core/Localization/AppLocalizer.swift`에 둔다.
+- Feature State의 기본 언어는 결정적인 값인 영어를 사용하고, 시스템 언어 및 저장 언어 선택은
+  Root lifecycle에서 한 번만 수행한다.
+- 서버 API 코드와 Apple Locale 식별자는 동일하다고 가정하지 않고 `apiCode`와
+  `localeIdentifier`로 구분한다.
+
 ## Network & API 연동 가이드라인
 ### 공통 응답 포맷 (Common Wrapper) 처리
 서버의 모든 응답(성공/실패)은 전역 공통 구조를 따르므로, BaseResponseDTO를 통해 1차 파싱을 수행한다. 실패 응답 시 클라이언트는 HTTP 상태 코드뿐만 아니라 error.code 문자열을 기반으로 비즈니스 분기를 처리해야 한다.

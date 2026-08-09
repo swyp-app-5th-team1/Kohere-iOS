@@ -18,7 +18,7 @@ struct MoreView: View {
         VStack(spacing: 0) {
             KohereNavigationBar(
                 left: .smallLogo,
-                center: .text(localized("more.title")),
+                center: .text(localized(.moreTitle)),
                 right: .moreTab(
                     showsLanguage: store.userType != .landlord,
                     languagePopover: NavigationPopover(
@@ -70,13 +70,13 @@ struct MoreView: View {
     private var languagePopover: some View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
-                Text(localized("language.current"))
+                Text(.languageCurrent)
                     .kohereTextStyle(.label2Medium)
                     .foregroundStyle(.neutral50)
 
                 Spacer(minLength: 8)
 
-                Text(store.selectedLanguage.title)
+                Text(store.selectedLanguage.nativeDisplayName)
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(.primary50)
             }
@@ -91,7 +91,7 @@ struct MoreView: View {
                     store.send(.languageSelected(language))
                 } label: {
                     HStack(spacing: 8) {
-                        Text(language.title)
+                        Text(language.nativeDisplayName)
                             .kohereTextStyle(.label1Medium)
                             .foregroundStyle(.neutral80)
 
@@ -141,22 +141,21 @@ struct MoreView: View {
         MoreProfileCard(
             userType: store.userType,
             userProfile: store.userProfile,
-            localized: localized,
             onEditTap: { store.send(.editProfileTapped) }
         )
     }
 
     private var tenantActivitySection: some View {
         MoreMenuSection(
-            title: localized("more.activity.title"),
+            title: .moreActivityTitle,
             items: [
                 .init(
-                    title: localized("more.activity.savedListings"),
+                    title: .moreActivitySavedListings,
                     iconName: "heart_24",
                     action: .savedListings
                 ),
                 .init(
-                    title: localized("more.activity.recentlyViewed"),
+                    title: .moreActivityRecentlyViewed,
                     iconName: "thunder_24",
                     action: .recentlyViewedListings
                 )
@@ -168,28 +167,28 @@ struct MoreView: View {
 
     private var tenantLivingGuideSection: some View {
         MoreMenuSection(
-            title: localized("home.livingGuide.title"),
+            title: .homeLivingGuideTitle,
             items: [
                 .init(
-                    title: localized("home.livingGuide.fraud.title"),
+                    title: .homeLivingGuideFraudTitle,
                     iconName: "contractChecklist",
                     rendersAsTemplate: false,
                     action: .livingGuide(.housingScams)
                 ),
                 .init(
-                    title: localized("home.livingGuide.bankAccount.title"),
+                    title: .homeLivingGuideBankAccountTitle,
                     iconName: "bankAccountGuide",
                     rendersAsTemplate: false,
                     action: .livingGuide(.bankAccount)
                 ),
                 .init(
-                    title: localized("home.livingGuide.transportation.title"),
+                    title: .homeLivingGuideTransportationTitle,
                     iconName: "train",
                     rendersAsTemplate: false,
                     action: .livingGuide(.publicTransit)
                 ),
                 .init(
-                    title: localized("home.livingGuide.healthInsurance.title"),
+                    title: .homeLivingGuideHealthInsuranceTitle,
                     iconName: "healthInsurance",
                     rendersAsTemplate: false,
                     action: .livingGuide(.healthInsurance)
@@ -202,11 +201,11 @@ struct MoreView: View {
 
     private var landlordServiceSection: some View {
         MoreMenuSection(
-            title: "사장님 서비스",
+            title: .moreLandlordServiceTitle,
             items: [
                 .init(
-                    title: localized("more.landlordService.promoteRoom"),
-                    subtitle: "고시원 · 쉐어하우스 · 코리빙 등",
+                    title: .moreLandlordServicePromoteRoom,
+                    subtitle: .moreLandlordServicePromoteRoomSubtitle,
                     iconName: "external_link_24",
                     action: .promoteRoom
                 )
@@ -218,20 +217,20 @@ struct MoreView: View {
 
     private var customerSupportSection: some View {
         MoreMenuSection(
-            title: localized("more.support.title"),
+            title: .moreSupportTitle,
             items: [
                 .init(
-                    title: localized("more.support.announcements"),
+                    title: .moreSupportAnnouncements,
                     iconName: "megaphone_24",
                     action: .announcements
                 ),
                 .init(
-                    title: localized("more.support.feedback"),
+                    title: .moreSupportFeedback,
                     iconName: "mail_24",
                     action: .feedback
                 ),
                 .init(
-                    title: localized("more.support.partner"),
+                    title: .moreSupportPartner,
                     iconName: "send_24",
                     action: .collaboration
                 )
@@ -241,13 +240,13 @@ struct MoreView: View {
         )
     }
 
-    private func localized(_ key: String) -> String {
-        AppLanguage(locale: locale).localized(key)
+    private func localized(_ resource: LocalizedStringResource) -> String {
+        AppLanguage(locale: locale).localized(resource)
     }
 }
 
 private struct MoreMenuSection: View {
-    let title: String
+    let title: LocalizedStringResource
     let items: [MoreMenuItem]
     let horizontalPadding: CGFloat
     var onItemTapped: (MoreMenuItem) -> Void = { _ in }
@@ -321,13 +320,13 @@ private struct MoreMenuRow: View {
 }
 
 private struct MoreMenuItem: Identifiable, Equatable {
-    let title: String
-    var subtitle: String?
+    let title: LocalizedStringResource
+    var subtitle: LocalizedStringResource?
     let iconName: String?
     var rendersAsTemplate = true
     var action: MoreMenuAction?
 
-    var id: String { title }
+    var id: String { title.key }
 }
 
 private enum MoreMenuAction: Equatable {

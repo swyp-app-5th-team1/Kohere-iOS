@@ -39,7 +39,7 @@ struct ListingDetailOverviewSection: View {
 
             HStack(spacing: 2) {
                 Text(overview.depositText)
-                Text("·")
+                Text(verbatim: "·")
                     .kohereTextStyle(.caption1Regular)
                     .foregroundStyle(.labelAlternative)
                 Text(overview.maintenanceFeeText)
@@ -73,7 +73,7 @@ struct ListingDetailOverviewSection: View {
                     .foregroundStyle(.labelNormal)
                     .lineLimit(1)
 
-                Text("·")
+                Text(verbatim: "·")
                     .kohereTextStyle(.caption1Regular)
                     .foregroundStyle(.labelAlternative)
 
@@ -83,7 +83,7 @@ struct ListingDetailOverviewSection: View {
                         .resizable()
                         .frame(width: 16, height: 16)
 
-                    Text("\(overview.reviewCount)")
+                    Text(verbatim: String(overview.reviewCount))
                 }
                 .kohereTextStyle(.body3Regular)
                 .foregroundStyle(.statusInfo)
@@ -115,12 +115,24 @@ struct ListingDetailBottomBar: View {
                         }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(isLiked ? "찜 해제" : "찜하기")
-                .accessibilityValue(isLiked ? "찜한 매물" : "찜하지 않은 매물")
+                .accessibilityLabel(
+                    Text(
+                        isLiked
+                            ? LocalizedStringResource.listingDetailLikeActionUnlike
+                            : LocalizedStringResource.listingDetailLikeActionLike
+                    )
+                )
+                .accessibilityValue(
+                    Text(
+                        isLiked
+                            ? LocalizedStringResource.listingDetailLikeAccessibilityLiked
+                            : LocalizedStringResource.listingDetailLikeAccessibilityNotLiked
+                    )
+                )
             }
 
             Button(action: onApplyTap) {
-                Text("listingDetail.action.apply")
+                Text(.listingDetailActionApply)
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.staticWhite)
                     .frame(maxWidth: .infinity)
@@ -234,7 +246,7 @@ struct ListingDetailApplicationPanel: View {
             HStack(spacing: 12) {
                 Text(
                     selectedRoomOffer?.name
-                        ?? AppLanguage(locale: locale).localized("listingDetail.field.roomType")
+                        ?? AppLanguage(locale: locale).localized(.listingDetailFieldRoomType)
                 )
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(isRoomTypeSelectorPresented || selectedRoomOffer != nil ? .labelStrong : .labelNeutral)
@@ -262,7 +274,7 @@ struct ListingDetailApplicationPanel: View {
     private var sheetBottomBar: some View {
         VStack(spacing: 0) {
             Button(action: onApplyTap) {
-                Text("listingDetail.action.apply")
+                Text(.listingDetailActionApply)
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.staticWhite)
                     .frame(maxWidth: .infinity)

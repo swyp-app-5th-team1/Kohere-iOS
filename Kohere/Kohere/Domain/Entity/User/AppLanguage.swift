@@ -2,54 +2,70 @@
 //  AppLanguage.swift
 //  Kohere
 //
-//  Created by Codex on 7/18/26.
+//  Created by soomin on 8/9/26.
 //
 
 import Foundation
 
-enum AppLanguage: String, CaseIterable, Codable, Equatable, Sendable {
-    case korean = "ko"
-    case english = "en"
+nonisolated enum AppLanguage: CaseIterable, Codable, Equatable, Sendable {
+    case korean
+    case english
 
-    static var systemDefault: Self {
-        Bundle.main.preferredLocalizations.first?.hasPrefix("ko") == true
-            ? .korean
-            : .english
-    }
-
-    nonisolated var locale: Locale {
-        Locale(identifier: rawValue)
-    }
-
-    nonisolated init(locale: Locale) {
-        self = locale.language.languageCode?.identifier == Self.korean.rawValue
-            ? .korean
-            : .english
-    }
-
-    nonisolated func localized(_ key: String, fallback: String? = nil) -> String {
-        guard let path = Bundle.main.path(forResource: rawValue, ofType: "lproj"),
-              let bundle = Bundle(path: path) else {
-            return Bundle.main.localizedString(
-                forKey: key,
-                value: fallback ?? key,
-                table: nil
-            )
+    var apiCode: String {
+        switch self {
+        case .korean:
+            "ko"
+        case .english:
+            "en"
         }
-
-        return bundle.localizedString(
-            forKey: key,
-            value: fallback ?? key,
-            table: nil
-        )
     }
 
-    var title: String {
+    var localeIdentifier: String {
+        switch self {
+        case .korean:
+            "ko-KR"
+        case .english:
+            "en-US"
+        }
+    }
+
+    var locale: Locale {
+        Locale(identifier: localeIdentifier)
+    }
+
+    var nativeDisplayName: String {
         switch self {
         case .korean:
             "한국어"
         case .english:
             "English"
         }
+    }
+
+    init?(apiCode: String) {
+        switch apiCode.lowercased() {
+        case "ko":
+            self = .korean
+        case "en":
+            self = .english
+        default:
+            return nil
+        }
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let apiCode = try container.decode(String.self)
+
+        guard let language = Self(apiCode: apiCode) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unsupported app language code: \(apiCode)")
+        }
+
+        self = language
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(apiCode)
     }
 }

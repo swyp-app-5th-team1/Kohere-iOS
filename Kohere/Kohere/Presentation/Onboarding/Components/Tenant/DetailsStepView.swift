@@ -42,14 +42,14 @@ struct DetailsStepView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 72) {
-            Text("onboarding.tenant.details.title")
+            Text(.onboardingTenantDetailsTitle)
                 .kohereTextStyle(.heading1Bold)
                 .foregroundColor(.neutral90)
                 .padding(.top, 40)
             
             VStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("onboarding.profile.visaStatus")
+                    Text(.onboardingProfileVisaStatus)
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
                     
@@ -60,7 +60,7 @@ struct DetailsStepView: View {
                 
                 HStack(spacing: 8) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("onboarding.profile.nationality")
+                        Text(.onboardingProfileNationality)
                             .kohereTextStyle(.label2Semibold)
                             .foregroundStyle(.neutral90)
                         
@@ -70,7 +70,7 @@ struct DetailsStepView: View {
                     .zIndex(2)
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("onboarding.profile.gender")
+                        Text(.onboardingProfileGender)
                             .kohereTextStyle(.label2Semibold)
                             .foregroundStyle(.neutral90)
                         

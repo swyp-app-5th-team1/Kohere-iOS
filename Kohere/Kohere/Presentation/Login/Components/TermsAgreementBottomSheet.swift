@@ -36,7 +36,7 @@ struct TermsAgreementBottomSheet: View {
                 .padding(.top, 12)
             
             VStack(alignment: .leading) {
-                Text("login.terms.title")
+                Text(.loginTermsTitle)
                     .kohereTextStyle(.heading2Bold)
                     .foregroundColor(.neutral80)
                     .multilineTextAlignment(.leading)
@@ -46,7 +46,7 @@ struct TermsAgreementBottomSheet: View {
             .padding(.horizontal, 40)
             
             VStack(alignment: .leading, spacing: 0) {
-                Text("login.terms.requiredSectionTitle")
+                Text(.loginTermsRequiredSectionTitle)
                     .kohereTextStyle(.caption1Regular)
                     .foregroundColor(.neutral60)
                     .padding(.bottom, 12)
@@ -60,7 +60,7 @@ struct TermsAgreementBottomSheet: View {
                             .foregroundColor(isRequiredTermsAgreed ? .statusInfo : .labelAssistive)
                             .frame(width: 24, height: 24)
 
-                        Text("login.terms.agreeAllRequired")
+                        Text(.loginTermsAgreeAllRequired)
                             .kohereTextStyle(.label1Semibold)
                             .foregroundColor(.neutral80)
 
@@ -78,7 +78,7 @@ struct TermsAgreementBottomSheet: View {
                     .padding(.bottom, 6)
                 
                 agreementRow(
-                    title: "login.terms.serviceRequired.title",
+                    title: .loginTermsServiceRequiredTitle,
                     isAgreed: isServiceTermsAgreed,
                     bottomHitPadding: 22,
                     onAgreementTapped: onServiceTermsAgreementTapped,
@@ -88,7 +88,7 @@ struct TermsAgreementBottomSheet: View {
                 )
                 
                 agreementRow(
-                    title: "login.terms.privacyRequired.title",
+                    title: .loginTermsPrivacyRequiredTitle,
                     isAgreed: isPrivacyTermsAgreed,
                     bottomHitPadding: 22,
                     onAgreementTapped: onPrivacyTermsAgreementTapped,
@@ -98,7 +98,7 @@ struct TermsAgreementBottomSheet: View {
                 )
                 
                 agreementRow(
-                    title: "login.terms.marketingOptional.title",
+                    title: .loginTermsMarketingOptionalTitle,
                     isAgreed: isMarketingCommunicationsAgreed,
                     bottomHitPadding: 12,
                     onAgreementTapped: onMarketingCommunicationsAgreementTapped,
@@ -118,7 +118,7 @@ struct TermsAgreementBottomSheet: View {
                         onStartTapped()
                     }
                 } label: {
-                    Text("login.terms.startButton")
+                    Text(.loginTermsStartButton)
                         .kohereTextStyle(.label1Semibold)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -137,7 +137,7 @@ struct TermsAgreementBottomSheet: View {
 
 private extension TermsAgreementBottomSheet {
     func agreementRow(
-        title: LocalizedStringKey,
+        title: LocalizedStringResource,
         isAgreed: Bool,
         bottomHitPadding: CGFloat,
         onAgreementTapped: @escaping () -> Void,

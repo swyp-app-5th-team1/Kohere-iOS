@@ -24,14 +24,14 @@ struct RecentlyViewedView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("home.recentListings.title")
+                Text(.homeRecentListingsTitle)
                     .kohereTextStyle(.heading3Semibold)
                     .foregroundColor(.neutral90)
                 
                 Spacer()
                 
                 Button(action: onSeeAllTapped) {
-                    Text("common.seeAll")
+                    Text(.commonSeeAll)
                         .kohereTextStyle(.body3Regular)
                         .foregroundColor(.labelNeutral)
                 }
@@ -57,13 +57,13 @@ struct RecentlyViewedView: View {
                 .resizable()
                 .frame(width: 152, height: 152)
             
-            Text("home.recentListings.empty.message")
+            Text(.homeRecentListingsEmptyMessage)
                 .kohereTextStyle(.caption1Regular)
                 .foregroundColor(.labelAlternative)
                 .multilineTextAlignment(.center)
             
             Button(action: onBrowseTapped) {
-                Text("common.browseListings")
+                Text(.commonBrowseListings)
                     .kohereTextStyle(.label3Semibold)
                     .foregroundColor(.common0)
                     .padding(.horizontal, 10)

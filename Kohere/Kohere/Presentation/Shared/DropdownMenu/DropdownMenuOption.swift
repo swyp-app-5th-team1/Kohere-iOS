@@ -31,11 +31,11 @@ extension DropdownMenuOption {
         }
 
         if let gender {
-            return AppLanguage(locale: locale).localized(gender.localizationKey)
+            return AppLanguage(locale: locale).localized(gender.localizedResource)
         }
 
         if let visaType {
-            return AppLanguage(locale: locale).localized(visaType.localizationKey)
+            return AppLanguage(locale: locale).localized(visaType.localizedResource)
         }
 
         return option
@@ -191,12 +191,12 @@ private extension Gender {
         }
     }
 
-    nonisolated var localizationKey: String {
+    var localizedResource: LocalizedStringResource {
         switch self {
         case .male:
-            "account.gender.male"
+            .accountGenderMale
         case .female:
-            "account.gender.female"
+            .accountGenderFemale
         }
     }
 }
@@ -227,28 +227,28 @@ private extension VisaType {
         }
     }
 
-    nonisolated var localizationKey: String {
+    var localizedResource: LocalizedStringResource {
         switch self {
         case .shortTermVisit:
-            "onboarding.option.visa.shortTermVisit"
+            .onboardingOptionVisaShortTermVisit
         case .studentsTrainees:
-            "onboarding.option.visa.studentsTrainees"
+            .onboardingOptionVisaStudentsTrainees
         case .nonProfessionalWorkers:
-            "onboarding.option.visa.nonProfessionalWorkers"
+            .onboardingOptionVisaNonProfessionalWorkers
         case .workingHolidayWorkAndVisit:
-            "onboarding.option.visa.workingHolidayWorkAndVisit"
+            .onboardingOptionVisaWorkingHolidayWorkAndVisit
         case .overseasKoreans:
-            "onboarding.option.visa.overseasKoreans"
+            .onboardingOptionVisaOverseasKoreans
         case .familyMarriageMigrants:
-            "onboarding.option.visa.familyMarriageMigrants"
+            .onboardingOptionVisaFamilyMarriageMigrants
         case .permanentResidents:
-            "onboarding.option.visa.permanentResidents"
+            .onboardingOptionVisaPermanentResidents
         case .professionals:
-            "onboarding.option.visa.professionals"
+            .onboardingOptionVisaProfessionals
         case .diplomaticOfficialAndOthers:
-            "onboarding.option.visa.diplomaticOfficialAndOthers"
+            .onboardingOptionVisaDiplomaticOfficialAndOthers
         case .etc:
-            "onboarding.option.visa.etc"
+            .onboardingOptionVisaEtc
         }
     }
 }

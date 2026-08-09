@@ -102,7 +102,7 @@ struct RangeSlider: View {
             }
             .contentShape(Circle())
             .accessibilityLabel(Text(thumb.accessibilityLabel(locale: locale)))
-            .accessibilityValue(Text("\(thumb.value(in: value))"))
+            .accessibilityValue(Text(verbatim: String(thumb.value(in: value))))
             .accessibilityAdjustableAction { direction in
                 adjust(thumb, direction: direction)
             }
@@ -167,9 +167,9 @@ struct RangeSlider: View {
         func accessibilityLabel(locale: Locale) -> String {
             switch self {
             case .minimum:
-                String(localized: "rangeSlider.accessibility.minimum", locale: locale)
+                AppLanguage(locale: locale).localized(.rangeSliderAccessibilityMinimum)
             case .maximum:
-                String(localized: "rangeSlider.accessibility.maximum", locale: locale)
+                AppLanguage(locale: locale).localized(.rangeSliderAccessibilityMaximum)
             }
         }
 

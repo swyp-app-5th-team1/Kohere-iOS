@@ -42,7 +42,7 @@ struct HomeRecentlyViewedFeature {
         
         init(
             userType: UserType? = nil,
-            appLanguage: AppLanguage = .systemDefault,
+            appLanguage: AppLanguage = .english,
             items: [ListingItemModel] = []
         ) {
             self.userType = userType

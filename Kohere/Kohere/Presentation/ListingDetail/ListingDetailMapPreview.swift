@@ -27,7 +27,7 @@ struct ListingDetailMapPreview: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("지도에서 위치 보기")
+                .accessibilityLabel(Text(.listingDetailMapAccessibilityOpen))
             }
         }
         .aspectRatio(16.0 / 9.0, contentMode: .fit)

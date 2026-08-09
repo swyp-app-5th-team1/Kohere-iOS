@@ -123,13 +123,13 @@ struct ListingApplicationSummaryCard: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 VStack(spacing: 12) {
-                    badgeRow(title: language.localized("listingApplication.review.field.roomType"), value: roomTypeName)
-                    badgeRow(title: language.localized("listingApplication.review.field.moveInDate"), value: moveInDateText)
-                    badgeRow(title: language.localized("listingApplication.review.field.moveOutDate"), value: moveOutDateText)
+                    badgeRow(title: language.localized(.listingApplicationReviewFieldRoomType), value: roomTypeName)
+                    badgeRow(title: language.localized(.listingApplicationReviewFieldMoveInDate), value: moveInDateText)
+                    badgeRow(title: language.localized(.listingApplicationReviewFieldMoveOutDate), value: moveOutDateText)
                 }
 
-                plainRow(title: language.localized("listingApplication.review.field.leaseTerm"), value: rentalPeriodText)
-                plainRow(title: language.localized("listingApplication.review.field.cost"), value: priceText)
+                plainRow(title: language.localized(.listingApplicationReviewFieldLeaseTerm), value: rentalPeriodText)
+                plainRow(title: language.localized(.listingApplicationReviewFieldCost), value: priceText)
             }
         }
         .padding(16)
@@ -196,7 +196,7 @@ struct ListingApplicationApplicantCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("listingApplication.applicant.title")
+            Text(.listingApplicationApplicantTitle)
                 .kohereTextStyle(.heading3Semibold)
                 .foregroundStyle(.neutral80)
 
@@ -228,7 +228,7 @@ struct ListingApplicationApplicantCard: View {
                 TextField(
                     "",
                     text: $phoneNumber,
-                    prompt: Text("listingApplication.applicant.phone.placeholder")
+                    prompt: Text(.listingApplicationApplicantPhonePlaceholder)
                         .foregroundColor(.coolNeutral20)
                 )
                     .kohereTextStyle(.label2Medium)
@@ -238,7 +238,7 @@ struct ListingApplicationApplicantCard: View {
                     .textInputAutocapitalization(.never)
                     .focused(isPhoneNumberFocused)
 
-                Text("*")
+                Text(verbatim: "*")
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(.statusDanger)
             }
@@ -256,7 +256,7 @@ struct ListingApplicationApplicantCard: View {
             }
 
             if showsPhoneNumberError {
-                Text("listingApplication.applicant.phone.required")
+                Text(.listingApplicationApplicantPhoneRequired)
                     .kohereTextStyle(.caption1Regular)
                     .foregroundStyle(.statusDanger)
                     .padding(.horizontal, 8)
@@ -352,7 +352,7 @@ struct ListingApplicationAgreementCard: View {
                     .frame(width: 24, height: 24)
                     .foregroundStyle(isChecked ? .statusInfo : .labelAssistive)
 
-                Text("listingApplication.privacy.thirdParty.agreement")
+                Text(.listingApplicationPrivacyThirdPartyAgreement)
                     .kohereTextStyle(.label2Medium)
                     .foregroundStyle(.neutral70)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -379,12 +379,12 @@ struct ListingApplicationConfirmationNotice: View {
                     .frame(width: 16, height: 16)
                     .foregroundStyle(.statusInfo)
 
-                Text("listingApplication.notice.title")
+                Text(.listingApplicationNoticeTitle)
                     .kohereTextStyle(.caption2Semibold)
                     .foregroundStyle(.statusInfo)
             }
 
-            Text("listingApplication.notice.message")
+            Text(.listingApplicationNoticeMessage)
                 .kohereTextStyle(.caption1Regular)
                 .foregroundStyle(.labelAlternative)
         }

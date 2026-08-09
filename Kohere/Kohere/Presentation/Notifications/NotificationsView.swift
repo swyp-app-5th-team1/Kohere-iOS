@@ -22,7 +22,7 @@ struct NotificationsView: View {
         VStack(spacing: 0) {
             KohereNavigationBar(
                 left: .backButton({ store.send(.backButtonTapped) }),
-                center: .text(AppLanguage(locale: locale).localized("notifications.title")),
+                center: .text(AppLanguage(locale: locale).localized(.notificationsTitle)),
                 right: .none
             )
             
@@ -31,7 +31,7 @@ struct NotificationsView: View {
                 .frame(height: 1)
             
             KohereEmptyView(
-                title: AppLanguage(locale: locale).localized("notifications.empty.title")
+                title: AppLanguage(locale: locale).localized(.notificationsEmptyTitle)
             )
         }
         .background(.backgroundNormalNormal)

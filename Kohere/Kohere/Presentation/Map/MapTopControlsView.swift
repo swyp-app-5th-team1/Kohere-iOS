@@ -40,7 +40,7 @@ struct MapTopControlsView: View {
                         .frame(width: 24, height: 24)
                         .foregroundStyle(.neutral70)
 
-                    Text(searchDisplayText ?? language.localized("search.placeholder"))
+                    Text(verbatim: searchDisplayText ?? language.localized(.searchPlaceholder))
                         .kohereTextStyle(.label1Medium)
                         .foregroundStyle(searchDisplayText == nil ? .coolNeutral20 : .coolNeutral80)
                         .lineLimit(1)
@@ -55,7 +55,7 @@ struct MapTopControlsView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(
                 searchDisplayText
-                    ?? language.localized("map.search.accessibility")
+                    ?? language.localized(.mapSearchAccessibility)
             )
 
             if searchDisplayText != nil {
@@ -66,7 +66,7 @@ struct MapTopControlsView: View {
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(language.localized("map.search.clear"))
+                .accessibilityLabel(language.localized(.mapSearchClear))
             }
         }
         .padding(.leading, 16)
@@ -89,7 +89,7 @@ struct MapTopControlsView: View {
                     .frame(width: 16, height: 16)
                     .foregroundStyle(.blue100)
 
-                Text("map.researchAreaButton")
+                Text(.mapResearchAreaButton)
                     .kohereTextStyle(.label2Medium)
                     .foregroundStyle(.blue100)
             }

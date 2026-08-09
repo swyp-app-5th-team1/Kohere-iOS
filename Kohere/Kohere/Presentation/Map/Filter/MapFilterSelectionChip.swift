@@ -14,7 +14,7 @@ struct MapFilterSelectionChip: View {
 
     var body: some View {
         Button(action: action) {
-            Text(title)
+            Text(verbatim: title)
                 .kohereTextStyle(.label3Medium)
                 .foregroundStyle(isSelected ? .primaryNormal : .labelNeutral)
                 .padding(.horizontal, 12)

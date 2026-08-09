@@ -5,7 +5,7 @@ extension RootFeature {
     struct State: Equatable {
         var authInfo: Auth?
         var currentUser: UserProfile?
-        var appLanguage: AppLanguage = .systemDefault
+        var appLanguage: AppLanguage = .english
         var isAuthLoading = true
         var isSplashMinimumDurationElapsed = false
         var isCurrentUserLoading = false

@@ -9,7 +9,7 @@ import Foundation
 
 enum MapFilterPriceFormatter {
     static func amountText(_ tenThousandWon: Int, locale: Locale) -> String {
-        if locale.language.languageCode?.identifier == AppLanguage.korean.rawValue {
+        if locale.language.languageCode?.identifier == AppLanguage.korean.apiCode {
             return "\(tenThousandWon)만 원"
         }
 
@@ -27,23 +27,23 @@ enum MapFilterPriceFormatter {
             maximumBoundary: bounds.upperBound
         ) {
         case .all:
-            return AppLanguage(locale: locale).localized("map.filter.any")
+            return AppLanguage(locale: locale).localized(.mapFilterAny)
         case let .upperBound(maximum):
             return localizedPriceText(
-                key: "map.filter.price.underFormat",
-                amounts: [maximum],
+                resource: .mapFilterPriceUnderFormat(amountText(maximum, locale: locale)),
                 locale: locale
             )
         case let .lowerBound(minimum):
             return localizedPriceText(
-                key: "map.filter.price.upperOnlyFormat",
-                amounts: [minimum],
+                resource: .mapFilterPriceUpperOnlyFormat(amountText(minimum, locale: locale)),
                 locale: locale
             )
         case let .range(minimum, maximum):
             return localizedPriceText(
-                key: "map.filter.price.rangeFormat",
-                amounts: [minimum, maximum],
+                resource: .mapFilterPriceRangeFormat(
+                    amountText(minimum, locale: locale),
+                    amountText(maximum, locale: locale)
+                ),
                 locale: locale
             )
         }
@@ -94,22 +94,34 @@ enum MapFilterPriceFormatter {
         case .all:
             return nil
         case let .upperBound(maximum):
-            return "\(prefix) \(localizedPriceText(key: "map.filter.price.underFormat", amounts: [maximum], locale: locale))"
+            let price = localizedPriceText(
+                resource: .mapFilterPriceUnderFormat(amountText(maximum, locale: locale)),
+                locale: locale
+            )
+            return "\(prefix) \(price)"
         case let .lowerBound(minimum):
-            return "\(prefix) \(localizedPriceText(key: "map.filter.price.upperOnlyFormat", amounts: [minimum], locale: locale))"
+            let price = localizedPriceText(
+                resource: .mapFilterPriceUpperOnlyFormat(amountText(minimum, locale: locale)),
+                locale: locale
+            )
+            return "\(prefix) \(price)"
         case let .range(minimum, maximum):
-            return "\(prefix) \(localizedPriceText(key: "map.filter.price.rangeFormat", amounts: [minimum, maximum], locale: locale))"
+            let price = localizedPriceText(
+                resource: .mapFilterPriceRangeFormat(
+                    amountText(minimum, locale: locale),
+                    amountText(maximum, locale: locale)
+                ),
+                locale: locale
+            )
+            return "\(prefix) \(price)"
         }
     }
 
     private static func localizedPriceText(
-        key: String,
-        amounts: [Int],
+        resource: LocalizedStringResource,
         locale: Locale
     ) -> String {
-        let format = AppLanguage(locale: locale).localized(key)
-        let localizedAmounts = amounts.map { amountText($0, locale: locale) as CVarArg }
-        return String(format: format, locale: locale, arguments: localizedAmounts)
+        AppLanguage(locale: locale).localized(resource)
     }
 
     private static func compactWonText(_ tenThousandWon: Int) -> String {

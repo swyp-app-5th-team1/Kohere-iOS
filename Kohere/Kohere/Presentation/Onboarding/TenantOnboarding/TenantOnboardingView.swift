@@ -95,7 +95,11 @@ private extension TenantOnboardingView {
                     store.send(.nextButtonTapped)
                 }
             } label: {
-                Text(store.isOnboardingSubmitting ? String(localized: "common.loading", locale: locale) : store.primaryButtonTitle)
+                Text(
+                    verbatim: store.isOnboardingSubmitting
+                        ? AppLanguage(locale: locale).localized(.commonLoading)
+                        : store.primaryButtonTitle
+                )
                     .kohereTextStyle(.label1Semibold)
                     .foregroundColor(.staticWhite)
                     .frame(maxWidth: .infinity)

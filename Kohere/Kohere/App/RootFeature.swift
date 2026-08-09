@@ -215,7 +215,7 @@ struct RootFeature {
             case let .more(.userProfileUpdated(userProfile)):
                 if userProfile.userType == .landlord,
                    state.appLanguage != .korean {
-                    try? userDefaultsClient.save(AppLanguage.korean.rawValue, for: .appLanguage)
+                    try? userDefaultsClient.save(AppLanguage.korean.apiCode, for: .appLanguage)
                     let selectedTab = state.selectedTab
                     let cancellation = resetMainContent(language: .korean, userProfile: userProfile,
                                                         selectedTab: selectedTab, state: &state)
@@ -238,7 +238,7 @@ struct RootFeature {
 
             case let .more(.languageUpdateResponse(language, .success(userProfile))):
                 let resolvedLanguage = userProfile.userType == .landlord ? AppLanguage.korean : language
-                try? userDefaultsClient.save(resolvedLanguage.rawValue, for: .appLanguage)
+                try? userDefaultsClient.save(resolvedLanguage.apiCode, for: .appLanguage)
                 let cancellation = resetMainContent(language: resolvedLanguage, userProfile: userProfile, state: &state)
                 return .concatenate(cancellation, .merge(.send(.home(.onAppear)), .send(.more(.onAppear))))
 
@@ -263,7 +263,7 @@ struct RootFeature {
             case let .logoutResponse(.failure(error)):
                 if case LogoutError.localAuthCleanupFailed = error {
                     state.isLogoutRequesting = false
-                    state.popup = .notice(AppPopup.Notice(message: state.appLanguage.localized("settings.logout.failure")))
+                    state.popup = .notice(AppPopup.Notice(message: state.appLanguage.localized(.settingsLogoutFailure)))
                     return .none
                 }
 
@@ -299,7 +299,7 @@ struct RootFeature {
 
             case .deleteAccountResponse(.failure):
                 state.isDeleteAccountRequesting = false
-                state.popup = .notice(AppPopup.Notice(message: state.appLanguage.localized("settings.withdrawal.failure")))
+                state.popup = .notice(AppPopup.Notice(message: state.appLanguage.localized(.settingsWithdrawalFailure)))
                 return .none
 
             case .deleteAccountLocalCleanupResponse(.success):
@@ -322,8 +322,8 @@ extension RootFeature {
         guard state.authInfo?.onboardingRequired != false else { return .none }
 
         state.popup = .action(
-            AppPopup.Action(message: state.appLanguage.localized("authGate.message"), primaryTitle: state.appLanguage.localized("authGate.signIn"),
-                            secondaryTitle: state.appLanguage.localized("authGate.notNow"), primaryRoute: .signIn, secondaryRoute: returnsToHomeOnDismiss ? .home : nil)
+            AppPopup.Action(message: state.appLanguage.localized(.authGateMessage), primaryTitle: state.appLanguage.localized(.authGateSignIn),
+                            secondaryTitle: state.appLanguage.localized(.authGateNotNow), primaryRoute: .signIn, secondaryRoute: returnsToHomeOnDismiss ? .home : nil)
         )
         return .none
     }

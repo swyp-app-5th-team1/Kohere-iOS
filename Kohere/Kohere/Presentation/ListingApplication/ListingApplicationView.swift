@@ -94,14 +94,14 @@ struct ListingApplicationView: View {
     private var dateSelectionBottomBar: some View {
         HStack(spacing: 8) {
             ListingApplicationBottomButton(
-                title: store.appLanguage.localized("listingApplication.action.back"),
+                title: store.appLanguage.localized(.listingApplicationActionBack),
                 style: .secondary
             ) {
                 store.send(.previousButtonTapped)
             }
 
             ListingApplicationBottomButton(
-                title: store.appLanguage.localized("listingApplication.action.apply"),
+                title: store.appLanguage.localized(.listingApplicationActionApply),
                 style: .primary
             ) {
                 store.send(.dateSelectionApplyButtonTapped)
@@ -116,7 +116,7 @@ struct ListingApplicationView: View {
     private var reviewView: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("listingApplication.review.prompt")
+                Text(.listingApplicationReviewPrompt)
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.labelNormal)
 
@@ -220,8 +220,8 @@ struct ListingApplicationView: View {
                 moveOutDateText: store.moveOutReviewText,
                 rentalPeriodText: store.rentalPeriodText,
                 priceText: store.roomPricingText,
-                closeButtonTitle: store.appLanguage.localized("listingApplication.action.close"),
-                confirmButtonTitle: store.appLanguage.localized("listingApplication.action.view"),
+                closeButtonTitle: store.appLanguage.localized(.listingApplicationActionClose),
+                confirmButtonTitle: store.appLanguage.localized(.listingApplicationActionView),
                 onCloseTap: { store.send(.completionCloseButtonTapped) },
                 onConfirmTap: { store.send(.completionConfirmButtonTapped) }
             )
@@ -280,11 +280,11 @@ private struct ListingApplicationCompletionPopup: View {
             .frame(width: 48, height: 48)
 
             VStack(spacing: 8) {
-                Text("listingApplication.completion.title")
+                Text(.listingApplicationCompletionTitle)
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.coolNeutral90)
 
-                Text("listingApplication.completion.message")
+                Text(.listingApplicationCompletionMessage)
                     .kohereTextStyle(.caption1Regular)
                     .foregroundStyle(.coolNeutral50)
                     .multilineTextAlignment(.center)
@@ -294,15 +294,15 @@ private struct ListingApplicationCompletionPopup: View {
 
     private var summary: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("listingApplication.completion.summaryTitle")
+            Text(.listingApplicationCompletionSummaryTitle)
                 .kohereTextStyle(.label3Semibold)
                 .foregroundStyle(.coolNeutral80)
 
             VStack(spacing: 12) {
-                summaryRow(title: language.localized("listingApplication.field.moveInDate"), value: moveInDateText)
-                summaryRow(title: language.localized("listingApplication.field.moveOutDate"), value: moveOutDateText)
-                summaryRow(title: language.localized("listingApplication.review.field.leaseTerm"), value: rentalPeriodText)
-                summaryRow(title: language.localized("listingApplication.review.field.cost"), value: priceText)
+                summaryRow(title: language.localized(.listingApplicationFieldMoveInDate), value: moveInDateText)
+                summaryRow(title: language.localized(.listingApplicationFieldMoveOutDate), value: moveOutDateText)
+                summaryRow(title: language.localized(.listingApplicationReviewFieldLeaseTerm), value: rentalPeriodText)
+                summaryRow(title: language.localized(.listingApplicationReviewFieldCost), value: priceText)
             }
         }
         .padding(.horizontal, 16)

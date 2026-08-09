@@ -13,7 +13,7 @@ struct MapFilterSection<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(title)
+            Text(verbatim: title)
                 .kohereTextStyle(.heading3Semibold)
                 .foregroundStyle(.common100)
                 .frame(maxWidth: .infinity, alignment: .leading)

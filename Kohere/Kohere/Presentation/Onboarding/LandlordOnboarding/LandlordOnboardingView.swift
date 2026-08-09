@@ -48,7 +48,7 @@ struct LandlordOnboardingView: View {
                     .padding(.horizontal, 20)
             }
         }
-        .environment(\.locale, AppLanguage.korean.locale)
+        .environment(\.locale, store.appLanguage.locale)
     }
 }
 
@@ -88,7 +88,11 @@ private extension LandlordOnboardingView {
                     store.send(.nextButtonTapped)
                 }
             } label: {
-                Text(store.isOnboardingSubmitting ? "로딩 중..." : store.primaryButtonTitle)
+                Text(
+                    verbatim: store.isOnboardingSubmitting
+                        ? store.appLanguage.localized(.commonLoading)
+                        : store.primaryButtonTitle
+                )
                     .kohereTextStyle(.label1Semibold)
                     .foregroundColor(.staticWhite)
                     .frame(maxWidth: .infinity)

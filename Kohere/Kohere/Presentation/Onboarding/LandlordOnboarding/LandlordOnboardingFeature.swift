@@ -45,6 +45,7 @@ struct LandlordOnboardingFeature {
     
     @ObservableState
     struct State: Equatable {
+        let appLanguage: AppLanguage
         var currentStep: Step = .nameAndBirth
         
         var name: String = ""
@@ -145,7 +146,7 @@ struct LandlordOnboardingFeature {
                 state.lastVerificationCodeSentPhoneNumber = state.phoneNumber
                 state.phoneVerificationCode = ""
                 state.isPhoneVerified = false
-                state.phoneMessage = "휴대폰으로 인증 코드를 보냈어요."
+                state.phoneMessage = state.appLanguage.localized(.onboardingPhoneVerificationCodeSent)
                 state.phoneVerificationCodeErrorMessage = nil
                 return .none
                 
@@ -154,7 +155,14 @@ struct LandlordOnboardingFeature {
                     return .none
                 }
                 state.isPhoneVerificationCodeRequesting = false
-                return .send(.popupRequested(OnboardingErrorPopup.make(context: .sendPhoneVerificationCode, language: .korean)))
+                return .send(
+                    .popupRequested(
+                        OnboardingErrorPopup.make(
+                            context: .sendPhoneVerificationCode,
+                            language: state.appLanguage
+                        )
+                    )
+                )
                 
             case .confirmPhoneVerificationCodeTapped:
                 let trimmedCode = state.phoneVerificationCode.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -185,7 +193,9 @@ struct LandlordOnboardingFeature {
                 state.isPhoneVerificationRequesting = false
                 state.isPhoneVerified = response.verified
                 state.phoneMessage = nil
-                state.phoneVerificationCodeErrorMessage = response.verified ? nil : "인증 코드가 올바르지 않아요. 다시 시도해주세요."
+                state.phoneVerificationCodeErrorMessage = response.verified
+                    ? nil
+                    : state.appLanguage.localized(.onboardingPhoneVerificationCodeInvalid)
                 return .none
                 
             case let .confirmPhoneVerificationCodeResponse(requestedPhoneNumber, requestedCode, .failure(error)):
@@ -195,10 +205,16 @@ struct LandlordOnboardingFeature {
                 }
                 state.isPhoneVerificationRequesting = false
                 if case let .serverError(code, _) = error, code == "AUTH_PHONE_VERIFICATION_FAILED" {
-                    state.phoneVerificationCodeErrorMessage = "인증 코드가 올바르지 않거나 만료됐어요. 다시 시도해주세요."
+                    state.phoneVerificationCodeErrorMessage = state.appLanguage.localized(
+                        .onboardingPhoneVerificationCodeInvalidOrExpired
+                    )
                     return .none
                 }
-                return .send(.popupRequested(OnboardingErrorPopup.make(context: .verifyPhone, language: .korean)))
+                return .send(
+                    .popupRequested(
+                        OnboardingErrorPopup.make(context: .verifyPhone, language: state.appLanguage)
+                    )
+                )
                 
             case .onboardingCompleted:
                 guard !state.isOnboardingSubmitting,
@@ -223,7 +239,11 @@ struct LandlordOnboardingFeature {
                 
             case .onboardingResponse(.failure):
                 state.isOnboardingSubmitting = false
-                return .send(.popupRequested(OnboardingErrorPopup.make(context: .completeProfile, language: .korean)))
+                return .send(
+                    .popupRequested(
+                        OnboardingErrorPopup.make(context: .completeProfile, language: state.appLanguage)
+                    )
+                )
 
             case .popupRequested:
                 return .none
@@ -240,7 +260,9 @@ extension LandlordOnboardingFeature.State {
     }
     
     var primaryButtonTitle: String {
-        currentStep == .phoneVerification ? "시작하기" : "다음"
+        currentStep == .phoneVerification
+            ? appLanguage.localized(.commonStart)
+            : appLanguage.localized(.commonNext)
     }
     
     var isNextButtonEnabled: Bool {

@@ -18,11 +18,11 @@ enum TermsDetailKind: String, Equatable, Identifiable {
     func title(language: AppLanguage) -> String {
         switch self {
         case .service:
-            language.localized("login.terms.service.title")
+            language.localized(.loginTermsServiceTitle)
         case .privacy:
-            language.localized("login.terms.privacy.title")
+            language.localized(.loginTermsPrivacyTitle)
         case .marketing:
-            language.localized("login.terms.marketing.title")
+            language.localized(.loginTermsMarketingTitle)
         }
     }
 
@@ -96,7 +96,7 @@ struct TermsDetailView: View {
             Button {
                 onAgreeTapped()
             } label: {
-                Text("common.agree")
+                Text(.commonAgree)
                     .kohereTextStyle(.label1Semibold)
                     .foregroundColor(.staticWhite)
                     .frame(maxWidth: .infinity)

@@ -216,7 +216,7 @@ struct MoveInApplicationCardView: View {
         case .landlord:
             return .korean
         case .tenant:
-            return locale.language.languageCode?.identifier == AppLanguage.korean.rawValue
+            return locale.language.languageCode?.identifier == AppLanguage.korean.apiCode
                 ? .korean
                 : .english
         }

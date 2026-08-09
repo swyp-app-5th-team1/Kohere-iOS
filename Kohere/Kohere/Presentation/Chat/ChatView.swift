@@ -22,7 +22,7 @@ struct ChatView: View {
         VStack(spacing: 8) {
             KohereNavigationBar(
                 left: .smallLogo,
-                center: .text(store.appLanguage.localized("chat.title"))
+                center: .text(store.appLanguage.localized(.chatTitle))
             )
             
             if store.isContentAvailable {
@@ -30,7 +30,7 @@ struct ChatView: View {
 
                 if store.chatRooms.isEmpty {
                     KohereEmptyView(
-                        title: store.appLanguage.localized("chat.empty.title"),
+                        title: store.appLanguage.localized(.chatEmptyTitle),
                         fontStyle: .label2Semibold,
                         fontColor: .neutral40
                     )
@@ -83,7 +83,7 @@ struct ChatView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 80)
                 .overlay(
-                    Text("common.roomFinderBanner.title")
+                    Text(.commonRoomFinderBannerTitle)
                         .kohereTextStyle(.heading3Semibold)
                         .foregroundStyle(.neutral5)
                         .padding(.leading, 16),
@@ -92,7 +92,7 @@ struct ChatView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text("common.roomFinderBanner.accessibility"))
+        .accessibilityLabel(Text(.commonRoomFinderBannerAccessibility))
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
     }

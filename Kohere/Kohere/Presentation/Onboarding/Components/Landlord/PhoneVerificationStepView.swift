@@ -20,20 +20,24 @@ struct PhoneVerificationStepView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 72) {
-            Text("사장님이 맞는지\n안전하게 확인해볼게요!")
+            Text(.onboardingLandlordPhoneVerificationTitle)
                 .kohereTextStyle(.heading1Bold)
                 .foregroundColor(.coolNeutral90)
                 .padding(.top, 40)
 
             VStack(alignment: .leading, spacing: 16) {
-                Text("전화번호")
+                Text(.onboardingProfilePhoneNumber)
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(.coolNeutral90)
 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
                         OnboardingTextField(text: $store.phoneNumber, activeField: $activeField, keyboardField: keyboardField,
-                                            equals: .phoneNumber, placeholder: "'-'를 제외하고 숫자만 입력해주세요", keyboardType: .phonePad)
+                                            equals: .phoneNumber,
+                                            placeholder: store.appLanguage.localized(
+                                                .onboardingProfilePhoneNumberPlaceholder
+                                            ),
+                                            keyboardType: .phonePad)
                         .allowsHitTesting(!store.isPhoneVerified && !store.isPhoneVerificationCodeRequesting)
 
                         Button {
@@ -54,7 +58,9 @@ struct PhoneVerificationStepView: View {
                             activeField: $activeField,
                             keyboardField: keyboardField,
                             equals: .phoneVerificationCode,
-                            placeholder: "전송된 6자리 코드를 입력해주세요",
+                            placeholder: store.appLanguage.localized(
+                                .onboardingPhoneVerificationCodePlaceholder
+                            ),
                             keyboardType: .numberPad,
                             hasError: store.phoneVerificationCodeErrorMessage != nil
                         )
@@ -79,7 +85,11 @@ struct PhoneVerificationStepView: View {
 
 extension PhoneVerificationStepView {
     private var verificationButtonTitle: some View {
-        Text(store.isPhoneVerified ? "인증완료" : (store.isPhoneCodeSent ? "재발송" : "인증"))
+        Text(
+            store.isPhoneVerified
+                ? .onboardingPhoneVerificationVerified
+                : (store.isPhoneCodeSent ? .onboardingPhoneVerificationResend : .onboardingPhoneVerificationVerify)
+        )
             .kohereTextStyle(.label2Medium)
             .foregroundColor(store.canSendPhoneVerificationCode && !store.isPhoneVerified && !store.isPhoneVerificationCodeRequesting ? .labelNormal : .labelAssistive)
             .frame(width: 80, height: 40)
@@ -88,7 +98,7 @@ extension PhoneVerificationStepView {
     }
 
     private var confirmButtonTitle: some View {
-        Text("확인")
+        Text(.commonConfirm)
             .kohereTextStyle(.label2Medium)
             .foregroundColor(store.canConfirmPhoneVerificationCode && !store.isPhoneVerified && !store.isPhoneVerificationRequesting ? .staticWhite : .labelAssistive)
             .frame(width: 80, height: 40)

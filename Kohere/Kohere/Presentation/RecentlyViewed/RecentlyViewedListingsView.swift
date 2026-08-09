@@ -22,7 +22,7 @@ struct RecentlyViewedListingsView: View {
         VStack(spacing: 0) {
             KohereNavigationBar(
                 left: .backButton({ store.send(.backButtonTapped) }),
-                center: .text(AppLanguage(locale: locale).localized("recentListings.title")),
+                center: .text(AppLanguage(locale: locale).localized(.recentListingsTitle)),
                 right: .none
             )
             
@@ -32,7 +32,7 @@ struct RecentlyViewedListingsView: View {
             
             if store.items.isEmpty {
                 KohereEmptyView(
-                    title: AppLanguage(locale: locale).localized("recentListings.empty.title")
+                    title: AppLanguage(locale: locale).localized(.recentListingsEmptyTitle)
                 )
             } else {
                 ScrollView {

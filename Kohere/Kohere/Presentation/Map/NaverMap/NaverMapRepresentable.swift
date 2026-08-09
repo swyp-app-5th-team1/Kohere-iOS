@@ -29,7 +29,7 @@ struct NaverMapRepresentable: UIViewRepresentable {
 
     func makeUIView(context: Context) -> NMFMapView {
         let mapView = InitialLayoutNMFMapView()
-        mapView.locale = appLanguage.rawValue
+        mapView.locale = appLanguage.apiCode
         mapView.addCameraDelegate(delegate: context.coordinator)
         mapView.onInitialLayout = { [weak coordinator = context.coordinator, weak mapView] in
             guard let mapView else { return }
@@ -39,7 +39,7 @@ struct NaverMapRepresentable: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: NMFMapView, context: Context) {
-        uiView.locale = appLanguage.rawValue
+        uiView.locale = appLanguage.apiCode
         context.coordinator.updateMarkersIfNeeded(markers, on: uiView)
         context.coordinator.updateSelectedMarkerIfNeeded(selectedMarkerID)
         context.coordinator.moveCameraIfNeeded(to: cameraMoveRequest, on: uiView)

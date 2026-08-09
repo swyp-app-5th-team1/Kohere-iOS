@@ -38,9 +38,9 @@ struct ChatRoomRowCell: View {
     private var statusText: String {
         switch participantRole {
         case .tenant:
-            return appLanguage.localized("chat.applicationSent.title")
+            return appLanguage.localized(.chatApplicationSentTitle)
         case .landlord:
-            return appLanguage.localized("chat.applicationReceived.title")
+            return appLanguage.localized(.chatApplicationReceivedTitle)
         }
     }
     

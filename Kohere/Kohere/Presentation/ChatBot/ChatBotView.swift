@@ -22,7 +22,7 @@ struct ChatBotView: View {
         VStack(alignment: .center, spacing: 0) {
             KohereNavigationBar(
                 left: .backButton({ store.send(.backButtonTapped) }),
-                center: .text(AppLanguage(locale: locale).localized("chatBot.title")),
+                center: .text(AppLanguage(locale: locale).localized(.chatBotTitle)),
                 backgroundColor: .backgroundNormalNormal,
                 height: 48
             )
@@ -105,7 +105,7 @@ extension ChatBotView {
                 Button {
                     store.send(.findButtonTapped)
                 } label: {
-                    Text(AppLanguage(locale: locale).localized("chatBot.action.find"))
+                    Text(AppLanguage(locale: locale).localized(.chatBotActionFind))
                         .kohereTextStyle(.label1Semibold)
                         .foregroundColor(store.isFindButtonEnabled ? .staticWhite : .labelDisable)
                         .frame(maxWidth: .infinity)

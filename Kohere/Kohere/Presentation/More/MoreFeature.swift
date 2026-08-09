@@ -41,7 +41,7 @@ struct MoreFeature {
         var userType: UserType?
         var userProfile: UserProfile?
         var isLanguagePopoverPresented = false
-        var selectedLanguage: AppLanguage = .systemDefault
+        var selectedLanguage: AppLanguage = .english
         var isLanguageUpdateLoading = false
         var livingGuides: [LivingGuide] = []
         var isLivingGuidesLoading: Bool = false
@@ -222,13 +222,13 @@ extension MoreFeature {
 
     private static func feedbackMailURL(language: AppLanguage) -> URL? {
         mailURL(
-            body: language.localized("more.support.feedbackMailBody")
+            body: language.localized(.moreSupportFeedbackMailBody)
         )
     }
 
     private static func collaborationMailURL(language: AppLanguage) -> URL? {
         mailURL(
-            body: language.localized("more.support.collaborationMailBody")
+            body: language.localized(.moreSupportCollaborationMailBody)
         )
     }
 
@@ -240,9 +240,5 @@ extension MoreFeature {
             URLQueryItem(name: "body", value: body)
         ]
         return components.url
-    }
-
-    static func localized(_ key: String, language: AppLanguage) -> String {
-        language.localized(key)
     }
 }

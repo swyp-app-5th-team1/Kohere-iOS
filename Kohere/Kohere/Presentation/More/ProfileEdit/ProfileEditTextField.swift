@@ -11,7 +11,7 @@ struct ProfileEditTextField: View {
 
     // MARK: - Properties
 
-    let title: String
+    let title: LocalizedStringResource
     @Binding var text: String
     @Binding var activeField: ProfileEditField?
     var keyboardField: FocusState<ProfileEditField?>.Binding
@@ -46,7 +46,7 @@ private extension ProfileEditTextField {
             Spacer(minLength: 0)
 
             if isRequired {
-                Text("*")
+                Text(verbatim: "*")
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(.statusDanger)
             }
@@ -92,7 +92,7 @@ private extension ProfileEditTextField {
 
     @ViewBuilder var characterCountText: some View {
         if let characterLimit {
-            Text("\(text.count)/\(characterLimit)")
+            Text(verbatim: "\(text.count)/\(characterLimit)")
                 .kohereTextStyle(.caption2Regular)
                 .foregroundStyle(.coolNeutral10)
         }

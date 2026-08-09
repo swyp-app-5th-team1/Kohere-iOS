@@ -22,19 +22,19 @@ enum ListingDetailSection: Int, CaseIterable, Identifiable {
     func fallbackTitle(language: AppLanguage) -> String {
         switch self {
         case .roomOffers:
-            return language.localized("listingDetail.tab.roomOffers")
+            return language.localized(.listingDetailTabRoomOffers)
         case .price:
-            return language.localized("listingDetail.tab.price")
+            return language.localized(.listingDetailTabPrice)
         case .property:
-            return language.localized("listingDetail.tab.property")
+            return language.localized(.listingDetailTabProperty)
         case .building:
-            return language.localized("listingDetail.tab.building")
+            return language.localized(.listingDetailTabBuilding)
         case .facility:
-            return language.localized("listingDetail.tab.facility")
+            return language.localized(.listingDetailTabFacility)
         case .location:
-            return language.localized("listingDetail.tab.location")
+            return language.localized(.listingDetailTabLocation)
         case .review:
-            return language.localized("listingDetail.tab.review")
+            return language.localized(.listingDetailTabReview)
         }
     }
 }

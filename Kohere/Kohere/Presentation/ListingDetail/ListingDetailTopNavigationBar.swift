@@ -16,7 +16,7 @@ struct ListingDetailTopNavigationBar: View {
         HStack {
             chromeButton(
                 imageName: "chevron_left_24",
-                accessibilityLabel: "뒤로가기",
+                accessibilityLabel: String(localized: .commonAccessibilityBack),
                 action: onBackTap
             )
 

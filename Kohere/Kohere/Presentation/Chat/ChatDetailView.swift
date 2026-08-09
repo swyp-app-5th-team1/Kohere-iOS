@@ -167,11 +167,11 @@ private extension ChatDetailView {
                 )
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("chat.applicationSent.title")
+                Text(.chatApplicationSentTitle)
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(.staticBlack)
                 
-                Text("chat.applicationSent.message")
+                Text(.chatApplicationSentMessage)
                     .kohereTextStyle(.body2Regular)
                     .foregroundStyle(.staticBlack)
             }
@@ -219,11 +219,11 @@ private extension ChatDetailView {
     
     var landlordRequestMessage: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("chat.applicationReceived.title")
+            Text(.chatApplicationReceivedTitle)
                 .kohereTextStyle(.label2Semibold)
                 .foregroundStyle(.staticBlack)
             
-            Text("chat.applicationReceived.message")
+            Text(.chatApplicationReceivedMessage)
                 .kohereTextStyle(.body2Regular)
                 .foregroundStyle(.staticBlack)
         }

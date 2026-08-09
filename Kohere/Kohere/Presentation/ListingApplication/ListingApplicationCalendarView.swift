@@ -53,12 +53,12 @@ struct ListingApplicationDateSelectionView: View {
                     .frame(width: 16, height: 16)
                     .foregroundStyle(.labelNormal)
 
-                Text("listingApplication.dateSelection.title")
+                Text(.listingApplicationDateSelectionTitle)
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.labelNormal)
             }
 
-            Text("listingApplication.dateSelection.subtitle")
+            Text(.listingApplicationDateSelectionSubtitle)
                 .kohereTextStyle(.caption1Regular)
                 .foregroundStyle(.labelAlternative)
                 .padding(.leading, 24)
@@ -142,13 +142,13 @@ struct ListingApplicationDateSelectionView: View {
 
     private var dateSummary: some View {
         HStack(spacing: 0) {
-            summaryColumn(title: language.localized("listingApplication.field.moveInDate"), value: moveInDateText)
+            summaryColumn(title: language.localized(.listingApplicationFieldMoveInDate), value: moveInDateText)
 
             Rectangle()
                 .fill(.lineNeutral)
                 .frame(width: 1, height: 40)
 
-            summaryColumn(title: language.localized("listingApplication.field.moveOutDate"), value: moveOutDateText)
+            summaryColumn(title: language.localized(.listingApplicationFieldMoveOutDate), value: moveOutDateText)
         }
         .frame(maxWidth: .infinity)
     }
@@ -182,7 +182,7 @@ struct ListingApplicationDateSelectionView: View {
             .opacity(rentalMonths <= 1 ? 0.35 : 1)
 
             VStack(spacing: 2) {
-                Text("listingApplication.field.contractPeriod")
+                Text(.listingApplicationFieldContractPeriod)
                     .kohereTextStyle(.caption1Regular)
                     .foregroundStyle(.labelAlternative)
 
@@ -236,7 +236,7 @@ private struct ListingApplicationCalendarGrid: View {
                     Button {
                         onDateTap(day.date)
                     } label: {
-                        Text("\(Self.calendar.component(.day, from: day.date))")
+                        Text(verbatim: String(Self.calendar.component(.day, from: day.date)))
                             .kohereTextStyle(.label2Medium)
                     }
                     .buttonStyle(

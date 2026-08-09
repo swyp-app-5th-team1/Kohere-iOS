@@ -21,9 +21,9 @@ extension MoreFeature {
             state.isLanguagePopoverPresented = false
             guard state.userType != .landlord, language != state.selectedLanguage else { return .none }
             return .send(.popupRequested(.action(AppPopup.Action(
-                message: Self.localized("language.change.resetNotice", language: state.selectedLanguage),
-                primaryTitle: Self.localized("language.change.confirm", language: state.selectedLanguage),
-                secondaryTitle: Self.localized("language.change.cancel", language: state.selectedLanguage),
+                message: state.selectedLanguage.localized(.languageChangeResetNotice),
+                primaryTitle: state.selectedLanguage.localized(.languageChangeConfirm),
+                secondaryTitle: state.selectedLanguage.localized(.languageChangeCancel),
                 route: .confirmLanguageChange(language)
             ))))
 
@@ -36,7 +36,7 @@ extension MoreFeature {
             let updateProfileUseCase = updateProfileUseCase
             return .run { send in
                 do {
-                    let profile = try await updateProfileUseCase.execute(UserProfileUpdate(lang: language.rawValue))
+                    let profile = try await updateProfileUseCase.execute(UserProfileUpdate(lang: language.apiCode))
                     await send(.languageUpdateResponse(language, .success(profile)))
                 } catch {
                     await send(.languageUpdateResponse(language, .failure(DataError.from(error))))
@@ -52,8 +52,8 @@ extension MoreFeature {
         case .languageUpdateResponse(_, .failure):
             state.isLanguageUpdateLoading = false
             return .send(.popupRequested(.notice(AppPopup.Notice(
-                message: Self.localized("language.change.failure", language: state.selectedLanguage),
-                confirmTitle: Self.localized("common.confirm", language: state.selectedLanguage)
+                message: state.selectedLanguage.localized(.languageChangeFailure),
+                confirmTitle: state.selectedLanguage.localized(.commonConfirm)
             ))))
 
         default:

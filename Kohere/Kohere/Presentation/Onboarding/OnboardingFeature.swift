@@ -26,7 +26,7 @@ struct OnboardingFeature {
 
         init(
             userType: OnboardingUserType = .tenant,
-            appLanguage: AppLanguage = .systemDefault,
+            appLanguage: AppLanguage = .english,
             socialName: String? = nil
         ) {
             self.userType = userType
@@ -37,7 +37,10 @@ struct OnboardingFeature {
                 self.landlord = nil
             case .landlord:
                 self.tenant = nil
-                self.landlord = LandlordOnboardingFeature.State(name: socialName ?? "")
+                self.landlord = LandlordOnboardingFeature.State(
+                    appLanguage: appLanguage,
+                    name: socialName ?? ""
+                )
             }
         }
     }

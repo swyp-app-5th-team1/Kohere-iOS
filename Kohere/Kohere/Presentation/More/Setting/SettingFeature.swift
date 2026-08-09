@@ -24,7 +24,7 @@ struct SettingFeature {
 
         init(
             appVersion: String = Bundle.main.shortVersionString,
-            language: AppLanguage = .systemDefault
+            language: AppLanguage = .english
         ) {
             self.appVersion = appVersion
             self.language = language
@@ -59,17 +59,14 @@ private extension SettingFeature {
     static func logoutPopup(language: AppLanguage) -> AppPopup {
         .action(
             AppPopup.Action(
-                message: localized("settings.logout.confirmMessage", language: language),
-                primaryTitle: localized("settings.popup.cancel", language: language),
-                secondaryTitle: localized("settings.logout.confirmAction", language: language),
+                message: language.localized(.settingsLogoutConfirmMessage),
+                primaryTitle: language.localized(.settingsPopupCancel),
+                secondaryTitle: language.localized(.settingsLogoutConfirmAction),
                 secondaryRoute: .logout
             )
         )
     }
 
-    static func localized(_ key: String, language: AppLanguage) -> String {
-        language.localized(key)
-    }
 }
 
 private extension Bundle {

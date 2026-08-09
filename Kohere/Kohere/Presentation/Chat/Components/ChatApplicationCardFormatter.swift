@@ -100,7 +100,7 @@ struct ChatApplicationCardFormatter {
     }
 
     func localized(_ key: String) -> String {
-        language.localized(key)
+        language.localizedString(forKey: key)
     }
 
     private var locale: Locale {

@@ -48,7 +48,7 @@ struct MapListingFilterChipItem: Identifiable {
         guard filter.hasSelectedOptions else {
             return MapListingFilterChipItem(
                 kind: .options,
-                title: language.localized("map.filter.section.options"),
+                title: language.localized(.mapFilterSectionOptions),
                 style: .plain,
                 showsChevron: true
             )
@@ -74,7 +74,7 @@ struct MapListingFilterChipItem: Identifiable {
         guard filter.hasSelectedPriceRange || source == .diagnosis else {
             return MapListingFilterChipItem(
                 kind: .price,
-                title: language.localized("map.filter.section.price"),
+                title: language.localized(.mapFilterSectionPrice),
                 style: .plain,
                 showsChevron: true
             )
@@ -97,7 +97,7 @@ struct MapListingFilterChipItem: Identifiable {
         guard filter.hasSelectedPropertyTypes else {
             return MapListingFilterChipItem(
                 kind: .propertyType,
-                title: language.localized("map.filter.section.propertyType"),
+                title: language.localized(.mapFilterSectionPropertyType),
                 style: .plain,
                 showsChevron: true
             )
@@ -131,7 +131,7 @@ struct MapListingFilterChipItem: Identifiable {
         let language = AppLanguage(locale: locale)
         let monthlyRentTitle = monthlyRentTitle(for: filter, source: source, locale: locale)
         let depositTitle = MapFilterPriceFormatter.chipTitle(
-            prefix: language.localized("map.filter.deposit"),
+            prefix: language.localized(.mapFilterDeposit),
             selection: filter.depositRange,
             defaultSelection: MapFilterPriceRange.defaultDeposit,
             locale: locale
@@ -141,7 +141,7 @@ struct MapListingFilterChipItem: Identifiable {
             .compactMap { $0 }
             .joined(separator: ", ")
 
-        return title.isEmpty ? language.localized("map.filter.section.price") : title
+        return title.isEmpty ? language.localized(.mapFilterSectionPrice) : title
     }
 
     private static func monthlyRentTitle(
@@ -153,14 +153,14 @@ struct MapListingFilterChipItem: Identifiable {
         return switch source {
         case .manual:
             MapFilterPriceFormatter.chipTitle(
-                prefix: language.localized("map.filter.monthlyRent"),
+                prefix: language.localized(.mapFilterMonthlyRent),
                 selection: filter.monthlyRentRange,
                 defaultSelection: MapFilterPriceRange.defaultMonthlyRent,
                 locale: locale
             )
         case .diagnosis:
             MapFilterPriceFormatter.chipTitle(
-                prefix: language.localized("map.filter.monthlyRent"),
+                prefix: language.localized(.mapFilterMonthlyRent),
                 selection: filter.monthlyRentRange,
                 bounds: MapFilterPriceRange.monthlyRent,
                 locale: locale

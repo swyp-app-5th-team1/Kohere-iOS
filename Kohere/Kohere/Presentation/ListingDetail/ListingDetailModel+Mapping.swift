@@ -93,14 +93,14 @@ extension ListingDetailModel {
         var rows: [ListingDetailInfoRowModel] = [
             ListingDetailInfoRowModel(
                 id: "rental-type",
-                title: language.localized("listingDetail.field.rentType"),
+                title: language.localized(.listingDetailFieldRentType),
                 value: listingDetail.rentalType.isEmpty
-                    ? language.localized("listingDetail.value.noRentalTypeInfo")
+                    ? language.localized(.listingDetailValueNoRentalTypeInfo)
                     : listingDetail.rentalType
             ),
             ListingDetailInfoRowModel(
                 id: "deposit",
-                title: language.localized("listingDetail.field.deposit"),
+                title: language.localized(.listingDetailFieldDeposit),
                 value: ListingDetailValueFormatter.priceRowValue(
                     min: deposits.min(),
                     max: deposits.max(),
@@ -109,7 +109,7 @@ extension ListingDetailModel {
             ),
             ListingDetailInfoRowModel(
                 id: "monthly-rent",
-                title: language.localized("listingDetail.field.monthlyRent"),
+                title: language.localized(.listingDetailFieldMonthlyRent),
                 value: ListingDetailValueFormatter.priceRowValue(
                     min: monthlyRents.min(),
                     max: monthlyRents.max(),
@@ -118,7 +118,7 @@ extension ListingDetailModel {
             ),
             ListingDetailInfoRowModel(
                 id: "maintenance-fee",
-                title: language.localized("listingDetail.field.maintenanceFee"),
+                title: language.localized(.listingDetailFieldMaintenanceFee),
                 value: ListingDetailValueFormatter.maintenanceFeeRowValue(
                     min: maintenanceFees.min(),
                     max: maintenanceFees.max(),
@@ -131,7 +131,7 @@ extension ListingDetailModel {
             rows.append(
                 ListingDetailInfoRowModel(
                     id: "refund-policy",
-                    title: language.localized("listingDetail.field.refundPolicy"),
+                    title: language.localized(.listingDetailFieldRefundPolicy),
                     value: refundPolicyValue(refundPolicy)
                 )
             )
@@ -153,7 +153,7 @@ extension ListingDetailModel {
             rows.append(
                 ListingDetailInfoRowModel(
                     id: "stay",
-                    title: language.localized("listingDetail.field.usagePeriod"),
+                    title: language.localized(.listingDetailFieldUsagePeriod),
                     value: contractTitle
                 )
             )
@@ -163,7 +163,7 @@ extension ListingDetailModel {
             rows.append(
                 ListingDetailInfoRowModel(
                     id: "gender",
-                    title: language.localized("listingDetail.field.genderPolicy"),
+                    title: language.localized(.listingDetailFieldGenderPolicy),
                     value: genderPolicy
                 )
             )
@@ -181,31 +181,31 @@ extension ListingDetailModel {
         return [
             optionalRow(
                 id: "building-type",
-                title: language.localized("listingDetail.field.buildingType"),
+                title: language.localized(.listingDetailFieldBuildingType),
                 value: building.type
             ),
             optionalRow(
                 id: "floor",
-                title: language.localized("listingDetail.field.floor"),
+                title: language.localized(.listingDetailFieldFloor),
                 value: ListingDetailValueFormatter.floorTitle(building, language: language)
             ),
             optionalRow(
                 id: "parking",
-                title: language.localized("listingDetail.field.parking"),
+                title: language.localized(.listingDetailFieldParking),
                 value: ListingDetailValueFormatter.availabilityTitle(
                     building.parkingAvailable,
-                    availableKey: "listingDetail.value.parkingAvailable",
-                    unavailableKey: "listingDetail.value.noParking",
+                    availableResource: .listingDetailValueParkingAvailable,
+                    unavailableResource: .listingDetailValueNoParking,
                     language: language
                 )
             ),
             optionalRow(
                 id: "elevator",
-                title: language.localized("listingDetail.field.elevator"),
+                title: language.localized(.listingDetailFieldElevator),
                 value: ListingDetailValueFormatter.availabilityTitle(
                     building.elevatorAvailable,
-                    availableKey: "listingDetail.value.elevatorAvailable",
-                    unavailableKey: "listingDetail.value.noElevator",
+                    availableResource: .listingDetailValueElevatorAvailable,
+                    unavailableResource: .listingDetailValueNoElevator,
                     language: language
                 )
             )
@@ -222,32 +222,32 @@ extension ListingDetailModel {
         return [
             listRow(
                 id: "heating",
-                title: language.localized("listingDetail.field.heatingFacility"),
+                title: language.localized(.listingDetailFieldHeatingFacility),
                 values: facilities.heatingSystem
             ),
             listRow(
                 id: "laundry",
-                title: language.localized("listingDetail.field.laundryFacility"),
+                title: language.localized(.listingDetailFieldLaundryFacility),
                 values: facilities.laundry
             ),
             listRow(
                 id: "kitchen",
-                title: language.localized("listingDetail.field.kitchenFacility"),
+                title: language.localized(.listingDetailFieldKitchenFacility),
                 values: facilities.kitchen
             ),
             listRow(
                 id: "amenities",
-                title: language.localized("listingDetail.field.livingFacility"),
+                title: language.localized(.listingDetailFieldLivingFacility),
                 values: facilities.livingAmenities
             ),
             listRow(
                 id: "security",
-                title: language.localized("listingDetail.field.safetyFacility"),
+                title: language.localized(.listingDetailFieldSafetyFacility),
                 values: facilities.securityFeatures
             ),
             listRow(
                 id: "common-areas",
-                title: language.localized("listingDetail.field.spaceFacility"),
+                title: language.localized(.listingDetailFieldSpaceFacility),
                 values: facilities.commonSpaces.map {
                     ListingDetailValueFormatter.commonSpaceTitle(
                         type: $0.type,
@@ -258,7 +258,7 @@ extension ListingDetailModel {
             ),
             listRow(
                 id: "supplies",
-                title: language.localized("listingDetail.field.providedSupplies"),
+                title: language.localized(.listingDetailFieldProvidedSupplies),
                 values: facilities.providedSupplies
             )
         ]
@@ -285,13 +285,13 @@ extension ListingDetailModel {
         } ?? []
 
         return ListingLocationInfoModel(
-            sectionTitle: language.localized("listingDetail.section.locationAndNearby"),
+            sectionTitle: language.localized(.listingDetailSectionLocationAndNearby),
             addressText: addressText(listingDetail.address, language: language),
             transits: transits,
             coordinate: listingDetail.coordinate,
-            nearbyPlacesTitle: language.localized("listingDetail.field.nearbyAmenities"),
+            nearbyPlacesTitle: language.localized(.listingDetailFieldNearbyAmenities),
             nearbyPlacesText: listingDetail.nearestTransit?.nearbyPlacesDescription
-                ?? language.localized("listingDetail.value.noNearbyAmenities")
+                ?? language.localized(.listingDetailValueNoNearbyAmenities)
         )
     }
 
@@ -305,7 +305,7 @@ extension ListingDetailModel {
         language: AppLanguage
     ) -> String {
         guard let address else {
-            return language.localized("listingDetail.value.noAddressInfo")
+            return language.localized(.listingDetailValueNoAddressInfo)
         }
 
         let fullAddress = address.fullAddress?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -323,7 +323,7 @@ extension ListingDetailModel {
             .filter { !$0.isEmpty }
 
         return locationParts.isEmpty
-            ? language.localized("listingDetail.value.noAddressInfo")
+            ? language.localized(.listingDetailValueNoAddressInfo)
             : locationParts.joined(separator: " ")
     }
 

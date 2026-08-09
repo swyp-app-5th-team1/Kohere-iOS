@@ -21,9 +21,9 @@ enum ListingApplicationPrivacySection: String, CaseIterable, Equatable, Hashable
     func title(language: AppLanguage) -> String {
         switch self {
         case .collection:
-            language.localized("listingApplication.privacy.collection.title")
+            language.localized(.listingApplicationPrivacyCollectionTitle)
         case .thirdParty:
-            language.localized("listingApplication.privacy.thirdParty.title")
+            language.localized(.listingApplicationPrivacyThirdPartyTitle)
         }
     }
 
@@ -160,7 +160,7 @@ extension ListingApplicationFeature {
         ) ?? minimumDate
     }
 
-    nonisolated static func applicantSummary(
+    static func applicantSummary(
         from profile: UserProfile,
         locale: Locale = Locale(identifier: "en_US")
     ) -> String {
@@ -181,7 +181,7 @@ extension ListingApplicationFeature {
             .joined(separator: " · ")
     }
 
-    nonisolated private static func readableGender(
+    private static func readableGender(
         _ rawValue: String?,
         locale: Locale
     ) -> String? {
@@ -189,9 +189,9 @@ extension ListingApplicationFeature {
 
         switch value.uppercased() {
         case Gender.male.rawValue:
-            return AppLanguage(locale: locale).localized("listingApplication.applicant.gender.male")
+            return AppLanguage(locale: locale).localized(.listingApplicationApplicantGenderMale)
         case Gender.female.rawValue:
-            return AppLanguage(locale: locale).localized("listingApplication.applicant.gender.female")
+            return AppLanguage(locale: locale).localized(.listingApplicationApplicantGenderFemale)
         default:
             return value
         }

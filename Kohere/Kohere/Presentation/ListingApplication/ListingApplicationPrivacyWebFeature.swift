@@ -18,7 +18,7 @@ struct ListingApplicationPrivacyWebFeature {
 
         init(
             section: ListingApplicationPrivacySection,
-            appLanguage: AppLanguage = .systemDefault,
+            appLanguage: AppLanguage = .english,
             isLoading: Bool = true
         ) {
             title = section.title(language: appLanguage)

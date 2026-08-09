@@ -22,7 +22,7 @@ struct SavedListingsView: View {
         VStack(spacing: 0) {
             KohereNavigationBar(
                 left: .backButton({ store.send(.backButtonTapped) }),
-                center: .text(AppLanguage(locale: locale).localized("savedListings.title")),
+                center: .text(AppLanguage(locale: locale).localized(.savedListingsTitle)),
                 right: .none
             )
             
@@ -37,7 +37,7 @@ struct SavedListingsView: View {
                 KohereEmptyView(title: errorMessage)
             } else if store.items.isEmpty {
                 KohereEmptyView(
-                    title: AppLanguage(locale: locale).localized("savedListings.empty.title")
+                    title: AppLanguage(locale: locale).localized(.savedListingsEmptyTitle)
                 )
             } else {
                 ScrollView {

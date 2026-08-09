@@ -11,7 +11,7 @@ struct ProfileEditDropdownField: View {
 
     // MARK: - Properties
 
-    let title: LocalizedStringKey
+    let title: LocalizedStringResource
     @Binding var selectedOption: DropdownMenuOption?
     @Binding var activeField: ProfileEditField?
     var keyboardField: FocusState<ProfileEditField?>.Binding
@@ -42,7 +42,7 @@ private extension ProfileEditDropdownField {
             Spacer(minLength: 0)
 
             if isRequired {
-                Text("*")
+                Text(verbatim: "*")
                     .kohereTextStyle(.label2Semibold)
                     .foregroundStyle(.statusDanger)
             }
