@@ -14,6 +14,6 @@ struct CommunityView: View {
     private var locale
 
     var body: some View {
-        PlaceholderTabView(title: String(localized: "tab.community", locale: locale))
+        PlaceholderTabView(title: AppLanguage(locale: locale).localized(.tabCommunity))
     }
 }
