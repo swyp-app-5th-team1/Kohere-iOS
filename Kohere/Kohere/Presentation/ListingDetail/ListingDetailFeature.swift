@@ -52,7 +52,7 @@ struct ListingDetailFeature {
         init(
             listingID: String,
             userType: UserType? = nil,
-            appLanguage: AppLanguage = .systemDefault,
+            appLanguage: AppLanguage = .english,
             isApplicationDisabled: Bool = false
         ) {
             self.listingID = listingID
@@ -229,8 +229,8 @@ struct ListingDetailFeature {
                 }
 
                 guard let selectedRoomOffer = state.selectedRoomOffer else {
-                    state.roomTypeValidationMessage = String(
-                        localized: "listingDetail.validation.roomTypeRequired"
+                    state.roomTypeValidationMessage = state.appLanguage.localized(
+                        .listingDetailValidationRoomTypeRequired
                     )
                     return .run { send in
                         try? await Task.sleep(nanoseconds: 2_000_000_000)
@@ -314,8 +314,8 @@ private extension ListingDetailFeature {
     static func detailLoadFailurePopup(language: AppLanguage) -> AppPopup {
         .notice(
             AppPopup.Notice(
-                message: language.localized("listingDetail.error.loadFailed"),
-                confirmTitle: language.localized("common.confirm"),
+                message: language.localized(.listingDetailErrorLoadFailed),
+                confirmTitle: language.localized(.commonConfirm),
                 confirmRoute: .dismissListingDetail
             )
         )

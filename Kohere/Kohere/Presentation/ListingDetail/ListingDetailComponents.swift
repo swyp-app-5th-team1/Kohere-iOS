@@ -19,7 +19,7 @@ struct ListingDetailSectionHeader: View {
                 .foregroundStyle(.common100)
 
             if let count {
-                Text("\(count)")
+                Text(verbatim: String(count))
                     .kohereTextStyle(.heading3Semibold)
                     .foregroundStyle(.labelNeutral)
             }

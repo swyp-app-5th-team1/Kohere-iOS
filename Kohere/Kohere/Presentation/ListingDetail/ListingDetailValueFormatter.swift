@@ -3,18 +3,18 @@ import Foundation
 enum ListingDetailValueFormatter {
     static func monthlyRentTitle(min: Int?, max: Int?, language: AppLanguage) -> String {
         guard let range = localizedWonRange(min: min, max: max, language: language) else {
-            return language.localized("listingDetail.value.noPriceInfo")
+            return language.localized(.listingDetailValueNoPriceInfo)
         }
 
-        return format("listingDetail.format.monthlyRent", language: language, range)
+        return language.localized(.listingDetailFormatMonthlyRent(range))
     }
 
     static func overviewDepositTitle(min: Int?, max: Int?, language: AppLanguage) -> String {
         guard let range = localizedWonRange(min: min, max: max, language: language) else {
-            return language.localized("listingDetail.value.noDepositInfo")
+            return language.localized(.listingDetailValueNoDepositInfo)
         }
 
-        return format("listingDetail.format.deposit.overview", language: language, range)
+        return language.localized(.listingDetailFormatDepositOverview(range))
     }
 
     static func roomOfferPricingTitle(
@@ -22,33 +22,29 @@ enum ListingDetailValueFormatter {
         language: AppLanguage
     ) -> String {
         guard let pricing else {
-            return language.localized("listingDetail.value.noPriceInfo")
+            return language.localized(.listingDetailValueNoPriceInfo)
         }
 
         let monthlyRent = pricing.monthlyRent.map {
-            format(
-                "listingDetail.format.monthlyRent",
-                language: language,
-                localizedWonAmount($0, language: language)
+            language.localized(
+                .listingDetailFormatMonthlyRent(localizedWonAmount($0, language: language))
             )
         }
         let deposit = pricing.deposit.map {
-            format(
-                "listingDetail.format.deposit.roomOffer",
-                language: language,
-                localizedWonAmount($0, language: language)
+            language.localized(
+                .listingDetailFormatDepositRoomOffer(localizedWonAmount($0, language: language))
             )
         }
         let values = [monthlyRent, deposit].compactMap { $0 }
 
         return values.isEmpty
-            ? language.localized("listingDetail.value.noPriceInfo")
+            ? language.localized(.listingDetailValueNoPriceInfo)
             : values.joined(separator: " · ")
     }
 
     static func priceRowValue(min: Int?, max: Int?, language: AppLanguage) -> String {
         localizedWonRange(min: min, max: max, language: language)
-            ?? language.localized("listingDetail.value.noInfo")
+            ?? language.localized(.listingDetailValueNoInfo)
     }
 
     static func overviewMaintenanceFeeTitle(
@@ -57,19 +53,19 @@ enum ListingDetailValueFormatter {
         language: AppLanguage
     ) -> String {
         if min == 0, max == 0 {
-            return language.localized("listingDetail.value.noMaintenanceFee")
+            return language.localized(.listingDetailValueNoMaintenanceFee)
         }
 
         guard let range = localizedWonRange(min: min, max: max, language: language) else {
-            return language.localized("listingDetail.value.noMaintenanceFeeInfo")
+            return language.localized(.listingDetailValueNoMaintenanceFeeInfo)
         }
 
-        return format("listingDetail.format.maintenanceFee.overview", language: language, range)
+        return language.localized(.listingDetailFormatMaintenanceFeeOverview(range))
     }
 
     static func maintenanceFeeRowValue(min: Int?, max: Int?, language: AppLanguage) -> String {
         if min == 0, max == 0 {
-            return language.localized("listingDetail.value.maintenanceFeeNotApplicable")
+            return language.localized(.listingDetailValueMaintenanceFeeNotApplicable)
         }
 
         return priceRowValue(min: min, max: max, language: language)
@@ -80,13 +76,13 @@ enum ListingDetailValueFormatter {
 
         switch (contract.minStayMonths, contract.maxStayMonths) {
         case let (min?, max?) where min == max:
-            return format("listingDetail.format.stay.equal", language: language, String(min))
+            return language.localized(.listingDetailFormatStayEqual(String(min)))
         case let (min?, max?):
-            return format("listingDetail.format.stay.range", language: language, String(min), String(max))
+            return language.localized(.listingDetailFormatStayRange(String(min), String(max)))
         case let (min?, nil):
-            return format("listingDetail.format.stay.minimum", language: language, String(min))
+            return language.localized(.listingDetailFormatStayMinimum(String(min)))
         case let (nil, max?):
-            return format("listingDetail.format.stay.maximum", language: language, String(max))
+            return language.localized(.listingDetailFormatStayMaximum(String(max)))
         case (nil, nil):
             return nil
         }
@@ -95,23 +91,25 @@ enum ListingDetailValueFormatter {
     static func floorTitle(_ building: ListingDetailBuilding, language: AppLanguage) -> String? {
         switch (building.usedFloorMin, building.usedFloorMax, building.totalFloors) {
         case let (min?, max?, total?) where min == max:
-            return format("listingDetail.format.floor.equalOfTotal", language: language, String(min), String(total))
+            return language.localized(.listingDetailFormatFloorEqualOfTotal(String(min), String(total)))
         case let (min?, max?, total?):
-            return format("listingDetail.format.floor.rangeOfTotal", language: language, String(min), String(max), String(total))
+            return language.localized(
+                .listingDetailFormatFloorRangeOfTotal(String(min), String(max), String(total))
+            )
         case let (min?, nil, total?):
-            return format("listingDetail.format.floor.minimumOfTotal", language: language, String(min), String(total))
+            return language.localized(.listingDetailFormatFloorMinimumOfTotal(String(min), String(total)))
         case let (nil, max?, total?):
-            return format("listingDetail.format.floor.maximumOfTotal", language: language, String(max), String(total))
+            return language.localized(.listingDetailFormatFloorMaximumOfTotal(String(max), String(total)))
         case let (nil, nil, total?):
-            return format("listingDetail.format.floor.totalOnly", language: language, String(total))
+            return language.localized(.listingDetailFormatFloorTotalOnly(String(total)))
         case let (min?, max?, nil) where min == max:
-            return format("listingDetail.format.floor.equal", language: language, String(min))
+            return language.localized(.listingDetailFormatFloorEqual(String(min)))
         case let (min?, max?, nil):
-            return format("listingDetail.format.floor.range", language: language, String(min), String(max))
+            return language.localized(.listingDetailFormatFloorRange(String(min), String(max)))
         case let (min?, nil, nil):
-            return format("listingDetail.format.floor.minimum", language: language, String(min))
+            return language.localized(.listingDetailFormatFloorMinimum(String(min)))
         case let (nil, max?, nil):
-            return format("listingDetail.format.floor.maximum", language: language, String(max))
+            return language.localized(.listingDetailFormatFloorMaximum(String(max)))
         case (nil, nil, nil):
             return nil
         }
@@ -119,12 +117,12 @@ enum ListingDetailValueFormatter {
 
     static func availabilityTitle(
         _ value: Bool?,
-        availableKey: String,
-        unavailableKey: String,
+        availableResource: LocalizedStringResource,
+        unavailableResource: LocalizedStringResource,
         language: AppLanguage
     ) -> String? {
         guard let value else { return nil }
-        return language.localized(value ? availableKey : unavailableKey)
+        return language.localized(value ? availableResource : unavailableResource)
     }
 
     static func transitTitle(
@@ -132,22 +130,17 @@ enum ListingDetailValueFormatter {
         includesFrom: Bool = false,
         language: AppLanguage
     ) -> String {
-        guard let transit else { return language.localized("listingDetail.value.noTransitInfo") }
+        guard let transit else { return language.localized(.listingDetailValueNoTransitInfo) }
         guard let walkMinutes = transit.walkMinutes else { return transit.name }
 
-        return format(
-            includesFrom
-                ? "listingDetail.format.transit.location"
-                : "listingDetail.format.transit.overview",
-            language: language,
-            String(walkMinutes),
-            transit.name
-        )
+        return includesFrom
+            ? language.localized(.listingDetailFormatTransitLocation(String(walkMinutes), transit.name))
+            : language.localized(.listingDetailFormatTransitOverview(String(walkMinutes), transit.name))
     }
 
     static func commonSpaceTitle(type: String, count: Int?, language: AppLanguage) -> String {
         guard let count else { return type }
-        return format("listingDetail.format.commonSpace.count", language: language, type, String(count))
+        return language.localized(.listingDetailFormatCommonSpaceCount(type, String(count)))
     }
 
     private static func localizedWonRange(
@@ -211,14 +204,4 @@ enum ListingDetailValueFormatter {
         value.rounded() == value ? "\(Int(value))" : String(format: "%.1f", value)
     }
 
-    private static func format(
-        _ key: String,
-        language: AppLanguage,
-        _ arguments: CVarArg...
-    ) -> String {
-        String(
-            format: language.localized(key),
-            arguments: arguments
-        )
-    }
 }

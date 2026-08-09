@@ -21,7 +21,7 @@ struct ListingDetailContentSections: View {
                 ListingDetailPropertySection(
                     title: title(.property),
                     rows: detail.propertyInfo,
-                    featuresTitle: appLanguage.localized("listingDetail.field.otherDetails"),
+                    featuresTitle: appLanguage.localized(.listingDetailFieldOtherDetails),
                     features: detail.propertyFeatures
                 )
             ))
@@ -41,8 +41,8 @@ struct ListingDetailContentSections: View {
                 ListingDetailReviewSection(
                     title: title(.review),
                     reviewCount: detail.overview.reviewCount,
-                    emptyMessage: appLanguage.localized("listingDetail.review.empty"),
-                    promptMessage: appLanguage.localized("listingDetail.review.prompt")
+                    emptyMessage: appLanguage.localized(.listingDetailReviewEmpty),
+                    promptMessage: appLanguage.localized(.listingDetailReviewPrompt)
                 )
             ))
         }
