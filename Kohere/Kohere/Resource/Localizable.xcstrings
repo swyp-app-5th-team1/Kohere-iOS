@@ -4086,7 +4086,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@-min walk from %@ Station"
+            "value" : "%@-min walk from %@"
           }
         },
         "ko" : {
@@ -4103,7 +4103,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@-min walk %@ Sta."
+            "value" : "%@-min walk %@"
           }
         },
         "ko" : {
