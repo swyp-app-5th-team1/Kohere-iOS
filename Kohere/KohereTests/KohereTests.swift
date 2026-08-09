@@ -42,7 +42,7 @@ final class QuizAnswerResponseMappingTests: XCTestCase {
 final class LanguageUpdateRequestDTOTests: XCTestCase {
     func testLanguageOnlyUpdateEncodesOnlyLangField() throws {
         let request = UpdateProfileRequestDTO(
-            UserProfileUpdate(lang: AppLanguage.english.rawValue)
+            UserProfileUpdate(lang: AppLanguage.english.apiCode)
         )
 
         let data = try JSONEncoder().encode(request)
@@ -55,18 +55,38 @@ final class LanguageUpdateRequestDTOTests: XCTestCase {
     }
 }
 
+final class AppLanguageTests: XCTestCase {
+    func testAPICodeRestoresLanguage() {
+        XCTAssertEqual(AppLanguage(apiCode: "ko"), .korean)
+        XCTAssertEqual(AppLanguage(apiCode: "en"), .english)
+        XCTAssertNil(AppLanguage(apiCode: "ja"))
+    }
+
+    func testCodableKeepsExistingLanguageCodeFormat() throws {
+        let data = try JSONEncoder().encode(AppLanguage.korean)
+        XCTAssertEqual(String(data: data, encoding: .utf8), "\"ko\"")
+        XCTAssertEqual(try JSONDecoder().decode(AppLanguage.self, from: data), .korean)
+    }
+
+    func testLocaleResolutionFallsBackToEnglish() {
+        XCTAssertEqual(AppLanguageResolver.resolve(from: Locale(identifier: "ko-KR")), .korean)
+        XCTAssertEqual(AppLanguageResolver.resolve(from: Locale(identifier: "en-US")), .english)
+        XCTAssertEqual(AppLanguageResolver.resolve(from: Locale(identifier: "ja-JP")), .english)
+    }
+}
+
 final class OnboardingLocalizationTests: XCTestCase {
     func testKoreanEmailVerificationCopyIsLocalized() {
         XCTAssertEqual(
-            AppLanguage.korean.localized("onboarding.email.placeholder"),
+            AppLanguage.korean.localizedString(forKey: "onboarding.email.placeholder"),
             "이메일을 입력해주세요"
         )
         XCTAssertEqual(
-            AppLanguage.korean.localized("onboarding.verification.emailSent"),
+            AppLanguage.korean.localizedString(forKey: "onboarding.verification.emailSent"),
             "이메일로 인증번호를 전송했어요"
         )
         XCTAssertEqual(
-            AppLanguage.korean.localized("onboarding.verification.email.placeholder"),
+            AppLanguage.korean.localizedString(forKey: "onboarding.verification.email.placeholder"),
             "전송된 6자리 코드를 입력해주세요"
         )
     }
@@ -1357,7 +1377,7 @@ final class ListingDetailLoadFailureTests: XCTestCase {
 @MainActor
 final class OnboardingRequestSafetyTests: XCTestCase {
     func testLandlordIgnoresVerificationResponseForPreviousPhoneNumber() async {
-        var initialState = LandlordOnboardingFeature.State()
+        var initialState = LandlordOnboardingFeature.State(appLanguage: .korean)
         initialState.phoneNumber = "01099998888"
         initialState.phoneVerificationCode = "654321"
 
@@ -1382,7 +1402,7 @@ final class OnboardingRequestSafetyTests: XCTestCase {
     }
 
     func testLandlordAppliesVerificationResponseForCurrentInput() async {
-        var initialState = LandlordOnboardingFeature.State()
+        var initialState = LandlordOnboardingFeature.State(appLanguage: .korean)
         initialState.phoneNumber = "01011112222"
         initialState.phoneVerificationCode = "123456"
         initialState.isPhoneVerificationRequesting = true
@@ -1428,7 +1448,7 @@ final class OnboardingRequestSafetyTests: XCTestCase {
     }
 
     func testLandlordDoesNotSubmitOnboardingWhileRequestIsInFlight() async {
-        var initialState = LandlordOnboardingFeature.State()
+        var initialState = LandlordOnboardingFeature.State(appLanguage: .korean)
         initialState.currentStep = .phoneVerification
         initialState.selectedMonth = DropdownMenuOption(option: "JAN")
         initialState.selectedDay = DropdownMenuOption(option: "1")
@@ -1484,7 +1504,7 @@ final class OnboardingErrorPopupTests: XCTestCase {
     }
 
     func testLandlordPhoneSendFailureRequestsLocalizedPopup() async {
-        var initialState = LandlordOnboardingFeature.State()
+        var initialState = LandlordOnboardingFeature.State(appLanguage: .korean)
         initialState.phoneNumber = "01011112222"
         initialState.isPhoneVerificationCodeRequesting = true
         let popup = OnboardingErrorPopup.make(
@@ -1507,7 +1527,7 @@ final class OnboardingErrorPopupTests: XCTestCase {
     }
 
     func testInvalidPhoneCodeKeepsInlineErrorWithoutPopup() async {
-        var initialState = LandlordOnboardingFeature.State()
+        var initialState = LandlordOnboardingFeature.State(appLanguage: .korean)
         initialState.phoneNumber = "01011112222"
         initialState.phoneVerificationCode = "123456"
         initialState.isPhoneVerificationRequesting = true
