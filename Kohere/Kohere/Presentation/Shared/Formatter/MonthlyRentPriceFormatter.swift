@@ -18,20 +18,16 @@ enum MonthlyRentPriceFormatter {
         return "\(prefix) \(rangeTitle)"
     }
 
-    nonisolated static func wonTitle(
+    static func wonTitle(
         min: Int?,
         max: Int?,
         language: AppLanguage
     ) -> String {
         guard let rangeTitle = amountRangeTitle(min: min, max: max, language: language) else {
-            return localized("listingDetail.value.noPriceInfo", language: language)
+            return language.localized(.listingDetailValueNoPriceInfo)
         }
 
-        return formatted(
-            "listingDetail.format.monthlyRent",
-            language: language,
-            arguments: [rangeTitle]
-        )
+        return language.localized(.listingDetailFormatMonthlyRent(rangeTitle))
     }
 
     nonisolated static func usdTitle(
@@ -178,19 +174,4 @@ enum MonthlyRentPriceFormatter {
         return formatter.string(from: number) ?? "\(number.intValue)"
     }
 
-    nonisolated private static func formatted(
-        _ key: String,
-        language: AppLanguage,
-        arguments: [CVarArg]
-    ) -> String {
-        String(
-            format: localized(key, language: language),
-            locale: language.locale,
-            arguments: arguments
-        )
-    }
-
-    nonisolated private static func localized(_ key: String, language: AppLanguage) -> String {
-        language.localized(key)
-    }
 }
