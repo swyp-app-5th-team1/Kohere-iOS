@@ -66,7 +66,7 @@ extension LoginView {
             Spacer()
             
             VStack(spacing: 24) {
-                Text("login.tagline")
+                Text(.loginTagline)
                     .kohereTextStyle(.body1Regular)
                     .foregroundColor(.black)
                 
@@ -79,7 +79,7 @@ extension LoginView {
             Spacer()
             
             VStack(spacing: 12) {
-                Text("login.quickStartBadge")
+                Text(.loginQuickStartBadge)
                     .kohereTextStyle(.label3Medium)
                     .foregroundColor(.neutral80)
                     .padding(.horizontal, 27)
@@ -99,7 +99,7 @@ extension LoginView {
                             .resizable()
                             .frame(width: 24, height: 24)
                         
-                        Text("login.googleButton")
+                        Text(.loginGoogleButton)
                             .kohereTextStyle(.label1Semibold)
                             .foregroundColor(.common100)
                     }
@@ -123,7 +123,7 @@ extension LoginView {
                             .frame(width: 16, height: 18)
                             .tint(.white)
                         
-                        Text("login.appleButton")
+                        Text(.loginAppleButton)
                             .kohereTextStyle(.label1Semibold)
                             .foregroundColor(.white)
                     }

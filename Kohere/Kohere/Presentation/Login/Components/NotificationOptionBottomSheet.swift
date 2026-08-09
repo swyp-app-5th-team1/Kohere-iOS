@@ -30,12 +30,12 @@ struct NotificationOptionBottomSheet: View {
                 .padding(.bottom, 20)
             
             VStack(alignment: .leading, spacing: 20) {
-                Text("login.notification.title")
+                Text(.loginNotificationTitle)
                     .kohereTextStyle(.heading2Bold)
                     .foregroundColor(.neutral80)
                     .multilineTextAlignment(.leading)
                 
-                Text("login.notification.description")
+                Text(.loginNotificationDescription)
                     .kohereTextStyle(.caption2Regular)
                     .foregroundColor(.neutral60)
             }
@@ -48,7 +48,7 @@ struct NotificationOptionBottomSheet: View {
                 Button {
                     onAllowTapped()
                 } label: {
-                    Text("login.notification.allowButton")
+                    Text(.loginNotificationAllowButton)
                         .kohereTextStyle(.label1Semibold)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -60,7 +60,7 @@ struct NotificationOptionBottomSheet: View {
                 Button {
                     onSkipTapped()
                 } label: {
-                    Text("common.skip")
+                    Text(.commonSkip)
                         .kohereTextStyle(.label2Medium)
                         .foregroundColor(.labelAlternative)
                 }

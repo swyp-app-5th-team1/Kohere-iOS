@@ -20,14 +20,14 @@ struct LandlordNameAndBirthStepView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 72) {
-            Text("반가워요! 가입된 정보가\n맞는지 확인해 드릴게요")
+            Text(.onboardingLandlordIdentityTitle)
                 .kohereTextStyle(.heading1Bold)
                 .foregroundColor(.neutral90)
                 .padding(.top, 40)
 
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("onboarding.profile.fullName")
+                    Text(.onboardingProfileFullName)
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
 
@@ -45,7 +45,7 @@ struct LandlordNameAndBirthStepView: View {
                 .zIndex(1)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("생년월일")
+                    Text(.onboardingProfileBirthDate)
                         .kohereTextStyle(.label2Semibold)
                         .foregroundStyle(.neutral90)
 

@@ -39,7 +39,7 @@ struct TenantOnboardingFeature {
 
     @ObservableState
     struct State: Equatable {
-        var appLanguage: AppLanguage = .systemDefault
+        var appLanguage: AppLanguage = .english
         var currentStep: Step = .nameAndBirth
 
         var name: String = ""
@@ -132,7 +132,7 @@ extension TenantOnboardingFeature.State {
     }
 
     var primaryButtonTitle: String {
-        currentStep == .details ? appLanguage.localized("common.start") : appLanguage.localized("common.next")
+        currentStep == .details ? appLanguage.localized(.commonStart) : appLanguage.localized(.commonNext)
     }
 
     var isNextButtonEnabled: Bool {
@@ -151,7 +151,7 @@ extension TenantOnboardingFeature.State {
         }
 
         return AuthOnboardingProfile(gender: gender, birthDate: birthDate, country: country,
-                                     visaType: visaType, lang: appLanguage.rawValue)
+                                     visaType: visaType, lang: appLanguage.apiCode)
     }
 
     private var birthDate: String? {

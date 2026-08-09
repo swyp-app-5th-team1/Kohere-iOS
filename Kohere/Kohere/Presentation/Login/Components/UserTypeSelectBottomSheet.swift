@@ -24,11 +24,11 @@ struct UserTypeSelectBottomSheet: View {
                 .padding(.top, 12)
             
             VStack(alignment: .leading, spacing: 2) {
-                Text("What brings you here?")
+                Text(.loginUserTypeTitle)
                     .kohereTextStyle(.heading2Bold)
                     .foregroundStyle(.labelNormal)
                 
-                Text("원하시는 서비스를 선택해주세요")
+                Text(.loginUserTypeSubtitle)
                     .kohereTextStyle(.body2Regular)
                     .foregroundStyle(.labelAlternative)
             }

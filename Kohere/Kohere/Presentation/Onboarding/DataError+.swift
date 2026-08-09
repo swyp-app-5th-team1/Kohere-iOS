@@ -20,16 +20,16 @@ enum OnboardingErrorContext {
     case verifyPhone
     case saveAuthentication
 
-    var localizationKey: String {
+    var localizedResource: LocalizedStringResource {
         switch self {
         case .completeProfile:
-            "onboarding.error.completeProfile"
+            .onboardingErrorCompleteProfile
         case .sendPhoneVerificationCode:
-            "onboarding.error.sendPhoneVerificationCode"
+            .onboardingErrorSendPhoneVerificationCode
         case .verifyPhone:
-            "onboarding.error.verifyPhone"
+            .onboardingErrorVerifyPhone
         case .saveAuthentication:
-            "onboarding.error.saveAuthentication"
+            .onboardingErrorSaveAuthentication
         }
     }
 }
@@ -37,7 +37,10 @@ enum OnboardingErrorContext {
 enum OnboardingErrorPopup {
     static func make(context: OnboardingErrorContext, language: AppLanguage) -> AppPopup {
         .notice(
-            AppPopup.Notice(message: language.localized(context.localizationKey), confirmTitle: language.localized("common.confirm"))
+            AppPopup.Notice(
+                message: language.localized(context.localizedResource),
+                confirmTitle: language.localized(.commonConfirm)
+            )
         )
     }
 }
