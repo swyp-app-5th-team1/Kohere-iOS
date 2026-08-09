@@ -98,7 +98,7 @@ extension ChatBotOptionsView {
         VStack(alignment: .trailing, spacing: 10) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text(localized("map.filter.monthlyRent"))
+                    Text(.mapFilterMonthlyRent)
                         .kohereTextStyle(.label2Medium)
                         .foregroundStyle(.labelNeutral)
 
@@ -119,17 +119,17 @@ extension ChatBotOptionsView {
                     .frame(height: 24)
 
                     HStack {
-                        Text("0")
+                        Text(verbatim: "0")
                             .frame(width: 46, alignment: .leading)
 
                         Spacer(minLength: 0)
 
-                        Text(localized("chatBot.budget.sliderMidpoint"))
+                        Text(.chatBotBudgetSliderMidpoint)
                             .frame(width: 46, alignment: .center)
 
                         Spacer(minLength: 0)
 
-                        Text(localized("chatBot.budget.sliderMaximum"))
+                        Text(.chatBotBudgetSliderMaximum)
                             .frame(width: 46, alignment: .trailing)
                     }
                     .kohereTextStyle(.caption2Regular)
@@ -151,7 +151,7 @@ extension ChatBotOptionsView {
                     _ = store.send(.budgetConfirmButtonTapped(AppLanguage(locale: locale)))
                 }
             } label: {
-                Text(localized("common.confirm"))
+                Text(.commonConfirm)
                     .kohereTextStyle(.label2Medium)
                     .underline()
                     .foregroundColor(.statusRed50)
@@ -167,22 +167,26 @@ extension ChatBotOptionsView {
 
         switch (range.minimum, range.maximum) {
         case (bounds.lowerBound, bounds.upperBound):
-            return localized("chatBot.budget.any")
+            return AppLanguage(locale: locale).localized(.chatBotBudgetAny)
 
         case (bounds.lowerBound, let maximum):
-            return localized("chatBot.budget.under", arguments: [MapFilterPriceFormatter.amountText(maximum, locale: locale)])
+            return AppLanguage(locale: locale).localized(
+                .chatBotBudgetUnder(MapFilterPriceFormatter.amountText(maximum, locale: locale))
+            )
 
         case (let minimum, bounds.upperBound):
-            return localized("chatBot.budget.upperOnly", arguments: [MapFilterPriceFormatter.amountText(minimum, locale: locale)])
+            return AppLanguage(locale: locale).localized(
+                .chatBotBudgetUpperOnly(MapFilterPriceFormatter.amountText(minimum, locale: locale))
+            )
 
         case let (minimum, maximum):
-            return localized("chatBot.budget.range", arguments: [MapFilterPriceFormatter.amountText(minimum, locale: locale), MapFilterPriceFormatter.amountText(maximum, locale: locale)])
+            return AppLanguage(locale: locale).localized(
+                .chatBotBudgetRange(
+                    MapFilterPriceFormatter.amountText(minimum, locale: locale),
+                    MapFilterPriceFormatter.amountText(maximum, locale: locale)
+                )
+            )
         }
-    }
-
-    private func localized(_ key: String, arguments: [String] = []) -> String {
-        let format = AppLanguage(locale: locale).localized(key)
-        return String(format: format, arguments: arguments.map { $0 as CVarArg })
     }
 
     private var confirmButton: some View {
@@ -191,7 +195,7 @@ extension ChatBotOptionsView {
                 _ = store.send(.confirmButtonTapped)
             }
         } label: {
-            Text(localized("common.confirm"))
+            Text(.commonConfirm)
                 .kohereTextStyle(.label2Medium)
                 .underline()
                 .foregroundColor(store.isConfirmButtonEnabled ? .statusRed50 : .neutral20)

@@ -55,11 +55,12 @@ struct ChatBotFeature {
         }
 
         func budgetAnswerText(language: AppLanguage) -> String {
-            let format = language.localized("chatBot.budget.range")
-            let amounts = [budgetRange.minimum, budgetRange.maximum].map {
-                MapFilterPriceFormatter.amountText($0, locale: language.locale) as CVarArg
-            }
-            return String(format: format, locale: language.locale, arguments: amounts)
+            language.localized(
+                .chatBotBudgetRange(
+                    MapFilterPriceFormatter.amountText(budgetRange.minimum, locale: language.locale),
+                    MapFilterPriceFormatter.amountText(budgetRange.maximum, locale: language.locale)
+                )
+            )
         }
 
         static let defaultBudgetRange = RangeSliderValue(
