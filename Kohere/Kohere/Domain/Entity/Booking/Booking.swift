@@ -9,15 +9,7 @@ import Foundation
 
 nonisolated struct BookingPage: Equatable {
     let content: [BookingSummary]
-    let page: BookingPageInfo?
-}
-
-nonisolated struct BookingPageInfo: Equatable {
-    let number: Int?
-    let size: Int?
-    let totalElements: Int?
-    let totalPages: Int?
-    let hasNext: Bool?
+    let page: PageInfo?
 }
 
 nonisolated struct BookingSummary: Equatable, Identifiable {

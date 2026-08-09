@@ -748,6 +748,7 @@ final class MapDiagnosisRecommendationTests: XCTestCase {
                 listing: makeRecommendation(id: "listing-1", coordinate: firstCoordinate),
                 pageNumber: 0
             ),
+            isFirstPage: true,
             to: &state
         )
         feature.applyDiagnosisRecommendations(
@@ -755,6 +756,7 @@ final class MapDiagnosisRecommendationTests: XCTestCase {
                 listing: makeRecommendation(id: "listing-2", coordinate: nextCoordinate),
                 pageNumber: 1
             ),
+            isFirstPage: false,
             to: &state
         )
 
@@ -773,7 +775,7 @@ final class MapDiagnosisRecommendationTests: XCTestCase {
     ) -> DiagnosisRecommendations {
         DiagnosisRecommendations(
             listings: [listing],
-            page: DiagnosisRecommendationPage(
+            page: PageInfo(
                 number: pageNumber,
                 size: 1,
                 totalElements: 2,

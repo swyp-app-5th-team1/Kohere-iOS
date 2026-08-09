@@ -210,25 +210,3 @@ private extension ListingNearestTransitResponseDTO {
     }
 }
 
-private extension ListingPageResponseDTO {
-    func toEntity() -> ListingSearchPageInfo {
-        let derivedHasNext: Bool?
-        if let hasNext {
-            derivedHasNext = hasNext
-        } else if let last {
-            derivedHasNext = !last
-        } else if let number, let totalPages {
-            derivedHasNext = number + 1 < totalPages
-        } else {
-            derivedHasNext = nil
-        }
-
-        return ListingSearchPageInfo(
-            number: number,
-            size: size,
-            totalElements: totalElements,
-            totalPages: totalPages,
-            hasNext: derivedHasNext
-        )
-    }
-}

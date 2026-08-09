@@ -7,12 +7,12 @@
 
 struct ListingListResponseDTO: Decodable {
     let content: [ListingListItemResponseDTO]?
-    let page: ListingPageResponseDTO?
+    let page: PageResponseDTO?
 }
 
 struct ListingFavoriteListResponseDTO: Decodable {
     let content: [ListingListItemResponseDTO]?
-    let page: ListingPageResponseDTO?
+    let page: PageResponseDTO?
 }
 
 struct ListingRecentListResponseDTO: Decodable {
@@ -162,15 +162,6 @@ struct ListingDescriptionsResponseDTO: Decodable {
     let ko: String?
     let en: String?
     let extraNotes: String?
-}
-
-struct ListingPageResponseDTO: Decodable {
-    let number: Int?
-    let size: Int?
-    let totalElements: Int?
-    let totalPages: Int?
-    let hasNext: Bool?
-    let last: Bool?
 }
 
 struct ListingCodeLabelResponseDTO: Decodable {
