@@ -29,7 +29,7 @@ private extension SettingView {
     var navigationBar: some View {
         KohereNavigationBar(
             left: .backButton({ store.send(.backButtonTapped) }),
-            center: .text(localized("settings.title")),
+            center: .text(localized(.settingsTitle)),
             right: .none,
             backgroundColor: .coolNeutral5
         )
@@ -45,16 +45,16 @@ private extension SettingView {
             VStack(spacing: 12) {
                 SettingMenuSection(
                     items: [
-                        .init(title: localized("settings.account.title"), action: .account)
+                        .init(title: .settingsAccountTitle, action: .account)
                     ],
                     onItemTapped: { store.send(.settingItemTapped($0)) }
                 )
 
                 SettingMenuSection(
                     items: [
-                        .init(title: localized("settings.customerTerms.title"), action: .termsOfService),
-                        .init(title: localized("settings.privacyPolicy.title"), action: .privacyPolicy),
-                        .init(title: localized("settings.marketingConsent.title"), action: .marketingAgreement)
+                        .init(title: .settingsCustomerTermsTitle, action: .termsOfService),
+                        .init(title: .settingsPrivacyPolicyTitle, action: .privacyPolicy),
+                        .init(title: .settingsMarketingConsentTitle, action: .marketingAgreement)
                     ],
                     onItemTapped: { store.send(.settingItemTapped($0)) }
                 )
@@ -72,11 +72,11 @@ private extension SettingView {
 
     var appVersionRow: some View {
         HStack {
-            Text(localized("settings.appVersion.current"))
+            Text(.settingsAppVersionCurrent)
 
             Spacer()
 
-            Text("v.\(store.appVersion)")
+            Text(verbatim: "v.\(store.appVersion)")
         }
         .kohereTextStyle(.label2Medium)
         .foregroundStyle(.coolNeutral10)
@@ -88,7 +88,7 @@ private extension SettingView {
         Button {
             store.send(.logoutButtonTapped)
         } label: {
-            Text(localized("settings.logout.title"))
+            Text(.settingsLogoutTitle)
                 .kohereTextStyle(.label2Medium)
                 .foregroundStyle(.coolNeutral10)
                 .underline()
@@ -99,8 +99,8 @@ private extension SettingView {
         .padding(.horizontal, 4)
     }
 
-    func localized(_ key: String) -> String {
-        AppLanguage(locale: locale).localized(key)
+    func localized(_ resource: LocalizedStringResource) -> String {
+        AppLanguage(locale: locale).localized(resource)
     }
 }
 
@@ -123,7 +123,7 @@ private struct SettingMenuSection: View {
 }
 
 private struct SettingMenuRow: View {
-    let title: String
+    let title: LocalizedStringResource
     let action: () -> Void
 
     var body: some View {
@@ -149,7 +149,7 @@ private struct SettingMenuRow: View {
 }
 
 private struct SettingMenuItem: Identifiable, Equatable {
-    let title: String
+    let title: LocalizedStringResource
     let action: SettingFeature.SettingItem
 
     var id: SettingFeature.SettingItem {

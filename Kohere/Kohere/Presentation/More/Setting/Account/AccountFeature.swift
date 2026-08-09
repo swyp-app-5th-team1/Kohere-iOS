@@ -14,7 +14,7 @@ struct AccountFeature {
     struct State: Equatable {
         var userType: UserType
         var userProfile: UserProfile?
-        var language: AppLanguage = .systemDefault
+        var language: AppLanguage = .english
     }
 
     enum Action: Equatable {
@@ -43,15 +43,12 @@ private extension AccountFeature {
     static func deleteAccountPopup(language: AppLanguage) -> AppPopup {
         .action(
             AppPopup.Action(
-                message: localized("settings.withdrawal.confirmMessage", language: language),
-                primaryTitle: localized("settings.popup.cancel", language: language),
-                secondaryTitle: localized("settings.withdrawal.confirmAction", language: language),
+                message: language.localized(.settingsWithdrawalConfirmMessage),
+                primaryTitle: language.localized(.settingsPopupCancel),
+                secondaryTitle: language.localized(.settingsWithdrawalConfirmAction),
                 secondaryRoute: .deleteAccount
             )
         )
     }
 
-    static func localized(_ key: String, language: AppLanguage) -> String {
-        language.localized(key)
-    }
 }

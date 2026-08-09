@@ -41,7 +41,7 @@ private extension ProfileEditView {
     var navigationBar: some View {
         KohereNavigationBar(
             left: .backButton({ store.send(.backButtonTapped) }),
-            center: .text(AppLanguage(locale: locale).localized("profileEdit.title")),
+            center: .text(AppLanguage(locale: locale).localized(.profileEditTitle)),
             right: .checkButton(
                 isEnabled: store.isSaveButtonEnabled,
                 action: { store.send(.saveButtonTapped) }
@@ -101,7 +101,7 @@ private extension ProfileEditView {
 
     var nameFields: some View {
         ProfileEditReadOnlyField(
-            title: AppLanguage(locale: locale).localized("onboarding.profile.fullName"),
+            title: .onboardingProfileFullName,
             value: store.displayName
         )
     }
@@ -109,7 +109,7 @@ private extension ProfileEditView {
     var nationalityAndGenderFields: some View {
         HStack(spacing: 8) {
             ProfileEditDropdownField(
-                title: "onboarding.profile.nationality",
+                title: .onboardingProfileNationality,
                 selectedOption: $store.selectedNationality,
                 activeField: $activeField,
                 keyboardField: $keyboardField,
@@ -121,7 +121,7 @@ private extension ProfileEditView {
             .zIndex(2)
 
             ProfileEditDropdownField(
-                title: "onboarding.profile.gender",
+                title: .onboardingProfileGender,
                 selectedOption: $store.selectedGender,
                 activeField: $activeField,
                 keyboardField: $keyboardField,
@@ -136,7 +136,7 @@ private extension ProfileEditView {
 
     var visaStatusField: some View {
         ProfileEditDropdownField(
-            title: "onboarding.profile.visaStatus",
+            title: .onboardingProfileVisaStatus,
             selectedOption: $store.selectedVisa,
             activeField: $activeField,
             keyboardField: $keyboardField,
@@ -158,7 +158,7 @@ private extension ProfileEditView {
 }
 
 private struct ProfileEditReadOnlyField: View {
-    let title: String
+    let title: LocalizedStringResource
     let value: String
 
     var body: some View {

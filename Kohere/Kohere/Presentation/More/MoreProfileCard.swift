@@ -6,9 +6,11 @@
 import SwiftUI
 
 struct MoreProfileCard: View {
+    @Environment(\.locale)
+    private var locale
+
     let userType: UserType?
     let userProfile: UserProfile?
-    let localized: (String) -> String
     let onEditTap: () -> Void
 
     var body: some View {
@@ -68,8 +70,8 @@ struct MoreProfileCard: View {
     private var profileName: String {
         guard let userProfile else {
             return userType == .landlord
-                ? localized("more.profile.landlordNamePlaceholder")
-                : localized("more.profile.nicknamePlaceholder")
+                ? localized(.moreProfileLandlordNamePlaceholder)
+                : localized(.moreProfileNicknamePlaceholder)
         }
 
         switch userProfile.userType {
@@ -81,5 +83,9 @@ struct MoreProfileCard: View {
         case .unknown:
             return userProfile.nickname
         }
+    }
+
+    private func localized(_ resource: LocalizedStringResource) -> String {
+        AppLanguage(locale: locale).localized(resource)
     }
 }

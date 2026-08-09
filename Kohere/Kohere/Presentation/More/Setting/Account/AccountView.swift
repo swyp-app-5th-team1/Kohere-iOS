@@ -29,7 +29,7 @@ private extension AccountView {
     var navigationBar: some View {
         KohereNavigationBar(
             left: .backButton({ store.send(.backButtonTapped) }),
-            center: .text(localized("settings.account.title")),
+            center: .text(localized(.settingsAccountTitle)),
             right: .none,
             backgroundColor: .coolNeutral5
         )
@@ -60,7 +60,7 @@ private extension AccountView {
         Button {
             store.send(.deleteAccountButtonTapped)
         } label: {
-            Text(localized("account.deleteAccount.title"))
+            Text(.accountDeleteAccountTitle)
                 .kohereTextStyle(.label2Medium)
                 .foregroundStyle(.coolNeutral10)
                 .underline()
@@ -75,20 +75,20 @@ private extension AccountView {
         switch resolvedUserType {
         case .tenant:
             return [
-                .init(title: localized("account.linkedEmail.title"), value: store.userProfile?.email ?? ""),
-                .init(title: localized("account.dateOfBirth.title"), value: formattedBirthDate),
-                .init(title: localized("account.gender.title"), value: formattedGender)
+                .init(title: .accountLinkedEmailTitle, value: store.userProfile?.email ?? ""),
+                .init(title: .accountDateOfBirthTitle, value: formattedBirthDate),
+                .init(title: .accountGenderTitle, value: formattedGender)
             ]
 
         case .landlord:
             return [
-                .init(title: localized("account.linkedEmail.title"), value: store.userProfile?.email ?? ""),
-                .init(title: localized("account.dateOfBirth.title"), value: formattedBirthDate)
+                .init(title: .accountLinkedEmailTitle, value: store.userProfile?.email ?? ""),
+                .init(title: .accountDateOfBirthTitle, value: formattedBirthDate)
             ]
 
         case .unknown:
             return [
-                .init(title: localized("account.linkedEmail.title"), value: store.userProfile?.email ?? "")
+                .init(title: .accountLinkedEmailTitle, value: store.userProfile?.email ?? "")
             ]
         }
     }
@@ -105,9 +105,9 @@ private extension AccountView {
     var formattedGender: String {
         switch store.userProfile?.gender {
         case Gender.male.rawValue:
-            return localized("account.gender.male")
+            return localized(.accountGenderMale)
         case Gender.female.rawValue:
-            return localized("account.gender.female")
+            return localized(.accountGenderFemale)
         case let gender?:
             return gender
         case nil:
@@ -115,13 +115,13 @@ private extension AccountView {
         }
     }
 
-    func localized(_ key: String) -> String {
-        AppLanguage(locale: locale).localized(key)
+    func localized(_ resource: LocalizedStringResource) -> String {
+        AppLanguage(locale: locale).localized(resource)
     }
 }
 
 private struct AccountField: View {
-    let title: String
+    let title: LocalizedStringResource
     let value: String
 
     var body: some View {
@@ -144,10 +144,10 @@ private struct AccountField: View {
 }
 
 private struct AccountFieldModel: Identifiable, Equatable {
-    let title: String
+    let title: LocalizedStringResource
     let value: String
 
     var id: String {
-        title
+        title.key
     }
 }
