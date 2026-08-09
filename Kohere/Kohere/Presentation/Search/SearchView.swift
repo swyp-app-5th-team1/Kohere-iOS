@@ -59,13 +59,13 @@ struct SearchView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text("search.accessibility.back"))
+        .accessibilityLabel(Text(.searchAccessibilityBack))
     }
 
     private var searchField: some View {
         HStack(spacing: 0) {
             TextField(
-                "search.placeholder",
+                AppLanguage(locale: locale).localized(.searchPlaceholder),
                 text: Binding(
                     get: { store.searchText },
                     set: { text in
@@ -73,7 +73,7 @@ struct SearchView: View {
                         store.send(.searchTextChanged(text))
                     }
                 ),
-                prompt: Text("search.placeholder")
+                prompt: Text(.searchPlaceholder)
                     .foregroundStyle(.coolNeutral20)
             )
                 .kohereTextStyle(.label1Medium)
@@ -95,7 +95,7 @@ struct SearchView: View {
                     .frame(width: 16, height: 16)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(Text("search.accessibility.clearInput"))
+            .accessibilityLabel(Text(.searchAccessibilityClearInput))
         }
         .padding(.horizontal, 16)
         .frame(height: 48)
@@ -116,7 +116,7 @@ struct SearchView: View {
                     .resizable()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                Text("common.roomFinderBanner.title")
+                Text(.commonRoomFinderBannerTitle)
                     .kohereTextStyle(.heading3Semibold)
                     .foregroundStyle(.neutral5)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -131,7 +131,7 @@ struct SearchView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text("common.roomFinderBanner.accessibility"))
+        .accessibilityLabel(Text(.commonRoomFinderBannerAccessibility))
     }
 
     @ViewBuilder private var searchContent: some View {
@@ -165,7 +165,7 @@ struct SearchView: View {
 
     private var recentSearchHeader: some View {
         HStack(alignment: .center, spacing: 0) {
-            Text("search.recent.title")
+            Text(.searchRecentTitle)
                 .kohereTextStyle(.label3Semibold)
                 .foregroundStyle(.labelNeutral)
 
@@ -175,7 +175,7 @@ struct SearchView: View {
                 Button {
                     store.send(.clearRecentSearchesButtonTapped)
                 } label: {
-                    Text("search.recent.clearAll")
+                    Text(.searchRecentClearAll)
                         .kohereTextStyle(.body3Regular)
                         .foregroundStyle(.neutral50)
                 }
@@ -232,12 +232,7 @@ struct SearchView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(
-                Text(
-                    String(
-                        format: String(localized: "search.recent.delete.accessibility", locale: locale),
-                        recentSearch.keyword
-                    )
-                )
+                Text(.searchRecentDeleteAccessibility(recentSearch.keyword))
             )
         }
         .frame(height: 36)
@@ -299,7 +294,7 @@ struct SearchView: View {
                 .frame(width: 80, height: 80)
                 .foregroundStyle(.labelAssistive)
 
-            Text("search.empty.noResults")
+            Text(.searchEmptyNoResults)
                 .kohereTextStyle(.label2Medium)
                 .foregroundStyle(.labelAlternative)
         }
