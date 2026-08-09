@@ -71,7 +71,7 @@ struct MapListingSheetView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(Text("map.filter.accessibility.open"))
+                .accessibilityLabel(Text(.mapFilterAccessibilityOpen))
 
                 ForEach(filterChips) { chip in
                     MapListingFilterChip(item: chip) {
@@ -147,7 +147,7 @@ struct MapListingSheetView: View {
             Image(.circleInfo24)
                 .foregroundStyle(.coolNeutral70)
 
-            Text(emptyStateTitle)
+            Text(verbatim: emptyStateTitle)
                 .kohereTextStyle(.body2Regular)
                 .foregroundStyle(.labelNormal)
                 .multilineTextAlignment(.center)
@@ -161,10 +161,10 @@ struct MapListingSheetView: View {
     private var emptyStateTitle: String {
         switch store.listingSource {
         case .diagnosis:
-            return AppLanguage(locale: locale).localized("map.listing.empty.diagnosis")
+            return AppLanguage(locale: locale).localized(.mapListingEmptyDiagnosis)
 
         case .idle, .locationSearch:
-            return AppLanguage(locale: locale).localized("map.listing.empty.location")
+            return AppLanguage(locale: locale).localized(.mapListingEmptyLocation)
         }
     }
 }

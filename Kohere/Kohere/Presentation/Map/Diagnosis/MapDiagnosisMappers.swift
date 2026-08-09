@@ -8,7 +8,7 @@
 import Foundation
 
 extension ListingItemModel {
-    nonisolated init(
+    init(
         recommendation: DiagnosisRecommendedListing,
         language: AppLanguage
     ) {
@@ -28,7 +28,7 @@ extension ListingItemModel {
                 language: language
             ),
             locationDescription: recommendation.title.isEmpty
-                ? Self.localized("map.diagnosis.matchesTitle", language: language)
+                ? language.localized(.mapDiagnosisMatchesTitle)
                 : recommendation.title,
             typeTag: recommendation.type,
             period: "1 mo~",
@@ -36,7 +36,7 @@ extension ListingItemModel {
         )
     }
 
-    nonisolated init(
+    init(
         recommendation: DiagnosisRecommendedListing,
         exchangeRate: KRWToUSDExchangeRate?,
         convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase,
@@ -72,7 +72,7 @@ extension ListingItemModel {
                 language: language
             ),
             locationDescription: recommendation.title.isEmpty
-                ? Self.localized("map.diagnosis.matchesTitle", language: language)
+                ? language.localized(.mapDiagnosisMatchesTitle)
                 : recommendation.title,
             typeTag: recommendation.type,
             period: "1 mo~",
@@ -80,7 +80,7 @@ extension ListingItemModel {
         )
     }
 
-    nonisolated private static func depositTitle(
+    private static func depositTitle(
         min: Int?,
         max: Int?,
         language: AppLanguage
@@ -91,12 +91,7 @@ extension ListingItemModel {
             language: language
         ) else { return "" }
 
-        let format = localized("listingDetail.format.deposit.overview", language: language)
-        return String(format: format, locale: language.locale, amount)
-    }
-
-    nonisolated private static func localized(_ key: String, language: AppLanguage) -> String {
-        language.localized(key)
+        return language.localized(.listingDetailFormatDepositOverview(amount))
     }
 }
 

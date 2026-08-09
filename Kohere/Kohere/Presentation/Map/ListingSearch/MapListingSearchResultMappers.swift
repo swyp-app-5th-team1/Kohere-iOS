@@ -8,7 +8,7 @@
 import Foundation
 
 extension ListingItemModel {
-    nonisolated init(listing: Listing, language: AppLanguage) {
+    init(listing: Listing, language: AppLanguage) {
         self.init(
             id: listing.id,
             title: listing.title,
@@ -34,7 +34,7 @@ extension ListingItemModel {
         )
     }
 
-    nonisolated init(
+    init(
         listing: Listing,
         exchangeRate: KRWToUSDExchangeRate?,
         convertMonthlyRentCurrencyUseCase: ConvertMonthlyRentCurrencyUseCase,
@@ -79,7 +79,7 @@ extension ListingItemModel {
         )
     }
 
-    nonisolated private static func detailsTitle(
+    private static func detailsTitle(
         minDeposit: Int?,
         maxDeposit: Int?,
         minimumMaintenanceFee: Int?,
@@ -94,11 +94,7 @@ extension ListingItemModel {
             language: language
         ) {
             parts.append(
-                formatted(
-                    "listingDetail.format.deposit.overview",
-                    language: language,
-                    arguments: [depositTitle]
-                )
+                language.localized(.listingDetailFormatDepositOverview(depositTitle))
             )
         }
 
@@ -108,27 +104,24 @@ extension ListingItemModel {
             language: language
         ) {
             parts.append(
-                formatted(
-                    "listingDetail.format.maintenanceFee.overview",
-                    language: language,
-                    arguments: [maintenanceFeeTitle]
-                )
+                language.localized(.listingDetailFormatMaintenanceFeeOverview(maintenanceFeeTitle))
             )
         }
 
         return parts.joined(separator: " · ")
     }
 
-    nonisolated private static func locationTitle(
+    private static func locationTitle(
         from listing: Listing,
         language: AppLanguage
     ) -> String {
         if let nearestTransit = listing.nearestTransit {
             if let walkMinutes = nearestTransit.walkMinutes {
-                return formatted(
-                    "listingDetail.format.transit.overview",
-                    language: language,
-                    arguments: ["\(walkMinutes)", nearestTransit.name]
+                return language.localized(
+                    .listingDetailFormatTransitOverview(
+                        "\(walkMinutes)",
+                        nearestTransit.name
+                    )
                 )
             }
 
@@ -147,7 +140,7 @@ extension ListingItemModel {
         return listing.address ?? ""
     }
 
-    nonisolated private static func minimumStayPeriodTitle(
+    private static func minimumStayPeriodTitle(
         months: Int?,
         language: AppLanguage
     ) -> String {
@@ -159,14 +152,5 @@ extension ListingItemModel {
         case .english:
             return "\(months) mo~"
         }
-    }
-
-    nonisolated private static func formatted(
-        _ key: String,
-        language: AppLanguage,
-        arguments: [CVarArg]
-    ) -> String {
-        let format = language.localized(key)
-        return String(format: format, locale: language.locale, arguments: arguments)
     }
 }

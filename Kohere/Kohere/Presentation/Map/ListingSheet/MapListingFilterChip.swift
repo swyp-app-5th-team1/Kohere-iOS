@@ -14,7 +14,7 @@ struct MapListingFilterChip: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 2) {
-                Text(item.title)
+                Text(verbatim: item.title)
                     .kohereTextStyle(.label3Medium)
                     .foregroundStyle(foregroundStyle)
 

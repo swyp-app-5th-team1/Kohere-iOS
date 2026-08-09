@@ -46,7 +46,7 @@ struct MapSelectedListingSheetView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            Text(title)
+            Text(verbatim: title)
                 .kohereTextStyle(.label1Semibold)
                 .foregroundStyle(.coolNeutral75)
                 .lineLimit(1)
@@ -66,8 +66,8 @@ struct MapSelectedListingSheetView: View {
                 .contentShape(Rectangle())
                 .accessibilityLabel(
                     item.isLiked
-                        ? Text("listingDetail.like.action.unlike")
-                        : Text("listingDetail.like.action.like")
+                        ? Text(.listingDetailLikeActionUnlike)
+                        : Text(.listingDetailLikeActionLike)
                 )
             }
 
@@ -83,7 +83,7 @@ struct MapSelectedListingSheetView: View {
             .buttonStyle(.plain)
             .frame(width: 24, height: 24)
             .contentShape(Rectangle())
-            .accessibilityLabel(Text("common.close"))
+            .accessibilityLabel(Text(.commonClose))
         }
     }
 

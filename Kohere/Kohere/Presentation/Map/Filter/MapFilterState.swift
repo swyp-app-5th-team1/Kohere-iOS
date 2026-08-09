@@ -96,11 +96,11 @@ enum MapPropertyType: CaseIterable, Hashable, Sendable {
         let language = AppLanguage(locale: locale)
         return switch self {
         case .goshiwon:
-            language.localized("map.propertyType.goshiwon")
+            language.localized(.mapPropertyTypeGoshiwon)
         case .coLiving:
-            language.localized("map.propertyType.coLiving")
+            language.localized(.mapPropertyTypeCoLiving)
         case .shareHouse:
-            language.localized("map.propertyType.shareHouse")
+            language.localized(.mapPropertyTypeShareHouse)
         }
     }
 }
@@ -110,23 +110,23 @@ extension RoomCondition {
         let language = AppLanguage(locale: locale)
         return switch self {
         case .moveInNow:
-            language.localized("map.filter.option.moveInNow")
+            language.localized(.mapFilterOptionMoveInNow)
         case .femaleOnly:
-            language.localized("map.filter.option.femaleOnly")
+            language.localized(.mapFilterOptionFemaleOnly)
         case .mealsIncluded:
-            language.localized("map.filter.option.mealsIncluded")
+            language.localized(.mapFilterOptionMealsIncluded)
         case .doubleRoom:
-            language.localized("map.filter.option.doubleRoom")
+            language.localized(.mapFilterOptionDoubleRoom)
         case .privateBathroom:
-            language.localized("map.filter.option.privateBathroom")
+            language.localized(.mapFilterOptionPrivateBathroom)
         case .englishSupport:
-            language.localized("map.filter.option.englishSupport")
+            language.localized(.mapFilterOptionEnglishSupport)
         case .addressRegistration:
-            language.localized("map.filter.option.addressRegistration")
+            language.localized(.mapFilterOptionAddressRegistration)
         case .noMaintenanceFee:
-            language.localized("map.filter.option.noMaintenanceFee")
+            language.localized(.mapFilterOptionNoMaintenanceFee)
         case .noARCRequired:
-            language.localized("map.filter.option.noARCRequired")
+            language.localized(.mapFilterOptionNoARCRequired)
         }
     }
 }
