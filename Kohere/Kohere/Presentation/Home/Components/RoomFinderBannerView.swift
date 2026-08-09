@@ -26,7 +26,7 @@ struct RoomFinderBannerView: View {
                         Button {
                             store.send(.roomFinderBannerTapped)
                         } label: {
-                            Text("home.roomFinder.button")
+                            Text(.homeRoomFinderButton)
                                 .kohereTextStyle(.label1Semibold)
                                 .foregroundColor(.primaryNormal)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -42,12 +42,12 @@ struct RoomFinderBannerView: View {
                     )
                 
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("common.roomFinderBanner.title")
+                    Text(.commonRoomFinderBannerTitle)
                         .kohereTextStyle(.heading2Bold)
                         .foregroundColor(.staticBlack)
                         .padding(.top, 20)
                     
-                    Text("home.roomFinder.subtitle")
+                    Text(.homeRoomFinderSubtitle)
                         .kohereTextStyle(.body1Regular)
                         .foregroundColor(.labelNeutral)
                         .padding(.top, 16)

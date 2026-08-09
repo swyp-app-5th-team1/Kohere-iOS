@@ -26,7 +26,7 @@ struct SavedListingsFeature {
     @ObservableState
     struct State: Equatable {
         var userType: UserType?
-        var appLanguage: AppLanguage = .systemDefault
+        var appLanguage: AppLanguage = .english
         var listings: [Listing] = []
         var items: [ListingItemModel] = []
         var isLoading: Bool = false

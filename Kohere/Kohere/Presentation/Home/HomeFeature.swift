@@ -37,7 +37,7 @@ struct HomeFeature {
         
         init(
             userType: UserType? = nil,
-            appLanguage: AppLanguage = .systemDefault,
+            appLanguage: AppLanguage = .english,
             recentlyViewedItems: [ListingItemModel] = [],
             quiz: Quiz = Quiz.mockQuiz,
             livingGuides: [LivingGuide] = []

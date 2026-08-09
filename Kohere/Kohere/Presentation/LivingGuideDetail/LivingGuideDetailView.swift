@@ -106,7 +106,7 @@ struct LivingGuideDetailView: View {
                 .frame(width: 44, height: 44)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("뒤로가기")
+            .accessibilityLabel(Text(.commonAccessibilityBack))
 
             Spacer()
         }

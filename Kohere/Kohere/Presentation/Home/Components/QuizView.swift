@@ -18,13 +18,13 @@ struct QuizView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("home.quiz.title")
+            Text(.homeQuizTitle)
                 .kohereTextStyle(.heading3Semibold)
                 .foregroundColor(.coolNeutral90)
                 .padding(.leading, 8)
             
             VStack(alignment: .leading, spacing: 20) {
-                Text("Q. \(store.quiz.question)")
+                Text(verbatim: "Q. \(store.quiz.question)")
                     .kohereTextStyle(.label1Semibold)
                     .foregroundColor(.labelNormal)
                     .lineSpacing(4)
