@@ -13,7 +13,6 @@ Kohere의 iOS 기능 구현 또는 기능 설계를 진행할 때 사용한다.
 
 - 먼저 `AGENTS.md`를 확인한다.
 - 아키텍처 기준은 `docs/architecture.md`를 확인한다.
-- 현재 진행 상태와 미결정 사항은 `docs/progress.md`를 확인한다.
 
 ## Workflow
 
