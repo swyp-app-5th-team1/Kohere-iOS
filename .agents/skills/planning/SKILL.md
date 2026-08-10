@@ -12,8 +12,6 @@ description: Use when clarifying Kohere product requirements before implementati
 ## Context
 
 - 먼저 `AGENTS.md`를 확인한다.
-- 기능 계획과 미확정 요구사항은 `docs/planning.md`를 확인한다.
-- 확정된 결정은 필요하면 `docs/progress.md`에 반영할지 제안한다.
 
 ## Workflow
 

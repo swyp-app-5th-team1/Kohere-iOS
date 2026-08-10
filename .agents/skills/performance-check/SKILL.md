@@ -34,9 +34,9 @@ Kohere SwiftUI 화면의 잠재 성능 이슈를 기본적으로 코드 리뷰 �
 
 ## Notes Policy
 
-기본적으로 repo 문서에 기록하지 않는다. 중요한 성능 개선, 구조 선택, UX trade-off, 측정 결과를 개인 기록으로 남기려면 `docs/private/engineering-notes.md`를 사용한다.
+기본적으로 repo 문서에 기록하지 않는다. 중요한 성능 개선, 구조 선택, UX trade-off, 측정 결과를 개인 기록으로 남기려면 `docs/private/performance-notes.md`를 사용한다.
 
-`docs/private/engineering-notes.md`가 이미 있으면 사용자에게 다시 묻지 않고 기록한다. 파일이나 폴더가 없으면 새로 만들어 기록할지 먼저 질문한다.
+`docs/private/performance-notes.md`가 이미 있으면 사용자에게 다시 묻지 않고 기록한다. 파일이나 폴더가 없으면 새로 만들어 기록할지 먼저 질문한다.
 
 기록 템플릿:
 

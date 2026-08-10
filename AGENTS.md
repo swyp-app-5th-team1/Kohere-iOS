@@ -14,9 +14,7 @@ Kohere is an iOS housing curation app for foreigners who need help finding suita
 ## Documents
 - `docs/design-system.md`: Figma 디자인 시스템을 iOS 코드 구조로 옮기는 기준.
 - `docs/architecture.md`: SwiftUI + TCA 기반 레이어 구조와 코드 배치 기준. 세부 기준은 진행하며 보완.
-- `docs/progress.md`: 현재 상태, 결정 사항, 최근 작업 로그.
-- `docs/planning.md`: 기능 계획, 작업 분해, 미확정 요구사항.
-- `docs/learning.md`: 구현 과정에서 학습할 CS/iOS 개념과 참고 주제.
+- `docs/private/`: 개인 작업 메모. git에 올리지 않는다. 있으면 참고하되 없다고 가정하고 동작한다.
 
 ## Skills
 - 기획 구체화와 작업 분해는 `$planning`을 사용한다.
