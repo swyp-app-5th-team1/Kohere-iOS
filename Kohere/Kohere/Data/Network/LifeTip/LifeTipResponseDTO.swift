@@ -2,7 +2,7 @@
 //  LifeTipResponseDTO.swift
 //  Kohere
 //
-//  Created by mandoo on 7/8/26.
+//  Created by soomin on 7/8/26.
 //
 
 // MARK: - Response

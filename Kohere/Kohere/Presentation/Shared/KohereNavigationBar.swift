@@ -2,7 +2,7 @@
 //  KohereNavigationBar.swift
 //  Kohere
 //
-//  Created by mandoo on 6/19/26.
+//  Created by soomin on 6/19/26.
 //
 
 import SwiftUI
@@ -10,6 +10,7 @@ import SwiftUI
 // MARK: - Navigation Types
 
 enum NavigationLeft {
+    case none
     case bigLogo
     case smallLogo
     case backButton(() -> Void)
@@ -29,6 +30,7 @@ struct NavigationPopover {
 
 enum NavigationRight {
     case none
+    case closeButton(() -> Void)
     case homeTab(showsHeart: Bool = true, onSearch: () -> Void, onHeart: () -> Void, onNotice: () -> Void)
     case moreTab(
         showsLanguage: Bool = true,
@@ -97,6 +99,9 @@ struct KohereNavigationBar: View {
 extension KohereNavigationBar {
     @ViewBuilder private var leftView: some View {
         switch left {
+        case .none:
+            EmptyView()
+
         case .bigLogo:
             Image(.typoLogo)
                 .resizable()
@@ -144,6 +149,15 @@ extension KohereNavigationBar {
         switch right {
         case .none:
             EmptyView()
+
+        case .closeButton(let action):
+            Button(action: action) {
+                Image(.close24)
+                    .renderingMode(.template)
+                    .foregroundColor(rightColor)
+                    .frame(width: 24, height: 24)
+            }
+            .accessibilityLabel(Text(.commonClose))
             
         case .homeTab(let showsHeart, let onSearch, let onHeart, let onNotice):
             HStack(spacing: 18) {

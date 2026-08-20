@@ -2,7 +2,7 @@
 //  ListingItemModel.swift
 //  Kohere
 //
-//  Created by mandoo on 6/23/26.
+//  Created by soomin on 6/23/26.
 //
 
 import Foundation

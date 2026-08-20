@@ -2,7 +2,7 @@
 //  HomeFeature.swift
 //  Kohere
 //
-//  Created by mandoo on 6/18/26.
+//  Created by soomin on 6/18/26.
 //
 
 import ComposableArchitecture

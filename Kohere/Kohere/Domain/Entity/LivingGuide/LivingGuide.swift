@@ -2,7 +2,7 @@
 //  LivingGuide.swift
 //  Kohere
 //
-//  Created by mandoo on 6/25/26.
+//  Created by soomin on 6/25/26.
 //
 
 struct LivingGuide: Equatable, Identifiable {

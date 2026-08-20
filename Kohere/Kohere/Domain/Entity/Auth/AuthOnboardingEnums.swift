@@ -2,7 +2,7 @@
 //  AuthOnboardingEnums.swift
 //  Kohere
 //
-//  Created by mandoo on 7/4/26.
+//  Created by soomin on 7/4/26.
 //
 
 enum Gender: String, Equatable, Codable, Sendable, CaseIterable {

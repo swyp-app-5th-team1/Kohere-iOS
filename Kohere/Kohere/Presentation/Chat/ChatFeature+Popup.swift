@@ -2,7 +2,7 @@
 //  ChatFeature+Popup.swift
 //  Kohere
 //
-//  Created by Codex on 8/9/26.
+//  Created by soomin on 8/9/26.
 //
 
 extension ChatFeature {

@@ -2,7 +2,7 @@
 //  QuizView.swift
 //  Kohere
 //
-//  Created by mandoo on 6/25/26.
+//  Created by soomin on 6/25/26.
 //
 
 import ComposableArchitecture

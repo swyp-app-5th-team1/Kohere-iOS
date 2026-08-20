@@ -2,7 +2,7 @@
 //  AppPopup.swift
 //  Kohere
 //
-//  Created by Codex on 7/8/26.
+//  Created by soomin on 7/8/26.
 //
 
 enum AppPopup: Equatable {
@@ -11,21 +11,21 @@ enum AppPopup: Equatable {
 
     struct Notice: Equatable {
         let message: String
-        var confirmTitle = "확인"
+        let confirmTitle: String
         var confirmRoute: Route?
     }
 
     struct Action: Equatable {
         let message: String
         let primaryTitle: String
-        var secondaryTitle = "취소"
+        let secondaryTitle: String
         var primaryRoute: Route?
         var secondaryRoute: Route?
 
         init(
             message: String,
             primaryTitle: String,
-            secondaryTitle: String = "취소",
+            secondaryTitle: String,
             primaryRoute: Route? = nil,
             secondaryRoute: Route? = nil
         ) {
@@ -39,7 +39,7 @@ enum AppPopup: Equatable {
         init(
             message: String,
             primaryTitle: String,
-            secondaryTitle: String = "취소",
+            secondaryTitle: String,
             route: Route
         ) {
             self.init(

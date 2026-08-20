@@ -2,7 +2,7 @@
 //  KohereActionPopup.swift
 //  Kohere
 //
-//  Created by Codex on 7/8/26.
+//  Created by soomin on 7/8/26.
 //
 
 import SwiftUI
@@ -10,7 +10,7 @@ import SwiftUI
 struct KohereActionPopup: View {
     let message: String
     let primaryTitle: String
-    var secondaryTitle = "취소"
+    let secondaryTitle: String
     let onPrimaryTapped: () -> Void
     let onSecondaryTapped: () -> Void
 
@@ -20,7 +20,7 @@ struct KohereActionPopup: View {
                 .kohereTextStyle(.body2Regular)
                 .foregroundStyle(.coolNeutral70)
                 .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 12)
 
             HStack(spacing: 8) {
                 Button {

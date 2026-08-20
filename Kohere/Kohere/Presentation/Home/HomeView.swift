@@ -2,7 +2,7 @@
 //  HomeView.swift
 //  Kohere
 //
-//  Created by Codex on 6/18/26.
+//  Created by soomin on 6/18/26.
 //
 
 import ComposableArchitecture

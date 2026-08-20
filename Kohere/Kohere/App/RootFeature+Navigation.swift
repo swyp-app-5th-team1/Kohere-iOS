@@ -43,7 +43,7 @@ extension RootFeature {
             return .send(.more(.deleteAccountConfirmed))
 
         case let .reportBooking(bookingID):
-            return .send(.chat(.swipeActionConfirmed(.report, roomID: bookingID)))
+            return .send(.chat(.reportDetailsRequested(roomID: bookingID)))
 
         case let .blockBooking(bookingID):
             return .send(.chat(.swipeActionConfirmed(.block, roomID: bookingID)))

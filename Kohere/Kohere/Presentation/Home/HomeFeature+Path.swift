@@ -2,7 +2,7 @@
 //  HomeFeature+Path.swift
 //  Kohere
 //
-//  Created by Codex on 7/9/26.
+//  Created by soomin on 7/9/26.
 //
 
 import ComposableArchitecture

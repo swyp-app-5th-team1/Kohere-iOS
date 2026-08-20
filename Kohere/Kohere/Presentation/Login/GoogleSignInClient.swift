@@ -2,7 +2,7 @@
 //  GoogleSignInClient.swift
 //  Kohere
 //
-//  Created by Codex on 6/30/26.
+//  Created by soomin on 6/30/26.
 //
 
 import ComposableArchitecture

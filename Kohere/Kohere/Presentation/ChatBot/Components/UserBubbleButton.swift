@@ -2,7 +2,7 @@
 //  UserBubbleButton.swift
 //  Kohere
 //
-//  Created by mandoo on 6/26/26.
+//  Created by soomin on 6/26/26.
 //
 
 import SwiftUI
