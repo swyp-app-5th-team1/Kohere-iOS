@@ -701,6 +701,69 @@
         }
       }
     },
+    "chat.report.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Report" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "신고하기" } }
+      }
+    },
+    "chat.report.privacy-notice" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your information and report details will be stored for one year to manage reports and detect misuse, then deleted." } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "신고 접수 시 신고자의 정보, 신고내용은 신고이력 관리, 부정이용 탐지 목적으로 이용되며 신고 시점으로부터 1년간 보관 후 파기합니다." } }
+      }
+    },
+    "chat.report.reason.abuse" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Abuse, Harassment, Discrimination" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "욕설, 비방, 차별, 혐오" } }
+      }
+    },
+    "chat.report.reason.illegal-information" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Illegal Content" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "불법정보" } }
+      }
+    },
+    "chat.report.reason.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Other" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "기타" } }
+      }
+    },
+    "chat.report.reason.personal-information" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Personal Information" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "개인정보 노출, 유포, 거래" } }
+      }
+    },
+    "chat.report.reason.sexual-content" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sexual or Inappropriate Content" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "음란, 청소년 유해" } }
+      }
+    },
+    "chat.report.reason.spam" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Spam" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "도박, 스팸" } }
+      }
+    },
+    "chat.report.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Report" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "신고하기" } }
+      }
+    },
     "chat.title" : {
       "extractionState" : "manual",
       "localizations" : {
