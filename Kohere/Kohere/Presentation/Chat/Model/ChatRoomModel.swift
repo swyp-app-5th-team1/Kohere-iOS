@@ -2,7 +2,7 @@
 //  ChatRoomModel.swift
 //  Kohere
 //
-//  Created by mandoo on 6/29/26.
+//  Created by soomin on 6/29/26.
 //
 
 import Foundation

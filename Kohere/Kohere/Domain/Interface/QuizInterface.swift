@@ -2,7 +2,7 @@
 //  QuizInterface.swift
 //  Kohere
 //
-//  Created by mandoo on 7/7/26.
+//  Created by soomin on 7/7/26.
 //
 
 import ComposableArchitecture

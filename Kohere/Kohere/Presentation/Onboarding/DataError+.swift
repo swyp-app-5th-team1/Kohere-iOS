@@ -2,7 +2,7 @@
 //  DataError+.swift
 //  Kohere
 //
-//  Created by mandoo on 7/5/26.
+//  Created by soomin on 7/5/26.
 //
 
 import Foundation

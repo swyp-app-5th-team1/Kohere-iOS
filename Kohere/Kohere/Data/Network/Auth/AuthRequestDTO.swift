@@ -2,7 +2,7 @@
 //  AuthRequestDTO.swift
 //  Kohere
 //
-//  Created by mandoo on 6/30/26.
+//  Created by soomin on 6/30/26.
 //
 
 nonisolated enum SocialLoginRequestDTO: Encodable, Sendable {

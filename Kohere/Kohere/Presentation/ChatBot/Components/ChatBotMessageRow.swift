@@ -2,7 +2,7 @@
 //  ChatBotMessageRow.swift
 //  Kohere
 //
-//  Created by mandoo on 6/27/26.
+//  Created by soomin on 6/27/26.
 //
 
 import SwiftUI

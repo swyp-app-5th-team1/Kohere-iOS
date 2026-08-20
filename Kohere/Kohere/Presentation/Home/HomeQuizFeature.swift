@@ -2,7 +2,7 @@
 //  HomeQuizFeature.swift
 //  Kohere
 //
-//  Created by Codex on 7/31/26.
+//  Created by soomin on 7/31/26.
 //
 
 import ComposableArchitecture

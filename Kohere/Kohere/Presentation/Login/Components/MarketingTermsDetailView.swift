@@ -2,7 +2,7 @@
 //  MarketingTermsDetailView.swift
 //  Kohere
 //
-//  Created by Codex on 6/21/26.
+//  Created by soomin on 6/21/26.
 //
 
 import SwiftUI
