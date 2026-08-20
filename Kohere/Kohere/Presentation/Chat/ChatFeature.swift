@@ -2,7 +2,7 @@
 //  ChatFeature.swift
 //  Kohere
 //
-//  Created by mandoo on 6/18/26.
+//  Created by soomin on 6/18/26.
 //
 
 import ComposableArchitecture
@@ -54,6 +54,7 @@ struct ChatFeature {
         case chatDetail(ChatDetailFeature)
         case chatBot(ChatBotFeature)
         case listingDetail(ListingDetailFeature)
+        case report(ChatReportFeature)
     }
     
     // MARK: - State
@@ -89,6 +90,7 @@ struct ChatFeature {
         case path(StackActionOf<Path>)
         case chatRoomTapped(id: Int)
         case swipeActionTapped(SwipeAction, roomID: Int)
+        case reportDetailsRequested(roomID: Int)
         case swipeActionConfirmed(SwipeAction, roomID: Int)
         case swipeActionResponse(SwipeAction, roomID: Int, Result<Void, Error>)
         case popupRequested(AppPopup)
@@ -147,6 +149,13 @@ struct ChatFeature {
                     roomID: roomID,
                     language: state.appLanguage
                 )))
+
+            case let .reportDetailsRequested(roomID):
+                guard state.chatRooms.contains(where: { $0.id == roomID }) else { return .none }
+                state.path.append(
+                    .report(ChatReportFeature.State(roomID: roomID, appLanguage: state.appLanguage))
+                )
+                return .none
 
             case let .swipeActionConfirmed(swipeAction, roomID):
                 guard state.pendingSwipeAction == nil,
@@ -222,6 +231,10 @@ struct ChatFeature {
                 return .none
 
             case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
+                _ = state.path.popLast()
+                return .none
+
+            case .path(.element(id: _, action: .report(.closeButtonTapped))):
                 _ = state.path.popLast()
                 return .none
 

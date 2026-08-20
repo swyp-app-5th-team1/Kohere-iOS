@@ -2,7 +2,7 @@
 //  ChatFlowView.swift
 //  Kohere
 //
-//  Created by Codex on 6/18/26.
+//  Created by soomin on 6/18/26.
 //
 
 import ComposableArchitecture
@@ -17,12 +17,7 @@ struct ChatFlowView: View {
     // MARK: - Body
 
     var body: some View {
-        NavigationStack(
-            path: $store.scope(
-                state: \ChatFeature.State.path,
-                action: \.path
-            )
-        ) {
+        NavigationStack(path: $store.scope(state: \ChatFeature.State.path, action: \.path)) {
             ChatView(store: store)
         } destination: { store in
             switch store.case {
@@ -36,6 +31,10 @@ struct ChatFlowView: View {
 
             case let .listingDetail(listingDetailStore):
                 ListingDetailView(store: listingDetailStore)
+                    .navigationBarHidden(true)
+
+            case let .report(reportStore):
+                ChatReportView(store: reportStore)
                     .navigationBarHidden(true)
             }
         }
