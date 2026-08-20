@@ -20,7 +20,7 @@ struct KohereActionPopup: View {
                 .kohereTextStyle(.body2Regular)
                 .foregroundStyle(.coolNeutral70)
                 .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 12)
 
             HStack(spacing: 8) {
                 Button {
