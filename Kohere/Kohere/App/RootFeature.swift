@@ -263,7 +263,10 @@ struct RootFeature {
             case let .logoutResponse(.failure(error)):
                 if case LogoutError.localAuthCleanupFailed = error {
                     state.isLogoutRequesting = false
-                    state.popup = .notice(AppPopup.Notice(message: state.appLanguage.localized(.settingsLogoutFailure)))
+                    state.popup = .notice(AppPopup.Notice(
+                        message: state.appLanguage.localized(.settingsLogoutFailure),
+                        confirmTitle: state.appLanguage.localized(.commonConfirm)
+                    ))
                     return .none
                 }
 
@@ -299,7 +302,8 @@ struct RootFeature {
 
             case .deleteAccountResponse(.failure):
                 state.isDeleteAccountRequesting = false
-                state.popup = .notice(AppPopup.Notice(message: state.appLanguage.localized(.settingsWithdrawalFailure)))
+                state.popup = .notice(AppPopup.Notice(message: state.appLanguage.localized(.settingsWithdrawalFailure),
+                                                      confirmTitle: state.appLanguage.localized(.commonConfirm)))
                 return .none
 
             case .deleteAccountLocalCleanupResponse(.success):

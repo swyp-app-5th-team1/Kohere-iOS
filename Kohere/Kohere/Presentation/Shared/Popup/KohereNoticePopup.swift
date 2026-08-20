@@ -2,14 +2,14 @@
 //  KohereNoticePopup.swift
 //  Kohere
 //
-//  Created by Codex on 7/8/26.
+//  Created by soomin on 7/8/26.
 //
 
 import SwiftUI
 
 struct KohereNoticePopup: View {
     let message: String
-    var confirmTitle = "확인"
+    let confirmTitle: String
     let onConfirmTapped: () -> Void
 
     var body: some View {

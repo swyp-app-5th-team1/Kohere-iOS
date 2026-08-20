@@ -177,7 +177,7 @@ private extension SearchFeature {
     func placeSearchFailurePopup(message: String, language: AppLanguage) -> AppPopup {
         let fallbackMessage = language.localized(.searchErrorFailed)
         let resolvedMessage = message.isEmpty ? fallbackMessage : message
-        return .notice(AppPopup.Notice(message: resolvedMessage))
+        return .notice(AppPopup.Notice(message: resolvedMessage, confirmTitle: language.localized(.commonConfirm)))
     }
 }
 
