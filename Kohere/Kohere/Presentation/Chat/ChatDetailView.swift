@@ -7,10 +7,11 @@
 
 import ComposableArchitecture
 import SwiftUI
+import UIKit
 
 struct ChatDetailView: View {
     
-    // MARK: - Property
+    // MARK: - Properties
     
     let store: StoreOf<ChatDetailFeature>
     @Environment(\.locale)
@@ -19,31 +20,97 @@ struct ChatDetailView: View {
     // MARK: - Body
     
     var body: some View {
-        VStack(spacing: 0) {
-            navigationBar
-            
-            Rectangle()
-                .fill(Color.neutral10)
-                .frame(height: 1)
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 12) {
-                    let dateText = store.chatRoom.localizedDateText(
-                        language: AppLanguage(locale: locale)
-                    )
-                    if !dateText.isEmpty {
-                        Text(dateText)
-                            .kohereTextStyle(.caption1Regular)
-                            .foregroundColor(.neutral40)
+        ZStack(alignment: .topTrailing) {
+            VStack(spacing: 0) {
+                ChatDetailNavigationBar(
+                    title: store.chatRoom.listingName,
+                    subtitle: store.chatRoom.location,
+                    onBackTapped: { store.send(.backButtonTapped) },
+                    onMoreTapped: {
+                        withAnimation(.easeInOut) {
+                            _ = store.send(.moreButtonTapped)
+                        }
                     }
-                    
-                    chatContent
+                )
+                
+                if store.participantRole == .landlord {
+                    Rectangle()
+                        .fill(.lineAlternative)
+                        .frame(height: 1)
                 }
-                .padding(.top, 18)
-                .padding(.bottom, 24)
+                
+                if store.showsApplicationBanner {
+                    ChatApplicationBanner {
+                        store.send(.applicationBannerTapped)
+                    }
+                }
+                
+                ScrollViewReader { proxy in
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 12) {
+                            let dateText = store.chatRoom.localizedDateText(language: AppLanguage(locale: locale))
+                            
+                            if !dateText.isEmpty {
+                                Text(dateText)
+                                    .kohereTextStyle(.body3Regular)
+                                    .foregroundColor(.neutral40)
+                            }
+                            
+                            initialContent
+                            
+                            ForEach(store.messages) { message in
+                                ChatMessageRow(message: message, participantRole: store.participantRole)
+                                    .padding(.horizontal, 20)
+                            }
+                            
+                        }
+                        .padding(.top, 12)
+                        .padding(.bottom, 1)
+                        .overlay(alignment: .bottom) {
+                            Color.clear
+                                .frame(height: 1)
+                                .id(ChatScrollAnchor.bottom)
+                        }
+                    }
+                    .background(.white)
+                    .simultaneousGesture(
+                        TapGesture()
+                            .onEnded { dismissKeyboard() }
+                    )
+                    .onChange(of: store.messages.count) {
+                        scrollToLatestMessage(using: proxy)
+                    }
+                    .onReceive(
+                        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+                    ) { _ in
+                        scrollToLatestMessage(using: proxy)
+                    }
+                }
+                
+                ChatComposer(showsKeywords: store.showsKeywordSuggestions, messageText: store.messageText,
+                             onTextChanged: { store.send(.messageTextChanged($0)) },
+                             onKeywordTapped: { store.send(.keywordTapped($0)) },
+                             onSendTapped: { store.send(.sendButtonTapped) })
             }
-            .background(.backgroundNormalNormal)
             
+            if store.isMoreMenuPresented {
+                Color("materialDimmer")
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeInOut) {
+                            _ = store.send(.moreMenuDismissed)
+                        }
+                    }
+                    .transition(.opacity)
+                
+                ChatMoreMenu { action in
+                    withAnimation(.easeInOut) {
+                        _ = store.send(.moreMenuActionTapped(action))
+                    }
+                }
+                .padding(.top, 52)
+                .padding(.trailing, 20)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.backgroundNormalNormal)
@@ -55,198 +122,31 @@ struct ChatDetailView: View {
 }
 
 private extension ChatDetailView {
-    var navigationBar: some View {
-        ZStack {
-            VStack(spacing: 2) {
-                Text(store.chatRoom.listingName)
-                    .kohereTextStyle(.label1Semibold)
-                    .foregroundStyle(.labelNormal)
-                
-                Text(store.chatRoom.location)
-                    .kohereTextStyle(.caption2Regular)
-                    .foregroundColor(.neutral50)
-            }
-            .lineLimit(1)
-            
-            HStack(spacing: 0) {
-                Button {
-                    store.send(.backButtonTapped)
-                } label: {
-                    Image(.chevronLeft24)
-                        .renderingMode(.template)
-                        .foregroundColor(.labelNormal)
-                        .frame(width: 24, height: 24)
-                }
-                
-                Spacer()
-                
-                Color.clear
-                    .frame(width: 24, height: 24)
-            }
-            .padding(.horizontal, 24)
-        }
-        .frame(height: 56)
-        .background(.backgroundNormalNormal)
+    enum ChatScrollAnchor {
+        case bottom
     }
     
-    @ViewBuilder var chatContent: some View {
+    func scrollToLatestMessage(using proxy: ScrollViewProxy) {
+        Task { @MainActor in
+            await Task.yield()
+            withAnimation(.easeOut(duration: 0.25)) {
+                proxy.scrollTo(ChatScrollAnchor.bottom, anchor: .bottom)
+            }
+        }
+    }
+    
+    func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+    
+    @ViewBuilder var initialContent: some View {
         switch store.participantRole {
         case .tenant:
-            tenantContent
+            ChatTenantInitialContent(item: store.chatRoom, hasSubmittedApplication: store.hasSubmittedApplication,
+                                     onDetailsTapped: { store.send(.viewDetailsButtonTapped) })
             
         case .landlord:
-            landlordContent
+            ChatLandlordInitialContent(item: store.chatRoom)
         }
-    }
-    
-    var tenantContent: some View {
-        VStack(spacing: 12) {
-            HStack(alignment: .bottom, spacing: 8) {
-                Spacer()
-                
-                if !store.chatRoom.timeText.isEmpty {
-                    Text(store.chatRoom.timeText)
-                        .kohereTextStyle(.caption2Regular)
-                        .foregroundStyle(.neutral20)
-                }
-                
-                MoveInApplicationCardView(item: store.chatRoom)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        store.send(.viewDetailsButtonTapped)
-                    }
-            }
-            .padding(.horizontal, 16)
-            
-            applicationSentMessage
-                .padding(.top, 12)
-        }
-    }
-    
-    var landlordContent: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top, spacing: 8) {
-                landlordAvatar
-                
-                landlordRequestMessage
-                
-                Spacer(minLength: 0)
-            }
-            
-            HStack(alignment: .bottom, spacing: 8) {
-                Color.clear
-                    .frame(width: 32, height: 1)
-                
-                MoveInApplicationCardView(
-                    item: store.chatRoom,
-                    mode: .landlord
-                )
-                
-                if !store.chatRoom.timeText.isEmpty {
-                    Text(store.chatRoom.timeText)
-                        .kohereTextStyle(.caption2Regular)
-                        .foregroundStyle(.neutral20)
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-    }
-    
-    var applicationSentMessage: some View {
-        HStack(alignment: .top, spacing: 8) {
-            Image(.smallLogo)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
-                .frame(width: 32, height: 32)
-                .background(Color.white)
-                .clipShape(Circle())
-                .overlay(
-                    Circle()
-                        .stroke(.lineNeutral, lineWidth: 1)
-                )
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text(.chatApplicationSentTitle)
-                    .kohereTextStyle(.label2Semibold)
-                    .foregroundStyle(.staticBlack)
-                
-                Text(.chatApplicationSentMessage)
-                    .kohereTextStyle(.body2Regular)
-                    .foregroundStyle(.staticBlack)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .frame(width: 248, alignment: .leading)
-            .background(Color.statusBlue5)
-            .clipShape(
-                UnevenRoundedRectangle(
-                    cornerRadii: RectangleCornerRadii(
-                        topLeading: 0,
-                        bottomLeading: 12,
-                        bottomTrailing: 12,
-                        topTrailing: 12
-                    )
-                )
-            )
-            .overlay(
-                UnevenRoundedRectangle(
-                    cornerRadii: RectangleCornerRadii(
-                        topLeading: 0,
-                        bottomLeading: 12,
-                        bottomTrailing: 12,
-                        topTrailing: 12
-                    )
-                )
-                    .stroke(Color.lineNeutral, lineWidth: 1)
-            )
-            
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 16)
-    }
-    
-    var landlordAvatar: some View {
-        Image(.personFill24)
-            .resizable()
-            .renderingMode(.template)
-            .foregroundStyle(.secondary5)
-            .frame(width: 24, height: 24)
-            .frame(width: 32, height: 32)
-            .background(.primary10)
-            .clipShape(Circle())
-    }
-    
-    var landlordRequestMessage: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(.chatApplicationReceivedTitle)
-                .kohereTextStyle(.label2Semibold)
-                .foregroundStyle(.staticBlack)
-            
-            Text(.chatApplicationReceivedMessage)
-                .kohereTextStyle(.body2Regular)
-                .foregroundStyle(.staticBlack)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(width: 270, alignment: .leading)
-        .background(.backgroundNormalAlternative)
-        .clipShape(
-            UnevenRoundedRectangle(
-                topLeadingRadius: 0,
-                bottomLeadingRadius: 12,
-                bottomTrailingRadius: 12,
-                topTrailingRadius: 12
-            )
-        )
-        .overlay(
-            UnevenRoundedRectangle(
-                topLeadingRadius: 0,
-                bottomLeadingRadius: 12,
-                bottomTrailingRadius: 12,
-                topTrailingRadius: 12
-            )
-            .stroke(.lineNeutral, lineWidth: 1)
-        )
     }
 }
