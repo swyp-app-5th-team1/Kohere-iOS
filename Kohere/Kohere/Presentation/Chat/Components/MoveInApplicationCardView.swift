@@ -78,12 +78,7 @@ struct MoveInApplicationCardView: View {
         .clipped()
         .clipShape(
             UnevenRoundedRectangle(
-                cornerRadii: RectangleCornerRadii(
-                    topLeading: 20,
-                    bottomLeading: 0,
-                    bottomTrailing: 0,
-                    topTrailing: 20
-                )
+                cornerRadii: RectangleCornerRadii(topLeading: 20, bottomLeading: 0, bottomTrailing: 0, topTrailing: 20)
             )
         )
     }
@@ -178,11 +173,7 @@ struct MoveInApplicationCardView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(
-                cardFormatter.localized(
-                    isEmailCopied
-                        ? "chat.applicationCard.accessibility.emailCopied"
-                        : "chat.applicationCard.accessibility.copyEmail"
-                )
+                cardFormatter.localized(isEmailCopied ? "chat.applicationCard.accessibility.emailCopied" : "chat.applicationCard.accessibility.copyEmail")
             )
             .accessibilityValue(item.applicantEmail)
         }
@@ -216,9 +207,7 @@ struct MoveInApplicationCardView: View {
         case .landlord:
             return .korean
         case .tenant:
-            return locale.language.languageCode?.identifier == AppLanguage.korean.apiCode
-                ? .korean
-                : .english
+            return locale.language.languageCode?.identifier == AppLanguage.korean.apiCode ? .korean : .english
         }
     }
 
