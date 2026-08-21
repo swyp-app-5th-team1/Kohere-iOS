@@ -503,13 +503,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your application is sent!"
+            "value" : "Application Complete!"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "신청서가 전송되었어요!"
+            "value" : "신청이 잘 접수되었어요!"
           }
         }
       }
@@ -5777,6 +5777,83 @@
             "value" : "회원 탈퇴를 완료하지 못했어요. 다시 시도해 주세요."
           }
         }
+      }
+    },
+    "chat.action.block" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Block" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "차단하기" } }
+      }
+    },
+    "chat.action.delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "삭제하기" } }
+      }
+    },
+    "chat.action.report" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Report" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "신고하기" } }
+      }
+    },
+    "chat.detail.applicationBanner" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Apply now and set your move-in date" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "지금 신청하고 입주일을 잡아보세요" } }
+      }
+    },
+    "chat.detail.keyword.availability" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Can I move in right now?" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "지금 입주 가능한가요?" } }
+      }
+    },
+    "chat.detail.keyword.depositReturn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "When do I get my deposit back?" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "보증금은 언제 돌려받나요?" } }
+      }
+    },
+    "chat.detail.keyword.earlyTermination" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Penalty for leaving early?" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "중도 퇴실 시 위약금이 있나요?" } }
+      }
+    },
+    "chat.detail.keyword.payment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "How do I pay?" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "결제는 어떤 방식으로 이루어지나요?" } }
+      }
+    },
+    "chat.detail.keyword.weeklyPrice" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "How much is it per week?" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "1주 별 금액은 얼마인가요?" } }
+      }
+    },
+    "chat.detail.messagePlaceholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Type a message" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "메시지 입력해 주세요" } }
+      }
+    },
+    "chat.detail.viewDetails" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "View Details" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "자세히 보기" } }
       }
     },
     "tab.community" : {
