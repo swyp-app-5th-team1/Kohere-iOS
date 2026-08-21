@@ -66,40 +66,25 @@ struct ChatRoomRowCell: View {
         .clipped()
         .animation(.snappy(duration: 0.25), value: isRevealed)
     }
+    
+    // MARK: - SubView
 
     private var actionButtons: some View {
         HStack(spacing: 0) {
-            swipeActionButton(
-                imageName: "megaphone_24",
-                accessibilityLabel: "채팅 신고",
-                backgroundColor: .coolNeutral20,
-                action: onReport
-            )
+            swipeActionButton(imageName: "megaphone_24", accessibilityLabel: "채팅 신고",
+                              backgroundColor: .coolNeutral20, action: onReport)
 
-            swipeActionButton(
-                imageName: "circle_block_24",
-                accessibilityLabel: "채팅 차단",
-                backgroundColor: .coolNeutral40,
-                action: onBlock
-            )
+            swipeActionButton(imageName: "circle_block_24", accessibilityLabel: "채팅 차단",
+                              backgroundColor: .coolNeutral40, action: onBlock)
 
-            swipeActionButton(
-                imageName: "delete_24",
-                accessibilityLabel: "채팅 삭제",
-                backgroundColor: .primaryNormal,
-                action: onDelete
-            )
+            swipeActionButton(imageName: "delete_24", accessibilityLabel: "채팅 삭제",
+                              backgroundColor: .primaryNormal, action: onDelete)
         }
         .frame(width: totalActionWidth)
         .frame(height: actionSize)
     }
 
-    private func swipeActionButton(
-        imageName: String,
-        accessibilityLabel: String,
-        backgroundColor: Color,
-        action: @escaping () -> Void
-    ) -> some View {
+    private func swipeActionButton(imageName: String, accessibilityLabel: String, backgroundColor: Color, action: @escaping () -> Void) -> some View {
         Button {
             onClose()
             action()
@@ -177,15 +162,12 @@ struct ChatRoomRowCell: View {
     }
 }
 
-private struct ChatRoomRowButtonStyle: ButtonStyle {
+// MARK: - Button Style
 
+private struct ChatRoomRowButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .background(
-                configuration.isPressed
-                ? Color.backgroundNormalAlternative
-                : Color.backgroundNormalNormal
-            )
+            .background(configuration.isPressed ? .backgroundNormalAlternative : .backgroundNormalNormal)
             .contentShape(Rectangle())
     }
 }

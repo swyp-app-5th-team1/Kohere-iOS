@@ -7,7 +7,7 @@
 
 import Foundation
 
-nonisolated struct ChatRoomModel: Equatable, Identifiable {
+struct ChatRoomModel: Equatable, Identifiable {
     let id: Int
     let listingID: String
     let listingName: String
@@ -27,6 +27,46 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     let depositAmount: Int?
     let totalCostAmount: Int?
     let pricePerMonthAmount: Int?
+
+    init(
+        id: Int,
+        listingID: String,
+        listingName: String,
+        location: String,
+        thumbnailURL: String? = nil,
+        createdAt: Date? = nil,
+        applicantName: String = "N/A",
+        applicantGenderCode: String = "",
+        applicantCountryCode: String = "",
+        applicantCountryName: String = "",
+        applicantEmail: String = "N/A",
+        roomType: String = "N/A",
+        moveInDate: Date? = nil,
+        leaseTermMonths: Int = 0,
+        depositAmount: Int? = nil,
+        totalCostAmount: Int? = nil,
+        pricePerMonthAmount: Int? = nil
+    ) {
+        self.id = id
+        self.listingID = listingID
+        self.listingName = listingName
+        self.location = location
+        self.thumbnailURL = thumbnailURL
+        self.createdAt = createdAt
+        self.dateText = Self.dateText(createdAt)
+        self.timeText = Self.timeText(createdAt)
+        self.applicantName = applicantName
+        self.applicantGenderCode = applicantGenderCode
+        self.applicantCountryCode = applicantCountryCode
+        self.applicantCountryName = applicantCountryName
+        self.applicantEmail = applicantEmail
+        self.roomType = roomType
+        self.moveInDate = moveInDate
+        self.leaseTermMonths = leaseTermMonths
+        self.depositAmount = depositAmount
+        self.totalCostAmount = totalCostAmount
+        self.pricePerMonthAmount = pricePerMonthAmount
+    }
     
     init(summary: BookingSummary) {
         self.id = summary.bookingID
@@ -102,5 +142,4 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         
         return formatter.string(from: date)
     }
-    
 }
