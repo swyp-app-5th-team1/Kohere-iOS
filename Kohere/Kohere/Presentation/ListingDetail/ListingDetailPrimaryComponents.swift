@@ -97,6 +97,7 @@ struct ListingDetailBottomBar: View {
     let showsLikeButton: Bool
     let isApplyEnabled: Bool
     let onLikeTap: () -> Void
+    let onContactTap: () -> Void
     let onApplyTap: () -> Void
 
     var body: some View {
@@ -131,14 +132,33 @@ struct ListingDetailBottomBar: View {
                 )
             }
 
+            Button(action: onContactTap) {
+                Text(.listingDetailActionContact)
+                    .kohereTextStyle(.label1Semibold)
+                    .foregroundStyle(.primaryNormal)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(.statusRed5)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(.lineAlternative, lineWidth: 1)
+                    }
+            }
+            .buttonStyle(.plain)
+
             Button(action: onApplyTap) {
                 Text(.listingDetailActionApply)
                     .kohereTextStyle(.label1Semibold)
                     .foregroundStyle(.staticWhite)
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
-                    .background(isApplyEnabled ? .primary50 : .primary10)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(isApplyEnabled ? .primaryNormal : .primary10)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(.lineAlternative, lineWidth: 1)
+                    }
             }
             .buttonStyle(.plain)
             .disabled(!isApplyEnabled)

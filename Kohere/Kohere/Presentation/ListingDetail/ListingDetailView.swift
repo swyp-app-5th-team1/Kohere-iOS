@@ -375,8 +375,8 @@ struct ListingDetailView: View {
             showsLikeButton: store.showsFavoriteControl,
             isApplyEnabled: store.canUseApplicationFeatures,
             onLikeTap: { store.send(.likeButtonTapped) },
+            onContactTap: { store.send(.contactButtonTapped) },
             onApplyTap: { store.send(.applyButtonTapped) }
         )
     }
-
 }
