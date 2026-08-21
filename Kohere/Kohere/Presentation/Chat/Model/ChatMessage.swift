@@ -5,6 +5,8 @@
 //  Created by soomin on 8/21/26.
 //
 
+import Foundation
+
 struct ChatMessage: Equatable, Identifiable {
     let id: UUID
     let sender: ChatParticipantRole
