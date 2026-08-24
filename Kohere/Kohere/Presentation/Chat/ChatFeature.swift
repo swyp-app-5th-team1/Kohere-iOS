@@ -230,6 +230,9 @@ struct ChatFeature {
                 )
                 return .none
 
+            case let .path(.element(id: _, action: .chatDetail(.delegate(.swipeActionRequested(swipeAction, roomID))))):
+                return .send(.swipeActionTapped(swipeAction, roomID: roomID))
+
             case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
@@ -284,83 +287,4 @@ extension ChatFeature.State {
     }
 }
 
-@Reducer
-struct ChatDetailFeature {
-    @Dependency(\.fetchBookingDetailUseCase)
-    var fetchBookingDetailUseCase
-    
-    // MARK: - State
-    
-    @ObservableState
-    struct State: Equatable {
-        var chatRoom: ChatRoomModel
-        var participantRole: ChatParticipantRole
-        var isLoading = false
-        var errorMessage: String?
-        
-        init(
-            chatRoom: ChatRoomModel,
-            participantRole: ChatParticipantRole = .tenant
-        ) {
-            self.chatRoom = chatRoom
-            self.participantRole = participantRole
-        }
-    }
-    
-    // MARK: - Action
-
-    enum Delegate: Equatable {
-        case listingDetailRequested(String)
-    }
-    
-    enum Action {
-        case onAppear
-        case bookingDetailResponse(Result<BookingDetail, Error>)
-        case backButtonTapped
-        case viewDetailsButtonTapped
-        case delegate(Delegate)
-    }
-    // MARK: - Reducer Body
-    
-    var body: some Reducer<State, Action> {
-        Reduce { state, action in
-            switch action {
-            case .onAppear:
-                guard !state.isLoading else { return .none }
-                state.isLoading = true
-                state.errorMessage = nil
-                let bookingID = state.chatRoom.id
-                let fetchBookingDetail = fetchBookingDetailUseCase
-                return .run { send in
-                    do {
-                        let detail = try await fetchBookingDetail.execute(bookingID)
-                        await send(.bookingDetailResponse(.success(detail)))
-                    } catch {
-                        await send(.bookingDetailResponse(.failure(error)))
-                    }
-                }
-                
-            case let .bookingDetailResponse(.success(detail)):
-                state.isLoading = false
-                state.errorMessage = nil
-                state.chatRoom = ChatRoomModel(detail: detail, fallback: state.chatRoom)
-                return .none
-                
-            case let .bookingDetailResponse(.failure(error)):
-                state.isLoading = false
-                state.errorMessage = error.localizedDescription
-                return .none
-                
-            case .backButtonTapped:
-                return .none
-
-            case .viewDetailsButtonTapped:
-                return .send(.delegate(.listingDetailRequested(state.chatRoom.listingID)))
-
-            case .delegate:
-                return .none
-            }
-        }
-    }
-}
 extension ChatFeature.Path.State: Equatable {}
