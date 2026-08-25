@@ -95,6 +95,7 @@ extension MapFeature {
             state.markers = []
             return .merge(
                 .cancel(id: MapEffectID.listingSearch),
+                .cancel(id: MapEffectID.listingMapMarkers),
                 cancelDiagnosisRequestEffects()
             )
 
@@ -118,6 +119,7 @@ extension MapFeature {
             state.listingSearchErrorMessage = nil
             return .merge(
                 .cancel(id: MapEffectID.listingSearch),
+                .cancel(id: MapEffectID.listingMapMarkers),
                 cancelDiagnosisRequestEffects()
             )
         }
@@ -149,7 +151,7 @@ extension MapFeature {
             source: state.appliedFilterSource
         )
 
-        return .run { [listingClient] send in
+        let listingsEffect: Effect<Action> = .run { [listingClient] send in
             debugLogListingSearchRequest(input)
 
             do {
@@ -160,6 +162,18 @@ extension MapFeature {
             }
         }
         .cancellable(id: MapEffectID.listingSearch, cancelInFlight: true)
+
+        let markersEffect: Effect<Action> = .run { [listingClient] send in
+            do {
+                let markers = try await listingClient.fetchMapMarkers(input)
+                await send(.listingMapMarkersResponse(.success(markers)))
+            } catch {
+                await send(.listingMapMarkersResponse(.failure(error)))
+            }
+        }
+        .cancellable(id: MapEffectID.listingMapMarkers, cancelInFlight: true)
+
+        return .merge(listingsEffect, markersEffect)
     }
 
     func handleListingSearchResponse(
@@ -180,6 +194,24 @@ extension MapFeature {
             debugLogListingSearchError(error)
             state.isListingSearchLoading = false
             state.listingSearchErrorMessage = error.localizedDescription
+        }
+
+        return .none
+    }
+
+    func handleListingMapMarkersResponse(
+        _ result: Result<[ListingMapMarker], Error>,
+        state: inout State
+    ) -> Effect<Action> {
+        guard state.listingSource == .locationSearch else { return .none }
+
+        switch result {
+        case let .success(markers):
+            state.markers = markers.map {
+                MapMarkerItem(id: $0.listingID, coordinate: $0.coordinate)
+            }
+        case .failure:
+            state.markers = []
         }
 
         return .none
@@ -252,7 +284,6 @@ extension MapFeature {
             state.listingSearchResults.appendUnique(contentsOf: page.content)
         }
 
-        state.markers = state.listingSearchResults.markerItems
         rebuildListingItems(to: &state)
 
         if let selectedMarkerID = state.selectedMarkerID,

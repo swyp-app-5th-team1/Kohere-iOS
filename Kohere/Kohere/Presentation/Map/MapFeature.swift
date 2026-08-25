@@ -59,6 +59,9 @@ struct MapFeature {
             case let .listingSearchResponse(result, isFirstPage):
                 return handleListingSearchResponse(result, isFirstPage: isFirstPage, state: &state)
 
+            case let .listingMapMarkersResponse(result):
+                return handleListingMapMarkersResponse(result, state: &state)
+
             case let .listingRowAppeared(listingID):
                 return handleListingRowAppeared(listingID, state: &state)
 
