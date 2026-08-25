@@ -25,7 +25,13 @@ struct ChatView: View {
             if store.isContentAvailable {
                 roomFinderBanner
 
-                if store.chatRooms.isEmpty {
+                if store.isLoading && store.chatRooms.isEmpty {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let errorMessage = store.errorMessage, store.chatRooms.isEmpty {
+                    KohereEmptyView(title: errorMessage)
+                        .padding(.bottom, 100)
+                } else if store.chatRooms.isEmpty {
                     KohereEmptyView(title: store.appLanguage.localized(.chatEmptyTitle), fontStyle: .label2Semibold, fontColor: .neutral40)
                     .padding(.bottom, 100)
                 } else {
@@ -33,6 +39,14 @@ struct ChatView: View {
                         LazyVStack(spacing: 4) {
                             ForEach(store.chatRooms) { room in
                                 chatRoomRow(room)
+                                    .onAppear {
+                                        store.send(.chatRoomAppeared(roomID: room.roomID))
+                                    }
+                            }
+
+                            if store.isLoading {
+                                ProgressView()
+                                    .padding(.vertical, 12)
                             }
                         }
                     }
@@ -48,7 +62,7 @@ struct ChatView: View {
     }
 
     private func chatRoomRow(_ room: ChatRoomModel) -> some View {
-        ChatRoomRowCell(item: room, participantRole: store.participantRole, appLanguage: store.appLanguage,
+        ChatRoomRowCell(item: room, participantRole: room.myRole, appLanguage: store.appLanguage,
                         isRevealed: revealedChatRoomID == room.id,
                         onTap: { roomID in store.send(.chatRoomTapped(roomID: roomID)) },
                         onReveal: { revealedChatRoomID = room.id },

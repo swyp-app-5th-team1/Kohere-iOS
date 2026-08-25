@@ -36,6 +36,12 @@ struct ChatRoomRowCell: View {
     }
     
     private var statusText: String {
+        if item.lastMessageType == .text {
+            return item.lastMessagePreview ?? ""
+        }
+
+        guard item.lastMessageType == .bookingCard else { return "" }
+
         switch participantRole {
         case .tenant:
             return appLanguage.localized(.chatApplicationSentTitle)

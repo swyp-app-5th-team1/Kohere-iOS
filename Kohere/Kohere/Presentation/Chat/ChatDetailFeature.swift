@@ -10,8 +10,8 @@ import Foundation
 
 @Reducer
 struct ChatDetailFeature {
-    @Dependency(\.fetchBookingDetailUseCase)
-    var fetchBookingDetailUseCase
+    @Dependency(\.fetchChatRoomUseCase)
+    var fetchChatRoomUseCase
 
     // MARK: - State
     
@@ -56,7 +56,7 @@ struct ChatDetailFeature {
 
     enum Action {
         case onAppear
-        case bookingDetailResponse(Result<BookingDetail, Error>)
+        case chatRoomResponse(Result<ChatRoom, Error>)
         case backButtonTapped
         case viewDetailsButtonTapped
         case applicationBannerTapped
@@ -78,25 +78,25 @@ struct ChatDetailFeature {
                 guard !state.isLoading else { return .none }
                 state.isLoading = true
                 state.errorMessage = nil
-                // TODO: Chat API 연동 후 수정
                 let roomID = state.chatRoom.roomID
-                let fetchBookingDetail = fetchBookingDetailUseCase
+                let fetchChatRoom = fetchChatRoomUseCase
                 return .run { send in
                     do {
-                        let detail = try await fetchBookingDetail.execute(roomID)
-                        await send(.bookingDetailResponse(.success(detail)))
+                        let room = try await fetchChatRoom.execute(roomID)
+                        await send(.chatRoomResponse(.success(room)))
                     } catch {
-                        await send(.bookingDetailResponse(.failure(error)))
+                        await send(.chatRoomResponse(.failure(error)))
                     }
                 }
 
-            case let .bookingDetailResponse(.success(detail)):
+            case let .chatRoomResponse(.success(room)):
                 state.isLoading = false
                 state.errorMessage = nil
-                state.chatRoom = ChatRoomModel(detail: detail, fallback: state.chatRoom)
+                state.chatRoom = ChatRoomModel(room: room)
+                state.participantRole = room.myRole
                 return .none
 
-            case let .bookingDetailResponse(.failure(error)):
+            case let .chatRoomResponse(.failure(error)):
                 state.isLoading = false
                 state.errorMessage = error.localizedDescription
                 return .none
