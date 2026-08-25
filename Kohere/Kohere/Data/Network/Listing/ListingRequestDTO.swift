@@ -16,9 +16,8 @@ nonisolated struct ListingListQueryDTO {
     let maxBudget: Int?
     let minDeposit: Int?
     let maxDeposit: Int?
-    let type: [String]
+    let type: String?
     let conditions: [String]
-    let arcRequired: Bool?
     let sort: String
     let page: Int
     let size: Int
@@ -61,9 +60,8 @@ extension ListingListQueryDTO {
             maxBudget: input.maxBudget,
             minDeposit: input.minDeposit,
             maxDeposit: input.maxDeposit,
-            type: input.propertyTypes.map(\.rawValue),
+            type: input.propertyTypes.first?.rawValue,
             conditions: input.conditions.map(\.conditionCode),
-            arcRequired: input.arcRequired,
             sort: input.sort.rawValue,
             page: input.page,
             size: input.size
@@ -85,10 +83,9 @@ extension ListingListQueryDTO {
         append(&items, name: "maxBudget", value: maxBudget)
         append(&items, name: "minDeposit", value: minDeposit)
         append(&items, name: "maxDeposit", value: maxDeposit)
-        append(&items, name: "arcRequired", value: arcRequired)
 
-        type.forEach {
-            items.append(URLQueryItem(name: "type", value: $0))
+        if let type {
+            items.append(URLQueryItem(name: "type", value: type))
         }
 
         conditions.forEach {
@@ -107,13 +104,17 @@ extension ListingListQueryDTO {
         items.append(URLQueryItem(name: name, value: String(value)))
     }
 
-    nonisolated private func append(
-        _ items: inout [URLQueryItem],
-        name: String,
-        value: Bool?
-    ) {
-        guard let value else { return }
-        items.append(URLQueryItem(name: name, value: String(value)))
+}
+
+nonisolated struct ListingMapQueryDTO {
+    let search: ListingListQueryDTO
+
+    init(_ input: ListingSearchInput) {
+        search = ListingListQueryDTO(input)
+    }
+
+    var queryItems: [URLQueryItem] {
+        search.queryItems.filter { !["sort", "page", "size"].contains($0.name) }
     }
 }
 

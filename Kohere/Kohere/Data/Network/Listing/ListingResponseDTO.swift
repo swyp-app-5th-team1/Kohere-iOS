@@ -6,8 +6,19 @@
 //
 
 struct ListingListResponseDTO: Decodable {
-    let content: [ListingListItemResponseDTO]?
+    let content: [ListingItemV2ResponseDTO]?
     let page: PageResponseDTO?
+}
+
+struct ListingMapResponseDTO: Decodable {
+    let total: Int?
+    let markers: [ListingMapMarkerResponseDTO]?
+}
+
+struct ListingMapMarkerResponseDTO: Decodable {
+    let listingId: String?
+    let lat: Double?
+    let lng: Double?
 }
 
 struct ListingFavoriteListResponseDTO: Decodable {
@@ -19,9 +30,8 @@ struct ListingRecentListResponseDTO: Decodable {
     let content: [ListingItemV2ResponseDTO]?
 }
 
-/// v2 사용자 매물 목록 항목 (`/api/v2/users/me/favorites`, `/api/v2/users/me/recent-listings` 공용).
-/// v1 목록과 달리 주소의 city/district가 code/label 객체이고, 계약 기간이 `roomOffers[].contract`에 실린다.
-/// 지도 검색(`/api/v1/listings`)이 v2로 옮겨오면 v1 전용 `ListingListItemResponseDTO`를 이 타입으로 대체한다.
+/// v2 공개·사용자 매물 목록 공용 항목.
+/// 주소의 city/district가 code/label 객체이고, 계약 기간은 `roomOffers[].contract`에 실린다.
 struct ListingItemV2ResponseDTO: Decodable {
     let listingId: String?
     let title: String?
@@ -42,6 +52,7 @@ struct ListingItemV2ResponseDTO: Decodable {
     let viewedAt: String?
     let createdAt: String?
     let updatedAt: String?
+    let distanceMeters: Double?
 }
 
 struct ListingAddressV2ResponseDTO: Decodable {
@@ -82,19 +93,19 @@ struct ListingDetailResponseDTO: Decodable {
     let type: ListingCodeLabelResponseDTO?
     let status: String?
     let rentalType: ListingCodeLabelResponseDTO?
-    let refundPolicy: ListingRefundPolicyResponseDTO?
-    let contract: ListingContractResponseDTO?
+    let refundPolicy: String?
     let genderPolicy: ListingCodeLabelResponseDTO?
     let location: ListingLocationResponseDTO?
-    let address: ListingAddressResponseDTO?
+    let address: ListingAddressV2ResponseDTO?
     let nearestTransit: ListingNearestTransitResponseDTO?
     let nearbyUniversityCodes: [String]?
     let building: ListingBuildingResponseDTO?
-    let propertyPolicies: ListingPropertyPoliciesResponseDTO?
+    let arcRequired: ListingCodeLabelResponseDTO?
     let facilities: ListingFacilitiesResponseDTO?
     let conditions: [ListingCodeLabelResponseDTO]?
-    let roomOffers: [ListingRoomOfferResponseDTO]?
-    let descriptions: ListingDescriptionsResponseDTO?
+    let roomOffers: [ListingRoomOfferV2ResponseDTO]?
+    let description: String?
+    let extraNotes: String?
     let imageUrls: [String]?
     let favorited: Bool?
     let favoriteCount: Int?
@@ -168,7 +179,7 @@ struct ListingFacilitiesResponseDTO: Decodable {
     let laundry: [ListingCodeLabelResponseDTO]?
     let livingAmenities: [ListingCodeLabelResponseDTO]?
     let securityFeatures: [ListingCodeLabelResponseDTO]?
-    let commonSpaces: [ListingCommonSpaceResponseDTO]?
+    let commonSpaces: [ListingCodeLabelResponseDTO]?
     let providedSupplies: [ListingCodeLabelResponseDTO]?
 }
 

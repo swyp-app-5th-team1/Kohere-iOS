@@ -30,6 +30,16 @@ final class ListingRepository: ListingInterface {
         return responseDTO.toEntity()
     }
 
+    func fetchMapMarkers(input: ListingSearchInput) async throws -> [ListingMapMarker] {
+        let environment = try environmentProvider()
+        let queryDTO = ListingMapQueryDTO(input)
+        let responseDTO: ListingMapResponseDTO = try await authenticatedNetworkService.request(
+            ListingRouter.map(query: queryDTO, environment)
+        )
+
+        return (responseDTO.markers ?? []).compactMap { $0.toEntity() }
+    }
+
     func fetchDetail(listingID: String) async throws -> ListingDetail {
         let environment = try environmentProvider()
         let responseDTO: ListingDetailResponseDTO = try await authenticatedNetworkService.request(
@@ -99,6 +109,16 @@ private extension ListingListResponseDTO {
         ListingSearchPage(
             content: (content ?? []).compactMap { $0.toEntity() },
             page: page?.toEntity()
+        )
+    }
+}
+
+private extension ListingMapMarkerResponseDTO {
+    func toEntity() -> ListingMapMarker? {
+        guard let listingId, let lat, let lng else { return nil }
+        return ListingMapMarker(
+            listingID: listingId,
+            coordinate: MapCoordinate(latitude: lat, longitude: lng)
         )
     }
 }
@@ -226,7 +246,7 @@ private extension ListingItemV2ResponseDTO {
             coordinate: coordinate,
             address: address?.fullAddress,
             nearestTransit: nearestTransit?.toEntity(),
-            distanceMeters: nil,
+            distanceMeters: distanceMeters,
             isFavorited: favorited ?? false,
             favoriteCount: favoriteCount
         )

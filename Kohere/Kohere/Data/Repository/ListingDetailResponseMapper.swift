@@ -12,6 +12,13 @@ extension ListingDetailResponseDTO {
         guard let listingId else { throw DataError.decodingFailed }
 
         let listingImageURLs = nonEmptyImageURLs(imageUrls)
+        let offers = roomOffers ?? []
+        let contracts = offers.compactMap(\.contract)
+        let aggregateContract = ListingDetailContract(
+            minStayMonths: contracts.compactMap(\.minStayMonths).min(),
+            maxStayMonths: contracts.compactMap(\.maxStayMonths).max()
+        )
+        let conditionCodes = Set((conditions ?? []).map { $0.code.uppercased() })
 
         return ListingDetail(
             listingID: listingId,
@@ -19,19 +26,30 @@ extension ListingDetailResponseDTO {
             type: type?.label ?? "",
             status: status ?? "",
             rentalType: rentalType?.label ?? "",
-            refundPolicy: refundPolicy?.toDetailEntity(),
-            contract: contract?.toDetailEntity(),
+            refundPolicy: refundPolicy.map {
+                ListingDetailRefundPolicy(code: "", description: $0)
+            },
+            contract: contracts.isEmpty ? nil : aggregateContract,
             genderPolicy: genderPolicy?.label,
             coordinate: location?.toDetailCoordinate(),
             address: address?.toDetailEntity(),
             nearestTransit: nearestTransit?.toDetailEntity(),
             nearbyUniversityCodes: nearbyUniversityCodes ?? [],
             building: building?.toDetailEntity(),
-            propertyPolicies: propertyPolicies?.toDetailEntity(),
+            propertyPolicies: ListingDetailPropertyPolicies(
+                arcRequired: arcRequired?.code.uppercased().contains("NOT") == false,
+                residentRegistrationAvailable: conditionCodes.contains("ADDRESS_REGISTRATION"),
+                mealsProvided: conditionCodes.contains("MEALS_INCLUDED"),
+                englishAvailable: conditionCodes.contains("ENGLISH_OK")
+            ),
             facilities: facilities?.toDetailEntity(),
             conditions: (conditions ?? []).map(\.label),
-            roomOffers: (roomOffers ?? []).compactMap { $0.toDetailEntity() },
-            descriptions: descriptions?.toDetailEntity(),
+            roomOffers: offers.compactMap { $0.toDetailEntity() },
+            descriptions: ListingDetailDescriptions(
+                korean: description,
+                english: description,
+                extraNotes: extraNotes
+            ),
             imageURLs: listingImageURLs,
             isFavorited: favorited ?? false,
             favoriteCount: favoriteCount ?? 0,
@@ -81,15 +99,15 @@ private extension ListingContractResponseDTO {
     }
 }
 
-private extension ListingAddressResponseDTO {
+private extension ListingAddressV2ResponseDTO {
     func toDetailEntity() -> ListingDetailAddress? {
         guard city != nil || district != nil || fullAddress != nil || detail != nil else {
             return nil
         }
 
         return ListingDetailAddress(
-            city: city,
-            district: district,
+            city: city?.label,
+            district: district?.label,
             fullAddress: fullAddress,
             detail: detail
         )
@@ -109,17 +127,6 @@ private extension ListingBuildingResponseDTO {
     }
 }
 
-private extension ListingPropertyPoliciesResponseDTO {
-    func toDetailEntity() -> ListingDetailPropertyPolicies {
-        ListingDetailPropertyPolicies(
-            arcRequired: arcRequired,
-            residentRegistrationAvailable: residentRegistrationAvailable,
-            mealsProvided: mealsProvided,
-            englishAvailable: englishAvailable
-        )
-    }
-}
-
 private extension ListingFacilitiesResponseDTO {
     func toDetailEntity() -> ListingDetailFacilities {
         ListingDetailFacilities(
@@ -128,24 +135,15 @@ private extension ListingFacilitiesResponseDTO {
             laundry: (laundry ?? []).map(\.label),
             livingAmenities: (livingAmenities ?? []).map(\.label),
             securityFeatures: (securityFeatures ?? []).map(\.label),
-            commonSpaces: (commonSpaces ?? []).compactMap { $0.toDetailEntity() },
+            commonSpaces: (commonSpaces ?? []).map {
+                ListingDetailCommonSpace(type: $0.label, count: nil)
+            },
             providedSupplies: (providedSupplies ?? []).map(\.label)
         )
     }
 }
 
-private extension ListingCommonSpaceResponseDTO {
-    func toDetailEntity() -> ListingDetailCommonSpace? {
-        guard let type = type?.label else { return nil }
-
-        return ListingDetailCommonSpace(
-            type: type,
-            count: count
-        )
-    }
-}
-
-private extension ListingRoomOfferResponseDTO {
+private extension ListingRoomOfferV2ResponseDTO {
     func toDetailEntity() -> ListingDetailRoomOffer? {
         guard let roomOfferId else { return nil }
 
@@ -156,7 +154,7 @@ private extension ListingRoomOfferResponseDTO {
             name: name ?? "",
             status: status,
             pricing: pricing?.toDetailEntity(),
-            inventory: inventory?.toDetailEntity(),
+            inventory: nil,
             filterTags: (filterTags ?? []).map(\.label),
             roomImageURLs: imageURLs
         )
@@ -178,24 +176,4 @@ private func nonEmptyImageURLs(_ imageURLs: [String]?) -> [String] {
     (imageURLs ?? [])
         .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
         .filter { !$0.isEmpty }
-}
-
-private extension ListingRoomInventoryResponseDTO {
-    func toDetailEntity() -> ListingDetailRoomInventory {
-        ListingDetailRoomInventory(
-            totalCount: totalCount,
-            availableCount: availableCount,
-            nextAvailableFrom: nextAvailableFrom
-        )
-    }
-}
-
-private extension ListingDescriptionsResponseDTO {
-    func toDetailEntity() -> ListingDetailDescriptions {
-        ListingDetailDescriptions(
-            korean: ko,
-            english: en,
-            extraNotes: extraNotes
-        )
-    }
 }
