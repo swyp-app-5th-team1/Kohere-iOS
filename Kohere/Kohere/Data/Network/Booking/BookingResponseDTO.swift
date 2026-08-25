@@ -43,4 +43,3 @@ struct BookingDetailResponseDTO: Decodable {
     let deposit: Int?
     let totalAmount: Int?
 }
-

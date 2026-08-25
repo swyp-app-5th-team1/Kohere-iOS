@@ -23,20 +23,13 @@ extension ChatFeature {
         }
 
         return .action(
-            AppPopup.Action(
-                message: language.localizedString(forKey: content.messageKey),
-                primaryTitle: language.localizedString(forKey: content.primaryTitleKey),
-                secondaryTitle: language.localized(.commonCancel),
-                primaryRoute: route
-            )
+            AppPopup.Action(message: language.localizedString(forKey: content.messageKey),
+                            primaryTitle: language.localizedString(forKey: content.primaryTitleKey),
+                            secondaryTitle: language.localized(.commonCancel), primaryRoute: route)
         )
     }
 
-    static func resultPopup(
-        for action: SwipeAction,
-        succeeded: Bool,
-        language: AppLanguage
-    ) -> AppPopup {
+    static func resultPopup(for action: SwipeAction, succeeded: Bool, language: AppLanguage) -> AppPopup {
         let messageKey: String
 
         if succeeded {
@@ -53,10 +46,7 @@ extension ChatFeature {
         }
 
         return .notice(
-            AppPopup.Notice(
-                message: language.localizedString(forKey: messageKey),
-                confirmTitle: language.localized(.commonConfirm)
-            )
+            AppPopup.Notice(message: language.localizedString(forKey: messageKey), confirmTitle: language.localized(.commonConfirm))
         )
     }
 }
