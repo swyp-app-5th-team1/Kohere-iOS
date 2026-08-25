@@ -263,43 +263,18 @@ final class ChatApplicationCardFormatterTests: XCTestCase {
     }
 
     private func makeChatRoomModel(deposit: Int) -> ChatRoomModel {
-        let summaryModel = ChatRoomModel(
-            summary: BookingSummary(
-                bookingID: 1,
-                listingID: "listing-1",
-                title: "Listing",
-                thumbnailURL: nil,
-                roomOfferID: "room-1",
-                moveInDate: Date(timeIntervalSince1970: 0),
-                contractPeriod: 1,
-                status: "SUBMITTED",
-                createdAt: Date(timeIntervalSince1970: 0)
-            )
-        )
-
         return ChatRoomModel(
-            detail: BookingDetail(
-                bookingID: 1,
-                status: "SUBMITTED",
-                listingID: "listing-1",
-                roomOfferID: "room-1",
-                title: "Listing",
-                thumbnailURL: nil,
-                address: "Seoul",
-                roomOfferName: "",
-                createdAt: Date(timeIntervalSince1970: 0),
-                moveInDate: Date(timeIntervalSince1970: 0),
-                contractPeriod: 1,
-                applicantName: "Applicant",
-                applicantGender: "",
-                applicantCountry: "",
-                applicantCountryName: "",
-                applicantEmail: "",
-                tenantName: "Applicant",
-                deposit: deposit,
-                totalAmount: 0
-            ),
-            fallback: summaryModel
+            roomID: 1,
+            listingID: "listing-1",
+            listingName: "Listing",
+            location: "Seoul",
+            createdAt: Date(timeIntervalSince1970: 0),
+            applicantName: "Applicant",
+            roomType: "N/A",
+            moveInDate: Date(timeIntervalSince1970: 0),
+            leaseTermMonths: 1,
+            depositAmount: deposit,
+            totalCostAmount: 0
         )
     }
 }
@@ -387,7 +362,7 @@ final class LanguageResetTests: XCTestCase {
         state.home.isQuizLoaded = true
         state.map.isFilterPresented = true
         state.more.path.append(.setting(SettingFeature.State()))
-        state.popup = .notice(AppPopup.Notice(message: "popup"))
+        state.popup = .notice(AppPopup.Notice(message: "popup", confirmTitle: "confirm"))
 
         RootFeature().resetMainContent(
             language: .english,
@@ -1368,6 +1343,7 @@ final class ListingDetailLoadFailureTests: XCTestCase {
         initialState.popup = .notice(
             AppPopup.Notice(
                 message: "load failed",
+                confirmTitle: "confirm",
                 confirmRoute: .dismissListingDetail
             )
         )
