@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum ChatRoomRole: String, Equatable, Sendable {
+nonisolated enum ChatRoomRole: String, Equatable, Sendable {
     case tenant = "TENANT"
     case landlord = "LANDLORD"
 
@@ -29,8 +29,26 @@ nonisolated struct ChatRoom: Equatable, Identifiable, Sendable {
     let listing: ChatRoomListing
     let counterpart: ChatRoomCounterpart
     let isBlocked: Bool
+    let lastMessage: ChatRoomLastMessage?
 
     var id: Int { roomID }
+}
+
+nonisolated struct ChatRoomPage: Equatable, Sendable {
+    let content: [ChatRoom]
+    let page: PageInfo
+}
+
+nonisolated struct ChatRoomLastMessage: Equatable, Sendable {
+    let messageID: Int?
+    let type: ChatMessageType?
+    let preview: String?
+    let sentAt: Date?
+}
+
+nonisolated enum ChatMessageType: String, Equatable, Sendable {
+    case text = "TEXT"
+    case bookingCard = "BOOKING_CARD"
 }
 
 nonisolated struct ChatRoomListing: Equatable, Sendable {
