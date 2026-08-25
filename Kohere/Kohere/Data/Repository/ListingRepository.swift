@@ -192,6 +192,47 @@ private extension ListingListItemResponseDTO {
     }
 }
 
+private extension ListingItemV2ResponseDTO {
+    func toEntity() -> Listing? {
+        guard let listingId else { return nil }
+
+        let coordinate: MapCoordinate?
+        if let lat = location?.lat, let lng = location?.lng {
+            coordinate = MapCoordinate(latitude: lat, longitude: lng)
+        } else {
+            coordinate = nil
+        }
+
+        let offers = roomOffers ?? []
+        let pricings = offers.compactMap(\.pricing)
+        let monthlyRents = pricings.compactMap(\.monthlyRent)
+        let deposits = pricings.compactMap(\.deposit)
+        let maintenanceFees = pricings.compactMap(\.maintenanceFee)
+        let contracts = offers.compactMap(\.contract)
+
+        return Listing(
+            listingID: listingId,
+            title: title ?? "",
+            type: type?.label ?? "",
+            minMonthlyRent: monthlyRents.min(),
+            maxMonthlyRent: monthlyRents.max(),
+            minDeposit: deposits.min(),
+            maxDeposit: deposits.max(),
+            minMaintenanceFee: maintenanceFees.min(),
+            maxMaintenanceFee: maintenanceFees.max(),
+            minStayMonths: contracts.compactMap(\.minStayMonths).min(),
+            maxStayMonths: contracts.compactMap(\.maxStayMonths).max(),
+            thumbnailURL: firstImageURL(imageUrls),
+            coordinate: coordinate,
+            address: address?.fullAddress,
+            nearestTransit: nearestTransit?.toEntity(),
+            distanceMeters: nil,
+            isFavorited: favorited ?? false,
+            favoriteCount: favoriteCount
+        )
+    }
+}
+
 private func firstImageURL(_ imageURLs: [String]?) -> String? {
     imageURLs?
         .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }

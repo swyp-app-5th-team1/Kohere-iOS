@@ -387,7 +387,7 @@ final class LanguageResetTests: XCTestCase {
         state.home.isQuizLoaded = true
         state.map.isFilterPresented = true
         state.more.path.append(.setting(SettingFeature.State()))
-        state.popup = .notice(AppPopup.Notice(message: "popup"))
+        state.popup = .notice(AppPopup.Notice(message: "popup", confirmTitle: "OK"))
 
         RootFeature().resetMainContent(
             language: .english,
@@ -1171,7 +1171,7 @@ final class ListingApplicationFeatureTests: XCTestCase {
 
 @MainActor
 final class ListingRecentResponseDTOTests: XCTestCase {
-    func testNestedRecentListingResponseDecodesUsingListingListItemShape() throws {
+    func testRecentListingV2ResponseDecodesSharedItemShapeWithViewedAt() throws {
         let data = Data(
             #"""
             {
@@ -1179,46 +1179,48 @@ final class ListingRecentResponseDTOTests: XCTestCase {
               "data": {
                 "content": [
                   {
-                    "listingId": "listing-1",
-                    "title": "회기 고시원",
-                    "type": {
-                      "code": "GOSHIWON",
-                      "label": "고시원"
-                    },
-                    "contract": {
-                      "minStayMonths": 1,
-                      "maxStayMonths": 3
-                    },
-                    "location": {
-                      "lat": 37.604268,
-                      "lng": 127.046761
-                    },
+                    "listingId": "68e0000000000000000000a1",
+                    "title": "Sillim Stay",
+                    "type": { "code": "GOSHIWON", "label": "Goshiwon" },
+                    "status": "PUBLISHED",
+                    "rentalType": { "code": "MONTHLY_RENT", "label": "Monthly Rent" },
+                    "genderPolicy": { "code": "FEMALE_ONLY", "label": "Female Only" },
+                    "location": { "lat": 37.459471, "lng": 126.951422 },
                     "address": {
-                      "city": "SEOUL",
-                      "district": "DONGDAEMUN_GU",
-                      "fullAddress": "서울특별시 동대문구 회기동",
+                      "city": { "code": "SEOUL", "label": "Seoul" },
+                      "district": { "code": "GWANAK_GU", "label": "Gwanak-gu" },
+                      "fullAddress": "56-15 Na-ro, Sillim-dong, Gwanak-gu, Seoul",
                       "detail": null
+                    },
+                    "nearestTransit": {
+                      "type": { "code": "SUBWAY", "label": "Subway" },
+                      "name": "Seoul Nat'l Univ. Sta.",
+                      "walkMinutes": 5
                     },
                     "roomOffers": [
                       {
-                        "roomOfferId": "room-1",
-                        "name": "스탠다드 1인실",
+                        "roomOfferId": "68e0000000000000000001a1",
+                        "name": "Standard Single Room",
                         "status": "ACTIVE",
+                        "contract": { "minStayMonths": 1, "maxStayMonths": 12 },
                         "pricing": {
-                          "monthlyRent": 200000,
-                          "deposit": 0,
+                          "monthlyRent": 380000,
+                          "deposit": 300000,
                           "maintenanceFee": 0,
                           "currency": "KRW"
                         },
-                        "inventory": null,
                         "filterTags": [],
                         "roomImageUrls": []
                       }
                     ],
-                    "imageUrls": [],
+                    "imageUrls": [
+                      "https://cdn.kohere.app/listings/68e0000000000000000000a1/1.jpg"
+                    ],
                     "favorited": true,
-                    "favoriteCount": 3,
-                    "viewedAt": "2026-07-11T14:30:10.882Z"
+                    "favoriteCount": 1,
+                    "createdAt": "2026-08-01T00:00:00Z",
+                    "updatedAt": "2026-08-01T00:00:00Z",
+                    "viewedAt": "2026-08-24T15:30:49.240Z"
                   }
                 ]
               },
@@ -1233,10 +1235,154 @@ final class ListingRecentResponseDTOTests: XCTestCase {
         )
         let listing = try XCTUnwrap(response.data?.content?.first)
 
-        XCTAssertEqual(listing.address?.fullAddress, "서울특별시 동대문구 회기동")
-        XCTAssertEqual(listing.location?.lat, 37.604268)
-        XCTAssertEqual(listing.roomOffers?.first?.pricing?.monthlyRent, 200000)
+        XCTAssertEqual(listing.listingId, "68e0000000000000000000a1")
+        XCTAssertEqual(listing.address?.city?.label, "Seoul")
+        XCTAssertEqual(listing.address?.fullAddress, "56-15 Na-ro, Sillim-dong, Gwanak-gu, Seoul")
+        XCTAssertEqual(listing.location?.lat, 37.459471)
+        XCTAssertEqual(listing.roomOffers?.first?.contract?.maxStayMonths, 12)
+        XCTAssertEqual(listing.roomOffers?.first?.pricing?.monthlyRent, 380000)
         XCTAssertEqual(listing.favorited, true)
+        XCTAssertEqual(listing.viewedAt, "2026-08-24T15:30:49.240Z")
+        XCTAssertNil(listing.favoritedAt)
+    }
+}
+
+@MainActor
+final class ListingFavoriteListResponseDTOTests: XCTestCase {
+    func testFavoriteListV2ResponseDecodesCodeLabelAddressAndRoomOfferContract() throws {
+        let data = Data(
+            #"""
+            {
+              "success": true,
+              "data": {
+                "content": [
+                  {
+                    "listingId": "68e0000000000000000000a1",
+                    "title": "Sillim Stay",
+                    "type": { "code": "GOSHIWON", "label": "Goshiwon" },
+                    "status": "PUBLISHED",
+                    "rentalType": { "code": "MONTHLY_RENT", "label": "Monthly Rent" },
+                    "refundPolicy": "Full refund if cancelled at least 7 days before move-in; 50% afterwards.",
+                    "genderPolicy": { "code": "FEMALE_ONLY", "label": "Female Only" },
+                    "arcRequired": { "code": "NOT_REQUIRED", "label": "ARC Not Required" },
+                    "ageMin": 20,
+                    "ageMax": 35,
+                    "languagesSupported": [
+                      { "code": "ENGLISH", "label": "English" }
+                    ],
+                    "contact": { "managerName": "김운영", "phone": "+82) 10-1234-5678" },
+                    "blogUrl": "https://blog.naver.com/kohere-goshiwon",
+                    "location": { "lat": 37.459471, "lng": 126.951422 },
+                    "address": {
+                      "city": { "code": "SEOUL", "label": "Seoul" },
+                      "district": { "code": "GWANAK_GU", "label": "Gwanak-gu" },
+                      "fullAddress": "56-15 Na-ro, Sillim-dong, Gwanak-gu, Seoul",
+                      "detail": null
+                    },
+                    "nearestTransit": {
+                      "type": { "code": "SUBWAY", "label": "Subway" },
+                      "name": "Seoul Nat'l Univ. Sta.",
+                      "walkMinutes": 5
+                    },
+                    "nearbyFacilities": [
+                      { "code": "CONVENIENCE_STORE", "label": "Convenience Store" }
+                    ],
+                    "nearbyUniversityCodes": ["SNU", "CAU", "SOONGSIL"],
+                    "building": {
+                      "type": { "code": "VILLA", "label": "Villa" },
+                      "usedFloorMin": 1,
+                      "usedFloorMax": 2,
+                      "totalFloors": 4,
+                      "parkingAvailable": true,
+                      "elevatorAvailable": true
+                    },
+                    "facilities": {
+                      "heatingSystem": [ { "code": "CENTRAL", "label": "Central Heating" } ],
+                      "commonSpaces": [ { "code": "SHARED_KITCHEN", "label": "Shared Kitchen" } ]
+                    },
+                    "conditions": [
+                      { "code": "MOVE_IN_NOW", "label": "Move-in Now" }
+                    ],
+                    "roomOffers": [
+                      {
+                        "roomOfferId": "68e0000000000000000001a1",
+                        "name": "Standard Single Room",
+                        "status": "ACTIVE",
+                        "contract": { "minStayMonths": 1, "maxStayMonths": 12 },
+                        "pricing": {
+                          "monthlyRent": 380000,
+                          "deposit": 300000,
+                          "maintenanceFee": 0,
+                          "currency": "KRW"
+                        },
+                        "filterTags": [ { "code": "MOVE_IN_NOW", "label": "Move-in Now" } ],
+                        "roomImageUrls": [
+                          "https://cdn.kohere.app/listings/68e0000000000000000000a1/room/1.jpg"
+                        ]
+                      },
+                      {
+                        "roomOfferId": "68e0000000000000000001a2",
+                        "name": "Premium Single Room",
+                        "status": "ACTIVE",
+                        "contract": { "minStayMonths": 3, "maxStayMonths": 24 },
+                        "pricing": {
+                          "monthlyRent": 520000,
+                          "deposit": 500000,
+                          "maintenanceFee": 20000,
+                          "currency": "KRW"
+                        },
+                        "filterTags": [],
+                        "roomImageUrls": []
+                      }
+                    ],
+                    "description": "A female-only goshiwon near Sillim Station, five minutes on foot.",
+                    "extraNotes": "No cooking inside rooms. Quiet hours after 11 PM.",
+                    "imageUrls": [
+                      "https://cdn.kohere.app/listings/68e0000000000000000000a1/1.jpg"
+                    ],
+                    "favorited": true,
+                    "favoriteCount": 1,
+                    "createdAt": "2026-08-01T00:00:00Z",
+                    "updatedAt": "2026-08-01T00:00:00Z",
+                    "favoritedAt": "2026-08-24T15:30:49.173Z"
+                  }
+                ],
+                "page": {
+                  "number": 0,
+                  "size": 20,
+                  "totalElements": 1,
+                  "totalPages": 1,
+                  "hasNext": false
+                }
+              },
+              "error": null
+            }
+            """#.utf8
+        )
+
+        let response = try JSONDecoder().decode(
+            BaseResponseDTO<ListingFavoriteListResponseDTO>.self,
+            from: data
+        )
+        let listing = try XCTUnwrap(response.data?.content?.first)
+
+        XCTAssertEqual(listing.listingId, "68e0000000000000000000a1")
+        XCTAssertEqual(listing.type?.label, "Goshiwon")
+        XCTAssertEqual(listing.address?.city?.code, "SEOUL")
+        XCTAssertEqual(listing.address?.district?.label, "Gwanak-gu")
+        XCTAssertEqual(listing.address?.fullAddress, "56-15 Na-ro, Sillim-dong, Gwanak-gu, Seoul")
+        XCTAssertEqual(listing.nearestTransit?.name, "Seoul Nat'l Univ. Sta.")
+        XCTAssertEqual(listing.nearestTransit?.walkMinutes, 5)
+        XCTAssertEqual(listing.roomOffers?.count, 2)
+        XCTAssertEqual(listing.roomOffers?.first?.contract?.minStayMonths, 1)
+        XCTAssertEqual(listing.roomOffers?.last?.contract?.maxStayMonths, 24)
+        XCTAssertEqual(listing.roomOffers?.first?.pricing?.monthlyRent, 380000)
+        XCTAssertEqual(listing.imageUrls?.first, "https://cdn.kohere.app/listings/68e0000000000000000000a1/1.jpg")
+        XCTAssertEqual(listing.favorited, true)
+        XCTAssertEqual(listing.favoriteCount, 1)
+        XCTAssertEqual(listing.favoritedAt, "2026-08-24T15:30:49.173Z")
+        XCTAssertEqual(response.data?.page?.totalElements, 1)
+        XCTAssertEqual(response.data?.page?.hasNext, false)
     }
 }
 
@@ -1368,6 +1514,7 @@ final class ListingDetailLoadFailureTests: XCTestCase {
         initialState.popup = .notice(
             AppPopup.Notice(
                 message: "load failed",
+                confirmTitle: "OK",
                 confirmRoute: .dismissListingDetail
             )
         )
