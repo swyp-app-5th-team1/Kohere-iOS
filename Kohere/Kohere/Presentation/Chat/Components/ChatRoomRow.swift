@@ -12,7 +12,7 @@ struct ChatRoomRowCell: View {
     // MARK: - Properties
     
     let item: ChatRoomModel
-    let participantRole: ChatParticipantRole
+    let participantRole: ChatRoomRole
     let appLanguage: AppLanguage
     let isRevealed: Bool
     let onTap: (Int) -> Void

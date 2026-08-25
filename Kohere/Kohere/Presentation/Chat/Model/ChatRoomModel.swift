@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct ChatRoomModel: Equatable, Identifiable {
-    let id: Int
+nonisolated struct ChatRoomModel: Equatable, Identifiable {
+    let roomID: Int
     let listingID: String
     let listingName: String
     let location: String
@@ -28,8 +28,10 @@ struct ChatRoomModel: Equatable, Identifiable {
     let totalCostAmount: Int?
     let pricePerMonthAmount: Int?
 
+    var id: Int { roomID }
+
     init(
-        id: Int,
+        roomID: Int,
         listingID: String,
         listingName: String,
         location: String,
@@ -47,7 +49,7 @@ struct ChatRoomModel: Equatable, Identifiable {
         totalCostAmount: Int? = nil,
         pricePerMonthAmount: Int? = nil
     ) {
-        self.id = id
+        self.roomID = roomID
         self.listingID = listingID
         self.listingName = listingName
         self.location = location
@@ -67,9 +69,20 @@ struct ChatRoomModel: Equatable, Identifiable {
         self.totalCostAmount = totalCostAmount
         self.pricePerMonthAmount = pricePerMonthAmount
     }
+
+    init(room: ChatRoom) {
+        self.init(
+            roomID: room.roomID,
+            listingID: room.listing.listingID,
+            listingName: room.listing.title,
+            location: room.listing.address,
+            applicantName: Self.displayText(room.counterpart.displayName)
+        )
+    }
     
     init(summary: BookingSummary) {
-        self.id = summary.bookingID
+        // TODO: Chat API 연동 후 제거
+        self.roomID = summary.bookingID
         self.listingID = summary.listingID
         self.listingName = summary.title
         self.location = ""
@@ -91,7 +104,7 @@ struct ChatRoomModel: Equatable, Identifiable {
     }
     
     init(detail: BookingDetail, fallback: ChatRoomModel) {
-        self.id = detail.bookingID
+        self.roomID = fallback.roomID
         self.listingID = detail.listingID
         self.listingName = detail.title
         self.location = detail.address

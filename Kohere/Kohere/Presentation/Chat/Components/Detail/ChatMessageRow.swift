@@ -12,7 +12,7 @@ struct ChatMessageRow: View {
     // MARK: - Properties
 
     let message: ChatMessage
-    let participantRole: ChatParticipantRole
+    let participantRole: ChatRoomRole
 
     private var isMine: Bool { message.sender == participantRole }
 

@@ -18,7 +18,7 @@ struct ChatDetailFeature {
     @ObservableState
     struct State: Equatable {
         var chatRoom: ChatRoomModel
-        var participantRole: ChatParticipantRole
+        var participantRole: ChatRoomRole
         var hasSubmittedApplication: Bool
         var messages: [ChatMessage]
         var messageText = ""
@@ -36,7 +36,7 @@ struct ChatDetailFeature {
 
         init(
             chatRoom: ChatRoomModel,
-            participantRole: ChatParticipantRole = .tenant,
+            participantRole: ChatRoomRole = .tenant,
             hasSubmittedApplication: Bool = true,
             messages: [ChatMessage] = []
         ) {
@@ -78,11 +78,12 @@ struct ChatDetailFeature {
                 guard !state.isLoading else { return .none }
                 state.isLoading = true
                 state.errorMessage = nil
-                let bookingID = state.chatRoom.id
+                // TODO: Chat API 연동 후 수정
+                let roomID = state.chatRoom.roomID
                 let fetchBookingDetail = fetchBookingDetailUseCase
                 return .run { send in
                     do {
-                        let detail = try await fetchBookingDetail.execute(bookingID)
+                        let detail = try await fetchBookingDetail.execute(roomID)
                         await send(.bookingDetailResponse(.success(detail)))
                     } catch {
                         await send(.bookingDetailResponse(.failure(error)))
@@ -139,7 +140,7 @@ struct ChatDetailFeature {
 
             case let .moreMenuActionTapped(swipeAction):
                 state.isMoreMenuPresented = false
-                return .send(.delegate(.swipeActionRequested(swipeAction, roomID: state.chatRoom.id)))
+                return .send(.delegate(.swipeActionRequested(swipeAction, roomID: state.chatRoom.roomID)))
 
             case .delegate:
                 return .none
@@ -154,7 +155,7 @@ struct ChatDetailFeature {
         return formatter.string(from: Date())
     }
 
-    private static func localMessage(_ text: String, sender: ChatParticipantRole) -> ChatMessage {
+    private static func localMessage(_ text: String, sender: ChatRoomRole) -> ChatMessage {
         ChatMessage(sender: sender, originalText: text, timeText: currentTimeText())
     }
 }

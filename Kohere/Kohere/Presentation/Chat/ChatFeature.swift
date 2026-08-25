@@ -8,23 +8,7 @@
 import ComposableArchitecture
 import Foundation
 
-enum ChatParticipantRole: Equatable {
-    case tenant
-    case landlord
-
-    init?(userType: UserType) {
-        switch userType {
-        case .tenant:
-            self = .tenant
-        case .landlord:
-            self = .landlord
-        case .unknown:
-            return nil
-        }
-    }
-}
-
-private extension ChatParticipantRole {
+private extension ChatRoomRole {
     var userType: UserType {
         switch self {
         case .tenant:
@@ -63,7 +47,7 @@ struct ChatFeature {
     struct State: Equatable {
         var path = StackState<Path.State>()
         var chatRooms: [ChatRoomModel] = []
-        var participantRole: ChatParticipantRole
+        var participantRole: ChatRoomRole
         var appLanguage: AppLanguage
         var isContentAvailable = false
         var isLoading = false
@@ -73,7 +57,7 @@ struct ChatFeature {
         
         init(
             chatRooms: [ChatRoomModel] = [],
-            participantRole: ChatParticipantRole = .landlord,
+            participantRole: ChatRoomRole = .landlord,
             appLanguage: AppLanguage = .english
         ) {
             self.chatRooms = chatRooms
@@ -88,7 +72,7 @@ struct ChatFeature {
         case onAppear
         case bookingListResponse(Result<BookingPage, Error>)
         case path(StackActionOf<Path>)
-        case chatRoomTapped(id: Int)
+        case chatRoomTapped(roomID: Int)
         case swipeActionTapped(SwipeAction, roomID: Int)
         case reportDetailsRequested(roomID: Int)
         case swipeActionConfirmed(SwipeAction, roomID: Int)
@@ -129,37 +113,24 @@ struct ChatFeature {
                 state.errorMessage = error.localizedDescription
                 return .none
                 
-            case let .chatRoomTapped(id):
-                if let selectedRoom = state.chatRooms.first(where: { $0.id == id }) {
-                    state.path.append(
-                        .chatDetail(
-                            ChatDetailFeature.State(
-                                chatRoom: selectedRoom,
-                                participantRole: state.participantRole
-                            )
-                        )
-                    )
+            case let .chatRoomTapped(roomID):
+                if let selectedRoom = state.chatRooms.first(where: { $0.roomID == roomID }) {
+                    state.path.append(.chatDetail(ChatDetailFeature.State(chatRoom: selectedRoom, participantRole: state.participantRole)))
                 }
                 return .none
 
             case let .swipeActionTapped(swipeAction, roomID):
-                guard state.chatRooms.contains(where: { $0.id == roomID }) else { return .none }
-                return .send(.popupRequested(Self.popup(
-                    for: swipeAction,
-                    roomID: roomID,
-                    language: state.appLanguage
-                )))
+                guard state.chatRooms.contains(where: { $0.roomID == roomID }) else { return .none }
+                return .send(.popupRequested(Self.popup(for: swipeAction, roomID: roomID, language: state.appLanguage)))
 
             case let .reportDetailsRequested(roomID):
-                guard state.chatRooms.contains(where: { $0.id == roomID }) else { return .none }
-                state.path.append(
-                    .report(ChatReportFeature.State(roomID: roomID, appLanguage: state.appLanguage))
-                )
+                guard state.chatRooms.contains(where: { $0.roomID == roomID }) else { return .none }
+                state.path.append(.report(ChatReportFeature.State(roomID: roomID, appLanguage: state.appLanguage)))
                 return .none
 
             case let .swipeActionConfirmed(swipeAction, roomID):
                 guard state.pendingSwipeAction == nil,
-                      state.chatRooms.contains(where: { $0.id == roomID })
+                      state.chatRooms.contains(where: { $0.roomID == roomID })
                 else { return .none }
 
                 state.pendingSwipeAction = swipeAction
@@ -182,13 +153,9 @@ struct ChatFeature {
                 state.pendingSwipeAction = nil
                 state.pendingSwipeRoomID = nil
                 if swipeAction == .block || swipeAction == .delete {
-                    state.chatRooms.removeAll { $0.id == roomID }
+                    state.chatRooms.removeAll { $0.roomID == roomID }
                 }
-                return .send(.popupRequested(Self.resultPopup(
-                    for: swipeAction,
-                    succeeded: true,
-                    language: state.appLanguage
-                )))
+                return .send(.popupRequested(Self.resultPopup(for: swipeAction, succeeded: true, language: state.appLanguage)))
 
             case let .swipeActionResponse(swipeAction, roomID, .failure):
                 guard state.pendingSwipeAction == swipeAction,
@@ -197,11 +164,7 @@ struct ChatFeature {
 
                 state.pendingSwipeAction = nil
                 state.pendingSwipeRoomID = nil
-                return .send(.popupRequested(Self.resultPopup(
-                    for: swipeAction,
-                    succeeded: false,
-                    language: state.appLanguage
-                )))
+                return .send(.popupRequested(Self.resultPopup(for: swipeAction, succeeded: false, language: state.appLanguage)))
 
             case .popupRequested:
                 return .none
@@ -220,12 +183,8 @@ struct ChatFeature {
             case let .path(.element(id: _, action: .chatDetail(.delegate(.listingDetailRequested(listingID))))):
                 state.path.append(
                     .listingDetail(
-                        ListingDetailFeature.State(
-                            listingID: listingID,
-                            userType: state.participantRole.userType,
-                            appLanguage: state.appLanguage,
-                            isApplicationDisabled: true
-                        )
+                        ListingDetailFeature.State(listingID: listingID, userType: state.participantRole.userType,
+                                                   appLanguage: state.appLanguage, isApplicationDisabled: true)
                     )
                 )
                 return .none
@@ -271,7 +230,7 @@ private extension ChatFeature.SwipeAction {
 
 extension ChatFeature.State {
     mutating func applyUserType(_ userType: UserType) -> Bool {
-        guard let updatedParticipantRole = ChatParticipantRole(userType: userType) else { return false }
+        guard let updatedParticipantRole = ChatRoomRole(userType: userType) else { return false }
         isContentAvailable = true
         guard participantRole != updatedParticipantRole else { return false }
 
