@@ -11,12 +11,54 @@ struct ListingListResponseDTO: Decodable {
 }
 
 struct ListingFavoriteListResponseDTO: Decodable {
-    let content: [ListingListItemResponseDTO]?
+    let content: [ListingItemV2ResponseDTO]?
     let page: PageResponseDTO?
 }
 
 struct ListingRecentListResponseDTO: Decodable {
-    let content: [ListingListItemResponseDTO]?
+    let content: [ListingItemV2ResponseDTO]?
+}
+
+/// v2 사용자 매물 목록 항목 (`/api/v2/users/me/favorites`, `/api/v2/users/me/recent-listings` 공용).
+/// v1 목록과 달리 주소의 city/district가 code/label 객체이고, 계약 기간이 `roomOffers[].contract`에 실린다.
+/// 지도 검색(`/api/v1/listings`)이 v2로 옮겨오면 v1 전용 `ListingListItemResponseDTO`를 이 타입으로 대체한다.
+struct ListingItemV2ResponseDTO: Decodable {
+    let listingId: String?
+    let title: String?
+    let type: ListingCodeLabelResponseDTO?
+    let status: String?
+    let rentalType: ListingCodeLabelResponseDTO?
+    let genderPolicy: ListingCodeLabelResponseDTO?
+    let location: ListingLocationResponseDTO?
+    let address: ListingAddressV2ResponseDTO?
+    let nearestTransit: ListingNearestTransitResponseDTO?
+    let roomOffers: [ListingRoomOfferV2ResponseDTO]?
+    let imageUrls: [String]?
+    let favorited: Bool?
+    let favoriteCount: Int?
+    /// 찜 목록 응답에만 존재
+    let favoritedAt: String?
+    /// 최근 본 목록 응답에만 존재
+    let viewedAt: String?
+    let createdAt: String?
+    let updatedAt: String?
+}
+
+struct ListingAddressV2ResponseDTO: Decodable {
+    let city: ListingCodeLabelResponseDTO?
+    let district: ListingCodeLabelResponseDTO?
+    let fullAddress: String?
+    let detail: String?
+}
+
+struct ListingRoomOfferV2ResponseDTO: Decodable {
+    let roomOfferId: String?
+    let name: String?
+    let status: String?
+    let contract: ListingContractResponseDTO?
+    let pricing: ListingRoomPricingResponseDTO?
+    let filterTags: [ListingCodeLabelResponseDTO]?
+    let roomImageUrls: [String]?
 }
 
 struct ListingFavoriteStatusResponseDTO: Decodable {
