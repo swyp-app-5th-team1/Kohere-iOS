@@ -50,7 +50,7 @@ extension MapFilterState {
         if selectedPropertyTypes.contains(propertyType) {
             selectedPropertyTypes.remove(propertyType)
         } else {
-            selectedPropertyTypes.insert(propertyType)
+            selectedPropertyTypes = [propertyType]
         }
     }
 
@@ -106,6 +106,8 @@ enum MapPropertyType: CaseIterable, Hashable, Sendable {
 }
 
 extension RoomCondition {
+    static let mapListingFilterCases = allCases.filter { $0 != .noARCRequired }
+
     func mapFilterDisplayTitle(locale: Locale) -> String {
         let language = AppLanguage(locale: locale)
         return switch self {

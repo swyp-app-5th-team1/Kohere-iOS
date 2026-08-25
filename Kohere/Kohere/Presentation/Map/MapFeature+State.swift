@@ -73,6 +73,7 @@ extension MapFeature {
         case initialLocationSearchRequested
         case browseListingsRequested
         case listingSearchResponse(Result<ListingSearchPage, Error>, isFirstPage: Bool)
+        case listingMapMarkersResponse(Result<[ListingMapMarker], Error>)
         case placeSearchResultSelected(SearchPlaceResult)
         case listingMapPreviewRequested(MapCoordinate)
         case placeSearchDisplayClearButtonTapped

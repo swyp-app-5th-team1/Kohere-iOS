@@ -31,7 +31,9 @@ extension MapFilterState {
             propertyTypes: selectedPropertyTypes
                 .map(\.listingSearchPropertyType)
                 .sorted(by: { $0.rawValue < $1.rawValue }),
-            conditions: selectedOptions.sorted(by: { $0.rawValue < $1.rawValue })
+            conditions: selectedOptions
+                .filter { $0 != .noARCRequired }
+                .sorted(by: { $0.rawValue < $1.rawValue })
         )
     }
 }

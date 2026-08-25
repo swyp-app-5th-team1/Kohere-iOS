@@ -49,7 +49,7 @@ struct MapFilterView: View {
     private var filterOptionsSection: some View {
         MapFilterSection(title: language.localized(.mapFilterSectionOptions)) {
             MapFilterFlowLayout(spacing: 8, rowSpacing: 8) {
-                ForEach(RoomCondition.allCases, id: \.self) { option in
+                ForEach(RoomCondition.mapListingFilterCases, id: \.self) { option in
                     MapFilterSelectionChip(
                         title: option.mapFilterDisplayTitle(locale: locale),
                         isSelected: store.editingFilter.selectedOptions.contains(option)

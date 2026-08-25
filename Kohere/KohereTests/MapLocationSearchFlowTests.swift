@@ -134,6 +134,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
             $0.listingClient.fetchListings = { _ in
                 ListingSearchPage(content: [], page: nil)
             }
+            $0.listingClient.fetchMapMarkers = { _ in [] }
         }
 
         await store.send(.viewportChanged(outsideViewport)) {
@@ -152,6 +153,21 @@ final class MapLocationSearchFlowTests: XCTestCase {
         } assert: {
             $0.isListingSearchLoading = false
         }
+        await store.receive {
+            guard case .listingMapMarkersResponse(.success) = $0 else { return false }
+            return true
+        } assert: {
+            $0.markers = []
+        }
+    }
+
+    func testPropertyTypeFilterAllowsOnlyOneSelection() {
+        var filter = MapFilterState()
+
+        filter.togglePropertyType(.goshiwon)
+        filter.togglePropertyType(.coLiving)
+
+        XCTAssertEqual(filter.selectedPropertyTypes, [.coLiving])
     }
 
     func testViewportChangeAfterSearchOnlyShowsResearchButton() async {

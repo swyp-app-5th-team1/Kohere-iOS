@@ -12,7 +12,7 @@ struct ChatRoomRowCell: View {
     // MARK: - Properties
     
     let item: ChatRoomModel
-    let participantRole: ChatParticipantRole
+    let participantRole: ChatRoomRole
     let appLanguage: AppLanguage
     let isRevealed: Bool
     let onTap: (Int) -> Void
@@ -36,6 +36,12 @@ struct ChatRoomRowCell: View {
     }
     
     private var statusText: String {
+        if item.lastMessageType == .text {
+            return item.lastMessagePreview ?? ""
+        }
+
+        guard item.lastMessageType == .bookingCard else { return "" }
+
         switch participantRole {
         case .tenant:
             return appLanguage.localized(.chatApplicationSentTitle)

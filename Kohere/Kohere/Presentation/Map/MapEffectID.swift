@@ -11,4 +11,5 @@ enum MapEffectID {
     static let diagnosisDetail = "MapFeature.diagnosisDetail"
     static let diagnosisRecommendations = "MapFeature.diagnosisRecommendations"
     static let listingSearch = "MapFeature.listingSearch"
+    static let listingMapMarkers = "MapFeature.listingMapMarkers"
 }

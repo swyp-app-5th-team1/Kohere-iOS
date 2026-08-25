@@ -46,6 +46,7 @@ extension MapFeature {
             .cancel(id: MapEffectID.diagnosisDetail),
             .cancel(id: MapEffectID.diagnosisRecommendations),
             .cancel(id: MapEffectID.listingSearch),
+            .cancel(id: MapEffectID.listingMapMarkers),
             .run { send in
                 do {
                     let input = DiagnosisRecommendationsInput(diagnosisID: diagnosisID)

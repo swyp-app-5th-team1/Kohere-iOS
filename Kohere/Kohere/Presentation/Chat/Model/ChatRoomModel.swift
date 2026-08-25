@@ -7,11 +7,16 @@
 
 import Foundation
 
-struct ChatRoomModel: Equatable, Identifiable {
-    let id: Int
+nonisolated struct ChatRoomModel: Equatable, Identifiable {
+    let roomID: Int
+    let myRole: ChatRoomRole
     let listingID: String
     let listingName: String
     let location: String
+    let counterpartName: String
+    let isBlocked: Bool
+    let lastMessageType: ChatMessageType?
+    let lastMessagePreview: String?
     let thumbnailURL: String?
     let createdAt: Date?
     let dateText: String
@@ -28,11 +33,18 @@ struct ChatRoomModel: Equatable, Identifiable {
     let totalCostAmount: Int?
     let pricePerMonthAmount: Int?
 
+    var id: Int { roomID }
+
     init(
-        id: Int,
+        roomID: Int,
+        myRole: ChatRoomRole = .tenant,
         listingID: String,
         listingName: String,
         location: String,
+        counterpartName: String = "",
+        isBlocked: Bool = false,
+        lastMessageType: ChatMessageType? = nil,
+        lastMessagePreview: String? = nil,
         thumbnailURL: String? = nil,
         createdAt: Date? = nil,
         applicantName: String = "N/A",
@@ -47,10 +59,15 @@ struct ChatRoomModel: Equatable, Identifiable {
         totalCostAmount: Int? = nil,
         pricePerMonthAmount: Int? = nil
     ) {
-        self.id = id
+        self.roomID = roomID
+        self.myRole = myRole
         self.listingID = listingID
         self.listingName = listingName
         self.location = location
+        self.counterpartName = counterpartName
+        self.isBlocked = isBlocked
+        self.lastMessageType = lastMessageType
+        self.lastMessagePreview = lastMessagePreview
         self.thumbnailURL = thumbnailURL
         self.createdAt = createdAt
         self.dateText = Self.dateText(createdAt)
@@ -67,49 +84,21 @@ struct ChatRoomModel: Equatable, Identifiable {
         self.totalCostAmount = totalCostAmount
         self.pricePerMonthAmount = pricePerMonthAmount
     }
-    
-    init(summary: BookingSummary) {
-        self.id = summary.bookingID
-        self.listingID = summary.listingID
-        self.listingName = summary.title
-        self.location = ""
-        self.thumbnailURL = summary.thumbnailURL?.absoluteString
-        self.createdAt = summary.createdAt
-        self.dateText = Self.dateText(summary.createdAt)
-        self.timeText = Self.timeText(summary.createdAt)
-        self.applicantName = "N/A"
-        self.applicantGenderCode = ""
-        self.applicantCountryCode = ""
-        self.applicantCountryName = ""
-        self.applicantEmail = "N/A"
-        self.roomType = "N/A"
-        self.moveInDate = summary.moveInDate
-        self.leaseTermMonths = summary.contractPeriod
-        self.depositAmount = nil
-        self.totalCostAmount = nil
-        self.pricePerMonthAmount = nil
-    }
-    
-    init(detail: BookingDetail, fallback: ChatRoomModel) {
-        self.id = detail.bookingID
-        self.listingID = detail.listingID
-        self.listingName = detail.title
-        self.location = detail.address
-        self.thumbnailURL = detail.thumbnailURL?.absoluteString ?? fallback.thumbnailURL
-        self.createdAt = detail.createdAt
-        self.dateText = Self.dateText(detail.createdAt)
-        self.timeText = Self.timeText(detail.createdAt)
-        self.applicantName = Self.displayText(detail.applicantName)
-        self.applicantGenderCode = detail.applicantGender
-        self.applicantCountryCode = detail.applicantCountry
-        self.applicantCountryName = detail.applicantCountryName
-        self.applicantEmail = Self.displayText(detail.applicantEmail)
-        self.roomType = detail.roomOfferName.isEmpty ? "N/A" : detail.roomOfferName
-        self.moveInDate = detail.moveInDate
-        self.leaseTermMonths = detail.contractPeriod
-        self.depositAmount = detail.deposit
-        self.totalCostAmount = detail.totalAmount
-        self.pricePerMonthAmount = fallback.pricePerMonthAmount
+
+    init(room: ChatRoom) {
+        self.init(
+            roomID: room.roomID,
+            myRole: room.myRole,
+            listingID: room.listing.listingID,
+            listingName: room.listing.title,
+            location: room.listing.address,
+            counterpartName: room.counterpart.displayName,
+            isBlocked: room.isBlocked,
+            lastMessageType: room.lastMessage?.type,
+            lastMessagePreview: room.lastMessage?.preview,
+            createdAt: room.lastMessage?.sentAt,
+            applicantName: Self.displayText(room.counterpart.displayName)
+        )
     }
 
     private static func displayText(_ value: String) -> String {

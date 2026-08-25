@@ -9,14 +9,14 @@ import Foundation
 
 struct ChatMessage: Equatable, Identifiable {
     let id: UUID
-    let sender: ChatParticipantRole
+    let sender: ChatRoomRole
     let originalText: String
     let translatedText: String?
     let timeText: String
 
     init(
         id: UUID = UUID(),
-        sender: ChatParticipantRole,
+        sender: ChatRoomRole,
         originalText: String,
         translatedText: String? = nil,
         timeText: String

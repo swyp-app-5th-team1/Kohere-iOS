@@ -10,6 +10,7 @@ import Foundation
 
 enum ListingRouter: URLRequestConvertible {
     case list(query: ListingListQueryDTO, APIEnvironment)
+    case map(query: ListingMapQueryDTO, APIEnvironment)
     case detail(listingID: String, APIEnvironment)
     case favoriteList(query: ListingFavoriteListQueryDTO, APIEnvironment)
     case recentList(APIEnvironment)
@@ -19,7 +20,7 @@ enum ListingRouter: URLRequestConvertible {
 
     private var method: HTTPMethod {
         switch self {
-        case .list, .detail, .favoriteList, .recentList:
+        case .list, .map, .detail, .favoriteList, .recentList:
             .get
         case .addFavorite, .createBooking:
             .post
@@ -31,9 +32,11 @@ enum ListingRouter: URLRequestConvertible {
     private var path: String {
         switch self {
         case .list:
-            "api/v1/listings"
+            "api/v2/listings"
+        case .map:
+            "api/v2/listings/map"
         case let .detail(listingID, _):
-            "api/v1/listings/\(listingID)"
+            "api/v2/listings/\(listingID)"
         case .favoriteList:
             "api/v2/users/me/favorites"
         case .recentList:
@@ -48,6 +51,8 @@ enum ListingRouter: URLRequestConvertible {
     private var environment: APIEnvironment {
         switch self {
         case let .list(_, environment):
+            environment
+        case let .map(_, environment):
             environment
         case let .detail(_, environment):
             environment
@@ -73,6 +78,16 @@ enum ListingRouter: URLRequestConvertible {
 
         switch self {
         case let .list(query, _):
+            guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+                throw DataError.invalidURL
+            }
+            components.queryItems = query.queryItems
+            guard let requestURL = components.url else {
+                throw DataError.invalidURL
+            }
+            request.url = requestURL
+
+        case let .map(query, _):
             guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
                 throw DataError.invalidURL
             }

@@ -20,26 +20,33 @@ struct ChatView: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            KohereNavigationBar(
-                left: .smallLogo,
-                center: .text(store.appLanguage.localized(.chatTitle))
-            )
+            KohereNavigationBar(left: .smallLogo, center: .text(store.appLanguage.localized(.chatTitle)))
             
             if store.isContentAvailable {
                 roomFinderBanner
 
-                if store.chatRooms.isEmpty {
-                    KohereEmptyView(
-                        title: store.appLanguage.localized(.chatEmptyTitle),
-                        fontStyle: .label2Semibold,
-                        fontColor: .neutral40
-                    )
+                if store.isLoading && store.chatRooms.isEmpty {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let errorMessage = store.errorMessage, store.chatRooms.isEmpty {
+                    KohereEmptyView(title: errorMessage)
+                        .padding(.bottom, 100)
+                } else if store.chatRooms.isEmpty {
+                    KohereEmptyView(title: store.appLanguage.localized(.chatEmptyTitle), fontStyle: .label2Semibold, fontColor: .neutral40)
                     .padding(.bottom, 100)
                 } else {
                     ScrollView(showsIndicators: false) {
                         LazyVStack(spacing: 4) {
                             ForEach(store.chatRooms) { room in
                                 chatRoomRow(room)
+                                    .onAppear {
+                                        store.send(.chatRoomAppeared(roomID: room.roomID))
+                                    }
+                            }
+
+                            if store.isLoading {
+                                ProgressView()
+                                    .padding(.vertical, 12)
                             }
                         }
                     }
@@ -55,22 +62,18 @@ struct ChatView: View {
     }
 
     private func chatRoomRow(_ room: ChatRoomModel) -> some View {
-        ChatRoomRowCell(
-            item: room,
-            participantRole: store.participantRole,
-            appLanguage: store.appLanguage,
-            isRevealed: revealedChatRoomID == room.id,
-            onTap: { id in store.send(.chatRoomTapped(id: id)) },
-            onReveal: { revealedChatRoomID = room.id },
-            onClose: {
-                if revealedChatRoomID == room.id {
-                    revealedChatRoomID = nil
-                }
-            },
-            onReport: { store.send(.swipeActionTapped(.report, roomID: room.id)) },
-            onBlock: { store.send(.swipeActionTapped(.block, roomID: room.id)) },
-            onDelete: { store.send(.swipeActionTapped(.delete, roomID: room.id)) }
-        )
+        ChatRoomRowCell(item: room, participantRole: room.myRole, appLanguage: store.appLanguage,
+                        isRevealed: revealedChatRoomID == room.id,
+                        onTap: { roomID in store.send(.chatRoomTapped(roomID: roomID)) },
+                        onReveal: { revealedChatRoomID = room.id },
+                        onClose: {
+                            if revealedChatRoomID == room.id {
+                                revealedChatRoomID = nil
+                            }
+                        },
+                        onReport: { store.send(.swipeActionTapped(.report, roomID: room.id)) },
+                        onBlock: { store.send(.swipeActionTapped(.block, roomID: room.id)) },
+                        onDelete: { store.send(.swipeActionTapped(.delete, roomID: room.id)) })
     }
 
     private var roomFinderBanner: some View {
@@ -86,8 +89,7 @@ struct ChatView: View {
                     Text(.commonRoomFinderBannerTitle)
                         .kohereTextStyle(.heading3Semibold)
                         .foregroundStyle(.neutral5)
-                        .padding(.leading, 16),
-                    alignment: .leading
+                        .padding(.leading, 16), alignment: .leading
                 )
                 .contentShape(Rectangle())
         }

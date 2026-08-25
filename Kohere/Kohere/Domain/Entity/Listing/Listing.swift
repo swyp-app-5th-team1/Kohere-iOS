@@ -38,3 +38,10 @@ struct ListingFavoriteStatus: Equatable {
     let isFavorited: Bool
     let favoriteCount: Int
 }
+
+struct ListingMapMarker: Equatable, Identifiable {
+    nonisolated var id: String { listingID }
+
+    let listingID: String
+    let coordinate: MapCoordinate
+}

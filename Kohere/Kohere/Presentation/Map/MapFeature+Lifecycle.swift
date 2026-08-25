@@ -34,7 +34,8 @@ extension MapFeature {
             .cancel(id: MapEffectID.diagnosisButtonAutoCollapse),
             .cancel(id: MapEffectID.diagnosisDetail),
             .cancel(id: MapEffectID.diagnosisRecommendations),
-            .cancel(id: MapEffectID.listingSearch)
+            .cancel(id: MapEffectID.listingSearch),
+            .cancel(id: MapEffectID.listingMapMarkers)
         )
     }
 }

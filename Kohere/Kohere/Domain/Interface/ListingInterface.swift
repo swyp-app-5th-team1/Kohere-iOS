@@ -9,6 +9,7 @@ import ComposableArchitecture
 
 protocol ListingInterface {
     func fetchListings(input: ListingSearchInput) async throws -> ListingSearchPage
+    func fetchMapMarkers(input: ListingSearchInput) async throws -> [ListingMapMarker]
     func fetchDetail(listingID: String) async throws -> ListingDetail
     func fetchFavoriteListings(page: Int, size: Int) async throws -> ListingSearchPage
     func fetchRecentListings() async throws -> [Listing]
@@ -19,6 +20,7 @@ protocol ListingInterface {
 
 struct ListingClient: Sendable {
     var fetchListings: @Sendable (_ input: ListingSearchInput) async throws -> ListingSearchPage
+    var fetchMapMarkers: @Sendable (_ input: ListingSearchInput) async throws -> [ListingMapMarker] = { _ in [] }
     var fetchDetail: @Sendable (_ listingID: String) async throws -> ListingDetail
     var fetchFavoriteListings: @Sendable (_ page: Int, _ size: Int) async throws -> ListingSearchPage
     var fetchRecentListings: @Sendable () async throws -> [Listing]
@@ -32,6 +34,9 @@ extension ListingClient {
         self.init(
             fetchListings: { input in
                 try await repository.fetchListings(input: input)
+            },
+            fetchMapMarkers: { input in
+                try await repository.fetchMapMarkers(input: input)
             },
             fetchDetail: { listingID in
                 try await repository.fetchDetail(listingID: listingID)
