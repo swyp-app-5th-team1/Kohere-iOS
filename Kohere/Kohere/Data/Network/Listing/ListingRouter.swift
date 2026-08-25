@@ -35,9 +35,9 @@ enum ListingRouter: URLRequestConvertible {
         case let .detail(listingID, _):
             "api/v1/listings/\(listingID)"
         case .favoriteList:
-            "api/v1/users/me/favorites"
+            "api/v2/users/me/favorites"
         case .recentList:
-            "api/v1/users/me/recent-listings"
+            "api/v2/users/me/recent-listings"
         case let .addFavorite(listingID, _), let .removeFavorite(listingID, _):
             "api/v1/listings/\(listingID)/favorite"
         case let .createBooking(listingID, _, _):
