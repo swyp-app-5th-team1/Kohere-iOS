@@ -38,6 +38,24 @@ final class ChatRepository: ChatInterface {
 
         return try response.toEntity()
     }
+
+    func createInquiry(listingID: String) async throws -> ChatInquiry {
+        let environment = try environmentProvider()
+        let response: ChatInquiryResponseDTO = try await authenticatedNetworkService.request(
+            ChatRouter.createInquiry(listingID: listingID, environment)
+        )
+
+        return ChatInquiry(roomID: response.chatRoomId, isCreated: response.created)
+    }
+
+    func fetchMessages(roomID: Int, cursor: String?, afterMessageID: Int?, size: Int) async throws -> ChatMessagePage {
+        let environment = try environmentProvider()
+        let query = ChatMessageHistoryQueryDTO(cursor: cursor, afterMessageID: afterMessageID, size: size)
+        let response: ChatMessagePageResponseDTO = try await authenticatedNetworkService.request(
+            ChatRouter.messageHistory(roomID: roomID, query: query, environment)
+        )
+        return try response.toEntity()
+    }
 }
 
 extension ChatClient: DependencyKey {
@@ -81,6 +99,39 @@ private extension ChatRoomLastMessageResponseDTO {
     }
 }
 
+private extension ChatMessagePageResponseDTO {
+    func toEntity() throws -> ChatMessagePage {
+        ChatMessagePage(content: try content.map { try $0.toEntity() }, nextCursor: nextCursor, hasNext: hasNext)
+    }
+}
+
+private extension ChatMessageResponseDTO {
+    func toEntity() throws -> StoredChatMessage {
+        guard let messageType = ChatMessageType(rawValue: type),
+              let date = ChatDateParser.date(from: sentAt)
+        else { throw DataError.decodingFailed }
+        return StoredChatMessage(messageID: messageId, roomID: chatRoomId, type: messageType, isMine: mine,
+                                 originalContent: originalContent, translatedContent: translation?.content,
+                                 sentAt: date, bookingCard: bookingCard?.toEntity())
+    }
+}
+
+private extension ChatBookingCardResponseDTO {
+    func toEntity() -> ChatBookingCard {
+        ChatBookingCard(bookingID: bookingId, roomOfferID: roomOfferId, roomOfferName: roomOfferName,
+                        moveInDate: ChatDateParser.day(from: moveInDate), contractPeriod: contractPeriod,
+                        deposit: deposit, totalAmount: totalAmount,
+                        listing: listing.map {
+                            ChatBookingListing(listingID: $0.listingId, title: $0.title, address: $0.address,
+                                               monthlyRent: $0.monthlyRent, thumbnailURL: $0.thumbnailUrl)
+                        },
+                        applicant: applicant.map {
+                            ChatBookingApplicant(userID: $0.userId, name: $0.name, gender: $0.gender,
+                                                 country: $0.country, countryName: $0.countryName, email: $0.email)
+                        })
+    }
+}
+
 private enum ChatDateParser {
     private static let withFractionalSeconds: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
@@ -97,5 +148,14 @@ private enum ChatDateParser {
     static func date(from value: String?) -> Date? {
         guard let value else { return nil }
         return withFractionalSeconds.date(from: value) ?? standard.date(from: value)
+    }
+
+    static func day(from value: String?) -> Date? {
+        guard let value else { return nil }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: value)
     }
 }

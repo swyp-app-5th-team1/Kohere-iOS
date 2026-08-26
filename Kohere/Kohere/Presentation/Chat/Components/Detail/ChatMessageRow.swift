@@ -13,13 +13,29 @@ struct ChatMessageRow: View {
 
     let message: ChatMessage
     let participantRole: ChatRoomRole
+    let onBookingCardTapped: () -> Void
 
     private var isMine: Bool { message.sender == participantRole }
 
     // MARK: - Body
 
     @ViewBuilder var body: some View {
-        if isMine {
+        if let bookingCard = message.bookingCard {
+            VStack(spacing: 12) {
+                HStack {
+                    if participantRole == .tenant { Spacer(minLength: 48) }
+                    MoveInApplicationCardView(item: bookingCard,
+                                              mode: participantRole == .landlord ? .landlord : .tenant)
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: onBookingCardTapped)
+                    if participantRole == .landlord { Spacer(minLength: 48) }
+                }
+
+                if participantRole == .tenant {
+                    applicationSentMessage
+                }
+            }
+        } else if isMine {
             HStack(alignment: .bottom, spacing: 4) {
                 Spacer(minLength: 48)
 
@@ -74,5 +90,35 @@ struct ChatMessageRow: View {
         Text(message.timeText)
             .kohereTextStyle(.caption2Regular)
             .foregroundStyle(.neutral20)
+    }
+
+    private var applicationSentMessage: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(.smallLogo)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+                .frame(width: 32, height: 32)
+                .background(.common0)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(.lineNeutral, lineWidth: 1))
+
+            Text(.chatApplicationSentTitle)
+                .kohereTextStyle(.label2Semibold)
+                .foregroundStyle(.staticBlack)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(.statusBlue5)
+                .clipShape(applicationMessageShape)
+                .overlay(applicationMessageShape.stroke(.lineNeutral, lineWidth: 1))
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var applicationMessageShape: UnevenRoundedRectangle {
+        UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 12,
+                               bottomTrailingRadius: 12, topTrailingRadius: 12)
     }
 }

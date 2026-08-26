@@ -115,7 +115,20 @@ struct RootFeature {
             case .home(.delegate(.chatTabRequested)):
                 state.home.path.removeAll()
                 state.selectedTab = .chat
-                return .none
+                state.chat.hasLoadedInitialPage = false
+                return .send(.chat(.onAppear))
+
+            case let .home(.path(.element(id: _, action: .listingDetail(.delegate(.inquiryChatRoomRequested(roomID, listingID)))))):
+                state.home.path.removeAll()
+                return openInquiryChat(roomID: roomID, listingID: listingID, state: &state)
+
+            case let .map(.path(.element(id: _, action: .listingDetail(.delegate(.inquiryChatRoomRequested(roomID, listingID)))))):
+                state.map.path.removeAll()
+                return openInquiryChat(roomID: roomID, listingID: listingID, state: &state)
+
+            case let .more(.path(.element(id: _, action: .listingDetail(.delegate(.inquiryChatRoomRequested(roomID, listingID)))))):
+                state.more.path.removeAll()
+                return openInquiryChat(roomID: roomID, listingID: listingID, state: &state)
 
             case let .home(.delegate(.popupRequested(popup))):
                 state.popup = popup
@@ -162,7 +175,8 @@ struct RootFeature {
             case .map(.path(.element(id: _, action: .listingApplication(.delegate(.chatTabRequested))))):
                 state.map.path.removeAll()
                 state.selectedTab = .chat
-                return .none
+                state.chat.hasLoadedInitialPage = false
+                return .send(.chat(.onAppear))
 
             case let .map(.path(.element(id: _, action: .search(.popupRequested(popup))))):
                 state.popup = popup
@@ -197,7 +211,8 @@ struct RootFeature {
             case .more(.chatTabRequested):
                 state.more.path.removeAll()
                 state.selectedTab = .chat
-                return .none
+                state.chat.hasLoadedInitialPage = false
+                return .send(.chat(.onAppear))
 
             case let .more(.path(.element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))))):
                 guard let listingID = state.more.path[id: id, case: \.listingDetail]?.listingID else { return .none }

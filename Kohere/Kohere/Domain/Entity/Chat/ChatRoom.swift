@@ -61,3 +61,56 @@ nonisolated struct ChatRoomCounterpart: Equatable, Sendable {
     let userID: Int
     let displayName: String
 }
+
+nonisolated struct ChatInquiry: Equatable, Sendable {
+    let roomID: Int
+    let isCreated: Bool
+}
+
+nonisolated struct ChatMessagePage: Equatable, Sendable {
+    let content: [StoredChatMessage]
+    let nextCursor: String?
+    let hasNext: Bool
+}
+
+nonisolated struct StoredChatMessage: Equatable, Identifiable, Sendable {
+    let messageID: Int
+    let roomID: Int
+    let type: ChatMessageType
+    let isMine: Bool
+    let originalContent: String?
+    let translatedContent: String?
+    let sentAt: Date
+    let bookingCard: ChatBookingCard?
+
+    var id: Int { messageID }
+}
+
+nonisolated struct ChatBookingCard: Equatable, Sendable {
+    let bookingID: Int?
+    let roomOfferID: String?
+    let roomOfferName: String?
+    let moveInDate: Date?
+    let contractPeriod: Int?
+    let deposit: Int?
+    let totalAmount: Int?
+    let listing: ChatBookingListing?
+    let applicant: ChatBookingApplicant?
+}
+
+nonisolated struct ChatBookingListing: Equatable, Sendable {
+    let listingID: String?
+    let title: String?
+    let address: String?
+    let monthlyRent: Int?
+    let thumbnailURL: String?
+}
+
+nonisolated struct ChatBookingApplicant: Equatable, Sendable {
+    let userID: Int?
+    let name: String?
+    let gender: String?
+    let country: String?
+    let countryName: String?
+    let email: String?
+}

@@ -14,6 +14,8 @@ struct ListingApplicationFeature {
     var fetchCurrentUserUseCase
     @Dependency(\.createListingBookingUseCase)
     var createListingBookingUseCase
+    @Dependency(\.createChatInquiryUseCase)
+    var createChatInquiryUseCase
 
     @ObservableState
     struct State: Equatable {
@@ -41,6 +43,7 @@ struct ListingApplicationFeature {
         var isSubmitting = false
         var submitErrorMessage: String?
         var booking: ListingBooking?
+        var chatRoomID: Int?
         var isCompletionPopupPresented = false
 
         var navigationTitle: String {
@@ -183,6 +186,7 @@ struct ListingApplicationFeature {
         case agreementTapped
         case submitButtonTapped
         case bookingResponse(Result<ListingBooking, DataError>)
+        case inquiryResponse(Result<ChatInquiry, DataError>)
         case completionCloseButtonTapped
         case completionConfirmButtonTapped
         case delegate(ListingApplicationDelegate)
@@ -354,6 +358,21 @@ struct ListingApplicationFeature {
                 state.isSubmitting = false
                 state.booking = booking
                 state.isCompletionPopupPresented = true
+                let createInquiry = createChatInquiryUseCase
+                return .run { [listingID = state.listingID] send in
+                    do {
+                        let inquiry = try await createInquiry.execute(listingID)
+                        await send(.inquiryResponse(.success(inquiry)))
+                    } catch {
+                        await send(.inquiryResponse(.failure(.from(error))))
+                    }
+                }
+
+            case let .inquiryResponse(.success(inquiry)):
+                state.chatRoomID = inquiry.roomID
+                return .none
+
+            case .inquiryResponse(.failure):
                 return .none
 
             case let .bookingResponse(.failure(error)):

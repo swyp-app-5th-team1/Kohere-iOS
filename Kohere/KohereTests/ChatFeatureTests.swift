@@ -9,7 +9,73 @@ import ComposableArchitecture
 import XCTest
 @testable import Kohere
 
+@MainActor
 final class ChatResponseDTOTests: XCTestCase {
+    func testChatMessageHistoryDecodesTextAndBookingCard() throws {
+        let data = Data(
+            """
+            {
+              "content": [
+                {
+                  "messageId": 1,
+                  "chatRoomId": 10,
+                  "type": "TEXT",
+                  "mine": true,
+                  "originalContent": "Hello",
+                  "sentAt": "2026-08-27T01:00:00Z",
+                  "translation": null,
+                  "bookingCard": null
+                },
+                {
+                  "messageId": 2,
+                  "chatRoomId": 10,
+                  "type": "BOOKING_CARD",
+                  "mine": false,
+                  "originalContent": null,
+                  "sentAt": "2026-08-27T01:01:00Z",
+                  "translation": null,
+                  "bookingCard": {
+                    "bookingId": 30,
+                    "roomOfferId": "offer-1",
+                    "roomOfferName": "Single",
+                    "moveInDate": "2026-09-01",
+                    "contractPeriod": 6,
+                    "deposit": 1000000,
+                    "totalAmount": 1500000,
+                    "listing": { "listingId": "listing-1", "title": "Home", "address": "Seoul", "monthlyRent": 500000, "thumbnailUrl": null },
+                    "applicant": { "userId": 20, "name": "Kim", "gender": "FEMALE", "country": "KR", "countryName": "Korea", "email": "kim@example.com" }
+                  }
+                }
+              ],
+              "nextCursor": null,
+              "hasNext": false
+            }
+            """.utf8
+        )
+
+        let response = try JSONDecoder().decode(ChatMessagePageResponseDTO.self, from: data)
+
+        XCTAssertEqual(response.content.count, 2)
+        XCTAssertEqual(response.content[0].originalContent, "Hello")
+        XCTAssertEqual(response.content[1].bookingCard?.bookingId, 30)
+    }
+
+    func testChatInquiryResponseDecodesCreatedRoomContract() throws {
+        let data = Data(
+            """
+            {
+              "chatRoomId": 10,
+              "created": true
+            }
+            """.utf8
+        )
+
+        let response = try JSONDecoder().decode(ChatInquiryResponseDTO.self, from: data)
+
+        XCTAssertEqual(response.chatRoomId, 10)
+        XCTAssertTrue(response.created)
+    }
+
     func testChatRoomPageResponseDecodesListContract() throws {
         let data = Data(
             """
@@ -100,6 +166,53 @@ final class ChatFeatureTests: XCTestCase {
         await store.send(.chatRoomResponse(.success(updatedRoom))) {
             $0.chatRoom = ChatRoomModel(room: self.makeRoom(roomID: 1, role: .landlord))
             $0.participantRole = .landlord
+        }
+    }
+
+    func testInquiryRoomShowsApplicationBannerAndOpensEnabledApplicationDetail() async {
+        let room = ChatRoomModel(room: makeRoom(roomID: 1, role: .tenant))
+        let store = TestStore(initialState: ChatDetailFeature.State(chatRoom: room, participantRole: .tenant,
+                                                                    hasSubmittedApplication: false,
+                                                                    showsInquiryCard: true)) {
+            ChatDetailFeature()
+        }
+
+        XCTAssertTrue(store.state.showsApplicationBanner)
+
+        await store.send(.applicationBannerTapped)
+        await store.receive(\.delegate.listingDetailRequested)
+    }
+
+    func testApplicationRequestFromChatListingDetailOpensApplicationFlow() async throws {
+        var initialState = ChatFeature.State(participantRole: .tenant)
+        initialState.path.append(.listingDetail(ListingDetailFeature.State(listingID: "listing-1",
+                                                                           userType: .tenant,
+                                                                           appLanguage: .english)))
+        let detailID = try XCTUnwrap(initialState.path.ids.last)
+        let store = TestStore(initialState: initialState) {
+            ChatFeature()
+        }
+
+        await store.send(
+            .path(
+                .element(
+                    id: detailID,
+                    action: .listingDetail(
+                        .delegate(
+                            .applicationRequested(listingID: "listing-1", listingTitle: "Home",
+                                                  roomOfferID: "offer-1", roomTypeName: "Single",
+                                                  roomPricingText: "₩500,000")
+                        )
+                    )
+                )
+            )
+        ) {
+            $0.path.append(.listingApplication(ListingApplicationFeature.State(listingID: "listing-1",
+                                                                               listingTitle: "Home",
+                                                                               roomOfferID: "offer-1",
+                                                                               roomTypeName: "Single",
+                                                                               roomPricingText: "₩500,000",
+                                                                               appLanguage: .english)))
         }
     }
 

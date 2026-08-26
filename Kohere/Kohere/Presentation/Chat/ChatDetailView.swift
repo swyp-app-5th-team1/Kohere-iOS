@@ -48,19 +48,23 @@ struct ChatDetailView: View {
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 12) {
-                            let dateText = store.chatRoom.localizedDateText(language: AppLanguage(locale: locale))
-                            
-                            if !dateText.isEmpty {
-                                Text(dateText)
-                                    .kohereTextStyle(.body3Regular)
-                                    .foregroundColor(.neutral40)
-                            }
-                            
-                            initialContent
-                            
-                            ForEach(store.messages) { message in
-                                ChatMessageRow(message: message, participantRole: store.participantRole)
+                            ForEach(Array(store.messages.enumerated()), id: \.element.id) { index, message in
+                                VStack(spacing: 12) {
+                                    if shouldShowDate(at: index), let sentAt = message.sentAt {
+                                        Text(localizedDateText(sentAt))
+                                            .kohereTextStyle(.body3Regular)
+                                            .foregroundColor(.neutral40)
+                                    }
+
+                                    ChatMessageRow(message: message, participantRole: store.participantRole,
+                                                   onBookingCardTapped: { store.send(.viewDetailsButtonTapped) })
+                                }
                                     .padding(.horizontal, 20)
+                                    .onAppear {
+                                        if message.id == store.messages.first?.id {
+                                            store.send(.loadPreviousMessages)
+                                        }
+                                    }
                             }
                             
                         }
@@ -138,15 +142,18 @@ private extension ChatDetailView {
     func dismissKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
-    
-    @ViewBuilder var initialContent: some View {
-        switch store.participantRole {
-        case .tenant:
-            ChatTenantInitialContent(item: store.chatRoom, hasSubmittedApplication: store.hasSubmittedApplication,
-                                     onDetailsTapped: { store.send(.viewDetailsButtonTapped) })
-            
-        case .landlord:
-            ChatLandlordInitialContent(item: store.chatRoom)
-        }
+
+    func shouldShowDate(at index: Int) -> Bool {
+        guard let date = store.messages[index].sentAt else { return false }
+        guard index > 0, let previousDate = store.messages[index - 1].sentAt else { return true }
+        return !Calendar.current.isDate(date, inSameDayAs: previousDate)
+    }
+
+    func localizedDateText(_ date: Date) -> String {
+        let language = AppLanguage(locale: locale)
+        let formatter = DateFormatter()
+        formatter.locale = language.locale
+        formatter.dateFormat = language == .korean ? "yyyy.M.d E" : "M/d/yyyy EEE"
+        return formatter.string(from: date)
     }
 }
