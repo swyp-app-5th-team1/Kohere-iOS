@@ -8,6 +8,20 @@
 import ComposableArchitecture
 
 extension RootFeature {
+    func openInquiryChat(roomID: Int, listingID: String, state: inout State) -> Effect<Action> {
+        let room = ChatRoomModel(roomID: roomID, myRole: .tenant, listingID: listingID,
+                                 listingName: "", location: "")
+
+        state.selectedTab = .chat
+        state.chat.participantRole = .tenant
+        state.chat.hasLoadedInitialPage = false
+        state.chat.path.removeAll()
+        state.chat.path.append(.chatDetail(ChatDetailFeature.State(chatRoom: room, participantRole: .tenant,
+                                                                   hasSubmittedApplication: false,
+                                                                   showsInquiryCard: true)))
+        return .none
+    }
+
     func openMap(request: MapEntryRequest, state: inout State) -> Effect<Action> {
         state.selectedTab = .map
 
