@@ -12,6 +12,7 @@ struct ChatComposer: View {
     // MARK: - Properties
 
     let showsKeywords: Bool
+    let isDisabled: Bool
     let messageText: String
     let onTextChanged: (String) -> Void
     let onKeywordTapped: (String) -> Void
@@ -31,7 +32,7 @@ struct ChatComposer: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            if showsKeywords && !isMessageFieldFocused {
+            if showsKeywords && !isDisabled && !isMessageFieldFocused {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(keywords, id: \.self) { key in
@@ -61,6 +62,7 @@ struct ChatComposer: View {
                     .foregroundStyle(.neutral70)
                     .tint(.coolNeutral30)
                     .focused($isMessageFieldFocused)
+                    .disabled(isDisabled)
 
                 if !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     Button(action: onSendTapped) {
@@ -83,6 +85,9 @@ struct ChatComposer: View {
         }
         .padding(.bottom, isMessageFieldFocused ? 24 : 0)
         .background(.common0)
+        .onChange(of: isDisabled) {
+            if isDisabled { isMessageFieldFocused = false }
+        }
     }
     
     // MARK: - SubView

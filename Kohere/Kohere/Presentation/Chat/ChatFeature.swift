@@ -30,8 +30,10 @@ struct ChatFeature {
     @Dependency(\.fetchChatRoomsUseCase)
     var fetchChatRoomsUseCase
 
-    @Dependency(\.mutateBookingUseCase)
-    var mutateBookingUseCase
+    @Dependency(\.hideChatRoomUseCase)
+    var hideChatRoomUseCase
+    @Dependency(\.blockChatRoomUseCase)
+    var blockChatRoomUseCase
     
     @Reducer
     enum Path {
@@ -139,25 +141,33 @@ struct ChatFeature {
                 return .none
 
             case let .swipeActionTapped(swipeAction, roomID):
-                guard state.chatRooms.contains(where: { $0.roomID == roomID }) else { return .none }
+                guard state.containsRoom(roomID) else { return .none }
                 return .send(.popupRequested(Self.popup(for: swipeAction, roomID: roomID, language: state.appLanguage)))
 
             case let .reportDetailsRequested(roomID):
-                guard state.chatRooms.contains(where: { $0.roomID == roomID }) else { return .none }
+                guard state.containsRoom(roomID) else { return .none }
                 state.path.append(.report(ChatReportFeature.State(roomID: roomID, appLanguage: state.appLanguage)))
                 return .none
 
             case let .swipeActionConfirmed(swipeAction, roomID):
                 guard state.pendingSwipeAction == nil,
-                      state.chatRooms.contains(where: { $0.roomID == roomID })
+                      state.containsRoom(roomID)
                 else { return .none }
 
                 state.pendingSwipeAction = swipeAction
                 state.pendingSwipeRoomID = roomID
-                let mutateBooking = mutateBookingUseCase
+                let hideRoom = hideChatRoomUseCase
+                let blockRoom = blockChatRoomUseCase
                 return .run { send in
                     do {
-                        try await mutateBooking.execute(swipeAction.bookingMutation, roomID)
+                        switch swipeAction {
+                        case .block:
+                            try await blockRoom.execute(roomID)
+                        case .delete:
+                            try await hideRoom.execute(roomID)
+                        case .report:
+                            return
+                        }
                         await send(.swipeActionResponse(swipeAction, roomID: roomID, .success(())))
                     } catch {
                         await send(.swipeActionResponse(swipeAction, roomID: roomID, .failure(error)))
@@ -171,8 +181,23 @@ struct ChatFeature {
 
                 state.pendingSwipeAction = nil
                 state.pendingSwipeRoomID = nil
-                if swipeAction == .block || swipeAction == .delete {
+                if swipeAction == .delete {
                     state.chatRooms.removeAll { $0.roomID == roomID }
+                    if state.path.contains(where: { pathState in
+                        guard case let .chatDetail(detailState) = pathState else { return false }
+                        return detailState.chatRoom.roomID == roomID
+                    }) {
+                        state.path.removeAll()
+                    }
+                } else if swipeAction == .block {
+                    if let roomIndex = state.chatRooms.firstIndex(where: { $0.roomID == roomID }) {
+                        state.chatRooms[roomIndex].isBlocked = true
+                    }
+                    for pathID in state.path.ids {
+                        guard state.path[id: pathID, case: \.chatDetail]?.chatRoom.roomID == roomID else { continue }
+                        state.path[id: pathID, case: \.chatDetail]?.chatRoom.isBlocked = true
+                        state.path[id: pathID, case: \.chatDetail]?.messageText = ""
+                    }
                 }
                 return .send(.popupRequested(Self.resultPopup(for: swipeAction, succeeded: true, language: state.appLanguage)))
 
@@ -285,6 +310,11 @@ struct ChatFeature {
                 _ = state.path.popLast()
                 return .none
 
+            case let .path(.element(id: _, action: .report(.delegate(.reportFinished(succeeded))))):
+                if succeeded { _ = state.path.popLast() }
+                return .send(.popupRequested(Self.resultPopup(for: .report, succeeded: succeeded,
+                                                               language: state.appLanguage)))
+
             case .roomFinderBannerTapped:
                 state.path.append(.chatBot(ChatBotFeature.State()))
                 return .none
@@ -315,20 +345,15 @@ struct ChatFeature {
     }
 }
 
-private extension ChatFeature.SwipeAction {
-    var bookingMutation: BookingMutation {
-        switch self {
-        case .report:
-            return .report
-        case .block:
-            return .block
-        case .delete:
-            return .delete
+extension ChatFeature.State {
+    func containsRoom(_ roomID: Int) -> Bool {
+        if chatRooms.contains(where: { $0.roomID == roomID }) { return true }
+        return path.contains { pathState in
+            guard case let .chatDetail(detailState) = pathState else { return false }
+            return detailState.chatRoom.roomID == roomID
         }
     }
-}
 
-extension ChatFeature.State {
     mutating func applyUserType(_ userType: UserType) -> Bool {
         guard let updatedParticipantRole = ChatRoomRole(userType: userType) else { return false }
         isContentAvailable = true

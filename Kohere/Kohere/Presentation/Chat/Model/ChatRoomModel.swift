@@ -14,7 +14,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     let listingName: String
     let location: String
     let counterpartName: String
-    let isBlocked: Bool
+    var isBlocked: Bool
     let lastMessageType: ChatMessageType?
     let lastMessagePreview: String?
     let thumbnailURL: String?

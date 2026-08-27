@@ -91,7 +91,8 @@ struct ChatDetailView: View {
                     }
                 }
                 
-                ChatComposer(showsKeywords: store.showsKeywordSuggestions, messageText: store.messageText,
+                ChatComposer(showsKeywords: store.showsKeywordSuggestions, isDisabled: store.chatRoom.isBlocked,
+                             messageText: store.messageText,
                              onTextChanged: { store.send(.messageTextChanged($0)) },
                              onKeywordTapped: { store.send(.keywordTapped($0)) },
                              onSendTapped: { store.send(.sendButtonTapped) })

@@ -183,10 +183,12 @@ struct ChatDetailFeature {
                 )
 
             case let .messageTextChanged(text):
+                guard !state.chatRoom.isBlocked else { return .none }
                 state.messageText = text
                 return .none
 
             case let .keywordTapped(keyword):
+                guard !state.chatRoom.isBlocked else { return .none }
                 let message = keyword.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !message.isEmpty else { return .none }
                 state.messages.append(Self.localMessage(message, sender: state.participantRole))
@@ -194,6 +196,7 @@ struct ChatDetailFeature {
                 return .none
 
             case .sendButtonTapped:
+                guard !state.chatRoom.isBlocked else { return .none }
                 let message = state.messageText.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !message.isEmpty else { return .none }
                 state.messages.append(Self.localMessage(message, sender: state.participantRole))
