@@ -67,6 +67,23 @@ nonisolated struct ChatInquiry: Equatable, Sendable {
     let isCreated: Bool
 }
 
+nonisolated enum ChatReportReason: String, CaseIterable, Equatable, Sendable {
+    case abuseHarassmentDiscrimination = "ABUSE_HARASSMENT_DISCRIMINATION"
+    case illegalContent = "ILLEGAL_CONTENT"
+    case sexualInappropriateContent = "SEXUAL_INAPPROPRIATE_CONTENT"
+    case personalInformation = "PERSONAL_INFORMATION"
+    case spam = "SPAM"
+    case other = "OTHER"
+}
+
+nonisolated struct ChatReport: Equatable, Sendable {
+    let reportID: Int
+    let roomID: Int
+    let reason: ChatReportReason
+    let status: String
+    let receivedAt: Date
+}
+
 nonisolated struct ChatMessagePage: Equatable, Sendable {
     let content: [StoredChatMessage]
     let nextCursor: String?

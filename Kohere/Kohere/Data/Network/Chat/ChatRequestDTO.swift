@@ -31,3 +31,7 @@ struct ChatMessageHistoryQueryDTO {
         return items
     }
 }
+
+nonisolated struct ChatRoomReportRequestDTO: Encodable {
+    let reason: String
+}
