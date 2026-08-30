@@ -48,6 +48,7 @@ nonisolated struct ChatRoomLastMessage: Equatable, Sendable {
 
 nonisolated enum ChatMessageType: String, Equatable, Sendable {
     case text = "TEXT"
+    case inquiryCard = "INQUIRY_CARD"
     case bookingCard = "BOOKING_CARD"
 }
 
@@ -81,9 +82,21 @@ nonisolated struct StoredChatMessage: Equatable, Identifiable, Sendable {
     let originalContent: String?
     let translatedContent: String?
     let sentAt: Date
+    let inquiryCard: ChatInquiryCard?
     let bookingCard: ChatBookingCard?
 
     var id: Int { messageID }
+}
+
+nonisolated struct ChatInquiryCard: Equatable, Sendable {
+    let listingID: String
+    let thumbnailURL: String?
+    let title: String
+    let city: String
+    let district: String
+    let listingType: String
+    let monthlyRentMin: Int
+    let monthlyRentMax: Int
 }
 
 nonisolated struct ChatBookingCard: Equatable, Sendable {

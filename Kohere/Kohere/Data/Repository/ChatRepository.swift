@@ -112,7 +112,16 @@ private extension ChatMessageResponseDTO {
         else { throw DataError.decodingFailed }
         return StoredChatMessage(messageID: messageId, roomID: chatRoomId, type: messageType, isMine: mine,
                                  originalContent: originalContent, translatedContent: translation?.content,
-                                 sentAt: date, bookingCard: bookingCard?.toEntity())
+                                 sentAt: date, inquiryCard: inquiryCard?.toEntity(),
+                                 bookingCard: bookingCard?.toEntity())
+    }
+}
+
+private extension ChatInquiryCardResponseDTO {
+    func toEntity() -> ChatInquiryCard {
+        ChatInquiryCard(listingID: listingId, thumbnailURL: thumbnailUrl, title: title, city: city,
+                        district: district, listingType: listingType, monthlyRentMin: monthlyRentMin,
+                        monthlyRentMax: monthlyRentMax)
     }
 }
 
