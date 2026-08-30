@@ -18,3 +18,16 @@ struct ChatRoomListQueryDTO {
         ]
     }
 }
+
+struct ChatMessageHistoryQueryDTO {
+    let cursor: String?
+    let afterMessageID: Int?
+    let size: Int
+
+    var queryItems: [URLQueryItem] {
+        var items = [URLQueryItem(name: "size", value: "\(size)")]
+        if let cursor { items.append(URLQueryItem(name: "cursor", value: cursor)) }
+        if let afterMessageID { items.append(URLQueryItem(name: "afterMessageId", value: "\(afterMessageID)")) }
+        return items
+    }
+}

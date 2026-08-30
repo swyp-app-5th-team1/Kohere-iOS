@@ -17,6 +17,7 @@ enum ListingDetailDelegate: Equatable {
         roomPricingText: String
     )
     case mapPreviewRequested(MapCoordinate)
+    case inquiryChatRoomRequested(roomID: Int, listingID: String)
 }
 
 @Reducer
@@ -29,6 +30,8 @@ struct ListingDetailFeature {
     var fetchKRWToUSDExchangeRateUseCase
     @Dependency(\.convertMonthlyRentCurrencyUseCase)
     var convertMonthlyRentCurrencyUseCase
+    @Dependency(\.createChatInquiryUseCase)
+    var createChatInquiryUseCase
 
     @ObservableState
     struct State: Equatable {
@@ -43,6 +46,7 @@ struct ListingDetailFeature {
         var isExchangeRateLoading = false
         var isApplicationDisabled = false
         var isFavoriteUpdating = false
+        var isInquiryLoading = false
         var isApplicationSheetPresented = false
         var selectedRoomOfferID: String?
         var isRoomTypeSelectorPresented = false
@@ -72,6 +76,7 @@ struct ListingDetailFeature {
         case favoriteStatusResponse(Result<ListingFavoriteStatus, DataError>)
         case shareButtonTapped
         case contactButtonTapped
+        case inquiryResponse(Result<ChatInquiry, DataError>)
         case applicationSheetDismissed
         case roomTypeSelectorTapped
         case roomOfferSelected(String)
@@ -255,6 +260,38 @@ struct ListingDetailFeature {
                 guard let coordinate = state.detail?.locationInfo.coordinate else { return .none }
                 return .send(.delegate(.mapPreviewRequested(coordinate)))
 
+            case .contactButtonTapped:
+                guard state.canUseApplicationFeatures,
+                      !state.isInquiryLoading
+                else { return .none }
+
+                state.isInquiryLoading = true
+                let listingID = state.listingID
+                let createInquiry = createChatInquiryUseCase
+                return .run { send in
+                    do {
+                        let inquiry = try await createInquiry.execute(listingID)
+                        await send(.inquiryResponse(.success(inquiry)))
+                    } catch {
+                        await send(.inquiryResponse(.failure(.from(error))))
+                    }
+                }
+
+            case let .inquiryResponse(.success(inquiry)):
+                state.isInquiryLoading = false
+                return .send(
+                    .delegate(
+                        .inquiryChatRoomRequested(roomID: inquiry.roomID, listingID: state.listingID)
+                    )
+                )
+
+            case let .inquiryResponse(.failure(error)):
+                state.isInquiryLoading = false
+                return .send(.popupRequested(.notice(AppPopup.Notice(
+                    message: error.localizedDescription,
+                    confirmTitle: state.appLanguage.localized(.commonConfirm)
+                ))))
+
             case .applicationSheetDismissed:
                 state.isApplicationSheetPresented = false
                 state.isRoomTypeSelectorPresented = false
@@ -265,7 +302,7 @@ struct ListingDetailFeature {
                 state.roomTypeValidationMessage = nil
                 return .none
 
-            case .backButtonTapped, .shareButtonTapped, .contactButtonTapped, .popupRequested, .delegate:
+            case .backButtonTapped, .shareButtonTapped, .popupRequested, .delegate:
                 return .none
             }
         }

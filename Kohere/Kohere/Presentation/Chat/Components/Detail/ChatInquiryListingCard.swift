@@ -11,7 +11,7 @@ struct ChatInquiryListingCard: View {
     
     // MARK: - Properties
 
-    let item: ChatRoomModel
+    let item: ChatInquiryCard
     let action: () -> Void
 
     @Environment(\.locale)
@@ -26,20 +26,18 @@ struct ChatInquiryListingCard: View {
                 .clipped()
 
             VStack(alignment: .leading, spacing: 0) {
-                Text(item.listingName)
+                Text(item.title)
                     .kohereTextStyle(.label2Medium)
                     .foregroundStyle(.neutral70)
                     .padding(.bottom, 4)
 
-                Text(item.location)
+                Text(formatter.locationAndType)
                     .kohereTextStyle(.caption1Regular)
                     .foregroundStyle(.coolNeutral30)
 
-                if !cardFormatter.pricePerMonth.isEmpty {
-                    Text(cardFormatter.pricePerMonth)
-                        .kohereTextStyle(.caption1Regular)
-                        .foregroundStyle(.coolNeutral30)
-                }
+                Text(formatter.monthlyRent)
+                    .kohereTextStyle(.caption1Regular)
+                    .foregroundStyle(.coolNeutral30)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -55,6 +53,7 @@ struct ChatInquiryListingCard: View {
             }
             .buttonStyle(.plain)
         }
+        .frame(width: 270)
         .background(.common0)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(.coolNeutral8, lineWidth: 0.5))
@@ -63,7 +62,7 @@ struct ChatInquiryListingCard: View {
     
     // MARK: - SubView
     
-    private var cardFormatter: ChatApplicationCardFormatter {
-        ChatApplicationCardFormatter(item: item, language: AppLanguage(locale: locale))
+    private var formatter: ChatInquiryCardFormatter {
+        ChatInquiryCardFormatter(item: item, language: AppLanguage(locale: locale))
     }
 }

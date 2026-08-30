@@ -33,6 +33,14 @@ struct ChatFlowView: View {
                 ListingDetailView(store: listingDetailStore)
                     .navigationBarHidden(true)
 
+            case let .listingApplication(listingApplicationStore):
+                ListingApplicationView(store: listingApplicationStore)
+                    .navigationBarHidden(true)
+
+            case let .listingApplicationPrivacyWeb(privacyWebStore):
+                ListingApplicationPrivacyWebView(store: privacyWebStore)
+                    .navigationBarHidden(true)
+
             case let .report(reportStore):
                 ChatReportView(store: reportStore)
                     .navigationBarHidden(true)
