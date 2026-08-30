@@ -64,7 +64,19 @@ struct ChatMessageResponseDTO: Decodable {
     let originalContent: String?
     let sentAt: String
     let translation: ChatTranslationResponseDTO?
+    let inquiryCard: ChatInquiryCardResponseDTO?
     let bookingCard: ChatBookingCardResponseDTO?
+}
+
+struct ChatInquiryCardResponseDTO: Decodable {
+    let listingId: String
+    let thumbnailUrl: String?
+    let title: String
+    let city: String
+    let district: String
+    let listingType: String
+    let monthlyRentMin: Int
+    let monthlyRentMax: Int
 }
 
 struct ChatTranslationResponseDTO: Decodable { let content: String? }

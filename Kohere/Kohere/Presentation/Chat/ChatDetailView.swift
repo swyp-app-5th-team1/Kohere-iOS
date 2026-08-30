@@ -57,7 +57,9 @@ struct ChatDetailView: View {
                                     }
 
                                     ChatMessageRow(message: message, participantRole: store.participantRole,
-                                                   onBookingCardTapped: { store.send(.viewDetailsButtonTapped) })
+                                                   onListingCardTapped: {
+                                                       store.send(.viewDetailsButtonTapped(listingID: $0))
+                                                   })
                                 }
                                     .padding(.horizontal, 20)
                                     .onAppear {
