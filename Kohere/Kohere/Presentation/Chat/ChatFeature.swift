@@ -60,6 +60,7 @@ struct ChatFeature {
         var pendingSwipeRoomID: Int?
         var errorMessage: String?
         var pendingBookingRoomIDs: Set<Int> = []
+        var pendingBookingListingIDs: Set<String> = []
         
         init(
             chatRooms: [ChatRoomModel] = [],
@@ -109,6 +110,10 @@ struct ChatFeature {
                 state.hasNextPage = page.page.hasNext ?? false
 
                 let rooms = page.content.map(ChatRoomModel.init(room:))
+                for room in rooms where state.pendingBookingListingIDs.contains(room.listingID) {
+                    state.pendingBookingRoomIDs.insert(room.roomID)
+                    state.pendingBookingListingIDs.remove(room.listingID)
+                }
                 if requestedPage == 0 {
                     state.chatRooms = rooms
                 } else {
@@ -248,8 +253,8 @@ struct ChatFeature {
                 _ = state.path.popLast()
                 return .none
 
-            case let .path(.element(id: _, action: .listingApplication(.inquiryResponse(.success(inquiry))))):
-                state.pendingBookingRoomIDs.insert(inquiry.roomID)
+            case let .path(.element(id: _, action: .listingApplication(.bookingResponse(.success(booking))))):
+                state.pendingBookingListingIDs.insert(booking.listingID)
                 state.hasLoadedInitialPage = false
                 return .none
 
@@ -345,6 +350,7 @@ extension ChatFeature.State {
         pendingSwipeRoomID = nil
         errorMessage = nil
         pendingBookingRoomIDs = []
+        pendingBookingListingIDs = []
 
         return true
     }
