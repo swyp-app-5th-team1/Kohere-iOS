@@ -13,25 +13,34 @@ struct ChatMessageRow: View {
 
     let message: ChatMessage
     let participantRole: ChatRoomRole
-    let onBookingCardTapped: () -> Void
+    let onListingCardTapped: (String) -> Void
 
     private var isMine: Bool { message.sender == participantRole }
 
     // MARK: - Body
 
     @ViewBuilder var body: some View {
-        if let bookingCard = message.bookingCard {
-            VStack(spacing: 12) {
-                HStack {
-                    if participantRole == .tenant { Spacer(minLength: 48) }
-                    MoveInApplicationCardView(item: bookingCard,
-                                              mode: participantRole == .landlord ? .landlord : .tenant)
-                    .contentShape(Rectangle())
-                    .onTapGesture(perform: onBookingCardTapped)
-                    if participantRole == .landlord { Spacer(minLength: 48) }
+        if let inquiryCard = message.inquiryCard {
+            listingCardAlignment {
+                ChatInquiryListingCard(item: inquiryCard) {
+                    onListingCardTapped(inquiryCard.listingID)
                 }
-
-                if participantRole == .tenant {
+            }
+        } else if message.type == .inquiryCard {
+            Text("chat.inquiryCard.unavailable")
+                .kohereTextStyle(.label2Medium)
+                .foregroundStyle(.neutral40)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+        } else if let bookingCard = message.bookingCard {
+            if participantRole == .landlord {
+                VStack(spacing: 8) {
+                    applicationReceivedMessage
+                    bookingCardView(bookingCard)
+                }
+            } else {
+                VStack(spacing: 12) {
+                    bookingCardView(bookingCard)
                     applicationSentMessage
                 }
             }
@@ -58,6 +67,37 @@ struct ChatMessageRow: View {
     }
     
     // MARK: - SubView
+
+    private func listingCardAlignment<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        HStack(alignment: .bottom, spacing: 8) {
+            if isMine {
+                Spacer(minLength: 0)
+
+                time
+                    .padding(.bottom, 2)
+                content()
+            } else {
+                Color.clear
+                    .frame(width: 32, height: 1)
+
+                content()
+                time
+                    .padding(.bottom, 2)
+                Spacer(minLength: 0)
+            }
+        }
+    }
+
+    private func bookingCardView(_ bookingCard: ChatRoomModel) -> some View {
+        listingCardAlignment {
+            MoveInApplicationCardView(item: bookingCard,
+                                      mode: participantRole == .landlord ? .landlord : .tenant)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onListingCardTapped(bookingCard.listingID)
+                }
+        }
+    }
     
     private var bubble: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -103,14 +143,54 @@ struct ChatMessageRow: View {
                 .clipShape(Circle())
                 .overlay(Circle().stroke(.lineNeutral, lineWidth: 1))
 
-            Text(.chatApplicationSentTitle)
-                .kohereTextStyle(.label2Semibold)
-                .foregroundStyle(.staticBlack)
+            HStack(alignment: .bottom, spacing: 4) {
+                Text(.chatApplicationSentTitle)
+                    .kohereTextStyle(.label2Semibold)
+                    .foregroundStyle(.staticBlack)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(.statusBlue5)
+                    .clipShape(applicationMessageShape)
+                    .overlay(applicationMessageShape.stroke(.lineNeutral, lineWidth: 1))
+
+                time
+            }
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var applicationReceivedMessage: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(.smallLogo)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+                .frame(width: 32, height: 32)
+                .background(.common0)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(.lineNeutral, lineWidth: 1))
+
+            HStack(alignment: .bottom, spacing: 4) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(.chatApplicationReceivedTitle)
+                        .kohereTextStyle(.label2Semibold)
+                        .foregroundStyle(.staticBlack)
+
+                    Text(.chatApplicationReceivedMessage)
+                        .kohereTextStyle(.body2Regular)
+                        .foregroundStyle(.staticBlack)
+                }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
-                .background(.statusBlue5)
+                .frame(width: 270, alignment: .leading)
+                .background(.backgroundNormalAlternative)
                 .clipShape(applicationMessageShape)
                 .overlay(applicationMessageShape.stroke(.lineNeutral, lineWidth: 1))
+
+                time
+            }
 
             Spacer(minLength: 0)
         }

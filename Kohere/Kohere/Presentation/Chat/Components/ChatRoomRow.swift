@@ -40,6 +40,13 @@ struct ChatRoomRowCell: View {
             return item.lastMessagePreview ?? ""
         }
 
+        if item.lastMessageType == .inquiryCard {
+            let key = participantRole == .tenant
+                ? "chat.inquiryCard.preview.sent"
+                : "chat.inquiryCard.preview.received"
+            return appLanguage.localizedString(forKey: key)
+        }
+
         guard item.lastMessageType == .bookingCard else { return "" }
 
         switch participantRole {

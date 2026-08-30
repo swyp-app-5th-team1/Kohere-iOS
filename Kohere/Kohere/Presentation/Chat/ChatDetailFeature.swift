@@ -74,7 +74,7 @@ struct ChatDetailFeature {
         case loadPreviousMessages
         case retryBookingCard
         case backButtonTapped
-        case viewDetailsButtonTapped
+        case viewDetailsButtonTapped(listingID: String)
         case applicationBannerTapped
         case messageTextChanged(String)
         case keywordTapped(String)
@@ -134,8 +134,11 @@ struct ChatDetailFeature {
                 if page.content.contains(where: { $0.type == .bookingCard }) {
                     state.hasSubmittedApplication = true
                     state.shouldRetryBookingCard = false
-                    return .none
                 }
+                if page.content.contains(where: { $0.type == .inquiryCard }) {
+                    state.showsInquiryCard = true
+                }
+                if state.hasSubmittedApplication { return .none }
                 guard isInitial, state.shouldRetryBookingCard else { return .none }
                 state.shouldRetryBookingCard = false
                 return .run { send in
@@ -162,11 +165,11 @@ struct ChatDetailFeature {
             case .backButtonTapped:
                 return .none
 
-            case .viewDetailsButtonTapped:
+            case let .viewDetailsButtonTapped(listingID):
                 return .send(
                     .delegate(
                         .listingDetailRequested(
-                            state.chatRoom.listingID,
+                            listingID,
                             isApplicationDisabled: state.hasSubmittedApplication
                         )
                     )
@@ -263,8 +266,9 @@ struct ChatDetailFeature {
                           totalCostAmount: booking.totalAmount,
                           pricePerMonthAmount: booking.listing?.monthlyRent)
         }
-        return ChatMessage(id: "server-\(message.messageID)", sender: sender,
+        return ChatMessage(id: "server-\(message.messageID)", type: message.type, sender: sender,
                            originalText: message.originalContent ?? "", translatedText: message.translatedContent,
-                           timeText: formatter.string(from: message.sentAt), sentAt: message.sentAt, bookingCard: card)
+                           timeText: formatter.string(from: message.sentAt), sentAt: message.sentAt,
+                           inquiryCard: message.inquiryCard, bookingCard: card)
     }
 }
