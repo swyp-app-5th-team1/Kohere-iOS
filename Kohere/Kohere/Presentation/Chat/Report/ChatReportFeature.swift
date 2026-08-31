@@ -9,6 +9,9 @@ import ComposableArchitecture
 
 @Reducer
 struct ChatReportFeature {
+    @Dependency(\.reportChatRoomUseCase)
+    var reportChatRoomUseCase
+
     enum Reason: String, CaseIterable, Equatable, Identifiable {
         case abuse
         case illegalInformation
@@ -38,14 +41,22 @@ struct ChatReportFeature {
         let roomID: Int
         let appLanguage: AppLanguage
         var selectedReason: Reason?
+        var isSubmitting = false
     }
     
     // MARK: - Action
 
-    enum Action: Equatable {
+    @CasePathable
+    enum Delegate: Equatable {
+        case reportFinished(succeeded: Bool)
+    }
+
+    enum Action {
         case closeButtonTapped
         case reasonTapped(Reason)
         case reportButtonTapped
+        case reportResponse(Result<ChatReport, Error>)
+        case delegate(Delegate)
     }
     
     // MARK: - Reducer Body
@@ -61,10 +72,43 @@ struct ChatReportFeature {
                 return .none
 
             case .reportButtonTapped:
-                guard state.selectedReason != nil else { return .none }
-                // TODO: 신고 API 확정 후 연동
+                guard let reason = state.selectedReason, !state.isSubmitting else { return .none }
+                state.isSubmitting = true
+                let roomID = state.roomID
+                let report = reportChatRoomUseCase
+                return .run { send in
+                    do {
+                        let response = try await report.execute(roomID, reason.domainReason)
+                        await send(.reportResponse(.success(response)))
+                    } catch {
+                        await send(.reportResponse(.failure(error)))
+                    }
+                }
+
+            case .reportResponse(.success):
+                state.isSubmitting = false
+                return .send(.delegate(.reportFinished(succeeded: true)))
+
+            case .reportResponse(.failure):
+                state.isSubmitting = false
+                return .send(.delegate(.reportFinished(succeeded: false)))
+
+            case .delegate:
                 return .none
             }
+        }
+    }
+}
+
+private extension ChatReportFeature.Reason {
+    var domainReason: ChatReportReason {
+        switch self {
+        case .abuse: .abuseHarassmentDiscrimination
+        case .illegalInformation: .illegalContent
+        case .sexualContent: .sexualInappropriateContent
+        case .personalInformation: .personalInformation
+        case .spam: .spam
+        case .other: .other
         }
     }
 }

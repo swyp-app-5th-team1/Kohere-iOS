@@ -42,6 +42,14 @@ struct ChatInquiryResponseDTO: Decodable {
     let created: Bool
 }
 
+struct ChatRoomReportResponseDTO: Decodable {
+    let reportId: Int
+    let chatRoomId: Int
+    let reason: String
+    let status: String
+    let receivedAt: String
+}
+
 struct ChatMessagePageResponseDTO: Decodable {
     let content: [ChatMessageResponseDTO]
     let nextCursor: String?

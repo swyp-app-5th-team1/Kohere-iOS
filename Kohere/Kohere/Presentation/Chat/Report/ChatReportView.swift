@@ -76,7 +76,7 @@ struct ChatReportView: View {
     }
     
     private var reportButton: some View {
-        let isEnabled = store.selectedReason != nil
+        let isEnabled = store.selectedReason != nil && !store.isSubmitting
 
         return Button {
             store.send(.reportButtonTapped)

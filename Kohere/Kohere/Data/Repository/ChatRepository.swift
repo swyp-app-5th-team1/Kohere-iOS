@@ -56,6 +56,25 @@ final class ChatRepository: ChatInterface {
         )
         return try response.toEntity()
     }
+
+    func hideRoom(roomID: Int) async throws {
+        let environment = try environmentProvider()
+        try await authenticatedNetworkService.requestVoid(ChatRouter.hideRoom(roomID: roomID, environment))
+    }
+
+    func blockRoom(roomID: Int) async throws {
+        let environment = try environmentProvider()
+        try await authenticatedNetworkService.requestVoid(ChatRouter.blockRoom(roomID: roomID, environment))
+    }
+
+    func reportRoom(roomID: Int, reason: ChatReportReason) async throws -> ChatReport {
+        let environment = try environmentProvider()
+        let request = ChatRoomReportRequestDTO(reason: reason.rawValue)
+        let response: ChatRoomReportResponseDTO = try await authenticatedNetworkService.request(
+            ChatRouter.reportRoom(roomID: roomID, request: request, environment)
+        )
+        return try response.toEntity()
+    }
 }
 
 extension ChatClient: DependencyKey {
@@ -138,6 +157,16 @@ private extension ChatBookingCardResponseDTO {
                             ChatBookingApplicant(userID: $0.userId, name: $0.name, gender: $0.gender,
                                                  country: $0.country, countryName: $0.countryName, email: $0.email)
                         })
+    }
+}
+
+private extension ChatRoomReportResponseDTO {
+    func toEntity() throws -> ChatReport {
+        guard let reason = ChatReportReason(rawValue: reason),
+              let receivedAt = ChatDateParser.date(from: receivedAt)
+        else { throw DataError.decodingFailed }
+        return ChatReport(reportID: reportId, roomID: chatRoomId, reason: reason,
+                          status: status, receivedAt: receivedAt)
     }
 }
 

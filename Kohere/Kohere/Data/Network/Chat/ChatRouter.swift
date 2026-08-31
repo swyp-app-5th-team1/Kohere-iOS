@@ -13,12 +13,20 @@ enum ChatRouter: URLRequestConvertible {
     case roomDetail(roomID: Int, APIEnvironment)
     case messageHistory(roomID: Int, query: ChatMessageHistoryQueryDTO, APIEnvironment)
     case createInquiry(listingID: String, APIEnvironment)
+    case hideRoom(roomID: Int, APIEnvironment)
+    case blockRoom(roomID: Int, APIEnvironment)
+    case reportRoom(roomID: Int, request: ChatRoomReportRequestDTO, APIEnvironment)
 
     func asURLRequest() throws -> URLRequest {
         let url = environment.baseURL.appendingPathComponent(path)
         var request = URLRequest(url: url)
         request.method = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        if case let .reportRoom(_, body, _) = self {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONEncoder().encode(body)
+        }
 
         let queryItems: [URLQueryItem]?
         switch self {
@@ -50,6 +58,12 @@ enum ChatRouter: URLRequestConvertible {
             "api/v1/chat-rooms/\(roomID)/messages"
         case let .createInquiry(listingID, _):
             "api/v1/listings/\(listingID)/inquiries"
+        case let .hideRoom(roomID, _):
+            "api/v1/chat-rooms/\(roomID)"
+        case let .blockRoom(roomID, _):
+            "api/v1/chat-rooms/\(roomID)/block"
+        case let .reportRoom(roomID, _, _):
+            "api/v1/chat-rooms/\(roomID)/reports"
         }
     }
 
@@ -58,7 +72,10 @@ enum ChatRouter: URLRequestConvertible {
         case let .roomList(_, environment),
              let .roomDetail(_, environment),
              let .messageHistory(_, _, environment),
-             let .createInquiry(_, environment):
+             let .createInquiry(_, environment),
+             let .hideRoom(_, environment),
+             let .blockRoom(_, environment),
+             let .reportRoom(_, _, environment):
             environment
         }
     }
@@ -67,8 +84,10 @@ enum ChatRouter: URLRequestConvertible {
         switch self {
         case .roomList, .roomDetail, .messageHistory:
             .get
-        case .createInquiry:
+        case .createInquiry, .blockRoom, .reportRoom:
             .post
+        case .hideRoom:
+            .delete
         }
     }
 }
