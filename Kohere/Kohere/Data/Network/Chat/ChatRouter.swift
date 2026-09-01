@@ -9,6 +9,7 @@ import Alamofire
 import Foundation
 
 enum ChatRouter: URLRequestConvertible {
+    case stompGuide(APIEnvironment)
     case roomList(query: ChatRoomListQueryDTO, APIEnvironment)
     case roomDetail(roomID: Int, APIEnvironment)
     case messageHistory(roomID: Int, query: ChatMessageHistoryQueryDTO, APIEnvironment)
@@ -50,6 +51,8 @@ enum ChatRouter: URLRequestConvertible {
 
     private var path: String {
         switch self {
+        case .stompGuide:
+            "api/v1/chat/stomp-guide"
         case .roomList:
             "api/v1/chat-rooms"
         case let .roomDetail(roomID, _):
@@ -69,7 +72,8 @@ enum ChatRouter: URLRequestConvertible {
 
     private var environment: APIEnvironment {
         switch self {
-        case let .roomList(_, environment),
+        case let .stompGuide(environment),
+             let .roomList(_, environment),
              let .roomDetail(_, environment),
              let .messageHistory(_, _, environment),
              let .createInquiry(_, environment),
@@ -82,7 +86,7 @@ enum ChatRouter: URLRequestConvertible {
 
     private var method: HTTPMethod {
         switch self {
-        case .roomList, .roomDetail, .messageHistory:
+        case .stompGuide, .roomList, .roomDetail, .messageHistory:
             .get
         case .createInquiry, .blockRoom, .reportRoom:
             .post

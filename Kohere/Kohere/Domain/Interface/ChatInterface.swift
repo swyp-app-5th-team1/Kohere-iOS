@@ -8,6 +8,7 @@
 import ComposableArchitecture
 
 protocol ChatInterface {
+    func fetchStompGuide() async throws -> ChatStompGuide
     func fetchChatRooms(page: Int, size: Int) async throws -> ChatRoomPage
     func fetchChatRoom(roomID: Int) async throws -> ChatRoom
     func createInquiry(listingID: String) async throws -> ChatInquiry
@@ -18,6 +19,7 @@ protocol ChatInterface {
 }
 
 struct ChatClient: Sendable {
+    var fetchStompGuide: @Sendable () async throws -> ChatStompGuide
     var fetchChatRooms: @Sendable (_ page: Int, _ size: Int) async throws -> ChatRoomPage
     var fetchChatRoom: @Sendable (_ roomID: Int) async throws -> ChatRoom
     var createInquiry: @Sendable (_ listingID: String) async throws -> ChatInquiry
@@ -30,6 +32,9 @@ struct ChatClient: Sendable {
 extension ChatClient {
     init(repository: any ChatInterface) {
         self.init(
+            fetchStompGuide: {
+                try await repository.fetchStompGuide()
+            },
             fetchChatRooms: { page, size in
                 try await repository.fetchChatRooms(page: page, size: size)
             },
