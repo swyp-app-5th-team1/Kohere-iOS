@@ -112,11 +112,10 @@ struct RootFeature {
                 state.home.path.removeAll()
                 return openListingMapPreview(coordinate: coordinate, state: &state)
 
-            case .home(.delegate(.chatTabRequested)):
+            case let .home(.delegate(.chatRoomRequested(listingID))):
                 state.home.path.removeAll()
                 state.selectedTab = .chat
-                state.chat.hasLoadedInitialPage = false
-                return .send(.chat(.onAppear))
+                return .send(.chat(.chatRoomForListingRequested(listingID)))
 
             case let .home(.path(.element(id: _, action: .listingDetail(.delegate(.inquiryChatRoomRequested(roomID, listingID)))))):
                 state.home.path.removeAll()
@@ -172,11 +171,13 @@ struct RootFeature {
                 state.map.path.removeAll()
                 return openMap(request: request, state: &state)
 
-            case .map(.path(.element(id: _, action: .listingApplication(.delegate(.chatTabRequested))))):
+            case let .map(.path(.element(
+                id: _,
+                action: .listingApplication(.delegate(.chatRoomRequested(listingID)))
+            ))):
                 state.map.path.removeAll()
                 state.selectedTab = .chat
-                state.chat.hasLoadedInitialPage = false
-                return .send(.chat(.onAppear))
+                return .send(.chat(.chatRoomForListingRequested(listingID)))
 
             case let .map(.path(.element(id: _, action: .search(.popupRequested(popup))))):
                 state.popup = popup
@@ -208,11 +209,10 @@ struct RootFeature {
                 state.more.path.removeAll()
                 return openListingMapPreview(coordinate: coordinate, state: &state)
 
-            case .more(.chatTabRequested):
+            case let .more(.chatRoomRequested(listingID)):
                 state.more.path.removeAll()
                 state.selectedTab = .chat
-                state.chat.hasLoadedInitialPage = false
-                return .send(.chat(.onAppear))
+                return .send(.chat(.chatRoomForListingRequested(listingID)))
 
             case let .more(.path(.element(id: id, action: .listingDetail(.favoriteStatusResponse(.success(status)))))):
                 guard let listingID = state.more.path[id: id, case: \.listingDetail]?.listingID else { return .none }

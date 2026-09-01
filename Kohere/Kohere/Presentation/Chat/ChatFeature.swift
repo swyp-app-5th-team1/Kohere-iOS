@@ -63,6 +63,7 @@ struct ChatFeature {
         var errorMessage: String?
         var pendingBookingRoomIDs: Set<Int> = []
         var pendingBookingListingIDs: Set<String> = []
+        var pendingNavigationListingID: String?
         
         init(
             chatRooms: [ChatRoomModel] = [],
@@ -83,6 +84,7 @@ struct ChatFeature {
         case chatRoomAppeared(roomID: Int)
         case path(StackActionOf<Path>)
         case chatRoomTapped(roomID: Int)
+        case chatRoomForListingRequested(String)
         case swipeActionTapped(SwipeAction, roomID: Int)
         case reportDetailsRequested(roomID: Int)
         case swipeActionConfirmed(SwipeAction, roomID: Int)
@@ -122,6 +124,22 @@ struct ChatFeature {
                     let existingRoomIDs = Set(state.chatRooms.map(\.roomID))
                     state.chatRooms.append(contentsOf: rooms.filter { !existingRoomIDs.contains($0.roomID) })
                 }
+                if let listingID = state.pendingNavigationListingID,
+                   let room = state.chatRooms.first(where: { $0.listingID == listingID }) {
+                    state.pendingNavigationListingID = nil
+                    state.pendingBookingListingIDs.remove(listingID)
+                    state.pendingBookingRoomIDs.remove(room.roomID)
+                    state.path.removeAll()
+                    state.path.append(
+                        .chatDetail(
+                            ChatDetailFeature.State(
+                                chatRoom: room,
+                                participantRole: room.myRole,
+                                shouldRetryBookingCard: true
+                            )
+                        )
+                    )
+                }
                 return .none
                 
             case let .chatRoomListResponse(_, .failure(error)):
@@ -144,6 +162,13 @@ struct ChatFeature {
                                                                           shouldRetryBookingCard: shouldRetry)))
                 }
                 return .none
+
+            case let .chatRoomForListingRequested(listingID):
+                state.path.removeAll()
+                state.pendingNavigationListingID = listingID
+                state.hasLoadedInitialPage = false
+                guard !state.isLoading else { return .none }
+                return fetchChatRooms(page: 0, state: &state)
 
             case let .swipeActionTapped(swipeAction, roomID):
                 guard state.containsRoom(roomID) else { return .none }
@@ -239,6 +264,9 @@ struct ChatFeature {
             case let .path(.element(id: _, action: .chatDetail(.delegate(.swipeActionRequested(swipeAction, roomID))))):
                 return .send(.swipeActionTapped(swipeAction, roomID: roomID))
 
+            case let .path(.element(id: _, action: .chatDetail(.delegate(.errorMessageRequested(message))))):
+                return .send(.popupRequested(Self.errorPopup(message: message, language: state.appLanguage)))
+
             case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
                 _ = state.path.popLast()
                 return .none
@@ -307,9 +335,11 @@ struct ChatFeature {
                                                                             isApplicationDisabled: true)))
                 return .none
 
-            case .path(.element(id: _, action: .listingApplication(.delegate(.chatTabRequested)))):
-                state.path.removeAll()
-                return fetchChatRooms(page: 0, state: &state)
+            case let .path(.element(
+                id: _,
+                action: .listingApplication(.delegate(.chatRoomRequested(listingID)))
+            )):
+                return .send(.chatRoomForListingRequested(listingID))
 
             case .path(.element(id: _, action: .report(.closeButtonTapped))):
                 _ = state.path.popLast()
