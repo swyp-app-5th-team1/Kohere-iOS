@@ -6,6 +6,15 @@
 //
 
 extension ChatFeature {
+    static func errorPopup(message: String, language: AppLanguage) -> AppPopup {
+        .notice(
+            AppPopup.Notice(
+                message: message,
+                confirmTitle: language.localized(.commonConfirm)
+            )
+        )
+    }
+
     static func popup(for action: SwipeAction, roomID: Int, language: AppLanguage) -> AppPopup {
         let content: (messageKey: String, primaryTitleKey: String)
         let route: AppPopup.Route

@@ -56,7 +56,7 @@ struct HomeFeature {
         case mapRequested(MapEntryRequest)
         case mapPlaceSearchRequested(SearchPlaceResult)
         case listingMapPreviewRequested(MapCoordinate)
-        case chatTabRequested
+        case chatRoomRequested(listingID: String)
         case popupRequested(AppPopup)
         case favoriteStatusChanged(listingID: String, status: ListingFavoriteStatus)
     }

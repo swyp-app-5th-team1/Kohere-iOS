@@ -367,7 +367,7 @@ struct ListingApplicationFeature {
 
             case .completionConfirmButtonTapped:
                 state.isCompletionPopupPresented = false
-                return .send(.delegate(.chatTabRequested))
+                return .send(.delegate(.chatRoomRequested(listingID: state.listingID)))
 
             case .delegate:
                 return .none

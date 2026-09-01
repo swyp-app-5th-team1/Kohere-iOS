@@ -70,7 +70,7 @@ struct MoreFeature {
         case userProfileUpdated(UserProfile)
         case popupRequested(AppPopup)
         case listingMapPreviewRequested(MapCoordinate)
-        case chatTabRequested
+        case chatRoomRequested(listingID: String)
         case logoutConfirmed
         case deleteAccountConfirmed
     }
@@ -198,7 +198,7 @@ struct MoreFeature {
 
             case .popupRequested,
                  .listingMapPreviewRequested,
-                 .chatTabRequested,
+                 .chatRoomRequested,
                  .logoutConfirmed,
                  .deleteAccountConfirmed:
                 return .none

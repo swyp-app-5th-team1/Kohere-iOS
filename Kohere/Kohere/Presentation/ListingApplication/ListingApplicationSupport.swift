@@ -39,7 +39,7 @@ enum ListingApplicationPrivacySection: String, CaseIterable, Equatable, Hashable
 
 enum ListingApplicationDelegate: Equatable {
     case listingDetailRequested(listingID: String)
-    case chatTabRequested
+    case chatRoomRequested(listingID: String)
     case privacyDocumentRequested(ListingApplicationPrivacySection)
 }
 
