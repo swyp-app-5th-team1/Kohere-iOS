@@ -229,6 +229,66 @@ final class ChatAccessTokenProviderTests: XCTestCase {
 
 @MainActor
 final class ChatFeatureTests: XCTestCase {
+    func testFailedMessageCanBeRetriedWhenRealtimeIsReady() async {
+        let clientMessageID = UUID()
+        let room = ChatRoomModel(room: makeRoom(roomID: 1, role: .tenant))
+        let failedMessage = ChatMessage(
+            id: "client-\(clientMessageID)", sender: .tenant, originalText: "Hello", timeText: "10:00",
+            clientMessageID: clientMessageID, deliveryStatus: .failed
+        )
+        let sentMessage = LockIsolated<(Int, UUID, String)?>(nil)
+        var initialState = ChatDetailFeature.State(
+            chatRoom: room,
+            participantRole: .tenant,
+            messages: [failedMessage]
+        )
+        initialState.isRealtimeReady = true
+        let store = TestStore(
+            initialState: initialState
+        ) {
+            ChatDetailFeature()
+        } withDependencies: {
+            $0.chatRealtimeClient.sendText = { roomID, messageID, content in
+                sentMessage.setValue((roomID, messageID, content))
+            }
+        }
+        store.exhaustivity = .off
+
+        await store.send(.retryFailedMessageTapped(clientMessageID)) {
+            $0.messages[0] = ChatMessage(
+                id: "client-\(clientMessageID)", sender: .tenant, originalText: "Hello", timeText: "10:00",
+                clientMessageID: clientMessageID, deliveryStatus: .sending
+            )
+        }
+        await store.receive(\.textSendResponse)
+
+        XCTAssertEqual(sentMessage.value?.0, 1)
+        XCTAssertEqual(sentMessage.value?.1, clientMessageID)
+        XCTAssertEqual(sentMessage.value?.2, "Hello")
+    }
+
+    func testFailedMessageCanBeDeletedFromDialog() async {
+        let clientMessageID = UUID()
+        let room = ChatRoomModel(room: makeRoom(roomID: 1, role: .tenant))
+        let failedMessage = ChatMessage(
+            sender: .tenant, originalText: "Hello", timeText: "10:00",
+            clientMessageID: clientMessageID, deliveryStatus: .failed
+        )
+        let store = TestStore(
+            initialState: ChatDetailFeature.State(chatRoom: room, participantRole: .tenant, messages: [failedMessage])
+        ) {
+            ChatDetailFeature()
+        }
+
+        await store.send(.failedMessageDeleteButtonTapped(clientMessageID)) {
+            $0.selectedFailedMessageID = clientMessageID
+        }
+        await store.send(.selectedFailedMessageDeleteTapped) {
+            $0.selectedFailedMessageID = nil
+            $0.messages = []
+        }
+    }
+
     func testRealtimeAcknowledgementCompletesOptimisticMessage() async {
         let clientMessageID = UUID()
         let room = ChatRoomModel(room: makeRoom(roomID: 1, role: .tenant))

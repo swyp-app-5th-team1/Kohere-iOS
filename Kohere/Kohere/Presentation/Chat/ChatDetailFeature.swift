@@ -38,6 +38,7 @@ struct ChatDetailFeature {
         var showsInquiryCard: Bool
         var errorMessage: String?
         var isRealtimeReady = false
+        var selectedFailedMessageID: UUID?
 
         var showsApplicationBanner: Bool {
             participantRole == .tenant && showsInquiryCard && hasLoadedMessages && !hasSubmittedApplication
@@ -90,6 +91,11 @@ struct ChatDetailFeature {
         case messageTextChanged(String)
         case keywordTapped(String)
         case sendButtonTapped
+        case retryFailedMessageTapped(UUID)
+        case failedMessageDeleteButtonTapped(UUID)
+        case failedMessageDialogDismissed
+        case selectedFailedMessageResendTapped
+        case selectedFailedMessageDeleteTapped
         case moreButtonTapped
         case moreMenuDismissed
         case moreMenuActionTapped(ChatFeature.SwipeAction)
@@ -253,6 +259,33 @@ struct ChatDetailFeature {
                 state.messageText = ""
                 return sendText(message, state: &state)
 
+            case let .retryFailedMessageTapped(clientMessageID):
+                return retryFailedMessage(clientMessageID, state: &state)
+
+            case let .failedMessageDeleteButtonTapped(clientMessageID):
+                guard state.messages.contains(where: {
+                    $0.clientMessageID == clientMessageID && $0.deliveryStatus == .failed
+                }) else { return .none }
+                state.selectedFailedMessageID = clientMessageID
+                return .none
+
+            case .failedMessageDialogDismissed:
+                state.selectedFailedMessageID = nil
+                return .none
+
+            case .selectedFailedMessageResendTapped:
+                guard let clientMessageID = state.selectedFailedMessageID else { return .none }
+                state.selectedFailedMessageID = nil
+                return retryFailedMessage(clientMessageID, state: &state)
+
+            case .selectedFailedMessageDeleteTapped:
+                guard let clientMessageID = state.selectedFailedMessageID else { return .none }
+                state.selectedFailedMessageID = nil
+                state.messages.removeAll {
+                    $0.clientMessageID == clientMessageID && $0.deliveryStatus == .failed
+                }
+                return .none
+
             case .moreButtonTapped:
                 state.isMoreMenuPresented.toggle()
                 return .none
@@ -350,6 +383,22 @@ struct ChatDetailFeature {
                 await output(.textSendResponse(clientMessageID: clientMessageID, .failure(error)))
             }
         }
+    }
+
+    private func retryFailedMessage(_ clientMessageID: UUID, state: inout State) -> Effect<Action> {
+        guard let index = state.messages.firstIndex(where: {
+            $0.clientMessageID == clientMessageID && $0.deliveryStatus == .failed
+        }) else { return .none }
+
+        let message = state.messages[index]
+        let deliveryStatus: ChatMessageDeliveryStatus = state.isRealtimeReady ? .sending : .queued
+        state.messages[index] = Self.message(message, deliveryStatus: deliveryStatus)
+        guard state.isRealtimeReady else { return .none }
+        return sendPendingMessage(
+            roomID: state.chatRoom.roomID,
+            clientMessageID: clientMessageID,
+            content: message.originalText
+        )
     }
 
     private func handleRealtimeEvent(_ event: ChatRealtimeEvent, state: inout State) -> Effect<Action> {
