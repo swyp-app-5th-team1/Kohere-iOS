@@ -62,7 +62,9 @@ struct ChatDetailView: View {
                                         showsSenderProfile: shouldShowSenderProfile(at: index),
                                         onListingCardTapped: {
                                             store.send(.viewDetailsButtonTapped(listingID: $0))
-                                        }
+                                        },
+                                        onRetryTapped: { store.send(.retryFailedMessageTapped($0)) },
+                                        onDeleteTapped: { store.send(.failedMessageDeleteButtonTapped($0)) }
                                     )
                                 }
                                     .padding(.horizontal, 20)
@@ -122,9 +124,31 @@ struct ChatDetailView: View {
                 .padding(.top, 52)
                 .padding(.trailing, 20)
             }
+
+            if store.selectedFailedMessageID != nil {
+                Color.materialDimmer
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        store.send(.failedMessageDialogDismissed)
+                    }
+                    .transition(.opacity)
+
+                VStack(spacing: 0) {
+                    Spacer()
+
+                    ChatFailedMessageBottomSheet(
+                        onResendTapped: { store.send(.selectedFailedMessageResendTapped) },
+                        onDeleteTapped: { store.send(.selectedFailedMessageDeleteTapped) },
+                        onCancelTapped: { store.send(.failedMessageDialogDismissed) }
+                    )
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.backgroundNormalNormal)
+        .animation(.easeInOut(duration: 0.25), value: store.selectedFailedMessageID)
         .onAppear {
             store.send(.onAppear)
         }

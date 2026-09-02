@@ -15,6 +15,8 @@ struct ChatMessageRow: View {
     let participantRole: ChatRoomRole
     let showsSenderProfile: Bool
     let onListingCardTapped: (String) -> Void
+    let onRetryTapped: (UUID) -> Void
+    let onDeleteTapped: (UUID) -> Void
 
     private var isMine: Bool { message.sender == participantRole }
     private var isUserSubmittedCard: Bool { participantRole == .tenant }
@@ -50,10 +52,15 @@ struct ChatMessageRow: View {
                 }
             }
         } else if isMine {
-            HStack(alignment: .bottom, spacing: 4) {
+            HStack(alignment: .bottom, spacing: message.deliveryStatus == .failed ? 8 : 4) {
                 Spacer(minLength: 48)
 
-                time
+                if message.deliveryStatus == .failed,
+                   let clientMessageID = message.clientMessageID {
+                    failedMessageActions(clientMessageID)
+                } else {
+                    time
+                }
                 bubble
             }
         } else {
@@ -139,6 +146,42 @@ struct ChatMessageRow: View {
     private var bubbleShape: UnevenRoundedRectangle {
         UnevenRoundedRectangle(topLeadingRadius: isMine ? 12 : 0, bottomLeadingRadius: 12,
                                bottomTrailingRadius: 12, topTrailingRadius: isMine ? 0 : 12)
+    }
+
+    private func failedMessageActions(_ clientMessageID: UUID) -> some View {
+        HStack(spacing: 0) {
+            Button {
+                onRetryTapped(clientMessageID)
+            } label: {
+                Image(.reset16)
+                    .renderingMode(.template)
+                    .scaleEffect(x: -1, y: 1)
+                    .foregroundStyle(.labelStrong)
+                    .frame(width: 16, height: 16)
+                    .frame(width: 25, height: 25)
+            }
+
+            Rectangle()
+                .fill(.lineNeutral)
+                .frame(width: 1, height: 25)
+
+            Button {
+                onDeleteTapped(clientMessageID)
+            } label: {
+                Image(.close16)
+                    .renderingMode(.template)
+                    .foregroundStyle(.statusRed50)
+                    .frame(width: 16, height: 16)
+                    .frame(width: 25, height: 25)
+            }
+        }
+        .background(.common0)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
+        .overlay {
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(.lineNeutral, lineWidth: 1)
+        }
+        .buttonStyle(.plain)
     }
 
     private var time: some View {
