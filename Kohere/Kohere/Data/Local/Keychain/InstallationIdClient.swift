@@ -33,7 +33,7 @@ extension DependencyValues {
     }
 }
 
-private final class InstallationIdProvider: Sendable {
+nonisolated private final class InstallationIdProvider: Sendable {
     private let keychainClient: KeychainClient
     private let cached = OSAllocatedUnfairLock<String?>(initialState: nil)
 
@@ -52,7 +52,7 @@ private final class InstallationIdProvider: Sendable {
     }
 
     private func loadOrCreate() -> String {
-        if let stored = (try? keychainClient.load(for: .installationId)) ?? nil,
+        if let stored = try? keychainClient.load(for: .installationId),
            stored.isEmpty == false {
             return stored
         }
