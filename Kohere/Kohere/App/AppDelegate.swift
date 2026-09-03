@@ -30,6 +30,20 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     ) {
         logger.info("event=apns_token_received")
         Messaging.messaging().apnsToken = deviceToken
+
+        // delegate 콜백이 오지 않는 환경 대비: APNs 토큰 확보 직후 FCM 토큰을 직접 조회해
+        // 같은 스트림(FCMTokenRelay)으로 흘려보낸다. (deprecated 경고는 대체 API 확정 전까지 감수)
+        Messaging.messaging().token { [logger] fcmToken, error in
+            if let error {
+                logger.error("event=fcm_token_fetch_failed error=\(error.localizedDescription, privacy: .public)")
+                return
+            }
+
+            guard let fcmToken else { return }
+
+            logger.info("event=fcm_token_fetched")
+            FCMTokenRelay.shared.emit(fcmToken)
+        }
     }
 
     func application(

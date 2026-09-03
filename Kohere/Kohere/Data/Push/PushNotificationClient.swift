@@ -85,6 +85,11 @@ nonisolated final class FCMTokenRelay: NSObject, MessagingDelegate, @unchecked S
         logger.info("event=fcm_delegate_fired hasToken=\(fcmToken != nil)")
         guard let fcmToken else { return }
 
+        emit(fcmToken)
+    }
+
+    /// delegate 콜백 외의 경로(명시적 토큰 조회 등)로 확보한 토큰을 같은 스트림으로 흘려보낸다.
+    func emit(_ fcmToken: String) {
         subscriptions.withLock { state in
             state.lastToken = fcmToken
 
