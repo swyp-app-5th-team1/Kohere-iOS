@@ -18,6 +18,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         FirebaseApp.configure()
+        Messaging.messaging().delegate = FCMTokenRelay.shared
         return true
     }
 

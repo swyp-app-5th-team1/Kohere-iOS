@@ -1,0 +1,74 @@
+//
+//  PushNotificationClient.swift
+//  Kohere
+//
+//  Created by 송규섭 on 9/4/26.
+//
+
+import ComposableArchitecture
+import FirebaseMessaging
+import os
+import UIKit
+import UserNotifications
+
+struct PushNotificationClient: Sendable {
+    /// 시스템 알림 권한을 요청한다. 시스템 팝업은 앱 수명 동안 최초 1회만 뜬다.
+    var requestAuthorization: @Sendable () async throws -> Bool
+    /// APNs 원격 알림 등록을 시작한다. 발급된 기기 토큰은 AppDelegate를 거쳐 FCM에 전달된다.
+    var registerForRemoteNotifications: @Sendable () async -> Void
+    /// FCM 토큰 발급·갱신 이벤트 스트림. 토큰이 바뀔 때마다 서버 재등록에 사용한다.
+    var fcmTokenUpdates: @Sendable () -> AsyncStream<String>
+}
+
+extension PushNotificationClient: DependencyKey {
+    static let liveValue = PushNotificationClient(
+        requestAuthorization: {
+            try await UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .sound, .badge])
+        },
+        registerForRemoteNotifications: {
+            await MainActor.run {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        },
+        fcmTokenUpdates: {
+            FCMTokenRelay.shared.updates()
+        }
+    )
+}
+
+extension DependencyValues {
+    var pushNotificationClient: PushNotificationClient {
+        get { self[PushNotificationClient.self] }
+        set { self[PushNotificationClient.self] = newValue }
+    }
+}
+
+/// MessagingDelegate 콜백(토큰 발급·갱신)을 AsyncStream으로 중계한다.
+/// AppDelegate에서 `Messaging.messaging().delegate`로 등록된다.
+nonisolated final class FCMTokenRelay: NSObject, MessagingDelegate, @unchecked Sendable {
+    static let shared = FCMTokenRelay()
+
+    private let continuations = OSAllocatedUnfairLock<[UUID: AsyncStream<String>.Continuation]>(initialState: [:])
+
+    func updates() -> AsyncStream<String> {
+        AsyncStream { continuation in
+            let id = UUID()
+            continuations.withLock { $0[id] = continuation }
+
+            continuation.onTermination = { [weak self] _ in
+                self?.continuations.withLock { $0[id] = nil }
+            }
+        }
+    }
+
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard let fcmToken else { return }
+
+        continuations.withLock { subscribers in
+            for continuation in subscribers.values {
+                continuation.yield(fcmToken)
+            }
+        }
+    }
+}
