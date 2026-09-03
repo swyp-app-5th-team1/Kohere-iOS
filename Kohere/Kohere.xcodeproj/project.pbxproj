@@ -11,6 +11,7 @@
 		772FBCF82FF3A40100336CF6 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 772FBCF92FF3A40100336CF6 /* GoogleSignIn */; };
 		778F3DF12FDA7D0D00AFF730 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 778F3DF02FDA7D0D00AFF730 /* .swiftlint.yml */; };
 		778F3DF32FDAA3000AFF730 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 778F3DF42FDAA3000AFF730 /* ComposableArchitecture */; };
+		951921A53049CCB300666ACA /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 951921A43049CCB300666ACA /* FirebaseMessaging */; };
 		9570E47F2FE45C37002FA6DE /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 9570E47E2FE45C37002FA6DE /* NMapsMap */; };
 		D4A1B2C32FF4A10000AA0001 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D4A1B2C32FF4A10000AA0003 /* Kingfisher */; };
 		E6B4C0013011000000000001 /* SwiftStomp in Frameworks */ = {isa = PBXBuildFile; productRef = E6B4C0013011000000000003 /* SwiftStomp */; };
@@ -80,6 +81,7 @@
 			files = (
 				778F3DF32FDAA3000AFF730 /* ComposableArchitecture in Frameworks */,
 				772FBCF62FF3A3F200336CF6 /* Alamofire in Frameworks */,
+				951921A53049CCB300666ACA /* FirebaseMessaging in Frameworks */,
 				772FBCF82FF3A40100336CF6 /* GoogleSignIn in Frameworks */,
 				9570E47F2FE45C37002FA6DE /* NMapsMap in Frameworks */,
 				D4A1B2C32FF4A10000AA0001 /* Kingfisher in Frameworks */,
@@ -162,6 +164,7 @@
 				9570E47E2FE45C37002FA6DE /* NMapsMap */,
 				D4A1B2C32FF4A10000AA0003 /* Kingfisher */,
 				E6B4C0013011000000000003 /* SwiftStomp */,
+				951921A43049CCB300666ACA /* FirebaseMessaging */,
 			);
 			productName = Kohere;
 			productReference = 9570C29A2FD9DA9D002FA6DE /* Kohere.app */;
@@ -258,6 +261,7 @@
 				772FBCF52FF3981E00336CF6 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				D4A1B2C32FF4A10000AA0002 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				E6B4C0013011000000000002 /* XCRemoteSwiftPackageReference "SwiftStomp" */,
+				951921A33049CCB300666ACA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9570C29B2FD9DA9D002FA6DE /* Products */;
@@ -698,6 +702,14 @@
 				minimumVersion = 1.26.0;
 			};
 		};
+		951921A33049CCB300666ACA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.18.0;
+			};
+		};
 		9570E47D2FE45C37002FA6DE /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
@@ -739,6 +751,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 778F3DF52FDAA3000AFF730 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
 			productName = ComposableArchitecture;
+		};
+		951921A43049CCB300666ACA /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 951921A33049CCB300666ACA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 		9570E47E2FE45C37002FA6DE /* NMapsMap */ = {
 			isa = XCSwiftPackageProductDependency;
