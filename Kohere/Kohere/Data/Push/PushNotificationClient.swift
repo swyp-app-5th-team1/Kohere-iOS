@@ -8,6 +8,7 @@
 import ComposableArchitecture
 import FirebaseMessaging
 import os
+import OSLog
 import UIKit
 import UserNotifications
 
@@ -49,6 +50,8 @@ extension DependencyValues {
 nonisolated final class FCMTokenRelay: NSObject, MessagingDelegate, @unchecked Sendable {
     static let shared = FCMTokenRelay()
 
+    private let logger = Logger(subsystem: "com.kohere.Kohere", category: "Push")
+
     private struct Subscriptions {
         var lastToken: String?
         var continuations: [UUID: AsyncStream<String>.Continuation] = [:]
@@ -63,6 +66,9 @@ nonisolated final class FCMTokenRelay: NSObject, MessagingDelegate, @unchecked S
             subscriptions.withLock { state in
                 state.continuations[id] = continuation
 
+                let hasCachedToken = state.lastToken != nil
+                logger.info("event=fcm_stream_subscribed hasCachedToken=\(hasCachedToken)")
+
                 // 구독 이전에 이미 발급된 토큰이 있으면 즉시 재생해 놓치지 않게 한다.
                 if let lastToken = state.lastToken {
                     continuation.yield(lastToken)
@@ -76,6 +82,7 @@ nonisolated final class FCMTokenRelay: NSObject, MessagingDelegate, @unchecked S
     }
 
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        logger.info("event=fcm_delegate_fired hasToken=\(fcmToken != nil)")
         guard let fcmToken else { return }
 
         subscriptions.withLock { state in

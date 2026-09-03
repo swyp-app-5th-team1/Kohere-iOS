@@ -31,6 +31,7 @@ extension RootFeature {
                 return
             }
 
+            PushRegistrationLogger.value.info("event=push_authorization_granted")
             await pushNotificationClient.registerForRemoteNotifications()
 
             for await token in pushNotificationClient.fcmTokenUpdates() {

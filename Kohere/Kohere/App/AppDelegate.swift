@@ -28,6 +28,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
+        logger.info("event=apns_token_received")
         Messaging.messaging().apnsToken = deviceToken
     }
 
