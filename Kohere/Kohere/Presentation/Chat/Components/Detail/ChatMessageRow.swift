@@ -13,18 +13,25 @@ struct ChatMessageRow: View {
 
     let message: ChatMessage
     let participantRole: ChatRoomRole
+    let showsSenderProfile: Bool
     let onListingCardTapped: (String) -> Void
+    let onRetryTapped: (UUID) -> Void
+    let onDeleteTapped: (UUID) -> Void
 
     private var isMine: Bool { message.sender == participantRole }
+    private var isUserSubmittedCard: Bool { participantRole == .tenant }
 
     // MARK: - Body
 
     @ViewBuilder var body: some View {
         if let inquiryCard = message.inquiryCard {
-            listingCardAlignment {
-                ChatInquiryListingCard(item: inquiryCard) {
-                    onListingCardTapped(inquiryCard.listingID)
+            if participantRole == .landlord {
+                VStack(spacing: 8) {
+                    inquiryReceivedMessage
+                    inquiryCardView(inquiryCard)
                 }
+            } else {
+                inquiryCardView(inquiryCard)
             }
         } else if message.type == .inquiryCard {
             Text("chat.inquiryCard.unavailable")
@@ -45,16 +52,23 @@ struct ChatMessageRow: View {
                 }
             }
         } else if isMine {
-            HStack(alignment: .bottom, spacing: 4) {
+            HStack(alignment: .bottom, spacing: message.deliveryStatus == .failed ? 8 : 4) {
                 Spacer(minLength: 48)
 
-                time
+                if message.deliveryStatus == .failed,
+                   let clientMessageID = message.clientMessageID {
+                    failedMessageActions(clientMessageID)
+                } else {
+                    time
+                }
                 bubble
             }
         } else {
             HStack(alignment: .top, spacing: 8) {
                 Image(.chatProfile)
                     .renderingMode(.original)
+                    .opacity(showsSenderProfile ? 1 : 0)
+                    .accessibilityHidden(!showsSenderProfile)
 
                 HStack(alignment: .bottom, spacing: 4) {
                     bubble
@@ -70,7 +84,7 @@ struct ChatMessageRow: View {
 
     private func listingCardAlignment<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         HStack(alignment: .bottom, spacing: 8) {
-            if isMine {
+            if isUserSubmittedCard {
                 Spacer(minLength: 0)
 
                 time
@@ -96,6 +110,14 @@ struct ChatMessageRow: View {
                 .onTapGesture {
                     onListingCardTapped(bookingCard.listingID)
                 }
+        }
+    }
+
+    private func inquiryCardView(_ inquiryCard: ChatInquiryCard) -> some View {
+        listingCardAlignment {
+            ChatInquiryListingCard(item: inquiryCard) {
+                onListingCardTapped(inquiryCard.listingID)
+            }
         }
     }
     
@@ -124,6 +146,42 @@ struct ChatMessageRow: View {
     private var bubbleShape: UnevenRoundedRectangle {
         UnevenRoundedRectangle(topLeadingRadius: isMine ? 12 : 0, bottomLeadingRadius: 12,
                                bottomTrailingRadius: 12, topTrailingRadius: isMine ? 0 : 12)
+    }
+
+    private func failedMessageActions(_ clientMessageID: UUID) -> some View {
+        HStack(spacing: 0) {
+            Button {
+                onRetryTapped(clientMessageID)
+            } label: {
+                Image(.reset16)
+                    .renderingMode(.template)
+                    .scaleEffect(x: -1, y: 1)
+                    .foregroundStyle(.labelStrong)
+                    .frame(width: 16, height: 16)
+                    .frame(width: 25, height: 25)
+            }
+
+            Rectangle()
+                .fill(.lineNeutral)
+                .frame(width: 1, height: 25)
+
+            Button {
+                onDeleteTapped(clientMessageID)
+            } label: {
+                Image(.close16)
+                    .renderingMode(.template)
+                    .foregroundStyle(.statusRed50)
+                    .frame(width: 16, height: 16)
+                    .frame(width: 25, height: 25)
+            }
+        }
+        .background(.common0)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
+        .overlay {
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(.lineNeutral, lineWidth: 1)
+        }
+        .buttonStyle(.plain)
     }
 
     private var time: some View {
@@ -179,6 +237,42 @@ struct ChatMessageRow: View {
                         .foregroundStyle(.staticBlack)
 
                     Text(.chatApplicationReceivedMessage)
+                        .kohereTextStyle(.body2Regular)
+                        .foregroundStyle(.staticBlack)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .frame(width: 270, alignment: .leading)
+                .background(.backgroundNormalAlternative)
+                .clipShape(applicationMessageShape)
+                .overlay(applicationMessageShape.stroke(.lineNeutral, lineWidth: 1))
+
+                time
+            }
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var inquiryReceivedMessage: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(.smallLogo)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+                .frame(width: 32, height: 32)
+                .background(.common0)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(.lineNeutral, lineWidth: 1))
+
+            HStack(alignment: .bottom, spacing: 4) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(.chatInquiryReceivedTitle)
+                        .kohereTextStyle(.label2Semibold)
+                        .foregroundStyle(.staticBlack)
+
+                    Text(.chatInquiryReceivedMessage)
                         .kohereTextStyle(.body2Regular)
                         .foregroundStyle(.staticBlack)
                 }

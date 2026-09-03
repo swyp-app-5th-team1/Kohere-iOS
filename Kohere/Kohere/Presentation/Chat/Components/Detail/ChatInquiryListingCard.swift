@@ -53,7 +53,7 @@ struct ChatInquiryListingCard: View {
             }
             .buttonStyle(.plain)
         }
-        .frame(width: 270)
+        .frame(width: 248)
         .background(.common0)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(.coolNeutral8, lineWidth: 0.5))

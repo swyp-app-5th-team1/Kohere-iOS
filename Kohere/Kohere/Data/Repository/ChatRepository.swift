@@ -20,6 +20,14 @@ final class ChatRepository: ChatInterface {
         self.environmentProvider = environmentProvider
     }
 
+    func fetchStompGuide() async throws -> ChatStompGuide {
+        let environment = try environmentProvider()
+        let response: ChatStompGuideResponseDTO = try await authenticatedNetworkService.request(
+            ChatRouter.stompGuide(environment)
+        )
+        return try response.toEntity()
+    }
+
     func fetchChatRooms(page: Int, size: Int) async throws -> ChatRoomPage {
         let environment = try environmentProvider()
         let query = ChatRoomListQueryDTO(page: page, size: size)
@@ -85,6 +93,32 @@ private extension ChatRoomPageResponseDTO {
     func toEntity() throws -> ChatRoomPage {
         ChatRoomPage(content: try content.map { try $0.toEntity() },
                      page: page.toEntity())
+    }
+}
+
+private extension ChatStompGuideResponseDTO {
+    func toEntity() throws -> ChatStompGuide {
+        guard let developmentURL = URL(string: developmentWebSocketUrl),
+              let localURL = URL(string: localWebSocketUrl)
+        else { throw DataError.invalidURL }
+
+        return ChatStompGuide(
+            developmentWebSocketURL: developmentURL,
+            localWebSocketURL: localURL,
+            webSocketEndpoint: webSocketEndpoint,
+            connectHeaderName: connectHeaderName,
+            connectHeaderValueFormat: connectHeaderValueFormat,
+            controlQueue: controlQueue,
+            ackQueue: ackQueue,
+            errorQueue: errorQueue,
+            roomEventQueue: roomEventQueue,
+            translationQueue: translationQueue,
+            controlSendDestination: controlSendDestination,
+            roomSubscribeDestination: roomSubscribeDestination,
+            messageSendDestination: messageSendDestination,
+            maxTextCodePoints: maxTextCodePoints,
+            heartbeatSeconds: heartbeatSeconds
+        )
     }
 }
 

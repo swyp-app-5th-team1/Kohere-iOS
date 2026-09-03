@@ -57,9 +57,9 @@ extension MoreFeature {
             )))
             return .none
 
-        case .element(id: _, action: .listingApplication(.delegate(.chatTabRequested))):
+        case let .element(id: _, action: .listingApplication(.delegate(.chatRoomRequested(listingID)))):
             state.path.removeAll()
-            return .send(.chatTabRequested)
+            return .send(.chatRoomRequested(listingID: listingID))
 
         case let .element(id: _, action: .savedListings(.delegate(.listingDetailRequested(listingID)))),
              let .element(id: _, action: .recentlyViewedList(.delegate(.listingDetailRequested(listingID)))):

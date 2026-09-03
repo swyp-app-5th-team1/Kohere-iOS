@@ -7,6 +7,13 @@
 
 import Foundation
 
+enum ChatMessageDeliveryStatus: Equatable {
+    case queued
+    case sending
+    case sent
+    case failed
+}
+
 struct ChatMessage: Equatable, Identifiable {
     let id: String
     let type: ChatMessageType
@@ -17,6 +24,9 @@ struct ChatMessage: Equatable, Identifiable {
     let sentAt: Date?
     let inquiryCard: ChatInquiryCard?
     let bookingCard: ChatRoomModel?
+    let clientMessageID: UUID?
+    let serverMessageID: Int?
+    let deliveryStatus: ChatMessageDeliveryStatus
 
     init(
         id: String = UUID().uuidString,
@@ -27,7 +37,10 @@ struct ChatMessage: Equatable, Identifiable {
         timeText: String,
         sentAt: Date? = nil,
         inquiryCard: ChatInquiryCard? = nil,
-        bookingCard: ChatRoomModel? = nil
+        bookingCard: ChatRoomModel? = nil,
+        clientMessageID: UUID? = nil,
+        serverMessageID: Int? = nil,
+        deliveryStatus: ChatMessageDeliveryStatus = .sent
     ) {
         self.id = id
         self.type = type
@@ -38,5 +51,8 @@ struct ChatMessage: Equatable, Identifiable {
         self.sentAt = sentAt
         self.inquiryCard = inquiryCard
         self.bookingCard = bookingCard
+        self.clientMessageID = clientMessageID
+        self.serverMessageID = serverMessageID
+        self.deliveryStatus = deliveryStatus
     }
 }

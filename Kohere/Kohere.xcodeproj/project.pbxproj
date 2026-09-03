@@ -13,6 +13,7 @@
 		778F3DF32FDAA3000AFF730 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 778F3DF42FDAA3000AFF730 /* ComposableArchitecture */; };
 		9570E47F2FE45C37002FA6DE /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 9570E47E2FE45C37002FA6DE /* NMapsMap */; };
 		D4A1B2C32FF4A10000AA0001 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D4A1B2C32FF4A10000AA0003 /* Kingfisher */; };
+		E6B4C0013011000000000001 /* SwiftStomp in Frameworks */ = {isa = PBXBuildFile; productRef = E6B4C0013011000000000003 /* SwiftStomp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,6 +83,7 @@
 				772FBCF82FF3A40100336CF6 /* GoogleSignIn in Frameworks */,
 				9570E47F2FE45C37002FA6DE /* NMapsMap in Frameworks */,
 				D4A1B2C32FF4A10000AA0001 /* Kingfisher in Frameworks */,
+				E6B4C0013011000000000001 /* SwiftStomp in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -159,6 +161,7 @@
 				772FBCF92FF3A40100336CF6 /* GoogleSignIn */,
 				9570E47E2FE45C37002FA6DE /* NMapsMap */,
 				D4A1B2C32FF4A10000AA0003 /* Kingfisher */,
+				E6B4C0013011000000000003 /* SwiftStomp */,
 			);
 			productName = Kohere;
 			productReference = 9570C29A2FD9DA9D002FA6DE /* Kohere.app */;
@@ -254,6 +257,7 @@
 				772FBCF42FF38F2F00336CF6 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				772FBCF52FF3981E00336CF6 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				D4A1B2C32FF4A10000AA0002 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				E6B4C0013011000000000002 /* XCRemoteSwiftPackageReference "SwiftStomp" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9570C29B2FD9DA9D002FA6DE /* Products */;
@@ -710,6 +714,14 @@
 				minimumVersion = 8.0.0;
 			};
 		};
+		E6B4C0013011000000000002 /* XCRemoteSwiftPackageReference "SwiftStomp" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Romixery/SwiftStomp.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.2.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -737,6 +749,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D4A1B2C32FF4A10000AA0002 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		E6B4C0013011000000000003 /* SwiftStomp */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E6B4C0013011000000000002 /* XCRemoteSwiftPackageReference "SwiftStomp" */;
+			productName = SwiftStomp;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -5,6 +5,24 @@
 //  Created by soomin on 8/25/26.
 //
 
+struct ChatStompGuideResponseDTO: Decodable {
+    let developmentWebSocketUrl: String
+    let localWebSocketUrl: String
+    let webSocketEndpoint: String
+    let connectHeaderName: String
+    let connectHeaderValueFormat: String
+    let controlQueue: String
+    let ackQueue: String
+    let errorQueue: String
+    let roomEventQueue: String
+    let translationQueue: String
+    let controlSendDestination: String
+    let roomSubscribeDestination: String
+    let messageSendDestination: String
+    let maxTextCodePoints: Int
+    let heartbeatSeconds: Int
+}
+
 struct ChatRoomPageResponseDTO: Decodable {
     let page: PageResponseDTO
     let content: [ChatRoomResponseDTO]

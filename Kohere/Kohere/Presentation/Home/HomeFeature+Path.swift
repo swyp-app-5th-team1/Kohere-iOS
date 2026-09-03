@@ -86,9 +86,9 @@ extension HomeFeature {
             )
             return .none
 
-        case .element(id: _, action: .listingApplication(.delegate(.chatTabRequested))):
+        case let .element(id: _, action: .listingApplication(.delegate(.chatRoomRequested(listingID)))):
             state.path.removeAll()
-            return .send(.delegate(.chatTabRequested))
+            return .send(.delegate(.chatRoomRequested(listingID: listingID)))
 
         case let .element(
             id: _,

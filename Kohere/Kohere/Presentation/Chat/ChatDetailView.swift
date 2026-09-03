@@ -56,10 +56,16 @@ struct ChatDetailView: View {
                                             .foregroundColor(.neutral40)
                                     }
 
-                                    ChatMessageRow(message: message, participantRole: store.participantRole,
-                                                   onListingCardTapped: {
-                                                       store.send(.viewDetailsButtonTapped(listingID: $0))
-                                                   })
+                                    ChatMessageRow(
+                                        message: message,
+                                        participantRole: store.participantRole,
+                                        showsSenderProfile: shouldShowSenderProfile(at: index),
+                                        onListingCardTapped: {
+                                            store.send(.viewDetailsButtonTapped(listingID: $0))
+                                        },
+                                        onRetryTapped: { store.send(.retryFailedMessageTapped($0)) },
+                                        onDeleteTapped: { store.send(.failedMessageDeleteButtonTapped($0)) }
+                                    )
                                 }
                                     .padding(.horizontal, 20)
                                     .onAppear {
@@ -118,11 +124,36 @@ struct ChatDetailView: View {
                 .padding(.top, 52)
                 .padding(.trailing, 20)
             }
+
+            if store.selectedFailedMessageID != nil {
+                Color.materialDimmer
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        store.send(.failedMessageDialogDismissed)
+                    }
+                    .transition(.opacity)
+
+                VStack(spacing: 0) {
+                    Spacer()
+
+                    ChatFailedMessageBottomSheet(
+                        onResendTapped: { store.send(.selectedFailedMessageResendTapped) },
+                        onDeleteTapped: { store.send(.selectedFailedMessageDeleteTapped) },
+                        onCancelTapped: { store.send(.failedMessageDialogDismissed) }
+                    )
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.backgroundNormalNormal)
+        .animation(.easeInOut(duration: 0.25), value: store.selectedFailedMessageID)
         .onAppear {
             store.send(.onAppear)
+        }
+        .onDisappear {
+            store.send(.onDisappear)
         }
         .interactivePopGestureEnabled()
     }
@@ -150,6 +181,17 @@ private extension ChatDetailView {
         guard let date = store.messages[index].sentAt else { return false }
         guard index > 0, let previousDate = store.messages[index - 1].sentAt else { return true }
         return !Calendar.current.isDate(date, inSameDayAs: previousDate)
+    }
+
+    func shouldShowSenderProfile(at index: Int) -> Bool {
+        let message = store.messages[index]
+        guard message.type == .text,
+              message.sender != store.participantRole
+        else { return false }
+        guard index > 0, !shouldShowDate(at: index) else { return true }
+
+        let previousMessage = store.messages[index - 1]
+        return previousMessage.type != .text || previousMessage.sender != message.sender
     }
 
     func localizedDateText(_ date: Date) -> String {

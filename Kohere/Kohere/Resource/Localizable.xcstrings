@@ -531,6 +531,40 @@
         }
       }
     },
+    "chat.inquiryReceived.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please review the inquiry and reply in the chat. 💬"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "문의 내용을 확인하고 채팅으로 답변해 주세요. 💬"
+          }
+        }
+      }
+    },
+    "chat.inquiryReceived.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’ve received a new inquiry!"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새로운 문의가 도착했어요!"
+          }
+        }
+      }
+    },
     "chat.applicationSent.message" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -718,18 +752,69 @@
         }
       }
     },
+    "chat.failedMessage.action.delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
+    "chat.failedMessage.action.resend" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resend"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재전송"
+          }
+        }
+      }
+    },
+    "chat.failedMessage.dialog.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this message?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제하시겠습니까?"
+          }
+        }
+      }
+    },
     "chat.inquiryCard.preview.received" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A new inquiry has arrived"
+            "value" : "New inquiry received!"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "새로운 문의가 도착했어요!"
           }
         }
@@ -741,13 +826,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your inquiry has been submitted"
+            "value" : "Your inquiry is sent!"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "문의가 접수되었어요!"
+            "state" : "needs_review",
+            "value" : "문의가 잘 접수되었어요! "
           }
         }
       }

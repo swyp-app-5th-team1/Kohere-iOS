@@ -18,6 +18,9 @@ struct ChatComposer: View {
     let onKeywordTapped: (String) -> Void
     let onSendTapped: () -> Void
 
+    @Environment(\.locale)
+    private var locale
+
     @FocusState private var isMessageFieldFocused: Bool
 
     private let keywords = [
@@ -36,7 +39,7 @@ struct ChatComposer: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(keywords, id: \.self) { key in
-                            let keyword = String(localized: String.LocalizationValue(key))
+                            let keyword = AppLanguage(locale: locale).localizedString(forKey: key)
                             Button {
                                 onKeywordTapped(keyword)
                             } label: {
@@ -54,10 +57,15 @@ struct ChatComposer: View {
                 .padding(.top, 16)
             }
 
-            HStack(spacing: 8) {
-                TextField("", text: Binding(get: { messageText }, set: onTextChanged),
-                          prompt: Text("chat.detail.messagePlaceholder")
-                                    .foregroundStyle(isMessageFieldFocused ? .coolNeutral40 : .coolNeutral10))
+            HStack(alignment: .bottom, spacing: 8) {
+                TextField(
+                    "",
+                    text: Binding(get: { messageText }, set: onTextChanged),
+                    prompt: Text("chat.detail.messagePlaceholder")
+                        .foregroundStyle(isMessageFieldFocused ? .coolNeutral40 : .coolNeutral10),
+                    axis: .vertical
+                )
+                    .lineLimit(1...)
                     .kohereTextStyle(.label2Medium)
                     .foregroundStyle(.neutral70)
                     .tint(.coolNeutral30)
@@ -73,7 +81,8 @@ struct ChatComposer: View {
                 }
             }
             .padding(.horizontal, 16)
-            .frame(height: 40)
+            .padding(.vertical, 8)
+            .frame(minHeight: 40)
             .background(.common0)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
