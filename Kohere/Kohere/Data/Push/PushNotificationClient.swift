@@ -49,15 +49,28 @@ extension DependencyValues {
 nonisolated final class FCMTokenRelay: NSObject, MessagingDelegate, @unchecked Sendable {
     static let shared = FCMTokenRelay()
 
-    private let continuations = OSAllocatedUnfairLock<[UUID: AsyncStream<String>.Continuation]>(initialState: [:])
+    private struct Subscriptions {
+        var lastToken: String?
+        var continuations: [UUID: AsyncStream<String>.Continuation] = [:]
+    }
+
+    private let subscriptions = OSAllocatedUnfairLock<Subscriptions>(initialState: Subscriptions())
 
     func updates() -> AsyncStream<String> {
         AsyncStream { continuation in
             let id = UUID()
-            continuations.withLock { $0[id] = continuation }
+
+            subscriptions.withLock { state in
+                state.continuations[id] = continuation
+
+                // 구독 이전에 이미 발급된 토큰이 있으면 즉시 재생해 놓치지 않게 한다.
+                if let lastToken = state.lastToken {
+                    continuation.yield(lastToken)
+                }
+            }
 
             continuation.onTermination = { [weak self] _ in
-                self?.continuations.withLock { $0[id] = nil }
+                self?.subscriptions.withLock { $0.continuations[id] = nil }
             }
         }
     }
@@ -65,8 +78,10 @@ nonisolated final class FCMTokenRelay: NSObject, MessagingDelegate, @unchecked S
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let fcmToken else { return }
 
-        continuations.withLock { subscribers in
-            for continuation in subscribers.values {
+        subscriptions.withLock { state in
+            state.lastToken = fcmToken
+
+            for continuation in state.continuations.values {
                 continuation.yield(fcmToken)
             }
         }
