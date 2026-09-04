@@ -26,6 +26,12 @@ struct RootFeature {
     var updateProfileUseCase
     @Dependency(\.deleteCurrentUserUseCase)
     var deleteCurrentUserUseCase
+    @Dependency(\.pushNotificationClient)
+    var pushNotificationClient
+    @Dependency(\.pushDeviceClient)
+    var pushDeviceClient
+    @Dependency(\.installationIdClient)
+    var installationIdClient
 
     enum Action {
         case onAppear, splashMinimumDurationElapsed, mainTabAppeared
@@ -35,6 +41,7 @@ struct RootFeature {
         case logoutResponse(Result<Void, Error>)
         case deleteAccountResponse(Result<Void, Error>)
         case deleteAccountLocalCleanupResponse(Result<Void, Error>)
+        case fcmTokenReceived(String)
         case login(LoginFeature.Action), saveAuthResponse(Result<Auth, Error>)
         case onboardingLanguageUpdateResponse(AppLanguage, Result<UserProfile, Error>)
         case onboarding(OnboardingFeature.Action)
@@ -261,9 +268,15 @@ struct RootFeature {
                 guard !state.isLogoutRequesting else { return .none }
                 state.isLogoutRequesting = true
                 let logoutUseCase = logoutUseCase
+                let pushDeviceClient = pushDeviceClient
+                let installationIdClient = installationIdClient
 
                 return .run { send in
                     do {
+                        // 인증이 살아있는 동안 푸시 발송 대상에서 제거한다. 실패해도 로그아웃은 진행(멱등 API).
+                        if let installationId = try? installationIdClient.id() {
+                            try? await pushDeviceClient.unregisterDevice(installationId)
+                        }
                         try await logoutUseCase.execute()
                         await send(.logoutResponse(.success(())))
                     } catch {
@@ -328,6 +341,9 @@ struct RootFeature {
             case .deleteAccountLocalCleanupResponse(.failure):
                 return completeLogout(state: &state)
                 
+            case let .fcmTokenReceived(token):
+                return registerPushDevice(fcmToken: token)
+
             case .login, .onboarding, .home, .community, .map, .chat, .more:
                 return .none
             }

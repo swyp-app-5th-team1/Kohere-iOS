@@ -11,6 +11,8 @@ import SwiftUI
 
 @main
 struct KohereApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     init() {
         TabBarAppearanceConfigurator.configure()
     }

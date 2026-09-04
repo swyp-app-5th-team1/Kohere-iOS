@@ -95,7 +95,7 @@ extension RootFeature {
             if auth == nil { applyAppLanguage(.english, state: &state) }
             guard auth?.onboardingRequired == true else {
                 userDefaultsClient.delete(for: .pendingOnboardingUserType)
-                return .none
+                return auth == nil ? .none : startPushRegistration()
             }
             state.isAuthenticationFlowPresented = true
             if let pendingOnboardingUserType {
@@ -149,7 +149,12 @@ extension RootFeature {
             userDefaultsClient.delete(for: .requiresAuthCleanup)
             state.authInfo = auth
             state.isAuthenticationFlowPresented = false
-            return fetchCurrentUserIfNeeded(state: &state)
+
+            var loginEffects: [Effect<Action>] = [fetchCurrentUserIfNeeded(state: &state)]
+            if auth.onboardingRequired == false {
+                loginEffects.append(startPushRegistration())
+            }
+            return .merge(loginEffects)
 
         case let .login(.userTypeSelected(userType)):
             guard state.login.isRequiredTermsAgreed, let authInfo = state.login.authInfo else { return .none }
@@ -177,14 +182,17 @@ extension RootFeature {
             let language = defaultLanguage(for: state.onboarding.userType)
             applyAppLanguage(language, state: &state)
             let updateProfileUseCase = updateProfileUseCase
-            return .run { send in
-                do {
-                    let profile = try await updateProfileUseCase.execute(UserProfileUpdate(lang: language.apiCode))
-                    await send(.onboardingLanguageUpdateResponse(language, .success(profile)))
-                } catch {
-                    await send(.onboardingLanguageUpdateResponse(language, .failure(error)))
-                }
-            }
+            return .merge(
+                .run { send in
+                    do {
+                        let profile = try await updateProfileUseCase.execute(UserProfileUpdate(lang: language.apiCode))
+                        await send(.onboardingLanguageUpdateResponse(language, .success(profile)))
+                    } catch {
+                        await send(.onboardingLanguageUpdateResponse(language, .failure(error)))
+                    }
+                },
+                startPushRegistration()
+            )
 
         case let .onboardingLanguageUpdateResponse(language, .success(userProfile)):
             try? userDefaultsClient.save(language.apiCode, for: .appLanguage)

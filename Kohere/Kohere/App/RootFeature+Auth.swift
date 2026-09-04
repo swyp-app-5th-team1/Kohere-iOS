@@ -214,6 +214,7 @@ extension RootFeature {
         return .merge(
             cancelHomeEffects(),
             .cancel(id: "RootFeature.fetchCurrentUser"),
+            .cancel(id: Self.pushTokenObserverID),
             .cancel(id: SearchFeatureCancelID.placeSearch),
             .cancel(id: MapEffectID.exchangeRate),
             .cancel(id: MapEffectID.diagnosisButtonAutoCollapse),
