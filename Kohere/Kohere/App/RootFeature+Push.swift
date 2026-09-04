@@ -53,7 +53,8 @@ extension RootFeature {
             #endif
 
             do {
-                try await pushDeviceClient.registerDevice(installationIdClient.id(), fcmToken)
+                let installationId = try installationIdClient.id()
+                try await pushDeviceClient.registerDevice(installationId, fcmToken)
                 PushRegistrationLogger.value.info("event=push_device_registered")
             } catch {
                 PushRegistrationLogger.value.error(

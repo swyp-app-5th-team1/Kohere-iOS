@@ -274,7 +274,9 @@ struct RootFeature {
                 return .run { send in
                     do {
                         // 인증이 살아있는 동안 푸시 발송 대상에서 제거한다. 실패해도 로그아웃은 진행(멱등 API).
-                        try? await pushDeviceClient.unregisterDevice(installationIdClient.id())
+                        if let installationId = try? installationIdClient.id() {
+                            try? await pushDeviceClient.unregisterDevice(installationId)
+                        }
                         try await logoutUseCase.execute()
                         await send(.logoutResponse(.success(())))
                     } catch {

@@ -15,14 +15,15 @@ extension KeychainKey where Value == String {
 
 /// push-devices API의 경로 파라미터로 쓰는 설치본 UUID.
 /// 최초 접근 시 생성해 Keychain에 보관하므로 앱을 삭제 후 재설치해도 같은 값이 유지된다.
+/// Keychain 읽기·저장에 실패하면 새 값을 만들지 않고 에러를 던진다 — 영속되지 않은 ID는 서버에 등록하지 않는다.
 struct InstallationIdClient: Sendable {
-    var id: @Sendable () -> String
+    var id: @Sendable () throws -> String
 }
 
 extension InstallationIdClient: DependencyKey {
     static let liveValue: InstallationIdClient = {
         let provider = InstallationIdProvider()
-        return InstallationIdClient(id: { provider.id() })
+        return InstallationIdClient(id: { try provider.id() })
     }()
 }
 
@@ -41,27 +42,26 @@ nonisolated private final class InstallationIdProvider: Sendable {
         self.keychainClient = keychainClient
     }
 
-    func id() -> String {
-        cached.withLock { cached in
+    func id() throws -> String {
+        try cached.withLock { cached in
             if let cached { return cached }
 
-            let identifier = loadOrCreate()
-            cached = identifier
+            let identifier = try loadOrCreate()
+            cached = identifier   // 영속에 성공한 값만 캐시한다. 실패한 시도는 흔적을 남기지 않아 다음 호출이 재시도한다.
             return identifier
         }
     }
 
-    private func loadOrCreate() -> String {
-        if let stored = try? keychainClient.load(for: .installationId),
+    /// 항목이 없을 때(errSecItemNotFound)만 새 UUID를 생성한다.
+    /// 읽기 실패·디코딩 실패·저장 실패는 모두 전파해, 기존 ID가 있는데 새 ID를 만들어 서버에 중복 행을 남기는 일을 막는다.
+    private func loadOrCreate() throws -> String {
+        if let stored = try keychainClient.load(for: .installationId),
            stored.isEmpty == false {
             return stored
         }
 
         let identifier = UUID().uuidString.lowercased()
-
-        // 저장에 실패해도 이번 실행 동안은 캐시된 같은 값을 사용한다.
-        // 서버의 PUT/DELETE가 멱등이라 다음 실행에서 새 값이 생겨도 동작은 유지된다.
-        try? keychainClient.save(identifier, for: .installationId)
+        try keychainClient.save(identifier, for: .installationId)
 
         return identifier
     }
