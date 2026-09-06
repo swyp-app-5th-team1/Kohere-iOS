@@ -32,6 +32,7 @@ struct MoreFeature {
         case listingApplication(ListingApplicationFeature)
         case listingApplicationPrivacyWeb(ListingApplicationPrivacyWebFeature)
         case setting(SettingFeature)
+        case notificationSetting(NotificationSettingFeature)
         case settingDocumentWeb(SettingDocumentWebFeature)
     }
 
@@ -73,6 +74,10 @@ struct MoreFeature {
         case chatRoomRequested(listingID: String)
         case logoutConfirmed
         case deleteAccountConfirmed
+        case notificationSettingsRetryRequested
+        case notificationSettingsDismissRequested
+        case notificationSettingsOpenSystemSettingsRequested
+        case notificationSettingsPushRegistrationRequested
     }
 
     var body: some Reducer<State, Action> {
@@ -122,6 +127,24 @@ struct MoreFeature {
             case .navigationSettingTapped:
                 state.path.append(.setting(SettingFeature.State(language: state.selectedLanguage)))
                 return .none
+
+            case .notificationSettingsOpenSystemSettingsRequested:
+                guard let id = state.path.ids.last,
+                      state.path[id: id, case: \.notificationSetting] != nil
+                else { return .none }
+                return .send(.path(.element(id: id, action: .notificationSetting(.openSystemSettingsTapped))))
+
+            case .notificationSettingsRetryRequested:
+                guard let id = state.path.ids.last,
+                      state.path[id: id, case: \.notificationSetting] != nil
+                else { return .none }
+                return .send(.path(.element(id: id, action: .notificationSetting(.retryButtonTapped))))
+
+            case .notificationSettingsDismissRequested:
+                guard let id = state.path.ids.last,
+                      state.path[id: id, case: \.notificationSetting] != nil
+                else { return .none }
+                return .send(.path(.element(id: id, action: .notificationSetting(.backButtonTapped))))
 
             case .announcementsTapped:
                 state.path.append(.announcements(AnnouncementsFeature.State()))
@@ -191,12 +214,14 @@ struct MoreFeature {
                 for id in state.path.ids {
                     state.path[id: id, case: \.account]?.userType = userProfile.userType
                     state.path[id: id, case: \.account]?.userProfile = userProfile
+                    state.path[id: id, case: \.notificationSetting]?.userType = userProfile.userType
                 }
 
                 guard userProfile.userType == .tenant else { return .none }
                 return .send(.onAppear)
 
             case .popupRequested,
+                 .notificationSettingsPushRegistrationRequested,
                  .listingMapPreviewRequested,
                  .chatRoomRequested,
                  .logoutConfirmed,

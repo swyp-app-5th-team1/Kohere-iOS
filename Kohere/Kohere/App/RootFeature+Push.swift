@@ -19,13 +19,20 @@ private enum PushRegistrationLogger {
 extension RootFeature {
     static let pushTokenObserverID = "RootFeature.pushTokenObserver"
 
-    /// 알림 권한을 요청하고, 허용 시 APNs 등록을 시작한 뒤 FCM 토큰 스트림을 구독한다.
+    /// 로그인에서는 권한을 요청하고, 앱 복귀에서는 현재 권한만 확인한다.
+    /// 허용 시 APNs 등록을 시작한 뒤 FCM 토큰 스트림을 구독한다.
     /// 토큰이 발급·갱신될 때마다 `.fcmTokenReceived`로 전달된다.
-    func startPushRegistration() -> Effect<Action> {
+    func startPushRegistration(requestPermission: Bool = true) -> Effect<Action> {
         let pushNotificationClient = pushNotificationClient
 
         return .run { send in
-            let granted = (try? await pushNotificationClient.requestAuthorization()) ?? false
+            let granted: Bool
+            if requestPermission {
+                granted = (try? await pushNotificationClient.requestAuthorization()) ?? false
+            } else {
+                granted = await pushNotificationClient.authorizationStatus().allowsNotifications
+            }
+            guard !Task.isCancelled else { return }
             guard granted else {
                 PushRegistrationLogger.value.info("event=push_authorization_denied")
                 return
@@ -35,6 +42,7 @@ extension RootFeature {
             await pushNotificationClient.registerForRemoteNotifications()
 
             for await token in pushNotificationClient.fcmTokenUpdates() {
+                guard !Task.isCancelled else { return }
                 await send(.fcmTokenReceived(token))
             }
         }

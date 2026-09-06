@@ -13,6 +13,10 @@ import UIKit
 import UserNotifications
 
 struct PushNotificationClient: Sendable {
+    /// 권한 팝업을 띄우지 않고 현재 기기의 알림 권한을 조회한다.
+    var authorizationStatus: @Sendable () async -> NotificationAuthorization
+    /// iOS의 이 앱 알림 설정으로 이동한다.
+    var openNotificationSettings: @Sendable () async -> Bool
     /// 시스템 알림 권한을 요청한다. 시스템 팝업은 앱 수명 동안 최초 1회만 뜬다.
     var requestAuthorization: @Sendable () async throws -> Bool
     /// APNs 원격 알림 등록을 시작한다. 발급된 기기 토큰은 AppDelegate를 거쳐 FCM에 전달된다.
@@ -23,6 +27,21 @@ struct PushNotificationClient: Sendable {
 
 extension PushNotificationClient: DependencyKey {
     static let liveValue = PushNotificationClient(
+        authorizationStatus: {
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            switch settings.authorizationStatus {
+            case .notDetermined: return .notDetermined
+            case .denied: return .denied
+            case .authorized: return .authorized
+            case .provisional: return .provisional
+            case .ephemeral: return .ephemeral
+            @unknown default: return .unknown
+            }
+        },
+        openNotificationSettings: {
+            guard let url = URL(string: UIApplication.openNotificationSettingsURLString) else { return false }
+            return await UIApplication.shared.open(url)
+        },
         requestAuthorization: {
             try await UNUserNotificationCenter.current()
                 .requestAuthorization(options: [.alert, .sound, .badge])

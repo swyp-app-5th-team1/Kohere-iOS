@@ -7,6 +7,12 @@
 
 import Foundation
 
+struct UserNotificationPreferencesResponseDTO: Decodable {
+    /// 같은 계정의 모든 기기에 적용되는 서버 채팅 푸시 설정이며, iOS 알림 권한과는 별개다.
+    /// 설정 이력이 없으면 서버가 true를 반환한다.
+    let chatPushEnabled: Bool
+}
+
 struct UserProfileResponseDTO: Decodable {
     let id: Int
     let userType: String

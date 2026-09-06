@@ -29,6 +29,23 @@ final class UserRepository: UserInterface {
         return responseDTO.toEntity()
     }
 
+    func fetchChatPushEnabled() async throws -> Bool {
+        let environment = try environmentProvider()
+        let response: UserNotificationPreferencesResponseDTO = try await authenticatedNetworkService.request(
+            UserRouter.notificationPreferences(environment)
+        )
+        return response.chatPushEnabled
+    }
+
+    func updateChatPushEnabled(_ isEnabled: Bool) async throws -> Bool {
+        let environment = try environmentProvider()
+        let request = UpdateNotificationPreferencesRequestDTO(chatPushEnabled: isEnabled)
+        let response: UserNotificationPreferencesResponseDTO = try await authenticatedNetworkService.request(
+            UserRouter.updateNotificationPreferences(request, environment)
+        )
+        return response.chatPushEnabled
+    }
+
     func updateProfile(_ update: UserProfileUpdate) async throws -> UserProfile {
         let environment = try environmentProvider()
         let requestDTO = UpdateProfileRequestDTO(update)

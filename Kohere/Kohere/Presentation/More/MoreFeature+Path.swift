@@ -19,13 +19,18 @@ extension MoreFeature {
              .element(id: _, action: .listingApplication(.backButtonTapped)),
              .element(id: _, action: .listingApplicationPrivacyWeb(.backButtonTapped)),
              .element(id: _, action: .setting(.backButtonTapped)),
+             .element(id: _, action: .notificationSetting(.backButtonTapped)),
              .element(id: _, action: .settingDocumentWeb(.backButtonTapped)):
             _ = state.path.popLast()
             return .none
 
         case let .element(id: _, action: .account(.popupRequested(popup))),
-             let .element(id: _, action: .setting(.popupRequested(popup))):
+             let .element(id: _, action: .setting(.popupRequested(popup))),
+             let .element(id: _, action: .notificationSetting(.popupRequested(popup))):
             return .send(.popupRequested(popup))
+
+        case .element(id: _, action: .notificationSetting(.pushRegistrationRequested)):
+            return .send(.notificationSettingsPushRegistrationRequested)
 
         case let .element(id: _, action: .profileEdit(.delegate(.profileUpdated(userProfile)))):
             _ = state.path.popLast()
@@ -71,6 +76,13 @@ extension MoreFeature {
         case .element(id: _, action: .setting(.settingItemTapped(.account))):
             state.path.append(.account(AccountFeature.State(
                 userType: state.userType ?? .unknown, userProfile: state.userProfile,
+                language: state.selectedLanguage
+            )))
+            return .none
+
+        case .element(id: _, action: .setting(.settingItemTapped(.notification))):
+            state.path.append(.notificationSetting(NotificationSettingFeature.State(
+                userType: state.userProfile?.userType ?? state.userType ?? .unknown,
                 language: state.selectedLanguage
             )))
             return .none

@@ -45,7 +45,8 @@ private extension SettingView {
             VStack(spacing: 12) {
                 SettingMenuSection(
                     items: [
-                        .init(title: .settingsAccountTitle, action: .account)
+                        .init(title: .settingsAccountTitle, action: .account),
+                        .init(title: .settingsNotificationsTitle, action: .notification)
                     ],
                     onItemTapped: { store.send(.settingItemTapped($0)) }
                 )

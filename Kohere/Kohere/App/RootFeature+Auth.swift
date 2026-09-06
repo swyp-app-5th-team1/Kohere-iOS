@@ -215,6 +215,7 @@ extension RootFeature {
             cancelHomeEffects(),
             .cancel(id: "RootFeature.fetchCurrentUser"),
             .cancel(id: Self.pushTokenObserverID),
+            .cancel(id: "RootFeature.pushDeviceRegister"),
             .cancel(id: SearchFeatureCancelID.placeSearch),
             .cancel(id: MapEffectID.exchangeRate),
             .cancel(id: MapEffectID.diagnosisButtonAutoCollapse),

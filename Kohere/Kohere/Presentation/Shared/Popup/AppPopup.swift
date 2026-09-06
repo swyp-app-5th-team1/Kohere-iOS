@@ -61,5 +61,8 @@ enum AppPopup: Equatable {
         case deleteBooking(Int)
         case dismissListingDetail
         case confirmLanguageChange(AppLanguage)
+        case retryNotificationSettings
+        case dismissNotificationSettings
+        case openNotificationSettings
     }
 }

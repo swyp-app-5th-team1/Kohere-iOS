@@ -70,7 +70,7 @@ struct SettingDocumentWebFeature {
 extension SettingFeature.SettingItem {
     var document: SettingDocument? {
         switch self {
-        case .account:
+        case .account, .notification:
             nil
         case .termsOfService:
             .termsOfService

@@ -12,6 +12,7 @@ import Foundation
 struct SettingFeature {
     enum SettingItem: Equatable {
         case account
+        case notification
         case termsOfService
         case privacyPolicy
         case marketingAgreement
