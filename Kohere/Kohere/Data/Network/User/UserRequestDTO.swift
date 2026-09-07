@@ -7,6 +7,10 @@
 
 import Foundation
 
+nonisolated struct UpdateNotificationPreferencesRequestDTO: Encodable, Sendable {
+    let chatPushEnabled: Bool
+}
+
 nonisolated struct UpdateProfileRequestDTO: Encodable, Sendable {
     let gender: String?
     let birthDate: String?

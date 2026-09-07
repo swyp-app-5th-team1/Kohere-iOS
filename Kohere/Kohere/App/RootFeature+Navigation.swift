@@ -80,6 +80,12 @@ extension RootFeature {
 
         case let .confirmLanguageChange(language):
             return .send(.more(.languageChangeConfirmed(language)))
+
+        case .dismissNotificationSettings:
+            return .send(.more(.notificationSettingsDismissRequested))
+
+        case .openNotificationSettings:
+            return .send(.more(.notificationSettingsOpenSystemSettingsRequested))
         }
     }
 }

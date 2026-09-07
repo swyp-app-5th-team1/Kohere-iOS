@@ -35,6 +35,7 @@ struct RootFeature {
 
     enum Action {
         case onAppear, splashMinimumDurationElapsed, mainTabAppeared
+        case willEnterForeground
         case storedAuthLoaded(Auth?, OnboardingUserType?)
         case authSessionExpired(AuthSessionExpirationContext?)
         case currentUserResponse(Result<UserProfile, Error>)
@@ -341,7 +342,12 @@ struct RootFeature {
             case .deleteAccountLocalCleanupResponse(.failure):
                 return completeLogout(state: &state)
                 
+            case .willEnterForeground, .more(.notificationSettingsPushRegistrationRequested):
+                guard state.authInfo?.onboardingRequired == false else { return .none }
+                return startPushRegistration(requestPermission: false)
+
             case let .fcmTokenReceived(token):
+                guard state.authInfo?.onboardingRequired == false else { return .none }
                 return registerPushDevice(fcmToken: token)
 
             case .login, .onboarding, .home, .community, .map, .chat, .more:

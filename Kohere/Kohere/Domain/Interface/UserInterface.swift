@@ -9,12 +9,16 @@ import ComposableArchitecture
 
 protocol UserInterface {
     func fetchCurrentUser() async throws -> UserProfile
+    func fetchNotificationPreferences() async throws -> UserNotificationPreferences
+    func updateNotificationPreferences(chatPushEnabled: Bool) async throws -> UserNotificationPreferences
     func updateProfile(_ update: UserProfileUpdate) async throws -> UserProfile
     func deleteCurrentUser() async throws
 }
 
 struct UserClient: Sendable {
     var fetchCurrentUser: @Sendable () async throws -> UserProfile
+    var fetchNotificationPreferences: @Sendable () async throws -> UserNotificationPreferences
+    var updateNotificationPreferences: @Sendable (_ chatPushEnabled: Bool) async throws -> UserNotificationPreferences
     var updateProfile: @Sendable (_ update: UserProfileUpdate) async throws -> UserProfile
     var deleteCurrentUser: @Sendable () async throws -> Void
 }
@@ -24,6 +28,12 @@ extension UserClient {
         self.init(
             fetchCurrentUser: {
                 try await repository.fetchCurrentUser()
+            },
+            fetchNotificationPreferences: {
+                try await repository.fetchNotificationPreferences()
+            },
+            updateNotificationPreferences: { isEnabled in
+                try await repository.updateNotificationPreferences(chatPushEnabled: isEnabled)
             },
             updateProfile: { update in
                 try await repository.updateProfile(update)

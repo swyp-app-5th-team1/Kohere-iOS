@@ -29,6 +29,35 @@ final class UserRepository: UserInterface {
         return responseDTO.toEntity()
     }
 
+    func fetchNotificationPreferences() async throws -> UserNotificationPreferences {
+        do {
+            let environment = try environmentProvider()
+            let response: UserNotificationPreferencesResponseDTO = try await authenticatedNetworkService.request(
+                UserRouter.notificationPreferences(environment)
+            )
+            return response.toEntity()
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            throw NotificationSettingError.from(error)
+        }
+    }
+
+    func updateNotificationPreferences(chatPushEnabled: Bool) async throws -> UserNotificationPreferences {
+        do {
+            let environment = try environmentProvider()
+            let request = UpdateNotificationPreferencesRequestDTO(chatPushEnabled: chatPushEnabled)
+            let response: UserNotificationPreferencesResponseDTO = try await authenticatedNetworkService.request(
+                UserRouter.updateNotificationPreferences(request, environment)
+            )
+            return response.toEntity()
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            throw NotificationSettingError.from(error)
+        }
+    }
+
     func updateProfile(_ update: UserProfileUpdate) async throws -> UserProfile {
         let environment = try environmentProvider()
         let requestDTO = UpdateProfileRequestDTO(update)
@@ -53,6 +82,12 @@ extension UserClient: DependencyKey {
         let repository: any UserInterface = UserRepository()
         return UserClient(repository: repository)
     }()
+}
+
+private extension UserNotificationPreferencesResponseDTO {
+    func toEntity() -> UserNotificationPreferences {
+        UserNotificationPreferences(chatPushEnabled: chatPushEnabled)
+    }
 }
 
 private extension UserProfileResponseDTO {

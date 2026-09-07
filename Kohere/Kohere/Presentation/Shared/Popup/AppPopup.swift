@@ -13,6 +13,11 @@ enum AppPopup: Equatable {
         let message: String
         let confirmTitle: String
         var confirmRoute: Route?
+        var confirmStyle: ConfirmStyle = .neutral
+    }
+
+    enum ConfirmStyle: Equatable {
+        case neutral, primary
     }
 
     struct Action: Equatable {
@@ -61,5 +66,7 @@ enum AppPopup: Equatable {
         case deleteBooking(Int)
         case dismissListingDetail
         case confirmLanguageChange(AppLanguage)
+        case dismissNotificationSettings
+        case openNotificationSettings
     }
 }

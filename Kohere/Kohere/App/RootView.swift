@@ -7,6 +7,7 @@
 
 import ComposableArchitecture
 import SwiftUI
+import UIKit
 
 struct RootView: View {
     @Bindable var store: StoreOf<RootFeature>
@@ -40,6 +41,9 @@ struct RootView: View {
         .animation(.easeInOut(duration: 0.25), value: store.isAuthenticationFlowPresented)
         .onAppear {
             store.send(.onAppear)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            store.send(.willEnterForeground)
         }
     }
 
@@ -148,7 +152,8 @@ struct RootView: View {
         case let .notice(notice):
             KohereNoticePopup(
                 message: notice.message,
-                confirmTitle: notice.confirmTitle
+                confirmTitle: notice.confirmTitle,
+                confirmStyle: notice.confirmStyle
             ) {
                 store.send(.popupNoticeConfirmButtonTapped)
             }
