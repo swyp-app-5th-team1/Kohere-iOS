@@ -9,16 +9,16 @@ import ComposableArchitecture
 
 protocol UserInterface {
     func fetchCurrentUser() async throws -> UserProfile
-    func fetchChatPushEnabled() async throws -> Bool
-    func updateChatPushEnabled(_ isEnabled: Bool) async throws -> Bool
+    func fetchNotificationPreferences() async throws -> UserNotificationPreferences
+    func updateNotificationPreferences(chatPushEnabled: Bool) async throws -> UserNotificationPreferences
     func updateProfile(_ update: UserProfileUpdate) async throws -> UserProfile
     func deleteCurrentUser() async throws
 }
 
 struct UserClient: Sendable {
     var fetchCurrentUser: @Sendable () async throws -> UserProfile
-    var fetchChatPushEnabled: @Sendable () async throws -> Bool
-    var updateChatPushEnabled: @Sendable (_ isEnabled: Bool) async throws -> Bool
+    var fetchNotificationPreferences: @Sendable () async throws -> UserNotificationPreferences
+    var updateNotificationPreferences: @Sendable (_ chatPushEnabled: Bool) async throws -> UserNotificationPreferences
     var updateProfile: @Sendable (_ update: UserProfileUpdate) async throws -> UserProfile
     var deleteCurrentUser: @Sendable () async throws -> Void
 }
@@ -29,11 +29,11 @@ extension UserClient {
             fetchCurrentUser: {
                 try await repository.fetchCurrentUser()
             },
-            fetchChatPushEnabled: {
-                try await repository.fetchChatPushEnabled()
+            fetchNotificationPreferences: {
+                try await repository.fetchNotificationPreferences()
             },
-            updateChatPushEnabled: { isEnabled in
-                try await repository.updateChatPushEnabled(isEnabled)
+            updateNotificationPreferences: { isEnabled in
+                try await repository.updateNotificationPreferences(chatPushEnabled: isEnabled)
             },
             updateProfile: { update in
                 try await repository.updateProfile(update)

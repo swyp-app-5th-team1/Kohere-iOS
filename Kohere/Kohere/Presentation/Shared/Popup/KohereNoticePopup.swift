@@ -10,6 +10,7 @@ import SwiftUI
 struct KohereNoticePopup: View {
     let message: String
     let confirmTitle: String
+    var confirmStyle: AppPopup.ConfirmStyle = .neutral
     let onConfirmTapped: () -> Void
 
     var body: some View {
@@ -25,10 +26,10 @@ struct KohereNoticePopup: View {
             } label: {
                 Text(confirmTitle)
                     .kohereTextStyle(.label1Semibold)
-                    .foregroundStyle(.labelNormal)
+                    .foregroundStyle(confirmStyle == .primary ? Color.staticWhite : Color.labelNormal)
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
-                    .background(.fillStrong)
+                    .background(confirmStyle == .primary ? Color.primary50 : Color.fillStrong)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(.plain)

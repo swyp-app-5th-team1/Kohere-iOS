@@ -152,7 +152,8 @@ struct RootView: View {
         case let .notice(notice):
             KohereNoticePopup(
                 message: notice.message,
-                confirmTitle: notice.confirmTitle
+                confirmTitle: notice.confirmTitle,
+                confirmStyle: notice.confirmStyle
             ) {
                 store.send(.popupNoticeConfirmButtonTapped)
             }

@@ -74,7 +74,6 @@ struct MoreFeature {
         case chatRoomRequested(listingID: String)
         case logoutConfirmed
         case deleteAccountConfirmed
-        case notificationSettingsRetryRequested
         case notificationSettingsDismissRequested
         case notificationSettingsOpenSystemSettingsRequested
         case notificationSettingsPushRegistrationRequested
@@ -133,12 +132,6 @@ struct MoreFeature {
                       state.path[id: id, case: \.notificationSetting] != nil
                 else { return .none }
                 return .send(.path(.element(id: id, action: .notificationSetting(.openSystemSettingsTapped))))
-
-            case .notificationSettingsRetryRequested:
-                guard let id = state.path.ids.last,
-                      state.path[id: id, case: \.notificationSetting] != nil
-                else { return .none }
-                return .send(.path(.element(id: id, action: .notificationSetting(.retryButtonTapped))))
 
             case .notificationSettingsDismissRequested:
                 guard let id = state.path.ids.last,

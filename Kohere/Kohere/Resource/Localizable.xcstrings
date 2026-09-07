@@ -6056,53 +6056,19 @@
         }
       }
     },
-    "settings.notification.loadFailure.back" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Go Back"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "돌아가기"
-          }
-        }
-      }
-    },
     "settings.notification.loadFailure.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unable to load notification settings.\nWould you like to try again?"
+            "value" : "Unable to load notification settings.\nPlease try again."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "알림 설정을 불러오지 못했어요.\n다시 시도하시겠어요?"
-          }
-        }
-      }
-    },
-    "settings.notification.loadFailure.retry" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try Again"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다시 시도"
+            "value" : "알림 설정 불러오기를 실패했습니다.\n다시 시도해주세요."
           }
         }
       }

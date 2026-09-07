@@ -24,7 +24,7 @@ final class NotificationSettingFeatureTests: XCTestCase {
         }
         XCTAssertTrue(store.state.showsSkeleton)
         await clock.advance(by: .seconds(1))
-        await store.receive(.preferencesResponse(1, .success(false))) {
+        await store.receive(.preferencesResponse(1, .success(.init(chatPushEnabled: false)))) {
             $0.serverChatPushEnabled = false
             $0.loadState = .loaded
         }
@@ -59,7 +59,7 @@ final class NotificationSettingFeatureTests: XCTestCase {
             primaryRoute: .openNotificationSettings
         ))))
         await clock.advance(by: .seconds(1))
-        await store.receive(.preferencesResponse(1, .success(true))) {
+        await store.receive(.preferencesResponse(1, .success(.init(chatPushEnabled: true)))) {
             $0.serverChatPushEnabled = true
             $0.loadState = .loaded
         }
@@ -82,7 +82,7 @@ final class NotificationSettingFeatureTests: XCTestCase {
         XCTAssertFalse(store.state.canInteractWithToggle)
         await store.send(.chatPushEnabledChanged(true))
         await clock.advance(by: .seconds(1))
-        await store.receive(.updateResponse(.success(true))) { $0.optimisticChatPushEnabled = nil }
+        await store.receive(.updateResponse(.success(.init(chatPushEnabled: true)))) { $0.optimisticChatPushEnabled = nil }
         XCTAssertEqual(sentValues.value, [false])
         XCTAssertTrue(store.state.isChatPushEnabled)
         XCTAssertTrue(store.state.canInteractWithToggle)
@@ -97,7 +97,7 @@ final class NotificationSettingFeatureTests: XCTestCase {
         }, update: { _ in throw failure })
 
         await store.send(.chatPushEnabledChanged(false)) { $0.optimisticChatPushEnabled = false }
-        await store.receive(.updateResponse(.failure(failure))) {
+        await store.receive(.updateResponse(.failure(.requestFailed(failure)))) {
             $0.optimisticChatPushEnabled = nil
             $0.loadState = .loading
             $0.loadGeneration = 1
@@ -107,11 +107,49 @@ final class NotificationSettingFeatureTests: XCTestCase {
         XCTAssertFalse(store.state.canInteractWithToggle)
         await store.receive(\.popupRequested)
         await clock.advance(by: .seconds(1))
-        await store.receive(.preferencesResponse(1, .success(false))) {
+        await store.receive(.preferencesResponse(1, .success(.init(chatPushEnabled: false)))) {
             $0.serverChatPushEnabled = false
             $0.loadState = .loaded
         }
         XCTAssertFalse(store.state.isChatPushEnabled)
+    }
+
+    func testFailedSaveAndReconciliationKeepRollbackAndOfferExit() async {
+        let clock = TestClock()
+        let failure = DataError.transport(message: "Offline")
+        let store = makeStore(fetch: {
+            try await clock.sleep(for: .seconds(1))
+            throw failure
+        }, update: { _ in throw failure })
+
+        await store.send(.chatPushEnabledChanged(false)) { $0.optimisticChatPushEnabled = false }
+        await store.receive(.updateResponse(.failure(.requestFailed(failure)))) {
+            $0.optimisticChatPushEnabled = nil
+            $0.loadState = .loading
+            $0.loadGeneration = 1
+        }
+        await store.receive(.popupRequested(.notice(AppPopup.Notice(
+            message: AppLanguage.english.localized(.settingsNotificationSaveFailure),
+            confirmTitle: AppLanguage.english.localized(.commonConfirm)
+        ))))
+        XCTAssertTrue(store.state.isChatPushEnabled)
+        XCTAssertFalse(store.state.showsSkeleton)
+        XCTAssertFalse(store.state.canInteractWithToggle)
+
+        await clock.advance(by: .seconds(1))
+        await store.receive(.preferencesResponse(1, .failure(.requestFailed(failure)))) {
+            $0.loadState = .failed
+        }
+        await store.receive(.popupRequested(.notice(AppPopup.Notice(
+            message: AppLanguage.english.localized(.settingsNotificationLoadFailureMessage),
+            confirmTitle: AppLanguage.english.localized(.commonConfirm),
+            confirmRoute: .dismissNotificationSettings,
+            confirmStyle: .primary
+        ))))
+        XCTAssertEqual(store.state.serverChatPushEnabled, true)
+        XCTAssertNil(store.state.optimisticChatPushEnabled)
+        XCTAssertFalse(store.state.canInteractWithToggle)
+        await store.finish()
     }
 
     func testForegroundDefersGetUntilPendingPatchCompletes() async {
@@ -135,14 +173,14 @@ final class NotificationSettingFeatureTests: XCTestCase {
         }
         XCTAssertEqual(fetchCount.value, 0)
         await clock.advance(by: .seconds(1))
-        await store.receive(.updateResponse(.success(false))) {
+        await store.receive(.updateResponse(.success(.init(chatPushEnabled: false)))) {
             $0.optimisticChatPushEnabled = nil
             $0.serverChatPushEnabled = false
             $0.needsReloadAfterSave = false
             $0.loadState = .loading
             $0.loadGeneration = 1
         }
-        await store.receive(.preferencesResponse(1, .success(false))) { $0.loadState = .loaded }
+        await store.receive(.preferencesResponse(1, .success(.init(chatPushEnabled: false)))) { $0.loadState = .loaded }
         XCTAssertEqual(fetchCount.value, 1)
     }
 
@@ -163,7 +201,7 @@ final class NotificationSettingFeatureTests: XCTestCase {
             $0.isCheckingAuthorization = false
         }
         await clock.advance(by: .seconds(1))
-        await store.receive(.preferencesResponse(1, .success(false))) { $0.loadState = .loaded }
+        await store.receive(.preferencesResponse(1, .success(.init(chatPushEnabled: false)))) { $0.loadState = .loaded }
         XCTAssertFalse(store.state.isChatPushEnabled)
     }
 
@@ -197,12 +235,12 @@ final class NotificationSettingFeatureTests: XCTestCase {
         }
         XCTAssertEqual(sentValues.value, [])
         await clock.advance(by: .seconds(1))
-        await store.receive(.preferencesResponse(1, .success(false))) {
+        await store.receive(.preferencesResponse(1, .success(.init(chatPushEnabled: false)))) {
             $0.loadState = .loaded
             $0.shouldEnableAfterPermission = false
             $0.optimisticChatPushEnabled = true
         }
-        await store.receive(.updateResponse(.success(true))) {
+        await store.receive(.updateResponse(.success(.init(chatPushEnabled: true)))) {
             $0.optimisticChatPushEnabled = nil
             $0.serverChatPushEnabled = true
         }
@@ -230,7 +268,7 @@ final class NotificationSettingFeatureTests: XCTestCase {
             $0.shouldEnableAfterPermission = false
         }
         await clock.advance(by: .seconds(1))
-        await store.receive(.preferencesResponse(1, .success(false))) { $0.loadState = .loaded }
+        await store.receive(.preferencesResponse(1, .success(.init(chatPushEnabled: false)))) { $0.loadState = .loaded }
         XCTAssertFalse(store.state.isChatPushEnabled)
     }
 
@@ -258,14 +296,14 @@ final class NotificationSettingFeatureTests: XCTestCase {
         }
         await store.receive(.pushRegistrationRequested)
         await clock.advance(by: .seconds(1))
-        await store.receive(.updateResponse(.success(true))) {
+        await store.receive(.updateResponse(.success(.init(chatPushEnabled: true)))) {
             $0.optimisticChatPushEnabled = nil
             $0.serverChatPushEnabled = true
         }
         XCTAssertEqual(requestCount.value, 1)
     }
 
-    func testLoadFailureOffersRetryAndBackAndRetryMakesFreshRequest() async {
+    func testLoadFailureUsesNoticeAndForegroundReloadIgnoresStaleResponse() async {
         let clock = TestClock()
         let fetchCount = LockIsolated(0)
         let failure = DataError.transport(message: "Offline")
@@ -285,18 +323,17 @@ final class NotificationSettingFeatureTests: XCTestCase {
             $0.isCheckingAuthorization = false
         }
         await clock.advance(by: .seconds(1))
-        await store.receive(.preferencesResponse(1, .failure(failure))) { $0.loadState = .failed }
-        await store.receive(.popupRequested(.action(AppPopup.Action(
+        await store.receive(.preferencesResponse(1, .failure(.requestFailed(failure)))) { $0.loadState = .failed }
+        await store.receive(.popupRequested(.notice(AppPopup.Notice(
             message: AppLanguage.english.localized(.settingsNotificationLoadFailureMessage),
-            primaryTitle: AppLanguage.english.localized(.settingsNotificationLoadFailureRetry),
-            secondaryTitle: AppLanguage.english.localized(.settingsNotificationLoadFailureBack),
-            primaryRoute: .retryNotificationSettings,
-            secondaryRoute: .dismissNotificationSettings
+            confirmTitle: AppLanguage.english.localized(.commonConfirm),
+            confirmRoute: .dismissNotificationSettings,
+            confirmStyle: .primary
         ))))
         XCTAssertTrue(store.state.showsSkeleton)
         XCTAssertFalse(store.state.isLoading)
 
-        await store.send(.retryButtonTapped) {
+        await store.send(.willEnterForeground) {
             $0.loadState = .loading
             $0.loadGeneration = 2
             $0.isCheckingAuthorization = true
@@ -304,13 +341,34 @@ final class NotificationSettingFeatureTests: XCTestCase {
         await store.receive(.authorizationResponse(.authorized, requestedByUser: false)) {
             $0.isCheckingAuthorization = false
         }
-        await store.send(.preferencesResponse(1, .success(false))) // Stale result cannot replace this retry.
+        await store.send(.preferencesResponse(1, .success(.init(chatPushEnabled: false)))) // Stale result cannot replace this retry.
         await clock.advance(by: .seconds(1))
-        await store.receive(.preferencesResponse(2, .success(true))) {
+        await store.receive(.preferencesResponse(2, .success(.init(chatPushEnabled: true)))) {
             $0.serverChatPushEnabled = true
             $0.loadState = .loaded
         }
         XCTAssertEqual(fetchCount.value, 2)
+    }
+
+    func testLoadFailureConfirmationDismissesPopupAndReturnsToSettings() async {
+        var state = RootFeature.State()
+        state.selectedTab = .more
+        state.more.path.append(.setting(SettingFeature.State()))
+        state.more.path.append(.notificationSetting(.init(userType: .tenant, loadState: .failed)))
+        state.popup = .notice(AppPopup.Notice(
+            message: AppLanguage.english.localized(.settingsNotificationLoadFailureMessage),
+            confirmTitle: AppLanguage.english.localized(.commonConfirm),
+            confirmRoute: .dismissNotificationSettings,
+            confirmStyle: .primary
+        ))
+        let store = TestStore(initialState: state) { RootFeature() }
+
+        await store.send(.popupNoticeConfirmButtonTapped) { $0.popup = nil }
+        await store.receive(\.more.notificationSettingsDismissRequested)
+        await store.receive(\.more.path) { _ = $0.more.path.popLast() }
+        XCTAssertEqual(store.state.more.path.count, 1)
+        XCTAssertNotNil(store.state.more.path.last?.setting)
+        await store.finish()
     }
 
     private func loadedState(enabled: Bool = true,
@@ -340,8 +398,8 @@ final class NotificationSettingFeatureTests: XCTestCase {
         } withDependencies: {
             $0.userClient = UserClient(
                 fetchCurrentUser: { XCTFail("Unexpected users/me"); throw DataError.emptyResponse },
-                fetchChatPushEnabled: fetch,
-                updateChatPushEnabled: update,
+                fetchNotificationPreferences: { .init(chatPushEnabled: try await fetch()) },
+                updateNotificationPreferences: { .init(chatPushEnabled: try await update($0)) },
                 updateProfile: { _ in XCTFail("Unexpected profile PATCH"); throw DataError.emptyResponse },
                 deleteCurrentUser: { XCTFail("Unexpected account deletion") }
             )

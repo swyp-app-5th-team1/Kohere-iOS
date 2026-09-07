@@ -60,10 +60,9 @@ struct NotificationSettingFeature {
         case task
         case willEnterForeground
         case backButtonTapped
-        case retryButtonTapped
         case chatPushEnabledChanged(Bool)
-        case preferencesResponse(Int, Result<Bool, DataError>)
-        case updateResponse(Result<Bool, DataError>)
+        case preferencesResponse(Int, Result<UserNotificationPreferences, NotificationSettingError>)
+        case updateResponse(Result<UserNotificationPreferences, NotificationSettingError>)
         case authorizationResponse(NotificationAuthorization, requestedByUser: Bool)
         case authorizationRequestFailed
         case openSystemSettingsTapped
@@ -91,15 +90,12 @@ struct NotificationSettingFeature {
                 }
                 return .merge(permissionEffect, loadPreferences(state: &state))
 
-            case .retryButtonTapped:
-                return .merge(loadPreferences(state: &state), checkAuthorization(state: &state))
-
             case let .preferencesResponse(generation, result):
                 guard generation == state.loadGeneration, state.loadState == .loading,
                       !state.isSaving else { return .none }
                 switch result {
-                case let .success(isEnabled):
-                    state.serverChatPushEnabled = isEnabled
+                case let .success(preferences):
+                    state.serverChatPushEnabled = preferences.chatPushEnabled
                     state.loadState = .loaded
                     return finishPendingEnable(state: &state)
                 case .failure:
@@ -170,8 +166,8 @@ struct NotificationSettingFeature {
                 let needsReload = state.needsReloadAfterSave
                 state.needsReloadAfterSave = false
                 switch result {
-                case let .success(isEnabled):
-                    state.serverChatPushEnabled = isEnabled
+                case let .success(preferences):
+                    state.serverChatPushEnabled = preferences.chatPushEnabled
                     return needsReload ? loadPreferences(state: &state) : .none
                 case .failure:
                     // 응답 유실로 서버에는 반영됐을 수 있으므로 복구 후 GET도 재실행한다.
@@ -196,9 +192,9 @@ private extension NotificationSettingFeature {
         let generation = state.loadGeneration
         return .run { [userClient] send in
             do {
-                let isEnabled = try await userClient.fetchChatPushEnabled()
+                let preferences = try await userClient.fetchNotificationPreferences()
                 try Task.checkCancellation()
-                await send(.preferencesResponse(generation, .success(isEnabled)))
+                await send(.preferencesResponse(generation, .success(preferences)))
             } catch {
                 guard !Task.isCancelled else { return }
                 await send(.preferencesResponse(generation, .failure(.from(error))))
@@ -247,9 +243,9 @@ private extension NotificationSettingFeature {
         state.optimisticChatPushEnabled = isEnabled
         return .run { [userClient] send in
             do {
-                let savedValue = try await userClient.updateChatPushEnabled(isEnabled)
+                let preferences = try await userClient.updateNotificationPreferences(isEnabled)
                 try Task.checkCancellation()
-                await send(.updateResponse(.success(savedValue)))
+                await send(.updateResponse(.success(preferences)))
             } catch {
                 guard !Task.isCancelled else { return }
                 await send(.updateResponse(.failure(.from(error))))
@@ -259,12 +255,11 @@ private extension NotificationSettingFeature {
     }
 
     static func loadFailurePopup(language: AppLanguage) -> AppPopup {
-        .action(AppPopup.Action(
+        .notice(AppPopup.Notice(
             message: language.localized(.settingsNotificationLoadFailureMessage),
-            primaryTitle: language.localized(.settingsNotificationLoadFailureRetry),
-            secondaryTitle: language.localized(.settingsNotificationLoadFailureBack),
-            primaryRoute: .retryNotificationSettings,
-            secondaryRoute: .dismissNotificationSettings
+            confirmTitle: language.localized(.commonConfirm),
+            confirmRoute: .dismissNotificationSettings,
+            confirmStyle: .primary
         ))
     }
 
