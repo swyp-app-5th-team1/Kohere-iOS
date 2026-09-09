@@ -156,8 +156,6 @@ final class MapLocationSearchFlowTests: XCTestCase {
         await store.receive {
             guard case .listingMapMarkersResponse(.success) = $0 else { return false }
             return true
-        } assert: {
-            $0.markers = []
         }
     }
 

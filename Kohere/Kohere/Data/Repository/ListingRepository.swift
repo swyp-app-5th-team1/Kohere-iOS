@@ -259,7 +259,7 @@ private func firstImageURL(_ imageURLs: [String]?) -> String? {
         .first { !$0.isEmpty }
 }
 
-private extension ListingNearestTransitResponseDTO {
+extension ListingNearestTransitResponseDTO {
     func toEntity() -> ListingNearestTransit? {
         guard let type = type?.code, let name else { return nil }
 

@@ -8,10 +8,11 @@
 import Foundation
 
 nonisolated struct ListingListQueryDTO {
-    let swLat: Double
-    let swLng: Double
-    let neLat: Double
-    let neLng: Double
+    let swLat: Double?
+    let swLng: Double?
+    let neLat: Double?
+    let neLng: Double?
+    let listingIDs: [String]
     let minBudget: Int?
     let maxBudget: Int?
     let minDeposit: Int?
@@ -52,10 +53,11 @@ nonisolated struct ListingBookingCreateRequestDTO: Encodable, Sendable {
 extension ListingListQueryDTO {
     nonisolated init(_ input: ListingSearchInput) {
         self.init(
-            swLat: input.bounds.southWest.latitude,
-            swLng: input.bounds.southWest.longitude,
-            neLat: input.bounds.northEast.latitude,
-            neLng: input.bounds.northEast.longitude,
+            swLat: input.bounds?.southWest.latitude,
+            swLng: input.bounds?.southWest.longitude,
+            neLat: input.bounds?.northEast.latitude,
+            neLng: input.bounds?.northEast.longitude,
+            listingIDs: input.listingIDs,
             minBudget: input.minBudget,
             maxBudget: input.maxBudget,
             minDeposit: input.minDeposit,
@@ -70,14 +72,23 @@ extension ListingListQueryDTO {
 
     nonisolated var queryItems: [URLQueryItem] {
         var items: [URLQueryItem] = [
-            URLQueryItem(name: "swLat", value: String(swLat)),
-            URLQueryItem(name: "swLng", value: String(swLng)),
-            URLQueryItem(name: "neLat", value: String(neLat)),
-            URLQueryItem(name: "neLng", value: String(neLng)),
             URLQueryItem(name: "sort", value: sort),
             URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "size", value: String(size))
         ]
+
+        if let swLat, let swLng, let neLat, let neLng {
+            items.append(contentsOf: [
+                URLQueryItem(name: "swLat", value: String(swLat)),
+                URLQueryItem(name: "swLng", value: String(swLng)),
+                URLQueryItem(name: "neLat", value: String(neLat)),
+                URLQueryItem(name: "neLng", value: String(neLng))
+            ])
+        }
+
+        listingIDs.forEach {
+            items.append(URLQueryItem(name: "listingIds", value: $0))
+        }
 
         append(&items, name: "minBudget", value: minBudget)
         append(&items, name: "maxBudget", value: maxBudget)
@@ -114,7 +125,7 @@ nonisolated struct ListingMapQueryDTO {
     }
 
     var queryItems: [URLQueryItem] {
-        search.queryItems.filter { !["sort", "page", "size"].contains($0.name) }
+        search.queryItems.filter { !["sort", "page", "size", "listingIds"].contains($0.name) }
     }
 }
 

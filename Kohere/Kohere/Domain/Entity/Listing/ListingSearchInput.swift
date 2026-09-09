@@ -8,7 +8,8 @@
 struct ListingSearchInput: Equatable {
     static let defaultPageSize = 10
 
-    let bounds: MapBounds
+    let bounds: MapBounds?
+    let listingIDs: [String]
     let page: Int
     let size: Int
     let sort: ListingSearchSort
@@ -21,7 +22,8 @@ struct ListingSearchInput: Equatable {
     let arcRequired: Bool?
 
     init(
-        bounds: MapBounds,
+        bounds: MapBounds? = nil,
+        listingIDs: [String] = [],
         page: Int = 0,
         size: Int = Self.defaultPageSize,
         sort: ListingSearchSort = .recommended,
@@ -34,6 +36,7 @@ struct ListingSearchInput: Equatable {
         arcRequired: Bool? = nil
     ) {
         self.bounds = bounds
+        self.listingIDs = listingIDs
         self.page = page
         self.size = size
         self.sort = sort

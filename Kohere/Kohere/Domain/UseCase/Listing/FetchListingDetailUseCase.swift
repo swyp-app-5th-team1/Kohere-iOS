@@ -8,7 +8,7 @@
 import ComposableArchitecture
 
 struct FetchListingDetailUseCase {
-    var execute: (_ listingID: String) async throws -> ListingDetail
+    var execute: @MainActor @Sendable (_ listingID: String) async throws -> ListingDetail
 }
 
 extension FetchListingDetailUseCase: DependencyKey {

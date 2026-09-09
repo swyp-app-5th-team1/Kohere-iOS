@@ -67,6 +67,12 @@ struct DiagnosisRecommendations: Equatable {
     let suggestions: DiagnosisRecommendationSuggestions?
 }
 
+struct DiagnosisRecommendationMap: Equatable {
+    let markers: [ListingMapMarker]
+    // 서버는 마커를 최대 500개까지 반환한다. total은 제한 전 전체 개수다.
+    let total: Int
+}
+
 struct DiagnosisRecommendedListing: Equatable, Identifiable {
     nonisolated var id: String { listingID }
 
@@ -79,6 +85,7 @@ struct DiagnosisRecommendedListing: Equatable, Identifiable {
     let maxDeposit: Int?
     let thumbnailURL: String?
     let coordinate: MapCoordinate?
+    let nearestTransit: ListingNearestTransit?
 }
 
 struct DiagnosisRecommendationSuggestions: Equatable {

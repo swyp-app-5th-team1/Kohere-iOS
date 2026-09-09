@@ -14,7 +14,8 @@ extension MapFeature {
         state: inout State
     ) -> Effect<Action> {
         guard state.canUseFavoriteFeatures,
-              let item = state.listings.first(where: { $0.listingID == listingID }),
+              let item = state.listings.first(where: { $0.listingID == listingID })
+                ?? state.selectedListingItem.flatMap({ $0.listingID == listingID ? $0 : nil }),
               !state.favoriteUpdatingIDs.contains(listingID)
         else { return .none }
 

@@ -71,7 +71,7 @@ struct MapListingFilterChipItem: Identifiable {
         locale: Locale
     ) -> MapListingFilterChipItem {
         let language = AppLanguage(locale: locale)
-        guard filter.hasSelectedPriceRange || source == .diagnosis else {
+        guard filter.hasSelectedPriceRange else {
             return MapListingFilterChipItem(
                 kind: .price,
                 title: language.localized(.mapFilterSectionPrice),
@@ -82,7 +82,7 @@ struct MapListingFilterChipItem: Identifiable {
 
         return MapListingFilterChipItem(
             kind: .price,
-            title: priceTitle(for: filter, source: source, locale: locale),
+            title: priceTitle(for: filter, locale: locale),
             style: style(for: source),
             showsChevron: false
         )
@@ -125,15 +125,19 @@ struct MapListingFilterChipItem: Identifiable {
 
     private static func priceTitle(
         for filter: MapFilterState,
-        source: MapFilterApplicationSource,
         locale: Locale
     ) -> String {
         let language = AppLanguage(locale: locale)
-        let monthlyRentTitle = monthlyRentTitle(for: filter, source: source, locale: locale)
+        let monthlyRentTitle = MapFilterPriceFormatter.chipTitle(
+            prefix: language.localized(.mapFilterMonthlyRent),
+            selection: filter.monthlyRentRange,
+            bounds: MapFilterPriceRange.monthlyRent,
+            locale: locale
+        )
         let depositTitle = MapFilterPriceFormatter.chipTitle(
             prefix: language.localized(.mapFilterDeposit),
             selection: filter.depositRange,
-            defaultSelection: MapFilterPriceRange.defaultDeposit,
+            bounds: MapFilterPriceRange.deposit,
             locale: locale
         )
 
@@ -142,29 +146,5 @@ struct MapListingFilterChipItem: Identifiable {
             .joined(separator: ", ")
 
         return title.isEmpty ? language.localized(.mapFilterSectionPrice) : title
-    }
-
-    private static func monthlyRentTitle(
-        for filter: MapFilterState,
-        source: MapFilterApplicationSource,
-        locale: Locale
-    ) -> String? {
-        let language = AppLanguage(locale: locale)
-        return switch source {
-        case .manual:
-            MapFilterPriceFormatter.chipTitle(
-                prefix: language.localized(.mapFilterMonthlyRent),
-                selection: filter.monthlyRentRange,
-                defaultSelection: MapFilterPriceRange.defaultMonthlyRent,
-                locale: locale
-            )
-        case .diagnosis:
-            MapFilterPriceFormatter.chipTitle(
-                prefix: language.localized(.mapFilterMonthlyRent),
-                selection: filter.monthlyRentRange,
-                bounds: MapFilterPriceRange.monthlyRent,
-                locale: locale
-            )
-        }
     }
 }

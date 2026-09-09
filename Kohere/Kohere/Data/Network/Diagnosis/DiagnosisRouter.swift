@@ -25,10 +25,11 @@ enum DiagnosisRouter: URLRequestConvertible {
         guestSessionID: String?,
         APIEnvironment
     )
+    case recommendationMap(diagnosisID: Int, guestSessionID: String?, APIEnvironment)
 
     private var method: HTTPMethod {
         switch self {
-        case .question, .detail, .recommendations:
+        case .question, .detail, .recommendations, .recommendationMap:
             .get
 
         case .startFlow, .advanceFlow, .saveAnswer, .submit:
@@ -58,6 +59,8 @@ enum DiagnosisRouter: URLRequestConvertible {
 
         case let .recommendations(diagnosisID, _, _, _):
             "api/v2/diagnoses/\(diagnosisID)/recommendations"
+        case let .recommendationMap(diagnosisID, _, _):
+            "api/v2/diagnoses/\(diagnosisID)/recommendations/map"
         }
     }
 
@@ -69,7 +72,8 @@ enum DiagnosisRouter: URLRequestConvertible {
              let .saveAnswer(_, environment),
 			 let .submit(environment),
 			 let .detail(_, environment),
-             let .recommendations(_, _, _, environment):
+             let .recommendations(_, _, _, environment),
+             let .recommendationMap(_, _, environment):
             environment
         }
     }
@@ -89,7 +93,7 @@ enum DiagnosisRouter: URLRequestConvertible {
              let .saveAnswer(requestDTO, _):
             request = try JSONParameterEncoder.default.encode(requestDTO, into: request)
 
-        case .startFlow, .detail, .question, .submit:
+        case .startFlow, .detail, .question, .submit, .recommendationMap:
             break
         }
 
@@ -103,7 +107,8 @@ enum DiagnosisRouter: URLRequestConvertible {
     private var guestSessionID: String? {
         switch self {
         case let .advanceFlow(_, guestSessionID, _),
-             let .recommendations(_, _, guestSessionID, _):
+             let .recommendations(_, _, guestSessionID, _),
+             let .recommendationMap(_, guestSessionID, _):
             guestSessionID
 
         case .startFlow, .question, .saveAnswer, .submit, .detail:
