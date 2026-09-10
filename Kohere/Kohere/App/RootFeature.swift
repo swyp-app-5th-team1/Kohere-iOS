@@ -187,7 +187,8 @@ struct RootFeature {
                 state.selectedTab = .chat
                 return .send(.chat(.chatRoomForListingRequested(listingID)))
 
-            case let .map(.path(.element(id: _, action: .search(.popupRequested(popup))))):
+            case let .map(.popupRequested(popup)),
+                 let .map(.path(.element(id: _, action: .search(.popupRequested(popup))))):
                 state.popup = popup
                 return .none
 

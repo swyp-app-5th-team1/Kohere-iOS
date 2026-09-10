@@ -27,9 +27,7 @@ extension ListingItemModel {
                 max: recommendation.maxDeposit,
                 language: language
             ),
-            locationDescription: recommendation.title.isEmpty
-                ? language.localized(.mapDiagnosisMatchesTitle)
-                : recommendation.title,
+            locationDescription: Self.transitTitle(recommendation.nearestTransit, language: language),
             typeTag: recommendation.type,
             period: "1 mo~",
             isLiked: false
@@ -71,9 +69,7 @@ extension ListingItemModel {
                 max: recommendation.maxDeposit,
                 language: language
             ),
-            locationDescription: recommendation.title.isEmpty
-                ? language.localized(.mapDiagnosisMatchesTitle)
-                : recommendation.title,
+            locationDescription: Self.transitTitle(recommendation.nearestTransit, language: language),
             typeTag: recommendation.type,
             period: "1 mo~",
             isLiked: false
@@ -97,6 +93,7 @@ extension ListingItemModel {
 
 extension MapFilterState {
     init(diagnosisDetail: DiagnosisDetail) {
+        // 진단에서 제공하지 않는 보증금에는 가격 제한을 추가하지 않는다.
         self.init()
         selectedOptions = Set(diagnosisDetail.conditions)
 

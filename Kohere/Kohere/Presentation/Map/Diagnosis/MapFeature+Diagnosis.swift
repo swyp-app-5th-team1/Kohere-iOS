@@ -17,8 +17,7 @@ extension MapFeature {
         state.path = StackState<Path.State>()
         state.activeDiagnosisID = diagnosisID
         state.listingSource = .diagnosis
-        state.selectedMarkerID = nil
-        state.sheetMode = .listingList
+        state.clearSelectedListing()
         state.isFilterPresented = false
         state.appliedFilterSource = .diagnosis
         state.appliedFilter = filter
@@ -51,19 +50,22 @@ extension MapFeature {
                 do {
                     let input = DiagnosisRecommendationsInput(diagnosisID: diagnosisID)
                     let recommendations = try await diagnosisClient.fetchRecommendations(input)
+                    try Task.checkCancellation()
                     await send(.diagnosisRecommendationsResponse(.success(recommendations), isFirstPage: true))
                 } catch {
                     guard !isDiagnosisRequestCancellation(error) else { return }
                     await send(.diagnosisRecommendationsResponse(.failure(error), isFirstPage: true))
                 }
             }
-            .cancellable(id: MapEffectID.diagnosisRecommendations, cancelInFlight: true)
+            .cancellable(id: MapEffectID.diagnosisRecommendations, cancelInFlight: true),
+            startDiagnosisMapEffect(diagnosisID: diagnosisID, state: &state)
         ]
 
         if state.userType != nil {
             effects.append(.run { send in
                 do {
                     let detail = try await diagnosisClient.fetchDetail(diagnosisID)
+                    try Task.checkCancellation()
                     await send(.diagnosisDetailResponse(.success(detail)))
                 } catch {
                     guard !isDiagnosisRequestCancellation(error) else { return }
@@ -84,10 +86,19 @@ extension MapFeature {
         case let .success(detail):
             guard state.activeDiagnosisID == detail.diagnosisID else { return .none }
             let filter = MapFilterState(diagnosisDetail: detail)
+            let shouldReloadSelectedCard = state.appliedFilter != filter
+                && (state.selectedListing != nil || state.selectedListingRequestID != nil)
+            let selectedID = state.selectedMarkerID
             state.appliedFilter = filter
             state.editingFilter = filter
             state.isDiagnosisDetailLoading = false
             state.diagnosisErrorMessage = nil
+
+            // 진단 상세가 늦게 와 조건을 보정했다면, 이전 조건으로 조회하던 카드도 갱신한다.
+            if shouldReloadSelectedCard, let selectedID {
+                state.clearSelectedListing()
+                return selectMarker(selectedID, state: &state)
+            }
 
         case let .failure(error):
             guard state.listingSource == .diagnosis else { return .none }
@@ -146,6 +157,7 @@ extension MapFeature {
         return .run { [diagnosisClient] send in
             do {
                 let recommendations = try await diagnosisClient.fetchRecommendations(input)
+                try Task.checkCancellation()
                 await send(.diagnosisRecommendationsResponse(.success(recommendations), isFirstPage: false))
             } catch {
                 guard !isDiagnosisRequestCancellation(error) else { return }
@@ -163,14 +175,14 @@ extension MapFeature {
         state.diagnosisRecommendationPageInfo = recommendations.page
 
         if isFirstPage {
-            state.selectedMarkerID = nil
-            state.sheetMode = .listingList
             state.diagnosisRecommendedListings = recommendations.listings
             state.diagnosisRecommendationSuggestions = recommendations.suggestions
 
             let cameraCoordinate = recommendations.listings.compactMap(\.coordinate).first
-            state.cameraMoveRequest = cameraCoordinate.map {
-                MapCameraMoveRequest(coordinate: $0, targetPosition: .center)
+            if state.selectedMarkerID == nil {
+                state.cameraMoveRequest = cameraCoordinate.map {
+                    MapCameraMoveRequest(coordinate: $0, targetPosition: .center)
+                }
             }
             if cameraCoordinate == nil {
                 state.lastSearchedViewport = state.currentViewport
@@ -179,8 +191,44 @@ extension MapFeature {
             state.diagnosisRecommendedListings.appendUnique(contentsOf: recommendations.listings)
         }
 
-        state.markers = state.diagnosisRecommendedListings.markerItems
         rebuildListingItems(to: &state)
+    }
+
+    func startDiagnosisMapEffect(diagnosisID: Int, state: inout State) -> Effect<Action> {
+        let requestID = uuid()
+        state.diagnosisMapRequestID = requestID
+        state.diagnosisMapErrorMessage = nil
+        return .run { [diagnosisClient] send in
+            do {
+                let map = try await diagnosisClient.fetchRecommendationMap(diagnosisID)
+                try Task.checkCancellation()
+                await send(.diagnosisMapResponse(requestID: requestID, .success(map)))
+            } catch {
+                guard !isDiagnosisRequestCancellation(error) else { return }
+                await send(.diagnosisMapResponse(requestID: requestID, .failure(.from(error))))
+            }
+        }
+        .cancellable(id: MapEffectID.diagnosisMap, cancelInFlight: true)
+    }
+
+    func handleDiagnosisMapResponse(
+        requestID: UUID,
+        result: Result<DiagnosisRecommendationMap, DataError>,
+        state: inout State
+    ) -> Effect<Action> {
+        guard state.listingSource == .diagnosis,
+              state.diagnosisMapRequestID == requestID else { return .none }
+        state.diagnosisMapRequestID = nil
+
+        switch result {
+        case let .success(map):
+            state.markers = map.markers.map { MapMarkerItem(id: $0.listingID, coordinate: $0.coordinate) }
+            state.diagnosisMapTotal = map.total
+            state.diagnosisMapErrorMessage = nil
+        case let .failure(error):
+            state.diagnosisMapErrorMessage = error.localizedDescription
+        }
+        return .none
     }
 
     func clearDiagnosisRecommendationState(state: inout State) {
@@ -189,12 +237,16 @@ extension MapFeature {
         state.diagnosisRecommendedListings = []
         state.diagnosisRecommendationSuggestions = nil
         state.diagnosisRecommendationPageInfo = nil
+        state.diagnosisMapRequestID = nil
+        state.diagnosisMapTotal = nil
+        state.diagnosisMapErrorMessage = nil
     }
 
     func cancelDiagnosisRequestEffects() -> Effect<Action> {
         .merge(
             .cancel(id: MapEffectID.diagnosisDetail),
-            .cancel(id: MapEffectID.diagnosisRecommendations)
+            .cancel(id: MapEffectID.diagnosisRecommendations),
+            .cancel(id: MapEffectID.diagnosisMap)
         )
     }
 

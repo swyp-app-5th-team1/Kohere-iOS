@@ -15,6 +15,7 @@ protocol DiagnosisInterface {
     func submit() async throws -> DiagnosisSubmission
     func fetchDetail(diagnosisID: Int) async throws -> DiagnosisDetail
     func fetchRecommendations(input: DiagnosisRecommendationsInput) async throws -> DiagnosisRecommendations
+    func fetchRecommendationMap(diagnosisID: Int) async throws -> DiagnosisRecommendationMap
 }
 
 struct DiagnosisClient: Sendable {
@@ -24,7 +25,8 @@ struct DiagnosisClient: Sendable {
     var saveAnswer: @Sendable (_ answer: DiagnosisAnswer) async throws -> Void
     var submit: @Sendable () async throws -> DiagnosisSubmission
     var fetchDetail: @Sendable (_ diagnosisID: Int) async throws -> DiagnosisDetail
-    var fetchRecommendations: @Sendable (_ input: DiagnosisRecommendationsInput) async throws -> DiagnosisRecommendations
+    var fetchRecommendations: @MainActor @Sendable (_ input: DiagnosisRecommendationsInput) async throws -> DiagnosisRecommendations
+    var fetchRecommendationMap: @MainActor @Sendable (_ diagnosisID: Int) async throws -> DiagnosisRecommendationMap
 }
 
 extension DiagnosisClient {
@@ -50,6 +52,9 @@ extension DiagnosisClient {
             },
             fetchRecommendations: { input in
                 try await repository.fetchRecommendations(input: input)
+            },
+            fetchRecommendationMap: { diagnosisID in
+                try await repository.fetchRecommendationMap(diagnosisID: diagnosisID)
             }
         )
     }

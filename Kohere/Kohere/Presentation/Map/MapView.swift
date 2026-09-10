@@ -31,9 +31,8 @@ struct MapView: View {
 
                 mapListingSheet(containerHeight: containerHeight)
 
-                if store.sheetMode == .selectedListing,
-                   let selectedListingItem = store.selectedListingItem {
-                    mapSelectedListingSheet(item: selectedListingItem)
+                if store.sheetMode == .selectedListing {
+                    mapSelectedListingSheet(item: store.selectedListingItem)
                 }
             }
             .animation(sheetAnimation, value: store.sheetMode)
@@ -158,15 +157,17 @@ struct MapView: View {
             .animation(sheetAnimation, value: listingSheetDetent)
     }
 
-    private func mapSelectedListingSheet(item: ListingItemModel) -> some View {
+    private func mapSelectedListingSheet(item: ListingItemModel?) -> some View {
         MapSelectedListingSheetView(
             title: store.selectedListingTitle,
             item: item,
             showsLikeButton: store.showsFavoriteControls,
+            isFavoriteUpdating: item.map { store.favoriteUpdatingIDs.contains($0.listingID) } ?? false,
             onCardTapped: {
                 store.send(.selectedListingCardTapped)
             },
             onLikeTapped: {
+                guard let item else { return }
                 store.send(.listingLikeButtonTapped(item.listingID))
             },
             onCloseButtonTapped: {

@@ -114,6 +114,19 @@ final class DiagnosisRepository: DiagnosisInterface {
         return responseDTO.toEntity()
     }
 
+    func fetchRecommendationMap(diagnosisID: Int) async throws -> DiagnosisRecommendationMap {
+        let environment = try environmentProvider()
+        let guestSessionID = try await guestSessionIDForRequest()
+        let responseDTO: DiagnosisRecommendationMapResponseDTO = try await networkService.request(
+            DiagnosisRouter.recommendationMap(
+                diagnosisID: diagnosisID,
+                guestSessionID: guestSessionID,
+                environment
+            )
+        )
+        return responseDTO.toEntity()
+    }
+
     private func guestSessionIDForRequest() async throws -> String? {
         guard try keychainClient.load(for: .auth) == nil else { return nil }
         return await guestSessionStore.value
@@ -249,7 +262,7 @@ private extension DiagnosisRecommendationsResponseDTO {
     }
 }
 
-private extension DiagnosisRecommendedListingResponseDTO {
+extension DiagnosisRecommendedListingResponseDTO {
     func toEntity() -> DiagnosisRecommendedListing {
         let propertyTypeLabel = type?.label ?? ""
 
@@ -269,7 +282,8 @@ private extension DiagnosisRecommendedListingResponseDTO {
             minDeposit: minDeposit,
             maxDeposit: maxDeposit,
             thumbnailURL: nonEmptyThumbnailURL,
-            coordinate: coordinate
+            coordinate: coordinate,
+            nearestTransit: nearestTransit?.toEntity()
         )
     }
 

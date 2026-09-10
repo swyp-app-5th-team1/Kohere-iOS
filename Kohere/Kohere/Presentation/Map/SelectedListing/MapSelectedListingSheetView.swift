@@ -9,8 +9,9 @@ import SwiftUI
 
 struct MapSelectedListingSheetView: View {
     let title: String
-    let item: ListingItemModel
+    let item: ListingItemModel?
     let showsLikeButton: Bool
+    var isFavoriteUpdating = false
     let onCardTapped: () -> Void
     let onLikeTapped: () -> Void
     let onCloseButtonTapped: () -> Void
@@ -22,8 +23,20 @@ struct MapSelectedListingSheetView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 2)
 
-            selectedListingCard
+            if let item {
+                ListingCardView(
+                    item: item,
+                    showsLikeButton: false,
+                    onCardTapped: onCardTapped,
+                    onLikeTapped: onLikeTapped
+                )
+                .disabled(isFavoriteUpdating)
                 .padding(.horizontal, 20)
+            } else {
+                ProgressView()
+                    .accessibilityLabel(Text(.commonLoading))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
 
             Spacer(minLength: 0)
         }
@@ -53,7 +66,7 @@ struct MapSelectedListingSheetView: View {
 
             Spacer()
 
-            if showsLikeButton {
+            if showsLikeButton, let item {
                 Button {
                     onLikeTapped()
                 } label: {
@@ -62,6 +75,7 @@ struct MapSelectedListingSheetView: View {
                         .foregroundStyle(item.isLiked ? .primary50 : .labelAlternative)
                 }
                 .buttonStyle(.plain)
+                .disabled(isFavoriteUpdating)
                 .frame(width: 24, height: 24)
                 .contentShape(Rectangle())
                 .accessibilityLabel(
@@ -85,14 +99,5 @@ struct MapSelectedListingSheetView: View {
             .contentShape(Rectangle())
             .accessibilityLabel(Text(.commonClose))
         }
-    }
-
-    private var selectedListingCard: some View {
-        ListingCardView(
-            item: item,
-            showsLikeButton: false,
-            onCardTapped: onCardTapped,
-            onLikeTapped: onLikeTapped
-        )
     }
 }

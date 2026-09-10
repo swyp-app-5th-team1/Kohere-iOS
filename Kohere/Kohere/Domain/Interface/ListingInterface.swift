@@ -19,9 +19,9 @@ protocol ListingInterface {
 }
 
 struct ListingClient: Sendable {
-    var fetchListings: @Sendable (_ input: ListingSearchInput) async throws -> ListingSearchPage
-    var fetchMapMarkers: @Sendable (_ input: ListingSearchInput) async throws -> [ListingMapMarker] = { _ in [] }
-    var fetchDetail: @Sendable (_ listingID: String) async throws -> ListingDetail
+    var fetchListings: @MainActor @Sendable (_ input: ListingSearchInput) async throws -> ListingSearchPage
+    var fetchMapMarkers: @MainActor @Sendable (_ input: ListingSearchInput) async throws -> [ListingMapMarker] = { _ in [] }
+    var fetchDetail: @MainActor @Sendable (_ listingID: String) async throws -> ListingDetail
     var fetchFavoriteListings: @Sendable (_ page: Int, _ size: Int) async throws -> ListingSearchPage
     var fetchRecentListings: @Sendable () async throws -> [Listing]
     var addFavorite: @Sendable (_ listingID: String) async throws -> ListingFavoriteStatus

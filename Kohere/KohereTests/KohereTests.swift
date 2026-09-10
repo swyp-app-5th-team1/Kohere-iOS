@@ -726,10 +726,16 @@ final class MapListingNavigationTests: XCTestCase {
 
 @MainActor
 final class MapDiagnosisRecommendationTests: XCTestCase {
-    func testDiagnosisMarkersAreRebuiltFromAccumulatedListings() {
+    func testDiagnosisPaginationPreservesAllMarkers() {
         let firstCoordinate = MapCoordinate(latitude: 37.604268, longitude: 127.046761)
         let nextCoordinate = MapCoordinate(latitude: 37.595316, longitude: 127.051202)
         var state = MapFeature.State()
+        let allMarkers = [
+            MapMarkerItem(id: "listing-1", coordinate: firstCoordinate),
+            MapMarkerItem(id: "listing-2", coordinate: nextCoordinate),
+            MapMarkerItem(id: "outside-loaded-pages", coordinate: firstCoordinate)
+        ]
+        state.markers = allMarkers
         let feature = withDependencies {
             $0.fetchKRWToUSDExchangeRateUseCase = FetchKRWToUSDExchangeRateUseCase {
                 KRWToUSDExchangeRate(usdPerKRW: 0)
@@ -755,13 +761,8 @@ final class MapDiagnosisRecommendationTests: XCTestCase {
             to: &state
         )
 
-        XCTAssertEqual(
-            state.markers,
-            [
-                MapMarkerItem(id: "listing-1", coordinate: firstCoordinate),
-                MapMarkerItem(id: "listing-2", coordinate: nextCoordinate)
-            ]
-        )
+        XCTAssertEqual(state.markers, allMarkers)
+        XCTAssertEqual(state.diagnosisRecommendedListings.map(\.listingID), ["listing-1", "listing-2"])
     }
 
     private func makeRecommendations(
@@ -794,7 +795,8 @@ final class MapDiagnosisRecommendationTests: XCTestCase {
             minDeposit: 0,
             maxDeposit: 100_000,
             thumbnailURL: nil,
-            coordinate: coordinate
+            coordinate: coordinate,
+            nearestTransit: nil
         )
     }
 }
@@ -1465,8 +1467,8 @@ final class ListingDetailLoadFailureTests: XCTestCase {
         initialState.isDetailLoading = true
         let popup = AppPopup.notice(
             AppPopup.Notice(
-                message: String(localized: "listingDetail.error.loadFailed"),
-                confirmTitle: String(localized: "common.confirm"),
+                message: initialState.appLanguage.localized(.listingDetailErrorLoadFailed),
+                confirmTitle: initialState.appLanguage.localized(.commonConfirm),
                 confirmRoute: .dismissListingDetail
             )
         )

@@ -56,6 +56,23 @@ struct DiagnosisRecommendationsResponseDTO: Decodable {
     let suggestions: DiagnosisSuggestionsResponseDTO?
 }
 
+struct DiagnosisRecommendationMapResponseDTO: Decodable {
+    let markers: [ListingMapMarkerResponseDTO]
+    let total: Int
+}
+
+extension DiagnosisRecommendationMapResponseDTO {
+    func toEntity() -> DiagnosisRecommendationMap {
+        DiagnosisRecommendationMap(
+            markers: markers.compactMap { marker in
+                guard let id = marker.listingId, let lat = marker.lat, let lng = marker.lng else { return nil }
+                return ListingMapMarker(listingID: id, coordinate: .init(latitude: lat, longitude: lng))
+            },
+            total: total
+        )
+    }
+}
+
 struct DiagnosisRecommendedListingResponseDTO: Decodable {
     let listingId: String
     let title: String?
@@ -67,6 +84,8 @@ struct DiagnosisRecommendedListingResponseDTO: Decodable {
     let thumbnailUrl: String?
     let lat: Double?
     let lng: Double?
+    // 일반 매물 조회와 같은 구조. 서버 반영 전 누락/null 응답도 허용한다.
+    let nearestTransit: ListingNearestTransitResponseDTO?
 }
 
 struct DiagnosisSuggestionsResponseDTO: Decodable {

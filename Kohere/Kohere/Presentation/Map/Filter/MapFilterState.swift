@@ -31,7 +31,8 @@ extension MapFilterState {
     }
 
     var hasSelectedPriceRange: Bool {
-        monthlyRentRange != MapFilterPriceRange.defaultMonthlyRent || depositRange != MapFilterPriceRange.defaultDeposit
+        monthlyRentRange != MapFilterPriceRange.defaultMonthlyRent
+            || depositRange != MapFilterPriceRange.defaultDeposit
     }
 
     var hasSelectedPropertyTypes: Bool {
@@ -75,14 +76,15 @@ enum MapFilterPriceRange {
     static let monthlyRent = 0...100
     static let deposit = 0...300
 
+    // 기본값은 전체다. 슬라이더 양끝은 각각 하한 없음과 상한 없음을 의미한다.
     static let defaultMonthlyRent = RangeSliderValue(
         minimum: monthlyRent.lowerBound,
-        maximum: 50,
+        maximum: monthlyRent.upperBound,
         bounds: monthlyRent
     )
     static let defaultDeposit = RangeSliderValue(
         minimum: deposit.lowerBound,
-        maximum: 150,
+        maximum: deposit.upperBound,
         bounds: deposit
     )
 }

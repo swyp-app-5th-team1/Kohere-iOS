@@ -7,26 +7,27 @@
 
 extension MapFilterState {
     func listingSearchInput(
-        bounds: MapBounds,
+        bounds: MapBounds? = nil,
+        listingIDs: [String] = [],
         page: Int = 0,
-        size: Int = ListingSearchInput.defaultPageSize,
-        source: MapFilterApplicationSource = .manual
+        size: Int = ListingSearchInput.defaultPageSize
     ) -> ListingSearchInput {
         ListingSearchInput(
             bounds: bounds,
+            listingIDs: listingIDs,
             page: page,
             size: size,
             minBudget: monthlyRentRange.minimumSearchValue(
-                defaultValue: monthlyRentDefaultMinimum(for: source)
+                unboundedValue: MapFilterPriceRange.monthlyRent.lowerBound
             ),
             maxBudget: monthlyRentRange.maximumSearchValue(
-                defaultValue: monthlyRentDefaultMaximum(for: source)
+                unboundedValue: MapFilterPriceRange.monthlyRent.upperBound
             ),
             minDeposit: depositRange.minimumSearchValue(
-                defaultValue: MapFilterPriceRange.defaultDeposit.minimum
+                unboundedValue: MapFilterPriceRange.deposit.lowerBound
             ),
             maxDeposit: depositRange.maximumSearchValue(
-                defaultValue: MapFilterPriceRange.defaultDeposit.maximum
+                unboundedValue: MapFilterPriceRange.deposit.upperBound
             ),
             propertyTypes: selectedPropertyTypes
                 .map(\.listingSearchPropertyType)
@@ -38,36 +39,16 @@ extension MapFilterState {
     }
 }
 
-private extension MapFilterState {
-    func monthlyRentDefaultMinimum(for source: MapFilterApplicationSource) -> Int {
-        switch source {
-        case .manual:
-            MapFilterPriceRange.defaultMonthlyRent.minimum
-        case .diagnosis:
-            MapFilterPriceRange.monthlyRent.lowerBound
-        }
-    }
-
-    func monthlyRentDefaultMaximum(for source: MapFilterApplicationSource) -> Int {
-        switch source {
-        case .manual:
-            MapFilterPriceRange.defaultMonthlyRent.maximum
-        case .diagnosis:
-            MapFilterPriceRange.monthlyRent.upperBound
-        }
-    }
-}
-
 private extension RangeSliderValue {
     static let wonMultiplier = 10_000
 
-    func minimumSearchValue(defaultValue: Int) -> Int? {
-        guard minimum != defaultValue else { return nil }
+    func minimumSearchValue(unboundedValue: Int) -> Int? {
+        guard minimum != unboundedValue else { return nil }
         return minimum * Self.wonMultiplier
     }
 
-    func maximumSearchValue(defaultValue: Int) -> Int? {
-        guard maximum != defaultValue else { return nil }
+    func maximumSearchValue(unboundedValue: Int) -> Int? {
+        guard maximum != unboundedValue else { return nil }
         return maximum * Self.wonMultiplier
     }
 }

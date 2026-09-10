@@ -20,6 +20,8 @@ struct MapFeature {
     var fetchKRWToUSDExchangeRateUseCase
     @Dependency(\.convertMonthlyRentCurrencyUseCase)
     var convertMonthlyRentCurrencyUseCase
+    @Dependency(\.uuid)
+    var uuid
 
     @Reducer
     enum Path {
@@ -87,6 +89,9 @@ struct MapFeature {
                     state: &state
                 )
 
+            case let .diagnosisMapResponse(requestID, result):
+                return handleDiagnosisMapResponse(requestID: requestID, result: result, state: &state)
+
             case .diagnosisButtonTapped:
                 state.path.append(.chatBot(ChatBotFeature.State()))
                 return .none
@@ -109,28 +114,28 @@ struct MapFeature {
 
             // 매물 선택 / Navigation
             case let .markerTapped(id):
-                guard state.selectedMarkerID != id else { return .none }
-                state.selectedMarkerID = id
-                state.sheetMode = .selectedListing
+                return selectMarker(id, state: &state)
+
+            case let .selectedListingResponse(requestID, result):
+                return handleSelectedListingResponse(requestID: requestID, result: result, state: &state)
+
+            case .popupRequested:
                 return .none
 
             case .selectedListingCardTapped:
-                guard let selectedMarkerID = state.selectedMarkerID else { return .none }
-                state.path.append(
-                    .listingDetail(
-                        ListingDetailFeature.State(
-                            listingID: selectedMarkerID,
-                            userType: state.userType,
-                            appLanguage: state.appLanguage
-                        )
-                    )
-                )
+                guard let item = state.selectedListingItem,
+                      !state.favoriteUpdatingIDs.contains(item.listingID)
+                else { return .none }
+                state.path.append(.listingDetail(ListingDetailFeature.State(
+                    listingID: item.listingID,
+                    userType: state.userType,
+                    appLanguage: state.appLanguage
+                )))
                 return .none
 
             case .selectedListingCloseButtonTapped:
-                state.selectedMarkerID = nil
-                state.sheetMode = .listingList
-                return .none
+                state.clearSelectedListing()
+                return .cancel(id: MapEffectID.selectedListing)
 
             case let .listingCardTapped(id):
                 state.path.append(
@@ -209,6 +214,11 @@ struct MapFeature {
 
             case .exchangeRateResponse(.failure):
                 return .none
+            }
+        }
+        .onChange(of: \.selectedMarkerID) { _, selectedID in
+            Reduce { _, _ in
+                selectedID == nil ? .cancel(id: MapEffectID.selectedListing) : .none
             }
         }
         .forEach(\.path, action: \.path)

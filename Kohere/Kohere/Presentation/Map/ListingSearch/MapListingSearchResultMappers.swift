@@ -116,16 +116,7 @@ extension ListingItemModel {
         language: AppLanguage
     ) -> String {
         if let nearestTransit = listing.nearestTransit {
-            if let walkMinutes = nearestTransit.walkMinutes {
-                return language.localized(
-                    .listingDetailFormatTransitOverview(
-                        "\(walkMinutes)",
-                        nearestTransit.name
-                    )
-                )
-            }
-
-            return nearestTransit.name
+            return transitTitle(nearestTransit, language: language)
         }
 
         if let distanceMeters = listing.distanceMeters {
@@ -138,6 +129,15 @@ extension ListingItemModel {
         }
 
         return listing.address ?? ""
+    }
+
+    static func transitTitle(_ transit: ListingNearestTransit?, language: AppLanguage) -> String {
+        guard let transit else { return "" }
+        guard let walkMinutes = transit.walkMinutes else { return transit.name }
+
+        return language.localized(
+            .listingDetailFormatTransitOverview("\(walkMinutes)", transit.name)
+        )
     }
 
     private static func minimumStayPeriodTitle(

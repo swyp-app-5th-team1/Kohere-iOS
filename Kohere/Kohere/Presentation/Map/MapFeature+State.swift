@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 extension MapFeature {
     @ObservableState
@@ -21,6 +22,10 @@ extension MapFeature {
         var selectedMarkerID: String?
         var listings: [ListingItemModel] = []
 
+        // 목록 밖 마커에서 필터를 적용해 조회한 카드 원본. 현재 선택 동안만 보관한다.
+        var selectedListing: Listing?
+        var selectedListingRequestID: UUID?
+
         // 일반 매물 검색
         var listingSearchResults: [Listing] = []
         var isListingSearchLoading = false
@@ -32,6 +37,9 @@ extension MapFeature {
         var diagnosisRecommendedListings: [DiagnosisRecommendedListing] = []
         var diagnosisRecommendationSuggestions: DiagnosisRecommendationSuggestions?
         var diagnosisRecommendationPageInfo: PageInfo?
+        var diagnosisMapRequestID: UUID?
+        var diagnosisMapTotal: Int?
+        var diagnosisMapErrorMessage: String?
         var isDiagnosisDetailLoading = false
         var isRecommendationsLoading = false
         var diagnosisErrorMessage: String?
@@ -87,6 +95,7 @@ extension MapFeature {
         case diagnosisResultRequested(diagnosisID: Int, filter: MapFilterState)
         case diagnosisDetailResponse(Result<DiagnosisDetail, Error>)
         case diagnosisRecommendationsResponse(Result<DiagnosisRecommendations, Error>, isFirstPage: Bool)
+        case diagnosisMapResponse(requestID: UUID, Result<DiagnosisRecommendationMap, DataError>)
 
         // 지도 viewport / 카메라
         case viewportChanged(MapViewport)
@@ -97,6 +106,8 @@ extension MapFeature {
 
         // 매물 선택 / Navigation
         case markerTapped(String)
+        case selectedListingResponse(requestID: UUID, Result<Listing, DataError>)
+        case popupRequested(AppPopup)
         case searchButtonTapped
         case path(StackActionOf<Path>)
         case listingCardTapped(String)

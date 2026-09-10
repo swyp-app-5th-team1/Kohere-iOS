@@ -52,21 +52,6 @@ enum MapFilterPriceFormatter {
     static func chipTitle(
         prefix: String,
         selection: RangeSliderValue,
-        defaultSelection: RangeSliderValue,
-        locale: Locale
-    ) -> String? {
-        chipTitle(
-            prefix: prefix,
-            selection: selection,
-            minimumBoundary: defaultSelection.minimum,
-            maximumBoundary: defaultSelection.maximum,
-            locale: locale
-        )
-    }
-
-    static func chipTitle(
-        prefix: String,
-        selection: RangeSliderValue,
         bounds: ClosedRange<Int>,
         locale: Locale
     ) -> String? {

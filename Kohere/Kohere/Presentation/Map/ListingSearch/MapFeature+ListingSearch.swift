@@ -36,8 +36,7 @@ extension MapFeature {
             prepareLocationSearchMode(state: &state)
             state.pendingViewportSearchTarget = nil
             state.selectedPlaceSearchTitle = nil
-            state.selectedMarkerID = nil
-            state.sheetMode = .listingList
+            state.clearSelectedListing()
             return .merge(
                 cancelDiagnosisRequestEffects(),
                 startListingSearchEffect(state: &state, viewport: viewport)
@@ -62,8 +61,7 @@ extension MapFeature {
             state.appliedFilterSource = .manual
             state.pendingViewportSearchTarget = nil
             state.selectedPlaceSearchTitle = nil
-            state.selectedMarkerID = nil
-            state.sheetMode = .listingList
+            state.clearSelectedListing()
             let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
             guard let viewport = state.currentViewport else { return cancelDiagnosisRequests }
             return .merge(
@@ -82,8 +80,7 @@ extension MapFeature {
                 coordinate: placeResult.coordinate,
                 targetPosition: .center
             )
-            state.selectedMarkerID = nil
-            state.sheetMode = .listingList
+            state.clearSelectedListing()
             state.isFilterPresented = false
             state.showsResearchButton = false
             state.lastSearchedViewport = nil
@@ -109,8 +106,7 @@ extension MapFeature {
                 coordinate: coordinate,
                 targetPosition: .upper
             )
-            state.selectedMarkerID = nil
-            state.sheetMode = .listingList
+            state.clearSelectedListing()
             state.isFilterPresented = false
             state.showsResearchButton = false
             state.lastSearchedViewport = nil
@@ -141,14 +137,12 @@ extension MapFeature {
     ) -> Effect<Action> {
         state.lastSearchedViewport = viewport
         state.showsResearchButton = false
-        state.selectedMarkerID = nil
-        state.sheetMode = .listingList
+        state.clearSelectedListing()
         state.isListingSearchLoading = true
         state.listingSearchErrorMessage = nil
 
         let input = state.appliedFilter.listingSearchInput(
-            bounds: viewport.visibleBounds,
-            source: state.appliedFilterSource
+            bounds: viewport.visibleBounds
         )
 
         let listingsEffect: Effect<Action> = .run { [listingClient] send in
@@ -252,8 +246,7 @@ extension MapFeature {
 
         let input = state.appliedFilter.listingSearchInput(
             bounds: lastSearchedViewport.visibleBounds,
-            page: nextPage,
-            source: state.appliedFilterSource
+            page: nextPage
         )
 
         return .run { [listingClient] send in
@@ -288,7 +281,7 @@ extension MapFeature {
 
         if let selectedMarkerID = state.selectedMarkerID,
            !state.markers.contains(where: { $0.id == selectedMarkerID }) {
-            state.selectedMarkerID = nil
+            state.clearSelectedListing()
         }
     }
 
