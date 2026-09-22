@@ -9,17 +9,28 @@ import FirebaseCore
 import FirebaseMessaging
 import OSLog
 import UIKit
+import UserNotifications
 
-final class AppDelegate: NSObject, UIApplicationDelegate {
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     private let logger = Logger(subsystem: "com.kohere.Kohere", category: "Push")
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
         FirebaseApp.configure()
         Messaging.messaging().delegate = FCMTokenRelay.shared
         return true
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        logger.info("event=foreground_notification_received")
+        completionHandler([.banner, .sound, .badge])
     }
 
     /// APNs 기기 토큰 발급 성공 시 Firebase에 전달한다.
