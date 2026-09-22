@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ChatComposer: View {
-    
+
     // MARK: - Properties
 
     let showsKeywords: Bool
@@ -61,24 +61,31 @@ struct ChatComposer: View {
                 TextField(
                     "",
                     text: Binding(get: { messageText }, set: onTextChanged),
-                    prompt: Text("chat.detail.messagePlaceholder")
+                    prompt: Text(messagePlaceholder)
+                        .font(inputTextStyle.font)
+                        .kerning(inputTextStyle.letterSpacing)
                         .foregroundStyle(isMessageFieldFocused ? .coolNeutral40 : .coolNeutral10),
                     axis: .vertical
                 )
-                    .lineLimit(1...)
-                    .kohereTextStyle(.label2Medium)
-                    .foregroundStyle(.neutral70)
-                    .tint(.coolNeutral30)
-                    .focused($isMessageFieldFocused)
-                    .disabled(isDisabled)
+                .lineLimit(1...)
+                .font(inputTextStyle.font)
+                .kerning(inputTextStyle.letterSpacing)
+                .frame(minHeight: inputTextStyle.lineHeight, alignment: .center)
+                .offset(y: -1.5)
+                .foregroundStyle(.neutral70)
+                .tint(.coolNeutral30)
+                .focused($isMessageFieldFocused)
+                .disabled(isDisabled)
+                .accessibilityLabel(Text("chat.detail.messagePlaceholder"))
 
-                if !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Button(action: onSendTapped) {
-                        Image(.chatSend)
-                            .renderingMode(.original)
-                    }
-                    .buttonStyle(.plain)
+                Button(action: onSendTapped) {
+                    Image(.chatSend)
+                        .renderingMode(.original)
                 }
+                .buttonStyle(.plain)
+                .opacity(hasMessage ? 1 : 0)
+                .allowsHitTesting(hasMessage)
+                .accessibilityHidden(!hasMessage)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
@@ -98,9 +105,21 @@ struct ChatComposer: View {
             if isDisabled { isMessageFieldFocused = false }
         }
     }
-    
+
     // MARK: - SubView
-    
+
+    private var inputTextStyle: KohereTextStyle {
+        .label2Medium
+    }
+
+    private var hasMessage: Bool {
+        !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var messagePlaceholder: String {
+        AppLanguage(locale: locale).localizedString(forKey: "chat.detail.messagePlaceholder")
+    }
+
     private var inputBorderColor: Color {
         if isMessageFieldFocused || !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return .primary20
