@@ -9,14 +9,14 @@ import ComposableArchitecture
 import Foundation
 
 private extension HomeLivingGuideFeature {
-    enum EffectID {
-        static let lifeTips = "HomeFeature.lifeTips"
+    nonisolated enum EffectID: Hashable, Sendable {
+        case topics
     }
 }
 @Reducer
 struct HomeLivingGuideFeature {
-    @Dependency(\.lifeTipClient)
-    var lifeTipClient
+    @Dependency(\.fetchLivingGuideTopicsUseCase)
+    var fetchLivingGuideTopics
     
     // MARK: - State
 
@@ -51,18 +51,18 @@ struct HomeLivingGuideFeature {
                 guard !state.isLoading, !state.isLoaded else { return .none }
                 state.isLoading = true
                 state.errorMessage = nil
-                return .run { [lifeTipClient] send in
+                return .run { [fetchLivingGuideTopics] send in
                     do {
-                        let topics = try await lifeTipClient.fetchTopics()
+                        let topics = try await fetchLivingGuideTopics.execute()
                         await send(.topicsResponse(.success(topics)))
                     } catch {
                         await send(.topicsResponse(.failure(.from(error))))
                     }
                 }
-                .cancellable(id: EffectID.lifeTips, cancelInFlight: true)
+                .cancellable(id: EffectID.topics, cancelInFlight: true)
 
             case .cancelEffects:
-                return .cancel(id: EffectID.lifeTips)
+                return .cancel(id: EffectID.topics)
 
             case .itemTapped:
                 return .none

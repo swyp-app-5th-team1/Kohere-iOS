@@ -1,5 +1,5 @@
 //
-//  LifeTipRouter.swift
+//  LivingGuideRouter.swift
 //  Kohere
 //
 //  Created by soomin on 7/8/26.
@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - Router
 
-enum LifeTipRouter: URLRequestConvertible {
+enum LivingGuideRouter: URLRequestConvertible {
     case topics(APIEnvironment)
     case tips(topicCode: String, APIEnvironment)
 

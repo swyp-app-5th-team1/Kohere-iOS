@@ -10,8 +10,8 @@ import Foundation
 
 @Reducer
 struct LivingGuideDetailFeature {
-    @Dependency(\.lifeTipClient)
-    var lifeTipClient
+    @Dependency(\.fetchLivingGuideTipsUseCase)
+    var fetchLivingGuideTips
 
     // MARK: - State
 
@@ -27,7 +27,7 @@ struct LivingGuideDetailFeature {
     enum Action {
         case onAppear
         case backButtonTapped
-        case lifeTipsResponse(Result<[LivingGuideTip], DataError>)
+        case tipsResponse(Result<[LivingGuideTip], DataError>)
     }
 
     // MARK: - Reducer Body
@@ -40,25 +40,25 @@ struct LivingGuideDetailFeature {
                 state.isTipsLoading = true
                 state.tipsErrorMessage = nil
 
-                return .run { [lifeTipClient, topicCode = state.guide.code] send in
+                return .run { [fetchLivingGuideTips, topicCode = state.guide.code] send in
                     do {
-                        let tips = try await lifeTipClient.fetchTips(topicCode)
-                        await send(.lifeTipsResponse(.success(tips)))
+                        let tips = try await fetchLivingGuideTips.execute(topicCode)
+                        await send(.tipsResponse(.success(tips)))
                     } catch {
-                        await send(.lifeTipsResponse(.failure(.from(error))))
+                        await send(.tipsResponse(.failure(.from(error))))
                     }
                 }
 
             case .backButtonTapped:
                 return .none
 
-            case let .lifeTipsResponse(.success(tips)):
+            case let .tipsResponse(.success(tips)):
                 state.isTipsLoading = false
                 state.tipsErrorMessage = nil
                 state.guide.tips = tips
                 return .none
 
-            case let .lifeTipsResponse(.failure(error)):
+            case let .tipsResponse(.failure(error)):
                 state.isTipsLoading = false
                 state.tipsErrorMessage = error.localizedDescription
                 return .none

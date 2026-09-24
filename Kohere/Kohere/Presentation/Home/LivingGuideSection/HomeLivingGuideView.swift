@@ -1,5 +1,5 @@
 //
-//  LivingInKoreaView.swift
+//  HomeLivingGuideView.swift
 //  Kohere
 //
 //  Created by soomin on 6/25/26.
@@ -8,7 +8,7 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct LivingInKoreaView: View {
+struct HomeLivingGuideView: View {
     
     // MARK: - Property
     

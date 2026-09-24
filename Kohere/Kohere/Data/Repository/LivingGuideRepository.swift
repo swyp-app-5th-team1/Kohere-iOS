@@ -1,5 +1,5 @@
 //
-//  LifeTipRepository.swift
+//  LivingGuideRepository.swift
 //  Kohere
 //
 //  Created by soomin on 7/8/26.
@@ -9,7 +9,7 @@ import ComposableArchitecture
 
 // MARK: - Repository
 
-final class LifeTipRepository: LifeTipInterface {
+final class LivingGuideRepository: LivingGuideInterface {
     private let authenticatedNetworkService: NetworkService
     private let environmentProvider: () throws -> APIEnvironment
 
@@ -23,8 +23,8 @@ final class LifeTipRepository: LifeTipInterface {
 
     func fetchTopics() async throws -> [LivingGuide] {
         let environment = try environmentProvider()
-        let responseDTO: LifeTipTopicsResponseDTO = try await authenticatedNetworkService.request(
-            LifeTipRouter.topics(environment)
+        let responseDTO: LivingGuideTopicsResponseDTO = try await authenticatedNetworkService.request(
+            LivingGuideRouter.topics(environment)
         )
 
         return (responseDTO.topics ?? []).enumerated().compactMap { index, topicDTO in
@@ -34,8 +34,8 @@ final class LifeTipRepository: LifeTipInterface {
 
     func fetchTips(topicCode: String) async throws -> [LivingGuideTip] {
         let environment = try environmentProvider()
-        let responseDTO: LifeTipListResponseDTO = try await authenticatedNetworkService.request(
-            LifeTipRouter.tips(topicCode: topicCode, environment)
+        let responseDTO: LivingGuideListResponseDTO = try await authenticatedNetworkService.request(
+            LivingGuideRouter.tips(topicCode: topicCode, environment)
         )
 
         return (responseDTO.tips ?? []).enumerated().compactMap { index, tipDTO in
@@ -46,16 +46,16 @@ final class LifeTipRepository: LifeTipInterface {
 
 // MARK: - Dependency
 
-extension LifeTipClient: DependencyKey {
-    static let liveValue: LifeTipClient = {
-        let repository: any LifeTipInterface = LifeTipRepository()
-        return LifeTipClient(repository: repository)
+extension LivingGuideClient: DependencyKey {
+    static let liveValue: LivingGuideClient = {
+        let repository: any LivingGuideInterface = LivingGuideRepository()
+        return LivingGuideClient(repository: repository)
     }()
 }
 
 // MARK: - Mapper
 
-private extension LifeTipTopicResponseDTO {
+private extension LivingGuideTopicResponseDTO {
     func toEntity(index: Int) -> LivingGuide? {
         guard let code, let name else { return nil }
 
@@ -73,7 +73,7 @@ private extension LifeTipTopicResponseDTO {
     }
 }
 
-private extension LifeTipResponseDTO {
+private extension LivingGuideTipResponseDTO {
     func toEntity(index: Int) -> LivingGuideTip? {
         guard let id, let title, let content else { return nil }
 
