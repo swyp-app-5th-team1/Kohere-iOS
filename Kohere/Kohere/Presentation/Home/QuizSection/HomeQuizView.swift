@@ -1,5 +1,5 @@
 //
-//  QuizView.swift
+//  HomeQuizView.swift
 //  Kohere
 //
 //  Created by soomin on 6/25/26.
@@ -8,7 +8,7 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct QuizView: View {
+struct HomeQuizView: View {
     
     // MARK: - Property
     
@@ -32,15 +32,15 @@ struct QuizView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 VStack(spacing: 8) {
-                    ForEach(0..<store.quiz.options.count, id: \.self) { index in
-                        let optionText = store.quiz.options[index]
-                        let style = store.quiz.optionStyle(for: index)
+                    ForEach(store.quiz.choices.indices, id: \.self) { index in
+                        let choice = store.quiz.choices[index]
+                        let style = optionStyle(for: choice.key)
                         
                         Button {
                             store.send(.optionTapped(index: index))
                         } label: {
                             HStack(spacing: 8) {
-                                Text(optionText)
+                                Text(choice.text)
                                     .kohereTextStyle(.label2Semibold)
                                     .foregroundColor(style.textColor)
                                 
@@ -62,11 +62,11 @@ struct QuizView: View {
                             )
                             .cornerRadius(8)
                         }
-                        .disabled(!store.isLoaded || store.quiz.hasAnswered || store.isAnswerSubmitting)
+                        .disabled(!store.isLoaded || store.hasAnswered || store.isAnswerSubmitting)
                     }
                 }
 
-                if store.quiz.shouldShowExplanation {
+                if store.shouldShowExplanation {
                     explanationView
                 }
             }
@@ -87,12 +87,54 @@ struct QuizView: View {
                 .frame(width: 16, height: 16)
                 .foregroundStyle(.labelNeutral)
 
-            Text(store.quiz.explanation ?? "")
+            Text(store.explanation ?? "")
                 .kohereTextStyle(.caption1Regular)
                 .foregroundStyle(.labelNeutral)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 6)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func optionStyle(for choiceKey: String) -> OptionStyle {
+        guard let selectedChoiceKey = store.selectedChoiceKey,
+              let correctChoiceKey = store.correctChoiceKey
+        else {
+            return .default
+        }
+
+        if choiceKey == correctChoiceKey {
+            return OptionStyle(
+                textColor: .statusGreen70,
+                tintColor: .statusPositive,
+                backgroundColor: .statusGreen5,
+                iconName: "check_16"
+            )
+        }
+
+        if choiceKey == selectedChoiceKey {
+            return OptionStyle(
+                textColor: .statusDanger,
+                tintColor: .statusDanger,
+                backgroundColor: .statusRed5,
+                iconName: "close_16"
+            )
+        }
+
+        return .default
+    }
+
+    private struct OptionStyle {
+        let textColor: Color
+        let tintColor: Color
+        let backgroundColor: Color
+        let iconName: String?
+
+        static let `default` = OptionStyle(
+            textColor: .labelNeutral,
+            tintColor: .clear,
+            backgroundColor: .backgroundNormalNormal,
+            iconName: nil
+        )
     }
 }
