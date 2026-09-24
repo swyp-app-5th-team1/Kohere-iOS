@@ -487,7 +487,7 @@
 				CODE_SIGN_ENTITLEMENTS = Kohere/Kohere.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3PVV8DQPL6;
+				DEVELOPMENT_TEAM = 2YTVA7GW5S;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Kohere/Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Kohere;
@@ -500,7 +500,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kohere.Kohere;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -526,7 +526,7 @@
 				CODE_SIGN_ENTITLEMENTS = Kohere/Kohere.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3PVV8DQPL6;
+				DEVELOPMENT_TEAM = 2YTVA7GW5S;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Kohere/Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Kohere;
@@ -539,7 +539,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kohere.Kohere;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
