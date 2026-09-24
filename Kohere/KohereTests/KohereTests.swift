@@ -359,7 +359,7 @@ final class LanguageResetTests: XCTestCase {
             isAuthLoading: false,
             selectedTab: .map
         )
-        state.home.isQuizLoaded = true
+        state.home.quizSection.isLoaded = true
         state.map.isFilterPresented = true
         state.more.path.append(.setting(SettingFeature.State()))
         state.popup = .notice(AppPopup.Notice(message: "popup", confirmTitle: "confirm"))
@@ -375,7 +375,7 @@ final class LanguageResetTests: XCTestCase {
         XCTAssertEqual(state.appLanguage, .english)
         XCTAssertEqual(state.selectedTab, .more)
         XCTAssertNil(state.popup)
-        XCTAssertFalse(state.home.isQuizLoaded)
+        XCTAssertFalse(state.home.quizSection.isLoaded)
         XCTAssertFalse(state.map.isFilterPresented)
         XCTAssertTrue(state.more.path.isEmpty)
         XCTAssertEqual(state.home.userType, .tenant)
@@ -1368,7 +1368,7 @@ final class RootFavoritePropagationTests: XCTestCase {
     func testMapDetailFavoriteSuccessUpdatesMapCardAndHomeCard() async throws {
         let status = ListingFavoriteStatus(isFavorited: true, favoriteCount: 7)
         var state = RootFeature.State(isAuthLoading: false)
-        state.home.recentlyViewedItems = [makeListingItem(isLiked: false, favoriteCount: 6)]
+        state.home.recentlyViewedSection.items = [makeListingItem(isLiked: false, favoriteCount: 6)]
         state.map.listings = [makeListingItem(isLiked: false, favoriteCount: 6)]
         state.map.path.append(
             .listingDetail(
@@ -1398,8 +1398,8 @@ final class RootFavoritePropagationTests: XCTestCase {
         ) {
             $0.map.path[id: detailID, case: \.listingDetail]?.detail?.overview.isLiked = true
             $0.map.path[id: detailID, case: \.listingDetail]?.detail?.overview.favoriteCount = 7
-            $0.home.recentlyViewedItems[0].isLiked = true
-            $0.home.recentlyViewedItems[0].favoriteCount = 7
+            $0.home.recentlyViewedSection.items[0].isLiked = true
+            $0.home.recentlyViewedSection.items[0].favoriteCount = 7
             $0.map.listings[0].isLiked = true
             $0.map.listings[0].favoriteCount = 7
             $0.map.favoriteStatusesByListingID["listing-1"] = status
@@ -1738,35 +1738,29 @@ final class HomeEffectCancellationTests: XCTestCase {
         let spy = HomeCancellationSpy()
         var initialState = HomeFeature.State(userType: .tenant)
         initialState.krwToUSDExchangeRate = KRWToUSDExchangeRate(usdPerKRW: 0.0007)
-        initialState.isQuizLoaded = true
-        initialState.isLivingGuidesLoaded = true
+        initialState.quizSection.isLoaded = true
+        initialState.livingGuideSection.isLoaded = true
         let store = TestStore(initialState: initialState) {
             HomeFeature()
         } withDependencies: {
-            $0.listingClient = ListingClient(
-                fetchListings: { _ in fatalError("Unexpected fetchListings") },
-                fetchDetail: { _ in fatalError("Unexpected fetchDetail") },
-                fetchFavoriteListings: { _, _ in fatalError("Unexpected fetchFavoriteListings") },
-                fetchRecentListings: { try await spy.fetchRecentListings() },
-                addFavorite: { _ in fatalError("Unexpected addFavorite") },
-                removeFavorite: { _ in fatalError("Unexpected removeFavorite") },
-                createBooking: { _, _ in fatalError("Unexpected createBooking") }
-            )
+            $0.fetchRecentListingsUseCase = FetchRecentListingsUseCase {
+                try await spy.fetchRecentListings()
+            }
         }
 
         await store.send(.onAppear)
-        await store.receive(\.recentlyViewed.onAppear) {
-            $0.isRecentlyViewedLoading = true
-            $0.recentlyViewedErrorMessage = nil
+        await store.receive(\.recentlyViewedSection.onAppear) {
+            $0.recentlyViewedSection.isLoading = true
+            $0.recentlyViewedSection.errorMessage = nil
         }
-        await store.receive(\.quiz.onAppear)
-        await store.receive(\.livingGuide.onAppear)
+        await store.receive(\.quizSection.onAppear)
+        await store.receive(\.livingGuideSection.onAppear)
         await fulfillment(of: [spy.started], timeout: 1)
 
         await store.send(.cancelEffects)
-        await store.receive(\.recentlyViewed.cancelEffects)
-        await store.receive(\.quiz.cancelEffects)
-        await store.receive(\.livingGuide.cancelEffects)
+        await store.receive(\.recentlyViewedSection.cancelEffects)
+        await store.receive(\.quizSection.cancelEffects)
+        await store.receive(\.livingGuideSection.cancelEffects)
         await fulfillment(of: [spy.cancelled], timeout: 1)
         await store.finish()
     }
