@@ -9,17 +9,19 @@ import ComposableArchitecture
 import Foundation
 
 private extension HomeRecentlyViewedFeature {
-    enum EffectID {
-        static let recentListings = "HomeFeature.recentListings"
-        static let exchangeRate = "HomeFeature.exchangeRate"
-        static let favorite = "HomeFeature.favorite"
+    nonisolated enum EffectID: Hashable, Sendable {
+        case recentListings
+        case exchangeRate
+        case favorite(String)
     }
 }
 
 @Reducer
 struct HomeRecentlyViewedFeature {
-    @Dependency(\.listingClient)
-    var listingClient
+    @Dependency(\.fetchRecentListingsUseCase)
+    var fetchRecentListings
+    @Dependency(\.updateListingFavoriteUseCase)
+    var updateListingFavorite
     @Dependency(\.fetchKRWToUSDExchangeRateUseCase)
     var fetchKRWToUSDExchangeRateUseCase
     @Dependency(\.convertMonthlyRentCurrencyUseCase)
@@ -72,10 +74,12 @@ struct HomeRecentlyViewedFeature {
                 return loadContent(state: &state)
                 
             case .cancelEffects:
+                let favoriteCancellations = state.favoriteUpdatingIDs.map {
+                    Effect<Action>.cancel(id: EffectID.favorite($0))
+                }
                 return .merge(
-                    .cancel(id: EffectID.recentListings),
-                    .cancel(id: EffectID.exchangeRate),
-                    .cancel(id: EffectID.favorite)
+                    [.cancel(id: EffectID.recentListings), .cancel(id: EffectID.exchangeRate)]
+                        + favoriteCancellations
                 )
                 
             case let .recentListingsResponse(.success(listings)):
@@ -130,9 +134,9 @@ struct HomeRecentlyViewedFeature {
             state.isLoading = true
             state.errorMessage = nil
             effects.append(
-                .run { [listingClient] send in
+                .run { [fetchRecentListings] send in
                     do {
-                        let listings = try await listingClient.fetchRecentListings()
+                        let listings = try await fetchRecentListings.execute()
                         await send(.recentListingsResponse(.success(listings)))
                     } catch {
                         await send(.recentListingsResponse(.failure(.from(error))))
@@ -169,17 +173,15 @@ struct HomeRecentlyViewedFeature {
         state.favoriteUpdatingIDs.insert(id)
         state.errorMessage = nil
         
-        return .run { [listingClient, isLiked = item.isLiked] send in
+        return .run { [updateListingFavorite, isLiked = item.isLiked] send in
             do {
-                let status = try await isLiked
-                ? listingClient.removeFavorite(id)
-                : listingClient.addFavorite(id)
+                let status = try await updateListingFavorite.execute(id, isLiked)
                 await send(.favoriteStatusResponse(listingID: id, .success(status)))
             } catch {
                 await send(.favoriteStatusResponse(listingID: id, .failure(.from(error))))
             }
         }
-        .cancellable(id: EffectID.favorite)
+        .cancellable(id: EffectID.favorite(id))
     }
     
     func synchronizeExchangeRate(_ exchangeRate: KRWToUSDExchangeRate, state: inout State) {

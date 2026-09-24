@@ -14,8 +14,10 @@ enum RecentlyViewedDelegate: Equatable {
 
 @Reducer
 struct RecentlyViewedFeature {
-    @Dependency(\.listingClient)
-    var listingClient
+    @Dependency(\.fetchRecentListingsUseCase)
+    var fetchRecentListings
+    @Dependency(\.updateListingFavoriteUseCase)
+    var updateListingFavorite
     @Dependency(\.fetchKRWToUSDExchangeRateUseCase)
     var fetchKRWToUSDExchangeRateUseCase
     @Dependency(\.convertMonthlyRentCurrencyUseCase)
@@ -61,9 +63,9 @@ struct RecentlyViewedFeature {
                     state.isLoading = true
                     state.errorMessage = nil
                     effects.append(
-                        .run { [listingClient] send in
+                        .run { [fetchRecentListings] send in
                             do {
-                                let listings = try await listingClient.fetchRecentListings()
+                                let listings = try await fetchRecentListings.execute()
                                 await send(.recentListingsResponse(.success(listings)))
                             } catch {
                                 await send(.recentListingsResponse(.failure(.from(error))))
@@ -122,14 +124,9 @@ struct RecentlyViewedFeature {
                 state.favoriteUpdatingIDs.insert(id)
                 state.errorMessage = nil
 
-                return .run { [listingClient, isLiked = item.isLiked] send in
+                return .run { [updateListingFavorite, isLiked = item.isLiked] send in
                     do {
-                        let status: ListingFavoriteStatus
-                        if isLiked {
-                            status = try await listingClient.removeFavorite(id)
-                        } else {
-                            status = try await listingClient.addFavorite(id)
-                        }
+                        let status = try await updateListingFavorite.execute(id, isLiked)
                         await send(.favoriteStatusResponse(listingID: id, .success(status)))
                     } catch {
                         await send(.favoriteStatusResponse(listingID: id, .failure(.from(error))))
