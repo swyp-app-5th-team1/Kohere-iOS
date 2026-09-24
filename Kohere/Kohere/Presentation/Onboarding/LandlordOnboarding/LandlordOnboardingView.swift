@@ -19,19 +19,19 @@ struct LandlordOnboardingView: View {
     // MARK: - Body
 
     var body: some View {
-        ZStack {
-            Color.backgroundNormalAlternative
-                .ignoresSafeArea()
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    dismissKeyboard()
-                }
-
-            VStack(spacing: 0) {
-                topProgressBar
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-
+        OnboardingStepContainer(
+            currentStep: store.currentStep.progressIndex,
+            totalStepCount: store.totalStepCount,
+            isPrimaryEnabled: store.isNextButtonEnabled,
+            isSubmitting: store.isOnboardingSubmitting,
+            primaryTitle: store.primaryButtonTitle,
+            loadingTitle: store.appLanguage.localized(.commonLoading),
+            onBack: { store.send(.backButtonTapped) },
+            onPrimary: {
+                store.send(store.currentStep == .phoneVerification ? .onboardingCompleted : .nextButtonTapped)
+            },
+            onBackgroundTapped: dismissKeyboard,
+            content: {
                 VStack(alignment: .leading, spacing: 0) {
                     switch store.currentStep {
                     case .nameAndBirth:
@@ -40,14 +40,8 @@ struct LandlordOnboardingView: View {
                         PhoneVerificationStepView(store: store, activeField: $activeField, keyboardField: $keyboardField)
                     }
                 }
-                .padding(.horizontal, 20)
-
-                Spacer()
-
-                bottomButtonArea
-                    .padding(.horizontal, 20)
             }
-        }
+        )
         .environment(\.locale, store.appLanguage.locale)
     }
 }
@@ -55,55 +49,6 @@ struct LandlordOnboardingView: View {
 // MARK: - Subviews
 
 private extension LandlordOnboardingView {
-    var topProgressBar: some View {
-        HStack(spacing: 8) {
-            ForEach(1...store.totalStepCount, id: \.self) { index in
-                Rectangle()
-                    .fill(store.currentStep.progressIndex == index ? .labelNormal : .fillStrong)
-                    .frame(height: 2)
-            }
-        }
-    }
-
-    var bottomButtonArea: some View {
-        HStack(spacing: 8) {
-            if store.currentStep.progressIndex > 1 {
-                Button {
-                    store.send(.backButtonTapped)
-                } label: {
-                    Image(.arrowLeft24)
-                        .foregroundColor(.labelAlternative)
-                        .frame(width: 48, height: 48)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(.lineNormal, lineWidth: 1)
-                        }
-                }
-            }
-
-            Button {
-                if store.currentStep == .phoneVerification {
-                    store.send(.onboardingCompleted)
-                } else {
-                    store.send(.nextButtonTapped)
-                }
-            } label: {
-                Text(
-                    verbatim: store.isOnboardingSubmitting
-                        ? store.appLanguage.localized(.commonLoading)
-                        : store.primaryButtonTitle
-                )
-                    .kohereTextStyle(.label1Semibold)
-                    .foregroundColor(.staticWhite)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 48)
-                    .background(store.isNextButtonEnabled ? .primaryNormal : .primary10)
-                    .cornerRadius(16)
-            }
-            .disabled(!store.isNextButtonEnabled)
-        }
-    }
-
     func dismissKeyboard() {
         activeField = nil
         keyboardField = nil
