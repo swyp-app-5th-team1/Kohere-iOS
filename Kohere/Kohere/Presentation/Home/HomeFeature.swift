@@ -20,7 +20,6 @@ struct HomeFeature {
         case listingDetail(ListingDetailFeature)
         case listingApplication(ListingApplicationFeature)
         case listingApplicationPrivacyWeb(ListingApplicationPrivacyWebFeature)
-        case notifications(NotificationsFeature)
         case chatBot(ChatBotFeature)
         case livingGuideDetail(LivingGuideDetailFeature)
         case search(SearchFeature)
@@ -76,7 +75,6 @@ struct HomeFeature {
         
         case navigationSearchTapped
         case navigationHeartTapped
-        case navigationNoticeTapped
         
         case roomFinderBannerTapped
         case seeAllListingsTapped
@@ -131,13 +129,6 @@ struct HomeFeature {
                                                    krwToUSDExchangeRate: state.krwToUSDExchangeRate)
                     )
                 )
-                return .none
-                
-            case .navigationNoticeTapped:
-                guard state.userType != nil else {
-                    return .send(.delegate(.authenticationRequired))
-                }
-                state.path.append(.notifications(NotificationsFeature.State()))
                 return .none
                 
             case .roomFinderBannerTapped:

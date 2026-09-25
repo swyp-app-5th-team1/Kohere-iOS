@@ -23,8 +23,7 @@ struct HomeView: View {
                 right: .homeTab(
                     showsHeart: store.showsFavoriteControls,
                     onSearch: { store.send(.navigationSearchTapped) },
-                    onHeart: { store.send(.navigationHeartTapped) },
-                    onNotice: { store.send(.navigationNoticeTapped) }
+                    onHeart: { store.send(.navigationHeartTapped) }
                 )
             )
             
