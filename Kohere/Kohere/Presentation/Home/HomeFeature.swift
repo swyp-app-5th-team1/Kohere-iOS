@@ -20,7 +20,6 @@ struct HomeFeature {
         case listingDetail(ListingDetailFeature)
         case listingApplication(ListingApplicationFeature)
         case listingApplicationPrivacyWeb(ListingApplicationPrivacyWebFeature)
-        case notifications(NotificationsFeature)
         case chatBot(ChatBotFeature)
         case livingGuideDetail(LivingGuideDetailFeature)
         case search(SearchFeature)
@@ -31,9 +30,9 @@ struct HomeFeature {
     @ObservableState
     struct State: Equatable {
         var path = StackState<Path.State>()
-        var recentlyViewed: HomeRecentlyViewedFeature.State
+        var recentlyViewedSection: HomeRecentlyViewedFeature.State
         var quizSection: HomeQuizFeature.State
-        var livingGuide: HomeLivingGuideFeature.State
+        var livingGuideSection: HomeLivingGuideFeature.State
         
         init(
             userType: UserType? = nil,
@@ -42,9 +41,13 @@ struct HomeFeature {
             quiz: Quiz = Quiz.mockQuiz,
             livingGuides: [LivingGuide] = []
         ) {
-            self.recentlyViewed = HomeRecentlyViewedFeature.State(userType: userType, appLanguage: appLanguage, items: recentlyViewedItems)
+            self.recentlyViewedSection = HomeRecentlyViewedFeature.State(
+                userType: userType,
+                appLanguage: appLanguage,
+                items: recentlyViewedItems
+            )
             self.quizSection = HomeQuizFeature.State(quiz: quiz)
-            self.livingGuide = HomeLivingGuideFeature.State(guides: livingGuides)
+            self.livingGuideSection = HomeLivingGuideFeature.State(guides: livingGuides)
         }
     }
     
@@ -66,13 +69,12 @@ struct HomeFeature {
         case delegate(Delegate)
         case onAppear
         case cancelEffects
-        case recentlyViewed(HomeRecentlyViewedFeature.Action)
-        case quiz(HomeQuizFeature.Action)
-        case livingGuide(HomeLivingGuideFeature.Action)
+        case recentlyViewedSection(HomeRecentlyViewedFeature.Action)
+        case quizSection(HomeQuizFeature.Action)
+        case livingGuideSection(HomeLivingGuideFeature.Action)
         
         case navigationSearchTapped
         case navigationHeartTapped
-        case navigationNoticeTapped
         
         case roomFinderBannerTapped
         case seeAllListingsTapped
@@ -83,30 +85,30 @@ struct HomeFeature {
     // MARK: - Reducer Body
     
     var body: some Reducer<State, Action> {
-        Scope(state: \.recentlyViewed, action: \.recentlyViewed) {
+        Scope(state: \.recentlyViewedSection, action: \.recentlyViewedSection) {
             HomeRecentlyViewedFeature()
         }
-        Scope(state: \.quizSection, action: \.quiz) {
+        Scope(state: \.quizSection, action: \.quizSection) {
             HomeQuizFeature()
         }
-        Scope(state: \.livingGuide, action: \.livingGuide) {
+        Scope(state: \.livingGuideSection, action: \.livingGuideSection) {
             HomeLivingGuideFeature()
         }
         
         Reduce { state, action in
             switch action {
             case .onAppear:
-                return .concatenate(
-                    .send(.recentlyViewed(.onAppear)),
-                    .send(.quiz(.onAppear)),
-                    .send(.livingGuide(.onAppear))
+                return .merge(
+                    .send(.recentlyViewedSection(.onAppear)),
+                    .send(.quizSection(.onAppear)),
+                    .send(.livingGuideSection(.onAppear))
                 )
 
             case .cancelEffects:
-                return .concatenate(
-                    .send(.recentlyViewed(.cancelEffects)),
-                    .send(.quiz(.cancelEffects)),
-                    .send(.livingGuide(.cancelEffects))
+                return .merge(
+                    .send(.recentlyViewedSection(.cancelEffects)),
+                    .send(.quizSection(.cancelEffects)),
+                    .send(.livingGuideSection(.cancelEffects))
                 )
 
             case let .path(pathAction):
@@ -127,13 +129,6 @@ struct HomeFeature {
                                                    krwToUSDExchangeRate: state.krwToUSDExchangeRate)
                     )
                 )
-                return .none
-                
-            case .navigationNoticeTapped:
-                guard state.userType != nil else {
-                    return .send(.delegate(.authenticationRequired))
-                }
-                state.path.append(.notifications(NotificationsFeature.State()))
                 return .none
                 
             case .roomFinderBannerTapped:
@@ -164,21 +159,20 @@ struct HomeFeature {
                 )
                 return .none
                 
-            case let .livingGuide(.itemTapped(id)):
-                guard state.canShowLivingContent,
-                      let guide = state.livingGuides.first(where: { $0.id == id }) else {
+            case let .livingGuideSection(.itemTapped(id)):
+                guard let guide = state.livingGuideSection.guides.first(where: { $0.id == id }) else {
                     return .none
                 }
                 state.path.append(.livingGuideDetail(LivingGuideDetailFeature.State(guide: guide)))
                 return .none
 
-            case .recentlyViewed(.likeButtonTapped) where state.userType == nil:
+            case .recentlyViewedSection(.likeButtonTapped) where state.userType == nil:
                 return .send(.delegate(.authenticationRequired))
 
-            case let .recentlyViewed(.favoriteStatusResponse(listingID, .success(status))):
+            case let .recentlyViewedSection(.favoriteStatusResponse(listingID, .success(status))):
                 return .send(.delegate(.favoriteStatusChanged(listingID: listingID, status: status)))
 
-            case .recentlyViewed, .quiz, .livingGuide:
+            case .recentlyViewedSection, .quizSection, .livingGuideSection:
                 return .none
 
             case .delegate:
@@ -193,113 +187,30 @@ extension HomeFeature.Path.State: Equatable {}
 
 extension HomeFeature.State {
     mutating func synchronizeFavoriteStatus(_ status: ListingFavoriteStatus, for listingID: String) {
-        recentlyViewed.synchronizeFavoriteStatus(status, for: listingID)
+        recentlyViewedSection.synchronizeFavoriteStatus(status, for: listingID)
     }
 
     var canUseFavoriteFeatures: Bool {
-        recentlyViewed.canUseFavoriteFeatures
+        recentlyViewedSection.canUseFavoriteFeatures
     }
 
     var showsFavoriteControls: Bool {
         userType != .landlord
     }
 
-    var canShowLivingContent: Bool {
-        true
-    }
-
     var userType: UserType? {
-        get { recentlyViewed.userType }
-        set { recentlyViewed.userType = newValue }
+        get { recentlyViewedSection.userType }
+        set { recentlyViewedSection.userType = newValue }
     }
 
     var appLanguage: AppLanguage {
-        get { recentlyViewed.appLanguage }
-        set { recentlyViewed.appLanguage = newValue }
-    }
-
-    var recentListings: [Listing] {
-        get { recentlyViewed.recentListings }
-        set { recentlyViewed.recentListings = newValue }
-    }
-
-    var recentlyViewedItems: [ListingItemModel] {
-        get { recentlyViewed.items }
-        set { recentlyViewed.items = newValue }
-    }
-
-    var isRecentlyViewedLoading: Bool {
-        get { recentlyViewed.isLoading }
-        set { recentlyViewed.isLoading = newValue }
-    }
-
-    var isRecentlyViewedLoaded: Bool {
-        get { recentlyViewed.isLoaded }
-        set { recentlyViewed.isLoaded = newValue }
-    }
-
-    var favoriteUpdatingIDs: Set<String> {
-        get { recentlyViewed.favoriteUpdatingIDs }
-        set { recentlyViewed.favoriteUpdatingIDs = newValue }
-    }
-
-    var recentlyViewedErrorMessage: String? {
-        get { recentlyViewed.errorMessage }
-        set { recentlyViewed.errorMessage = newValue }
+        get { recentlyViewedSection.appLanguage }
+        set { recentlyViewedSection.appLanguage = newValue }
     }
 
     var krwToUSDExchangeRate: KRWToUSDExchangeRate? {
-        get { recentlyViewed.exchangeRate }
-        set { recentlyViewed.exchangeRate = newValue }
+        get { recentlyViewedSection.exchangeRate }
+        set { recentlyViewedSection.exchangeRate = newValue }
     }
 
-    var isExchangeRateLoading: Bool {
-        get { recentlyViewed.isExchangeRateLoading }
-        set { recentlyViewed.isExchangeRateLoading = newValue }
-    }
-
-    var quiz: QuizModel {
-        get { quizSection.quiz }
-        set { quizSection.quiz = newValue }
-    }
-
-    var isQuizLoading: Bool {
-        get { quizSection.isLoading }
-        set { quizSection.isLoading = newValue }
-    }
-
-    var isQuizLoaded: Bool {
-        get { quizSection.isLoaded }
-        set { quizSection.isLoaded = newValue }
-    }
-
-    var isQuizAnswerSubmitting: Bool {
-        get { quizSection.isAnswerSubmitting }
-        set { quizSection.isAnswerSubmitting = newValue }
-    }
-
-    var quizErrorMessage: String? {
-        get { quizSection.errorMessage }
-        set { quizSection.errorMessage = newValue }
-    }
-
-    var livingGuides: [LivingGuide] {
-        get { livingGuide.guides }
-        set { livingGuide.guides = newValue }
-    }
-
-    var isLivingGuidesLoading: Bool {
-        get { livingGuide.isLoading }
-        set { livingGuide.isLoading = newValue }
-    }
-
-    var isLivingGuidesLoaded: Bool {
-        get { livingGuide.isLoaded }
-        set { livingGuide.isLoaded = newValue }
-    }
-
-    var livingGuidesErrorMessage: String? {
-        get { livingGuide.errorMessage }
-        set { livingGuide.errorMessage = newValue }
-    }
 }

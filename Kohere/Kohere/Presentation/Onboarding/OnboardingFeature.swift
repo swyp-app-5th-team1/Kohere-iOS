@@ -63,10 +63,10 @@ struct OnboardingFeature {
     var body: some Reducer<State, Action> {
         Reduce { _, action in
             switch action {
-            case let .tenant(.onboardingResponse(.success(auth))):
+            case let .tenant(.delegate(.completed(auth))):
                 return .send(.delegate(.completed(auth)))
 
-            case let .landlord(.onboardingResponse(.success(auth))):
+            case let .landlord(.delegate(.completed(auth))):
                 return .send(.delegate(.completed(auth)))
 
             case let .tenant(.popupRequested(popup)),

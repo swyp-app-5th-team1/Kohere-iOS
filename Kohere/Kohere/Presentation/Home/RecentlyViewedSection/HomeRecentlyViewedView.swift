@@ -1,23 +1,23 @@
 //
-//  RecentlyViewedView.swift
+//  HomeRecentlyViewedView.swift
 //  Kohere
 //
 //  Created by soomin on 6/23/26.
 //
 
+import ComposableArchitecture
 import SwiftUI
 
-struct RecentlyViewedView: View {
+struct HomeRecentlyViewedView: View {
     
     // MARK: - Properties
     
-    let items: [ListingItemModel]
+    let store: StoreOf<HomeRecentlyViewedFeature>
     let showsLikeButtons: Bool
     
     let onSeeAllTapped: () -> Void
     let onBrowseTapped: () -> Void
     let onCardTapped: (String) -> Void
-    let onLikeTapped: (String) -> Void
     
     // MARK: - Body
     
@@ -40,7 +40,7 @@ struct RecentlyViewedView: View {
             .padding(.horizontal, 28)
             .padding(.bottom, 16)
             
-            if items.isEmpty {
+            if store.items.isEmpty {
                 emptyView
             } else {
                 listView
@@ -80,12 +80,12 @@ struct RecentlyViewedView: View {
     private var listView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 16) {
-                ForEach(items) { item in
+                ForEach(store.items) { item in
                     HomeListingCardView(
                         item: item,
                         showsLikeButton: showsLikeButtons,
                         onCardTapped: onCardTapped,
-                        onLikeTapped: onLikeTapped
+                        onLikeTapped: { store.send(.likeButtonTapped(id: $0)) }
                     )
                 }
             }

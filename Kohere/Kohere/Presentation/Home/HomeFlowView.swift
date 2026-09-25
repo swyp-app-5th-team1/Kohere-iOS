@@ -47,10 +47,6 @@ struct HomeFlowView: View {
                     ListingApplicationPrivacyWebView(store: listingApplicationPrivacyWebStore)
                         .navigationBarHidden(true)
                     
-                case let .notifications(notificationsStore):
-                    NotificationsView(store: notificationsStore)
-                        .navigationBarHidden(true)
-                    
                 case let .chatBot(chatBotStore):
                     ChatBotView(store: chatBotStore)
                         .navigationBarHidden(true)

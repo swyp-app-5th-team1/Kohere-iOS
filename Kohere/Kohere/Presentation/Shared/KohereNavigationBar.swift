@@ -31,7 +31,7 @@ struct NavigationPopover {
 enum NavigationRight {
     case none
     case closeButton(() -> Void)
-    case homeTab(showsHeart: Bool = true, onSearch: () -> Void, onHeart: () -> Void, onNotice: () -> Void)
+    case homeTab(showsHeart: Bool = true, onSearch: () -> Void, onHeart: () -> Void)
     case moreTab(
         showsLanguage: Bool = true,
         languagePopover: NavigationPopover? = nil,
@@ -159,7 +159,7 @@ extension KohereNavigationBar {
             }
             .accessibilityLabel(Text(.commonClose))
             
-        case .homeTab(let showsHeart, let onSearch, let onHeart, let onNotice):
+        case .homeTab(let showsHeart, let onSearch, let onHeart):
             HStack(spacing: 18) {
                 Button(action: onSearch) {
                     Image(.search24)
@@ -173,14 +173,8 @@ extension KohereNavigationBar {
                         Image(.heart24)
                             .renderingMode(.template)
                             .foregroundColor(rightColor)
-                            .frame(width: 24, height: 24)
-                    }
-                }
-                Button(action: onNotice) {
-                    Image(.bell24)
-                        .renderingMode(.template)
-                        .foregroundColor(rightColor)
                         .frame(width: 24, height: 24)
+                    }
                 }
             }
             

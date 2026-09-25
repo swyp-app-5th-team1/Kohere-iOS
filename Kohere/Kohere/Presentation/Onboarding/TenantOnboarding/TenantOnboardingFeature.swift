@@ -8,8 +8,8 @@
 import ComposableArchitecture
 import Foundation
 
-private enum TenantOnboardingEffectID {
-    static let completeOnboarding = "TenantOnboardingFeature.completeOnboarding"
+private nonisolated enum TenantOnboardingEffectID: Hashable, Sendable {
+    case completeOnboarding
 }
 
 @Reducer
@@ -56,6 +56,10 @@ struct TenantOnboardingFeature {
 
     // MARK: - Action
 
+    enum Delegate: Equatable {
+        case completed(Auth)
+    }
+
     enum Action: BindableAction, Equatable {
         case binding(BindingAction<State>)
         case nextButtonTapped
@@ -63,6 +67,7 @@ struct TenantOnboardingFeature {
         case onboardingCompleted
         case onboardingResponse(Result<Auth, DataError>)
         case popupRequested(AppPopup)
+        case delegate(Delegate)
     }
 
     // MARK: - Reducer Body
@@ -109,15 +114,15 @@ struct TenantOnboardingFeature {
                 }
                 .cancellable(id: TenantOnboardingEffectID.completeOnboarding, cancelInFlight: true)
 
-            case .onboardingResponse(.success):
+            case let .onboardingResponse(.success(auth)):
                 state.isOnboardingSubmitting = false
-                return .none
+                return .send(.delegate(.completed(auth)))
 
             case .onboardingResponse(.failure):
                 state.isOnboardingSubmitting = false
                 return .send(.popupRequested(OnboardingErrorPopup.make(context: .completeProfile, language: state.appLanguage)))
 
-            case .popupRequested:
+            case .popupRequested, .delegate:
                 return .none
             }
         }

@@ -10,8 +10,8 @@ import Foundation
 
 @Reducer
 struct MoreFeature {
-    @Dependency(\.lifeTipClient)
-    var lifeTipClient
+    @Dependency(\.fetchLivingGuideTopicsUseCase)
+    var fetchLivingGuideTopics
 
     @Dependency(\.openURL)
     var openURL
@@ -53,7 +53,7 @@ struct MoreFeature {
     enum Action {
         case path(StackActionOf<Path>)
         case onAppear
-        case lifeTipTopicsResponse(Result<[LivingGuide], DataError>)
+        case livingGuideTopicsResponse(Result<[LivingGuide], DataError>)
         case navigationLanguageTapped
         case languagePopoverPresentationChanged(Bool)
         case languageSelected(AppLanguage)
@@ -94,23 +94,23 @@ struct MoreFeature {
                 state.isLivingGuidesLoading = true
                 state.livingGuidesErrorMessage = nil
 
-                return .run { [lifeTipClient] send in
+                return .run { [fetchLivingGuideTopics] send in
                     do {
-                        let topics = try await lifeTipClient.fetchTopics()
-                        await send(.lifeTipTopicsResponse(.success(topics)))
+                        let topics = try await fetchLivingGuideTopics.execute()
+                        await send(.livingGuideTopicsResponse(.success(topics)))
                     } catch {
-                        await send(.lifeTipTopicsResponse(.failure(.from(error))))
+                        await send(.livingGuideTopicsResponse(.failure(.from(error))))
                     }
                 }
 
-            case let .lifeTipTopicsResponse(.success(guides)):
+            case let .livingGuideTopicsResponse(.success(guides)):
                 state.isLivingGuidesLoading = false
                 state.isLivingGuidesLoaded = true
                 state.livingGuidesErrorMessage = nil
                 state.livingGuides = guides
                 return .none
 
-            case let .lifeTipTopicsResponse(.failure(error)):
+            case let .livingGuideTopicsResponse(.failure(error)):
                 state.isLivingGuidesLoading = false
                 state.isLivingGuidesLoaded = false
                 state.livingGuidesErrorMessage = error.localizedDescription

@@ -1,5 +1,5 @@
 //
-//  LifeTipInterface.swift
+//  LivingGuideInterface.swift
 //  Kohere
 //
 //  Created by soomin on 7/8/26.
@@ -9,20 +9,20 @@ import ComposableArchitecture
 
 // MARK: - Interface
 
-protocol LifeTipInterface {
+protocol LivingGuideInterface {
     func fetchTopics() async throws -> [LivingGuide]
     func fetchTips(topicCode: String) async throws -> [LivingGuideTip]
 }
 
 // MARK: - Client
 
-struct LifeTipClient: Sendable {
+struct LivingGuideClient: Sendable {
     var fetchTopics: @Sendable () async throws -> [LivingGuide]
     var fetchTips: @Sendable (_ topicCode: String) async throws -> [LivingGuideTip]
 }
 
-extension LifeTipClient {
-    init(repository: any LifeTipInterface) {
+extension LivingGuideClient {
+    init(repository: any LivingGuideInterface) {
         self.init(
             fetchTopics: {
                 try await repository.fetchTopics()
@@ -37,8 +37,8 @@ extension LifeTipClient {
 // MARK: - Dependency
 
 extension DependencyValues {
-    var lifeTipClient: LifeTipClient {
-        get { self[LifeTipClient.self] }
-        set { self[LifeTipClient.self] = newValue }
+    var livingGuideClient: LivingGuideClient {
+        get { self[LivingGuideClient.self] }
+        set { self[LivingGuideClient.self] = newValue }
     }
 }

@@ -8,10 +8,10 @@
 import ComposableArchitecture
 import Foundation
 
-private enum LandlordOnboardingEffectID {
-    static let sendPhoneVerificationCode = "LandlordOnboardingFeature.sendPhoneVerificationCode"
-    static let confirmPhoneVerificationCode = "LandlordOnboardingFeature.confirmPhoneVerificationCode"
-    static let completeOnboarding = "LandlordOnboardingFeature.completeOnboarding"
+private nonisolated enum LandlordOnboardingEffectID: Hashable, Sendable {
+    case sendPhoneVerificationCode
+    case confirmPhoneVerificationCode
+    case completeOnboarding
 }
 
 @Reducer
@@ -68,6 +68,10 @@ struct LandlordOnboardingFeature {
     
     // MARK: - Action
     
+    enum Delegate: Equatable {
+        case completed(Auth)
+    }
+
     enum Action: BindableAction, Equatable {
         case binding(BindingAction<State>)
         case nextButtonTapped
@@ -79,6 +83,7 @@ struct LandlordOnboardingFeature {
         case onboardingCompleted
         case onboardingResponse(Result<Auth, DataError>)
         case popupRequested(AppPopup)
+        case delegate(Delegate)
     }
     
     // MARK: - Reducer Body
@@ -233,9 +238,9 @@ struct LandlordOnboardingFeature {
                 }
                 .cancellable(id: LandlordOnboardingEffectID.completeOnboarding, cancelInFlight: true)
                 
-            case .onboardingResponse(.success):
+            case let .onboardingResponse(.success(auth)):
                 state.isOnboardingSubmitting = false
-                return .none
+                return .send(.delegate(.completed(auth)))
                 
             case .onboardingResponse(.failure):
                 state.isOnboardingSubmitting = false
@@ -245,7 +250,7 @@ struct LandlordOnboardingFeature {
                     )
                 )
 
-            case .popupRequested:
+            case .popupRequested, .delegate:
                 return .none
             }
         }

@@ -23,8 +23,7 @@ struct HomeView: View {
                 right: .homeTab(
                     showsHeart: store.showsFavoriteControls,
                     onSearch: { store.send(.navigationSearchTapped) },
-                    onHeart: { store.send(.navigationHeartTapped) },
-                    onNotice: { store.send(.navigationNoticeTapped) }
+                    onHeart: { store.send(.navigationHeartTapped) }
                 )
             )
             
@@ -36,24 +35,23 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     RoomFinderBannerView(store: store)
                     
-                    RecentlyViewedView(
-                        items: store.recentlyViewedItems,
+                    HomeRecentlyViewedView(
+                        store: store.scope(state: \.recentlyViewedSection, action: \.recentlyViewedSection),
                         showsLikeButtons: store.showsFavoriteControls,
                         onSeeAllTapped: { store.send(.seeAllListingsTapped) },
                         onBrowseTapped: { store.send(.browseListingsTapped) },
-                        onCardTapped: { id in store.send(.cardTapped(id: id)) },
-                        onLikeTapped: { id in store.send(.recentlyViewed(.likeButtonTapped(id: id))) }
+                        onCardTapped: { id in store.send(.cardTapped(id: id)) }
                     )
                     
                     homeDivider
                     
-                    if store.canShowLivingContent {
-                        QuizView(store: store.scope(state: \.quizSection, action: \.quiz))
+                    HomeQuizView(store: store.scope(state: \.quizSection, action: \.quizSection))
 
-                        homeDivider
+                    homeDivider
 
-                        LivingInKoreaView(store: store.scope(state: \.livingGuide, action: \.livingGuide))
-                    }
+                    HomeLivingGuideView(
+                        store: store.scope(state: \.livingGuideSection, action: \.livingGuideSection)
+                    )
                 }
                 .background(.backgroundNormalNormal)
             }

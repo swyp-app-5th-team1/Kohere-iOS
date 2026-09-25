@@ -9,29 +9,50 @@ import ComposableArchitecture
 import Foundation
 
 private extension HomeQuizFeature {
-    enum EffectID {
-        static let quiz = "HomeFeature.quiz"
-        static let answer = "HomeFeature.quizAnswer"
+    nonisolated enum EffectID: Hashable, Sendable {
+        case quiz
+        case answer
     }
 }
 
 @Reducer
 struct HomeQuizFeature {
-    @Dependency(\.quizClient)
-    var quizClient
+    @Dependency(\.fetchRandomQuizUseCase)
+    var fetchRandomQuiz
+
+    @Dependency(\.submitQuizAnswerUseCase)
+    var submitQuizAnswer
 
     // MARK: - State
     
     @ObservableState
     struct State: Equatable {
-        var quiz: QuizModel
+        var quiz: Quiz
+        var selectedChoiceKey: String?
+        var answerResult: QuizAnswerResult?
         var isLoading = false
         var isLoaded = false
         var isAnswerSubmitting = false
         var errorMessage: String?
 
+        var hasAnswered: Bool {
+            selectedChoiceKey != nil && correctChoiceKey != nil
+        }
+
+        var correctChoiceKey: String? {
+            answerResult?.correctChoiceKey ?? quiz.correctChoiceKey
+        }
+
+        var explanation: String? {
+            answerResult?.explanation ?? quiz.explanation
+        }
+
+        var shouldShowExplanation: Bool {
+            hasAnswered && !(explanation ?? "").isEmpty
+        }
+
         init(quiz: Quiz = Quiz.mockQuiz) {
-            self.quiz = QuizModel(entity: quiz, selectedChoiceKey: nil)
+            self.quiz = quiz
         }
     }
 
@@ -54,9 +75,9 @@ struct HomeQuizFeature {
                 guard !state.isLoading, !state.isLoaded else { return .none }
                 state.isLoading = true
                 state.errorMessage = nil
-                return .run { [quizClient] send in
+                return .run { [fetchRandomQuiz] send in
                     do {
-                        let quiz = try await quizClient.fetchRandomQuiz()
+                        let quiz = try await fetchRandomQuiz.execute()
                         await send(.randomQuizResponse(.success(quiz)))
                     } catch {
                         await send(.randomQuizResponse(.failure(.from(error))))
@@ -71,7 +92,9 @@ struct HomeQuizFeature {
                 )
 
             case let .randomQuizResponse(.success(quiz)):
-                state.quiz = QuizModel(entity: quiz)
+                state.quiz = quiz
+                state.selectedChoiceKey = nil
+                state.answerResult = nil
                 state.isLoading = false
                 state.isLoaded = true
                 state.errorMessage = nil
@@ -84,18 +107,19 @@ struct HomeQuizFeature {
 
             case let .optionTapped(index):
                 guard state.isLoaded,
-                      !state.quiz.hasAnswered,
+                      !state.hasAnswered,
                       !state.isAnswerSubmitting,
-                      let selectedChoiceKey = state.quiz.choiceKey(for: index)
+                      state.quiz.choices.indices.contains(index)
                 else { return .none }
 
-                state.quiz.selectedChoiceKey = selectedChoiceKey
+                let selectedChoiceKey = state.quiz.choices[index].key
+                state.selectedChoiceKey = selectedChoiceKey
                 state.isAnswerSubmitting = true
                 state.errorMessage = nil
 
-                return .run { [quizClient, quizID = state.quiz.id] send in
+                return .run { [submitQuizAnswer, quizID = state.quiz.id] send in
                     do {
-                        let result = try await quizClient.submitAnswer(quizID, selectedChoiceKey)
+                        let result = try await submitQuizAnswer.execute(quizID, selectedChoiceKey)
                         await send(.answerResponse(.success(result)))
                     } catch {
                         await send(.answerResponse(.failure(.from(error))))
@@ -104,13 +128,15 @@ struct HomeQuizFeature {
                 .cancellable(id: EffectID.answer, cancelInFlight: true)
 
             case let .answerResponse(.success(result)):
-                state.quiz.apply(answerResult: result)
+                state.selectedChoiceKey = result.selectedChoiceKey
+                state.answerResult = result
                 state.isAnswerSubmitting = false
                 state.errorMessage = nil
                 return .none
 
             case let .answerResponse(.failure(error)):
-                state.quiz.selectedChoiceKey = nil
+                state.selectedChoiceKey = nil
+                state.answerResult = nil
                 state.isAnswerSubmitting = false
                 state.errorMessage = error.localizedDescription
                 return .none
