@@ -15,8 +15,8 @@ extension MapFeature {
         state: inout State
     ) -> Effect<Action> {
         state.path = StackState<Path.State>()
-        state.activeDiagnosisID = diagnosisID
-        state.listingSource = .diagnosis
+        // 새 진단은 항상 빈 진단 데이터로 시작한다. 이전 모드(또는 이전 진단)의 데이터는 여기서 함께 사라진다.
+        state.searchMode = .diagnosis(MapDiagnosisSearchState(diagnosisID: diagnosisID))
         state.clearSelectedListing()
         state.isFilterPresented = false
         state.appliedFilterSource = .diagnosis
@@ -28,10 +28,6 @@ extension MapFeature {
         state.showsResearchButton = false
         state.viewportSearchTrigger = .onFirstIdle
         state.markers = []
-        state.listings = []
-        state.listingSearchResults = []
-        clearDiagnosisRecommendationState(state: &state)
-        state.isListingSearchLoading = false
         state.isDiagnosisDetailLoading = state.userType != nil
         state.isRecommendationsLoading = true
         state.listingSearchErrorMessage = nil
@@ -191,7 +187,6 @@ extension MapFeature {
             state.diagnosisRecommendedListings.appendUnique(contentsOf: recommendations.listings)
         }
 
-        rebuildListingItems(to: &state)
     }
 
     func startDiagnosisMapEffect(diagnosisID: Int, state: inout State) -> Effect<Action> {
@@ -229,16 +224,6 @@ extension MapFeature {
             state.diagnosisMapErrorMessage = error.localizedDescription
         }
         return .none
-    }
-
-    func clearDiagnosisRecommendationState(state: inout State) {
-        state.isRecommendationsLoading = false
-        state.recommendationsErrorMessage = nil
-        state.diagnosisRecommendedListings = []
-        state.diagnosisRecommendationPageInfo = nil
-        state.diagnosisMapRequestID = nil
-        state.diagnosisMapTotal = nil
-        state.diagnosisMapErrorMessage = nil
     }
 
     func cancelDiagnosisRequestEffects() -> Effect<Action> {

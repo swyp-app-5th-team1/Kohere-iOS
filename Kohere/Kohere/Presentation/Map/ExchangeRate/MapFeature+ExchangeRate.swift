@@ -22,6 +22,5 @@ extension MapFeature {
 
     func applyExchangeRate(_ exchangeRate: KRWToUSDExchangeRate, to state: inout State) {
         state.krwToUSDExchangeRate = exchangeRate
-        rebuildListingItems(to: &state)
     }
 }

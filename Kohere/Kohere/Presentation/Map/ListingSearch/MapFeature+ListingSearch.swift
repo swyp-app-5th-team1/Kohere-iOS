@@ -82,7 +82,6 @@ extension MapFeature {
             state.isListingSearchLoading = false
             state.listingSearchErrorMessage = nil
             state.listingSearchResults = []
-            state.listings = []
             state.markers = []
             return .merge(
                 .cancel(id: MapEffectID.listingSearch),
@@ -114,12 +113,10 @@ extension MapFeature {
         }
     }
 
+    /// 위치 검색 모드로 바꾼다. 진단 모드였다면 진단 데이터는 모드 전환과 함께 사라진다.
+    /// 이미 위치 검색 모드면 기존 결과를 유지한다. (새 결과가 올 때까지 화면이 비지 않도록)
     private func prepareLocationSearchMode(state: inout State) {
         state.listingSource = .locationSearch
-        state.activeDiagnosisID = nil
-        state.isDiagnosisDetailLoading = false
-        state.diagnosisErrorMessage = nil
-        clearDiagnosisRecommendationState(state: &state)
     }
 
     // MARK: - Request / Response
@@ -270,69 +267,9 @@ extension MapFeature {
             state.listingSearchResults.appendUnique(contentsOf: page.content)
         }
 
-        rebuildListingItems(to: &state)
-
         if let selectedMarkerID = state.selectedMarkerID,
            !state.markers.contains(where: { $0.id == selectedMarkerID }) {
             state.clearSelectedListing()
         }
-    }
-
-    // MARK: - Shared Listing Presentation
-
-    func listingItemModels(
-        from listings: [Listing],
-        exchangeRate: KRWToUSDExchangeRate?,
-        language: AppLanguage
-    ) -> [ListingItemModel] {
-        listings.map {
-            ListingItemModel(
-                listing: $0,
-                exchangeRate: exchangeRate,
-                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
-                language: language
-            )
-        }
-    }
-
-    func listingItemModels(
-        from recommendations: [DiagnosisRecommendedListing],
-        exchangeRate: KRWToUSDExchangeRate?,
-        language: AppLanguage
-    ) -> [ListingItemModel] {
-        recommendations.map {
-            ListingItemModel(
-                recommendation: $0,
-                exchangeRate: exchangeRate,
-                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
-                language: language
-            )
-        }
-    }
-
-    func rebuildListingItems(to state: inout State) {
-        switch state.listingSource {
-        case .locationSearch:
-            state.listings = listingItemModels(
-                from: state.listingSearchResults,
-                exchangeRate: state.krwToUSDExchangeRate,
-                language: state.appLanguage
-            )
-
-        case .diagnosis:
-            state.listings = listingItemModels(
-                from: state.diagnosisRecommendedListings,
-                exchangeRate: state.krwToUSDExchangeRate,
-                language: state.appLanguage
-            )
-
-        case .idle:
-            return
-        }
-
-        applyFavoriteStatusOverrides(
-            to: &state.listings,
-            statusByID: state.favoriteStatusesByListingID
-        )
     }
 }

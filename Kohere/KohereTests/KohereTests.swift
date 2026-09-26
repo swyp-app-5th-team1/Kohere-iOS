@@ -601,9 +601,10 @@ final class MapFavoriteSyncTests: XCTestCase {
         var state = MapFeature.State()
         let status = ListingFavoriteStatus(isFavorited: false, favoriteCount: 4)
 
-        state.listings = [
-            makeListingItem(id: "listing-1", isLiked: true, favoriteCount: 5),
-            makeListingItem(id: "listing-2", isLiked: true, favoriteCount: 8)
+        state.listingSource = .locationSearch
+        state.listingSearchResults = [
+            makeMapTestListing(id: "listing-1", isFavorited: true, favoriteCount: 5),
+            makeMapTestListing(id: "listing-2", isFavorited: true, favoriteCount: 8)
         ]
 
         state.synchronizeFavoriteStatus(status, for: "listing-1")
@@ -670,29 +671,24 @@ final class MapListingNavigationTests: XCTestCase {
         }
     }
 
-    func testListingMapPreviewPreservesResultsAndPreparesLocationSearch() async {
+    // 진단에서 넘어오면 진단 카드는 모드 전환과 함께 사라지고, 마커는 새 결과가 올 때까지 남는다.
+    func testListingMapPreviewFromDiagnosisKeepsMarkersAndPreparesLocationSearch() async {
         let coordinate = MapCoordinate(latitude: 37.5559, longitude: 126.9250)
         let marker = MapMarkerItem(id: "listing-1", coordinate: coordinate)
-        let listing = ListingItemModel(
-            id: "listing-1",
-            formattedPrice: "₩500,000 / month",
-            formattedUsdPrice: "$360 / month",
-            detailsDescription: "Studio",
-            locationDescription: "Seoul",
-            typeTag: "Apartment",
-            period: "6 months",
-            isLiked: false
-        )
         var initialState = MapFeature.State()
         initialState.path.append(
             .listingDetail(ListingDetailFeature.State(listingID: "listing-1"))
         )
         initialState.markers = [marker]
-        initialState.listings = [listing]
         initialState.selectedMarkerID = marker.id
         initialState.sheetMode = .selectedListing
         initialState.listingSource = .diagnosis
         initialState.activeDiagnosisID = 1
+        initialState.diagnosisRecommendedListings = [DiagnosisRecommendedListing(
+            listingID: "listing-1", title: "Listing", type: "Apartment",
+            minMonthlyRent: 500_000, maxMonthlyRent: 500_000, minDeposit: 0, maxDeposit: 0,
+            thumbnailURL: nil, coordinate: coordinate, nearestTransit: nil
+        )]
         initialState.appliedFilterSource = .diagnosis
         initialState.isListingSearchLoading = true
         initialState.isRecommendationsLoading = true
@@ -720,7 +716,7 @@ final class MapListingNavigationTests: XCTestCase {
         }
 
         XCTAssertEqual(store.state.markers, [marker])
-        XCTAssertEqual(store.state.listings, [listing])
+        XCTAssertTrue(store.state.listings.isEmpty)
     }
 }
 
@@ -730,6 +726,8 @@ final class MapDiagnosisRecommendationTests: XCTestCase {
         let firstCoordinate = MapCoordinate(latitude: 37.604268, longitude: 127.046761)
         let nextCoordinate = MapCoordinate(latitude: 37.595316, longitude: 127.051202)
         var state = MapFeature.State()
+        // 진단 추천 데이터는 진단 모드 안에만 존재한다. 실제 흐름에서는 진단 진입이 먼저 모드를 바꾼다.
+        state.listingSource = .diagnosis
         let allMarkers = [
             MapMarkerItem(id: "listing-1", coordinate: firstCoordinate),
             MapMarkerItem(id: "listing-2", coordinate: nextCoordinate),
@@ -1368,7 +1366,8 @@ final class RootFavoritePropagationTests: XCTestCase {
         let status = ListingFavoriteStatus(isFavorited: true, favoriteCount: 7)
         var state = RootFeature.State(isAuthLoading: false)
         state.home.recentlyViewedItems = [makeListingItem(isLiked: false, favoriteCount: 6)]
-        state.map.listings = [makeListingItem(isLiked: false, favoriteCount: 6)]
+        state.map.listingSource = .locationSearch
+        state.map.listingSearchResults = [makeMapTestListing(id: "listing-1", isFavorited: false, favoriteCount: 6)]
         state.map.path.append(
             .listingDetail(
                 ListingDetailFeature.State(
@@ -1399,10 +1398,11 @@ final class RootFavoritePropagationTests: XCTestCase {
             $0.map.path[id: detailID, case: \.listingDetail]?.detail?.overview.favoriteCount = 7
             $0.home.recentlyViewedItems[0].isLiked = true
             $0.home.recentlyViewedItems[0].favoriteCount = 7
-            $0.map.listings[0].isLiked = true
-            $0.map.listings[0].favoriteCount = 7
             $0.map.favoriteStatusesByListingID["listing-1"] = status
         }
+        // 지도 카드는 찜 상태를 반영해 계산된다.
+        XCTAssertEqual(store.state.map.listings.first?.isLiked, true)
+        XCTAssertEqual(store.state.map.listings.first?.favoriteCount, 7)
     }
 
     private func makeListingItem(
@@ -1785,4 +1785,15 @@ private final class HomeCancellationSpy: @unchecked Sendable {
             self.cancelled.fulfill()
         }
     }
+}
+
+/// 지도 카드 목록은 원본에서 계산되므로, 지도 테스트는 원본 `Listing`으로 상태를 만든다.
+private func makeMapTestListing(id: String, isFavorited: Bool, favoriteCount: Int) -> Listing {
+    Listing(
+        listingID: id, title: "Listing \(id)", type: "Apartment",
+        minMonthlyRent: 500_000, maxMonthlyRent: 500_000, minDeposit: 0, maxDeposit: 0,
+        minMaintenanceFee: nil, maxMaintenanceFee: nil, minStayMonths: 6, maxStayMonths: nil,
+        thumbnailURL: nil, coordinate: nil, address: "Seoul", nearestTransit: nil,
+        distanceMeters: nil, isFavorited: isFavorited, favoriteCount: favoriteCount
+    )
 }

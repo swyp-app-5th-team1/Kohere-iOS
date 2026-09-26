@@ -5,6 +5,8 @@
 //  Created by Codex on 7/5/26.
 //
 
+import Foundation
+
 enum MapSheetMode: Equatable {
     case listingList
     case selectedListing
@@ -15,6 +17,40 @@ enum MapListingSource: Equatable {
     case idle
     case locationSearch
     case diagnosis
+}
+
+/// 지도 목록의 검색 모드와, 그 모드에서만 의미 있는 데이터.
+/// 데이터를 연관값으로 들고 있어 모드를 바꾸면 이전 모드의 데이터가 함께 사라진다.
+enum MapSearchMode: Equatable {
+    case idle
+    case locationSearch(MapLocationSearchState)
+    case diagnosis(MapDiagnosisSearchState)
+}
+
+/// 위치 기반 일반 검색 모드의 데이터.
+struct MapLocationSearchState: Equatable {
+    /// 서버 원본. 화면용 `listings`는 이 값으로 계산한다.
+    var results: [Listing] = []
+    var pageInfo: PageInfo?
+    var isLoading = false
+    var errorMessage: String?
+}
+
+/// 진단 추천 모드의 데이터.
+struct MapDiagnosisSearchState: Equatable {
+    /// 지금 기다리는 진단. 늦게 도착한 다른 진단의 응답을 거르는 기준이다.
+    var diagnosisID: Int?
+    /// 서버 원본. 화면용 `listings`는 이 값으로 계산한다.
+    var recommendations: [DiagnosisRecommendedListing] = []
+    var pageInfo: PageInfo?
+    var isRecommendationsLoading = false
+    var recommendationsErrorMessage: String?
+    /// 진단 마커 요청 추적. 지도 이탈 후 재진입 시 누락된 마커를 다시 조회하는 판단에 쓴다.
+    var mapRequestID: UUID?
+    var mapTotal: Int?
+    var mapErrorMessage: String?
+    var isDetailLoading = false
+    var detailErrorMessage: String?
 }
 
 /// 적용된 필터가 진단 조건인지. 표시용이며 목록 데이터 출처와는 별개다.
