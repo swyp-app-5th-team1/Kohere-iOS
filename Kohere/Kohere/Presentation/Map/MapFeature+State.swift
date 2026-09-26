@@ -55,8 +55,7 @@ extension MapFeature {
 
         // 지도 viewport / 카메라 요청
         var currentViewport: MapViewport?
-        var lastSearchedViewport: MapViewport?
-        var pendingViewportSearchTarget: MapPendingViewportSearchTarget?
+        var viewportSearchTrigger: MapViewportSearchTrigger = .onFirstIdle
         var selectedPlaceSearchTitle: String?
         var showsResearchButton = false
         var cameraMoveRequest: MapCameraMoveRequest?
@@ -137,10 +136,6 @@ extension MapFeature {
         case filterApplyButtonTapped
         case filterResetButtonTapped
     }
-}
-
-struct MapPendingViewportSearchTarget: Equatable {
-    let coordinate: MapCoordinate
 }
 
 extension MapFeature.State {

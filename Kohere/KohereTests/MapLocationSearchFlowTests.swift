@@ -100,7 +100,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
             $0.listingSource = .locationSearch
             $0.activeDiagnosisID = nil
             $0.appliedFilterSource = .manual
-            $0.pendingViewportSearchTarget = MapPendingViewportSearchTarget(coordinate: coordinate)
+            $0.viewportSearchTrigger = .onArrival(at: coordinate)
             $0.selectedPlaceSearchTitle = placeResult.title
             $0.cameraMoveRequest = MapCameraMoveRequest(
                 coordinate: coordinate,
@@ -126,7 +126,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
         )
         var initialState = MapFeature.State()
         initialState.listingSource = .locationSearch
-        initialState.pendingViewportSearchTarget = MapPendingViewportSearchTarget(coordinate: target)
+        initialState.viewportSearchTrigger = .onArrival(at: target)
 
         let store = TestStore(initialState: initialState) {
             MapFeature()
@@ -143,8 +143,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
 
         await store.send(.viewportChanged(targetViewport)) {
             $0.currentViewport = targetViewport
-            $0.pendingViewportSearchTarget = nil
-            $0.lastSearchedViewport = targetViewport
+            $0.viewportSearchTrigger = .manual(lastSearched: targetViewport)
             $0.isListingSearchLoading = true
         }
         await store.receive {
@@ -182,7 +181,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
         var initialState = MapFeature.State()
         initialState.listingSource = .locationSearch
         initialState.currentViewport = previousViewport
-        initialState.lastSearchedViewport = previousViewport
+        initialState.viewportSearchTrigger = .manual(lastSearched: previousViewport)
 
         let store = TestStore(initialState: initialState) {
             MapFeature()

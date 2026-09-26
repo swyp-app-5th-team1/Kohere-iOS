@@ -117,7 +117,7 @@ struct MapListingSheetView: View {
             return false
 
         case .locationSearch:
-            return store.lastSearchedViewport != nil
+            return store.viewportSearchTrigger.lastSearchedViewport != nil
 
         case .diagnosis:
             return true

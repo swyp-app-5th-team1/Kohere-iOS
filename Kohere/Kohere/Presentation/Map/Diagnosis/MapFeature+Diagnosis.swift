@@ -22,12 +22,11 @@ extension MapFeature {
         state.appliedFilterSource = .diagnosis
         state.appliedFilter = filter
         state.editingFilter = filter
-        state.pendingViewportSearchTarget = nil
         state.selectedPlaceSearchTitle = nil
         state.isDiagnosisButtonExpanded = false
         state.isDiagnosisMatchesButtonExpanded = true
         state.showsResearchButton = false
-        state.lastSearchedViewport = nil
+        state.viewportSearchTrigger = .onFirstIdle
         state.markers = []
         state.listings = []
         state.listingSearchResults = []
@@ -186,7 +185,7 @@ extension MapFeature {
                 }
             }
             if cameraCoordinate == nil {
-                state.lastSearchedViewport = state.currentViewport
+                state.viewportSearchTrigger = state.currentViewport.map { .manual(lastSearched: $0) } ?? .onFirstIdle
             }
         } else {
             state.diagnosisRecommendedListings.appendUnique(contentsOf: recommendations.listings)

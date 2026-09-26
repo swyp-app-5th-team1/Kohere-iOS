@@ -34,7 +34,6 @@ extension MapFeature {
         case .researchCurrentViewport:
             guard let viewport = state.currentViewport else { return .none }
             prepareLocationSearchMode(state: &state)
-            state.pendingViewportSearchTarget = nil
             state.selectedPlaceSearchTitle = nil
             state.clearSelectedListing()
             return .merge(
@@ -44,7 +43,6 @@ extension MapFeature {
 
         case .filterApplied:
             prepareLocationSearchMode(state: &state)
-            state.pendingViewportSearchTarget = nil
             let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
             guard let viewport = state.currentViewport else { return cancelDiagnosisRequests }
             return .merge(
@@ -59,7 +57,6 @@ extension MapFeature {
                 state.editingFilter = MapFilterState()
             }
             state.appliedFilterSource = .manual
-            state.pendingViewportSearchTarget = nil
             state.selectedPlaceSearchTitle = nil
             state.clearSelectedListing()
             let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
@@ -72,9 +69,7 @@ extension MapFeature {
         case let .placeResult(placeResult):
             prepareLocationSearchMode(state: &state)
             state.appliedFilterSource = .manual
-            state.pendingViewportSearchTarget = MapPendingViewportSearchTarget(
-                coordinate: placeResult.coordinate
-            )
+            state.viewportSearchTrigger = .onArrival(at: placeResult.coordinate)
             state.selectedPlaceSearchTitle = placeResult.title
             state.cameraMoveRequest = MapCameraMoveRequest(
                 coordinate: placeResult.coordinate,
@@ -83,7 +78,6 @@ extension MapFeature {
             state.clearSelectedListing()
             state.isFilterPresented = false
             state.showsResearchButton = false
-            state.lastSearchedViewport = nil
             state.listingPageInfo = nil
             state.isListingSearchLoading = false
             state.listingSearchErrorMessage = nil
@@ -100,7 +94,7 @@ extension MapFeature {
             prepareLocationSearchMode(state: &state)
             state.path.removeAll()
             state.appliedFilterSource = .manual
-            state.pendingViewportSearchTarget = MapPendingViewportSearchTarget(coordinate: coordinate)
+            state.viewportSearchTrigger = .onArrival(at: coordinate)
             state.selectedPlaceSearchTitle = nil
             state.cameraMoveRequest = MapCameraMoveRequest(
                 coordinate: coordinate,
@@ -109,7 +103,6 @@ extension MapFeature {
             state.clearSelectedListing()
             state.isFilterPresented = false
             state.showsResearchButton = false
-            state.lastSearchedViewport = nil
             state.listingPageInfo = nil
             state.isListingSearchLoading = false
             state.listingSearchErrorMessage = nil
@@ -135,7 +128,7 @@ extension MapFeature {
         state: inout State,
         viewport: MapViewport
     ) -> Effect<Action> {
-        state.lastSearchedViewport = viewport
+        state.viewportSearchTrigger = .manual(lastSearched: viewport)
         state.showsResearchButton = false
         state.clearSelectedListing()
         state.isListingSearchLoading = true
@@ -237,7 +230,7 @@ extension MapFeature {
               !state.isListingSearchLoading,
               state.listingSource == .locationSearch,
               state.listingPageInfo?.hasNext == true,
-              let lastSearchedViewport = state.lastSearchedViewport
+              let lastSearchedViewport = state.viewportSearchTrigger.lastSearchedViewport
         else { return .none }
 
         let nextPage = (state.listingPageInfo?.number ?? 0) + 1

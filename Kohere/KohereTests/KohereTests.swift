@@ -712,7 +712,7 @@ final class MapListingNavigationTests: XCTestCase {
             $0.isListingSearchLoading = false
             $0.isRecommendationsLoading = false
             $0.recommendationsErrorMessage = nil
-            $0.pendingViewportSearchTarget = MapPendingViewportSearchTarget(coordinate: coordinate)
+            $0.viewportSearchTrigger = .onArrival(at: coordinate)
             $0.cameraMoveRequest = MapCameraMoveRequest(
                 coordinate: coordinate,
                 targetPosition: .upper

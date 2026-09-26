@@ -14,7 +14,7 @@ final class MapPriceFilterTests: XCTestCase {
 
         await store.send(.initialLocationSearchRequested) {
             $0.listingSource = .locationSearch
-            $0.lastSearchedViewport = self.viewport
+            $0.viewportSearchTrigger = .manual(lastSearched: self.viewport)
             $0.isListingSearchLoading = true
         }
         await receiveSearch(store, clock)
@@ -59,7 +59,7 @@ final class MapPriceFilterTests: XCTestCase {
             $0.appliedFilter = self.boundedFilter
             $0.isFilterPresented = false
             $0.listingSource = .locationSearch
-            $0.lastSearchedViewport = self.viewport
+            $0.viewportSearchTrigger = .manual(lastSearched: self.viewport)
             $0.isListingSearchLoading = true
         }
         await receiveSearch(store, clock)
@@ -94,7 +94,7 @@ final class MapPriceFilterTests: XCTestCase {
         await store.send(.filterApplyButtonTapped) {
             $0.isFilterPresented = false
             $0.listingSource = .locationSearch
-            $0.lastSearchedViewport = self.viewport
+            $0.viewportSearchTrigger = .manual(lastSearched: self.viewport)
             $0.isListingSearchLoading = true
         }
         await receiveSearch(store, clock)
@@ -137,7 +137,7 @@ final class MapPriceFilterTests: XCTestCase {
         await store.send(.filterApplyButtonTapped) {
             $0.appliedFilter = MapFilterState()
             $0.isFilterPresented = false
-            $0.lastSearchedViewport = self.viewport
+            $0.viewportSearchTrigger = .manual(lastSearched: self.viewport)
             $0.isListingSearchLoading = true
         }
         await receiveSearch(store, clock)
@@ -244,7 +244,7 @@ final class MapPriceFilterTests: XCTestCase {
         var state = MapFeature.State()
         state.appliedFilter = boundedFilter
         state.listingSource = .locationSearch
-        state.lastSearchedViewport = viewport
+        state.viewportSearchTrigger = .manual(lastSearched: viewport)
         state.listingPageInfo = PageInfo(number: 0, size: 10, totalElements: 11, totalPages: 2, hasNext: true)
         state.listings = [ListingItemModel(
             id: "last-listing", formattedPrice: "", formattedUsdPrice: "", detailsDescription: "",
