@@ -8,7 +8,7 @@
 import ComposableArchitecture
 import Foundation
 
-private extension ChatRoomRole {
+extension ChatRoomRole {
     var userType: UserType {
         switch self {
         case .tenant:
@@ -21,6 +21,11 @@ private extension ChatRoomRole {
 
 @Reducer
 struct ChatFeature {
+    nonisolated enum EffectID {
+        case rooms
+        case swipeAction
+    }
+
     enum SwipeAction: Equatable {
         case report
         case block
@@ -77,7 +82,13 @@ struct ChatFeature {
     }
     
     // MARK: - Action
-    
+
+    @CasePathable
+    enum Delegate: Equatable {
+        case popupRequested(AppPopup)
+        case mapRequested(MapEntryRequest)
+    }
+
     enum Action {
         case onAppear
         case chatRoomListResponse(requestedPage: Int, Result<ChatRoomPage, Error>)
@@ -89,9 +100,8 @@ struct ChatFeature {
         case reportDetailsRequested(roomID: Int)
         case swipeActionConfirmed(SwipeAction, roomID: Int)
         case swipeActionResponse(SwipeAction, roomID: Int, Result<Void, Error>)
-        case popupRequested(AppPopup)
         case roomFinderBannerTapped
-        case mapRequested(MapEntryRequest)
+        case delegate(Delegate)
     }
     
     // MARK: - Reducer Body
@@ -99,6 +109,9 @@ struct ChatFeature {
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            case let .path(pathAction):
+                return handlePathAction(pathAction, state: &state)
+
             case .onAppear:
                 guard state.isContentAvailable,
                       !state.hasLoadedInitialPage,
@@ -134,7 +147,6 @@ struct ChatFeature {
                         .chatDetail(
                             ChatDetailFeature.State(
                                 chatRoom: room,
-                                participantRole: room.myRole,
                                 shouldRetryBookingCard: true
                             )
                         )
@@ -158,7 +170,6 @@ struct ChatFeature {
                 if let selectedRoom = state.chatRooms.first(where: { $0.roomID == roomID }) {
                     let shouldRetry = state.pendingBookingRoomIDs.remove(roomID) != nil
                     state.path.append(.chatDetail(ChatDetailFeature.State(chatRoom: selectedRoom,
-                                                                          participantRole: selectedRoom.myRole,
                                                                           shouldRetryBookingCard: shouldRetry)))
                 }
                 return .none
@@ -172,7 +183,7 @@ struct ChatFeature {
 
             case let .swipeActionTapped(swipeAction, roomID):
                 guard state.containsRoom(roomID) else { return .none }
-                return .send(.popupRequested(Self.popup(for: swipeAction, roomID: roomID, language: state.appLanguage)))
+                return .send(.delegate(.popupRequested(Self.popup(for: swipeAction, roomID: roomID, language: state.appLanguage))))
 
             case let .reportDetailsRequested(roomID):
                 guard state.containsRoom(roomID) else { return .none }
@@ -203,6 +214,7 @@ struct ChatFeature {
                         await send(.swipeActionResponse(swipeAction, roomID: roomID, .failure(error)))
                     }
                 }
+                .cancellable(id: EffectID.swipeAction, cancelInFlight: true)
 
             case let .swipeActionResponse(swipeAction, roomID, .success):
                 guard state.pendingSwipeAction == swipeAction,
@@ -229,7 +241,8 @@ struct ChatFeature {
                         state.path[id: pathID, case: \.chatDetail]?.messageText = ""
                     }
                 }
-                return .send(.popupRequested(Self.resultPopup(for: swipeAction, succeeded: true, language: state.appLanguage)))
+                return .send(.delegate(.popupRequested(Self.resultPopup(for: swipeAction, succeeded: true,
+                                                                        language: state.appLanguage))))
 
             case let .swipeActionResponse(swipeAction, roomID, .failure):
                 guard state.pendingSwipeAction == swipeAction,
@@ -238,133 +251,21 @@ struct ChatFeature {
 
                 state.pendingSwipeAction = nil
                 state.pendingSwipeRoomID = nil
-                return .send(.popupRequested(Self.resultPopup(for: swipeAction, succeeded: false, language: state.appLanguage)))
-
-            case .popupRequested:
-                return .none
-                
-            case .path(.element(id: _, action: .chatDetail(.backButtonTapped))):
-                _ = state.path.popLast()
-                return fetchChatRooms(page: 0, state: &state)
-
-            case .path(.element(id: _, action: .chatBot(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(.element(id: _, action: .chatBot(.mapRequested(request)))):
-                return .send(.mapRequested(request))
-
-            case let .path(.element(id: _, action: .chatDetail(.delegate(.listingDetailRequested(listingID, isApplicationDisabled))))):
-                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: listingID,
-                                                                            userType: state.participantRole.userType,
-                                                                            appLanguage: state.appLanguage,
-                                                                            isApplicationDisabled: isApplicationDisabled)))
-                return .none
-
-            case let .path(.element(id: _, action: .chatDetail(.delegate(.swipeActionRequested(swipeAction, roomID))))):
-                return .send(.swipeActionTapped(swipeAction, roomID: roomID))
-
-            case let .path(.element(id: _, action: .chatDetail(.delegate(.errorMessageRequested(message))))):
-                return .send(.popupRequested(Self.errorPopup(message: message, language: state.appLanguage)))
-
-            case .path(.element(id: _, action: .listingDetail(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(.element(
-                id: _,
-                action: .listingDetail(
-                    .delegate(
-                        .applicationRequested(
-                            listingID,
-                            listingTitle,
-                            roomOfferID,
-                            roomTypeName,
-                            roomPricingText
-                        )
-                    )
-                )
-            )):
-                state.path.append(.listingApplication(ListingApplicationFeature.State(listingID: listingID,
-                                                                                      listingTitle: listingTitle,
-                                                                                      roomOfferID: roomOfferID,
-                                                                                      roomTypeName: roomTypeName,
-                                                                                      roomPricingText: roomPricingText,
-                                                                                      appLanguage: state.appLanguage)))
-                return .none
-
-            case let .path(.element(id: _, action: .listingDetail(.delegate(.inquiryChatRoomRequested(roomID, listingID))))):
-                let room = ChatRoomModel(roomID: roomID, myRole: .tenant, listingID: listingID,
-                                         listingName: "", location: "")
-                state.path.removeAll()
-                state.path.append(.chatDetail(ChatDetailFeature.State(chatRoom: room, participantRole: .tenant,
-                                                                      hasSubmittedApplication: false,
-                                                                      showsInquiryCard: true)))
-                return .none
-
-            case .path(.element(id: _, action: .listingApplication(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(.element(id: _, action: .listingApplication(.bookingResponse(.success(booking))))):
-                state.pendingBookingListingIDs.insert(booking.listingID)
-                state.hasLoadedInitialPage = false
-                return .none
-
-            case let .path(.element(
-                id: _,
-                action: .listingApplication(.delegate(.privacyDocumentRequested(section)))
-            )):
-                state.path.append(.listingApplicationPrivacyWeb(
-                    ListingApplicationPrivacyWebFeature.State(section: section, appLanguage: state.appLanguage)
-                ))
-                return .none
-
-            case .path(.element(id: _, action: .listingApplicationPrivacyWeb(.backButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(.element(
-                id: _,
-                action: .listingApplication(.delegate(.listingDetailRequested(listingID)))
-            )):
-                state.path.removeAll()
-                state.path.append(.listingDetail(ListingDetailFeature.State(listingID: listingID,
-                                                                            userType: state.participantRole.userType,
-                                                                            appLanguage: state.appLanguage,
-                                                                            isApplicationDisabled: true)))
-                return .none
-
-            case let .path(.element(
-                id: _,
-                action: .listingApplication(.delegate(.chatRoomRequested(listingID)))
-            )):
-                return .send(.chatRoomForListingRequested(listingID))
-
-            case .path(.element(id: _, action: .report(.closeButtonTapped))):
-                _ = state.path.popLast()
-                return .none
-
-            case let .path(.element(id: _, action: .report(.delegate(.reportFinished(succeeded))))):
-                if succeeded { _ = state.path.popLast() }
-                return .send(.popupRequested(Self.resultPopup(for: .report, succeeded: succeeded,
-                                                               language: state.appLanguage)))
+                return .send(.delegate(.popupRequested(Self.resultPopup(for: swipeAction, succeeded: false,
+                                                                        language: state.appLanguage))))
 
             case .roomFinderBannerTapped:
                 state.path.append(.chatBot(ChatBotFeature.State()))
                 return .none
 
-            case .mapRequested:
-                return .none
-                
-            case .path:
+            case .delegate:
                 return .none
             }
         }
         .forEach(\.path, action: \.path)
     }
 
-    private func fetchChatRooms(page: Int, state: inout State) -> Effect<Action> {
+    func fetchChatRooms(page: Int, state: inout State) -> Effect<Action> {
         state.isLoading = true
         state.errorMessage = nil
 
@@ -377,6 +278,7 @@ struct ChatFeature {
                 await send(.chatRoomListResponse(requestedPage: page, .failure(error)))
             }
         }
+        .cancellable(id: EffectID.rooms, cancelInFlight: page == 0)
     }
 }
 
@@ -406,6 +308,7 @@ extension ChatFeature.State {
         errorMessage = nil
         pendingBookingRoomIDs = []
         pendingBookingListingIDs = []
+        pendingNavigationListingID = nil
 
         return true
     }

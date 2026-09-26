@@ -19,21 +19,9 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
     let lastMessagePreview: String?
     let thumbnailURL: String?
     let createdAt: Date?
-    let dateText: String
-    let timeText: String
-    let applicantName: String
-    let applicantGenderCode: String
-    let applicantCountryCode: String
-    let applicantCountryName: String
-    let applicantEmail: String
-    let roomType: String
-    let moveInDate: Date?
-    let leaseTermMonths: Int
-    let depositAmount: Int?
-    let totalCostAmount: Int?
-    let pricePerMonthAmount: Int?
 
     var id: Int { roomID }
+    var timeText: String { ChatTimestampFormatter.timeText(createdAt) }
 
     init(
         roomID: Int,
@@ -46,18 +34,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         lastMessageType: ChatMessageType? = nil,
         lastMessagePreview: String? = nil,
         thumbnailURL: String? = nil,
-        createdAt: Date? = nil,
-        applicantName: String = "N/A",
-        applicantGenderCode: String = "",
-        applicantCountryCode: String = "",
-        applicantCountryName: String = "",
-        applicantEmail: String = "N/A",
-        roomType: String = "N/A",
-        moveInDate: Date? = nil,
-        leaseTermMonths: Int = 0,
-        depositAmount: Int? = nil,
-        totalCostAmount: Int? = nil,
-        pricePerMonthAmount: Int? = nil
+        createdAt: Date? = nil
     ) {
         self.roomID = roomID
         self.myRole = myRole
@@ -70,19 +47,6 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
         self.lastMessagePreview = lastMessagePreview
         self.thumbnailURL = thumbnailURL
         self.createdAt = createdAt
-        self.dateText = Self.dateText(createdAt)
-        self.timeText = Self.timeText(createdAt)
-        self.applicantName = applicantName
-        self.applicantGenderCode = applicantGenderCode
-        self.applicantCountryCode = applicantCountryCode
-        self.applicantCountryName = applicantCountryName
-        self.applicantEmail = applicantEmail
-        self.roomType = roomType
-        self.moveInDate = moveInDate
-        self.leaseTermMonths = leaseTermMonths
-        self.depositAmount = depositAmount
-        self.totalCostAmount = totalCostAmount
-        self.pricePerMonthAmount = pricePerMonthAmount
     }
 
     init(room: ChatRoom) {
@@ -96,39 +60,7 @@ nonisolated struct ChatRoomModel: Equatable, Identifiable {
             isBlocked: room.isBlocked,
             lastMessageType: room.lastMessage?.type,
             lastMessagePreview: room.lastMessage?.preview,
-            createdAt: room.lastMessage?.sentAt,
-            applicantName: Self.displayText(room.counterpart.displayName)
+            createdAt: room.lastMessage?.sentAt
         )
-    }
-
-    private static func displayText(_ value: String) -> String {
-        let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedValue.isEmpty ? "N/A" : trimmedValue
-    }
-
-    func localizedDateText(language: AppLanguage) -> String {
-        guard let createdAt else { return "" }
-        let formatter = DateFormatter()
-        formatter.locale = language.locale
-        formatter.dateFormat = language == .korean ? "yyyy.M.d E" : "M/d/yyyy EEE"
-        return formatter.string(from: createdAt)
-    }
-
-    private static func dateText(_ date: Date?) -> String {
-        guard let date else { return "" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "M/d/yyyy EEE"
-        formatter.locale = Locale(identifier: "en_US")
-        
-        return formatter.string(from: date)
-    }
-    
-    private static func timeText(_ date: Date?) -> String {
-        guard let date else { return "" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        
-        return formatter.string(from: date)
     }
 }

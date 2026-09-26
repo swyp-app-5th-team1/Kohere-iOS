@@ -102,7 +102,7 @@ struct ChatMessageRow: View {
         }
     }
 
-    private func bookingCardView(_ bookingCard: ChatRoomModel) -> some View {
+    private func bookingCardView(_ bookingCard: ChatApplicationCard) -> some View {
         listingCardAlignment {
             MoveInApplicationCardView(item: bookingCard,
                                       mode: participantRole == .landlord ? .landlord : .tenant)

@@ -192,7 +192,7 @@ final class ChatRealtimeService {
         guard !isStopped, reconnectTask == nil else { return }
         reconnectTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(2))
-            guard !Task.isCancelled, let self, !self.isStopped else { return }
+            guard !Task.isCancelled, let self, !isStopped else { return }
             reconnectTask = nil
             cancellables.removeAll()
             stomp?.disconnect(force: true)
@@ -253,13 +253,12 @@ final class ChatRealtimeService {
             continuation?.yield(.subscriptionReady(.init(roomID: roomID, highWatermark: control.highWatermark)))
         default:
             logger.warning("알 수 없는 STOMP control 이벤트: \(control.type, privacy: .public)")
-            break
         }
     }
 
     private func handleRoomMessage(_ data: Data) {
         guard let value = try? JSONDecoder.chat.decode(ChatMessageResponseDTO.self, from: data),
-              let event = value.toRealtimeEntity()
+              let event = try? value.toEntity()
         else { return }
         continuation?.yield(.roomMessage(event))
     }
@@ -362,62 +361,11 @@ private extension JSONDecoder {
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
             let value = try container.decode(String.self)
-            if let date = ISO8601DateFormatter.chatFractional.date(from: value)
-                ?? ISO8601DateFormatter.chatStandard.date(from: value) {
+            if let date = ChatDateParser.date(from: value) {
                 return date
             }
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid ISO-8601 date")
         }
         return decoder
-    }
-}
-
-private extension ISO8601DateFormatter {
-    static let chatFractional: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
-
-    static let chatStandard = ISO8601DateFormatter()
-}
-
-private extension ChatMessageResponseDTO {
-    func toRealtimeEntity() -> StoredChatMessage? {
-        guard let messageType = ChatMessageType(rawValue: type),
-              let date = ISO8601DateFormatter.chatFractional.date(from: sentAt)
-                ?? ISO8601DateFormatter.chatStandard.date(from: sentAt)
-        else { return nil }
-        return StoredChatMessage(
-            messageID: messageId,
-            roomID: chatRoomId,
-            type: messageType,
-            isMine: mine,
-            originalContent: originalContent,
-            translatedContent: translation?.content,
-            sentAt: date,
-            inquiryCard: inquiryCard.map {
-                .init(listingID: $0.listingId, thumbnailURL: $0.thumbnailUrl, title: $0.title,
-                      city: $0.city, district: $0.district, listingType: $0.listingType,
-                      monthlyRentMin: $0.monthlyRentMin, monthlyRentMax: $0.monthlyRentMax)
-            },
-            bookingCard: bookingCard.map {
-                .init(bookingID: $0.bookingId, roomOfferID: $0.roomOfferId, roomOfferName: $0.roomOfferName,
-                      moveInDate: $0.moveInDate.flatMap { value in
-                          let formatter = DateFormatter()
-                          formatter.locale = Locale(identifier: "en_US_POSIX")
-                          formatter.dateFormat = "yyyy-MM-dd"
-                          return formatter.date(from: value)
-                      }, contractPeriod: $0.contractPeriod, deposit: $0.deposit, totalAmount: $0.totalAmount,
-                      listing: $0.listing.map {
-                          .init(listingID: $0.listingId, title: $0.title, address: $0.address,
-                                monthlyRent: $0.monthlyRent, thumbnailURL: $0.thumbnailUrl)
-                      },
-                      applicant: $0.applicant.map {
-                          .init(userID: $0.userId, name: $0.name, gender: $0.gender,
-                                country: $0.country, countryName: $0.countryName, email: $0.email)
-                      })
-            }
-        )
     }
 }

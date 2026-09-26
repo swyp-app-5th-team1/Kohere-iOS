@@ -88,6 +88,11 @@ final class ChatResponseDTOTests: XCTestCase {
         XCTAssertEqual(response.content.count, 2)
         XCTAssertEqual(response.content[0].originalContent, "Hello")
         XCTAssertEqual(response.content[1].bookingCard?.bookingId, 30)
+
+        let bookingMessage = try response.content[1].toEntity()
+        XCTAssertEqual(bookingMessage.type, .bookingCard)
+        XCTAssertEqual(bookingMessage.bookingCard?.listing?.listingID, "listing-1")
+        XCTAssertEqual(bookingMessage.bookingCard?.applicant?.name, "Kim")
     }
 
     func testChatInquiryResponseDecodesCreatedRoomContract() throws {
@@ -229,6 +234,41 @@ final class ChatAccessTokenProviderTests: XCTestCase {
 
 @MainActor
 final class ChatFeatureTests: XCTestCase {
+    func testBackButtonRequestsParentDismissal() async {
+        let room = ChatRoomModel(room: makeRoom(roomID: 1, role: .tenant))
+        let store = TestStore(initialState: ChatDetailFeature.State(chatRoom: room)) {
+            ChatDetailFeature()
+        }
+
+        await store.send(.backButtonTapped)
+        await store.receive(\.delegate.dismissRequested)
+    }
+
+    func testSendButtonQueuesMessageWithInjectedIdentifiersWhileRealtimeIsDisconnected() async {
+        let clientMessageID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+        let sentAt = Date(timeIntervalSince1970: 100)
+        let room = ChatRoomModel(room: makeRoom(roomID: 1, role: .tenant))
+        var initialState = ChatDetailFeature.State(chatRoom: room)
+        initialState.messageText = "  Hello  "
+        let store = TestStore(initialState: initialState) {
+            ChatDetailFeature()
+        } withDependencies: {
+            $0.uuid = .constant(clientMessageID)
+            $0.date.now = sentAt
+        }
+
+        await store.send(.sendButtonTapped) {
+            $0.messageText = ""
+            $0.messages = [
+                ChatMessage(
+                    id: "client-\(clientMessageID.uuidString)", sender: .tenant,
+                    originalText: "Hello", timeText: ChatTimestampFormatter.timeText(sentAt), sentAt: sentAt,
+                    clientMessageID: clientMessageID, deliveryStatus: .queued
+                )
+            ]
+        }
+    }
+
     func testFailedMessageCanBeRetriedWhenRealtimeIsReady() async {
         let clientMessageID = UUID()
         let room = ChatRoomModel(room: makeRoom(roomID: 1, role: .tenant))
@@ -239,7 +279,6 @@ final class ChatFeatureTests: XCTestCase {
         let sentMessage = LockIsolated<(Int, UUID, String)?>(nil)
         var initialState = ChatDetailFeature.State(
             chatRoom: room,
-            participantRole: .tenant,
             messages: [failedMessage]
         )
         initialState.isRealtimeReady = true
@@ -275,7 +314,7 @@ final class ChatFeatureTests: XCTestCase {
             clientMessageID: clientMessageID, deliveryStatus: .failed
         )
         let store = TestStore(
-            initialState: ChatDetailFeature.State(chatRoom: room, participantRole: .tenant, messages: [failedMessage])
+            initialState: ChatDetailFeature.State(chatRoom: room, messages: [failedMessage])
         ) {
             ChatDetailFeature()
         }
@@ -297,7 +336,7 @@ final class ChatFeatureTests: XCTestCase {
             sentAt: Date(timeIntervalSince1970: 0), clientMessageID: clientMessageID, deliveryStatus: .sending
         )
         let store = TestStore(
-            initialState: ChatDetailFeature.State(chatRoom: room, participantRole: .tenant, messages: [pending])
+            initialState: ChatDetailFeature.State(chatRoom: room, messages: [pending])
         ) {
             ChatDetailFeature()
         }
@@ -326,7 +365,6 @@ final class ChatFeatureTests: XCTestCase {
         )
         var initialState = ChatDetailFeature.State(
             chatRoom: room,
-            participantRole: .tenant,
             messages: [pending]
         )
         initialState.isRealtimeReady = true
@@ -365,7 +403,6 @@ final class ChatFeatureTests: XCTestCase {
         )
         var initialState = ChatDetailFeature.State(
             chatRoom: room,
-            participantRole: .tenant,
             messages: [realtime, pending]
         )
         initialState.isMessagesLoading = true
@@ -417,7 +454,6 @@ final class ChatFeatureTests: XCTestCase {
         let store = TestStore(
             initialState: ChatDetailFeature.State(
                 chatRoom: room,
-                participantRole: .tenant,
                 messages: [serverCopy, pending]
             )
         ) {
@@ -507,7 +543,6 @@ final class ChatFeatureTests: XCTestCase {
                 .chatDetail(
                     ChatDetailFeature.State(
                         chatRoom: ChatRoomModel(room: matchingRoom),
-                        participantRole: .tenant,
                         shouldRetryBookingCard: true
                     )
                 )
@@ -518,7 +553,7 @@ final class ChatFeatureTests: XCTestCase {
     func testDetailResponseUsesServerRoleAndRoomInformation() async {
         let initialRoom = ChatRoomModel(room: makeRoom(roomID: 1, role: .tenant))
         let store = TestStore(
-            initialState: ChatDetailFeature.State(chatRoom: initialRoom, participantRole: .tenant)
+            initialState: ChatDetailFeature.State(chatRoom: initialRoom)
         ) {
             ChatDetailFeature()
         }
@@ -526,14 +561,12 @@ final class ChatFeatureTests: XCTestCase {
 
         await store.send(.chatRoomResponse(.success(updatedRoom))) {
             $0.chatRoom = ChatRoomModel(room: self.makeRoom(roomID: 1, role: .landlord))
-            $0.participantRole = .landlord
         }
     }
 
     func testInquiryRoomShowsApplicationBannerAndOpensEnabledApplicationDetail() async {
         let room = ChatRoomModel(room: makeRoom(roomID: 1, role: .tenant))
-        let store = TestStore(initialState: ChatDetailFeature.State(chatRoom: room, participantRole: .tenant,
-                                                                    hasSubmittedApplication: false,
+        let store = TestStore(initialState: ChatDetailFeature.State(chatRoom: room, hasSubmittedApplication: false,
                                                                     showsInquiryCard: true)) {
             ChatDetailFeature()
         }
@@ -549,7 +582,6 @@ final class ChatFeatureTests: XCTestCase {
         let store = TestStore(
             initialState: ChatDetailFeature.State(
                 chatRoom: room,
-                participantRole: .tenant,
                 hasSubmittedApplication: true
             )
         ) {
