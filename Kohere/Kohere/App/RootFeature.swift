@@ -175,10 +175,6 @@ struct RootFeature {
                 guard let route = popup.secondaryRoute else { return .none }
                 return handlePopupRoute(route, state: &state)
 
-            case let .map(.path(.element(id: _, action: .chatBot(.mapRequested(request))))):
-                state.map.path.removeAll()
-                return openMap(request: request, state: &state)
-
             case let .map(.path(.element(
                 id: _,
                 action: .listingApplication(.delegate(.chatRoomRequested(listingID)))

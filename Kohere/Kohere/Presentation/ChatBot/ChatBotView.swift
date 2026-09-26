@@ -58,11 +58,11 @@ extension ChatBotView {
                         }
                     }
                     
-                    if let currentDiagnosis = store.currentDiagnosis {
+                    if let currentQuestion = store.currentQuestion {
                         HStack {
                             Spacer()
                             
-                            ChatBotOptionsView(store: store, diagnosis: currentDiagnosis)
+                            ChatBotOptionsView(store: store, diagnosis: currentQuestion)
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 20)
@@ -135,14 +135,7 @@ extension ChatBotView {
     private func calculateSpacing(current: ChatBotFeature.ChatItem, nextIndex: Int) -> CGFloat {
         guard nextIndex < store.history.count else { return 0 }
         let nextItem = store.history[nextIndex]
-        return (isBot(current) == isBot(nextItem)) ? 4 : 20
-    }
-    
-    private func isBot(_ item: ChatBotFeature.ChatItem) -> Bool {
-        switch item {
-        case .bot: return true
-        case .user: return false
-        }
+        return current.isBot == nextItem.isBot ? 4 : 20
     }
     
     private func scrollToLastUserMessage(with proxy: ScrollViewProxy) {
