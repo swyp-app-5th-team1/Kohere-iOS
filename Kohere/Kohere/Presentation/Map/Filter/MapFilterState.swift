@@ -16,11 +16,6 @@ struct MapFilterState: Equatable, Sendable {
     var selectedPropertyTypes: Set<MapPropertyType> = []
 }
 
-enum MapFilterApplicationSource: Equatable {
-    case manual
-    case diagnosis
-}
-
 extension MapFilterState {
     var isDefault: Bool {
         self == MapFilterState()

@@ -10,9 +10,16 @@ enum MapSheetMode: Equatable {
     case selectedListing
 }
 
+/// 목록과 마커를 어느 API 결과로 채우는지. appliedFilterSource와의 관계는 MapFeature.State 참고.
 enum MapListingSource: Equatable {
     case idle
     case locationSearch
+    case diagnosis
+}
+
+/// 적용된 필터가 진단 조건인지. 표시용이며 목록 데이터 출처와는 별개다.
+enum MapFilterApplicationSource: Equatable {
+    case manual
     case diagnosis
 }
 

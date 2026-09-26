@@ -17,7 +17,16 @@ extension MapFeature {
         var appLanguage: AppLanguage = .english
 
         // 현재 검색 모드 / 화면 표시
+        // - listingSource: 목록과 마커를 어느 API 결과로 채우는지 정한다. (위치 검색 / 진단 추천)
+        // - appliedFilterSource: 적용된 필터가 진단 조건인지 나타낸다. 필터 칩과 진단 버튼 표시에만 쓴다.
+        // 가능한 조합
+        // - idle + manual: 지도 첫 진입 전
+        // - locationSearch + manual: 일반 검색
+        // - locationSearch + diagnosis: 진단 중 재검색하거나, 필터를 바꾸지 않고 적용한 경우
+        // - diagnosis + diagnosis: 진단으로 막 진입한 경우
+        // diagnosis + manual 조합은 나오면 안 된다. 두 값은 beginLocationSearch와 beginDiagnosisSearch에서 함께 바꾼다.
         var listingSource: MapListingSource = .idle
+        var appliedFilterSource: MapFilterApplicationSource = .manual
         var markers: [MapMarkerItem] = []
         var selectedMarkerID: String?
         var listings: [ListingItemModel] = []
@@ -58,7 +67,6 @@ extension MapFeature {
         var isFilterPresented = false
         var appliedFilter = MapFilterState()
         var editingFilter = MapFilterState()
-        var appliedFilterSource: MapFilterApplicationSource = .manual
 
         // 즐겨찾기 / 환율
         var favoriteUpdatingIDs: Set<String> = []
