@@ -31,35 +31,36 @@ extension MapFeature {
         _ viewport: MapViewport,
         state: inout State
     ) -> Effect<Action> {
-        if let target = state.pendingViewportSearchTarget {
+        switch state.viewportSearchTrigger {
+        case .onFirstIdle:
             state.showsResearchButton = false
-            guard isCoordinate(target.coordinate, inside: viewport.visibleBounds) else {
+            return startListingSearchEffect(state: &state, viewport: viewport)
+
+        case let .onArrival(target):
+            state.showsResearchButton = false
+            guard isCoordinate(target, inside: viewport.visibleBounds) else {
                 return .none
             }
-            state.pendingViewportSearchTarget = nil
             return startListingSearchEffect(state: &state, viewport: viewport)
-        }
 
-        guard let lastSearchedViewport = state.lastSearchedViewport else {
-            state.showsResearchButton = false
-            return startListingSearchEffect(state: &state, viewport: viewport)
+        case let .manual(lastSearched):
+            state.showsResearchButton = lastSearched != viewport
+            return .none
         }
-
-        state.showsResearchButton = lastSearchedViewport != viewport
-        return .none
     }
 
     private func handleDiagnosisViewportChanged(
         _ viewport: MapViewport,
         state: inout State
     ) -> Effect<Action> {
-        guard let lastSearchedViewport = state.lastSearchedViewport else {
-            state.lastSearchedViewport = viewport
+        // 진단 추천은 영역과 무관하게 조회하므로, 첫 멈춤 영역은 재검색 버튼 기준으로만 쓴다.
+        guard case let .manual(lastSearched) = state.viewportSearchTrigger else {
+            state.viewportSearchTrigger = .manual(lastSearched: viewport)
             state.showsResearchButton = false
             return .none
         }
 
-        state.showsResearchButton = lastSearchedViewport != viewport
+        state.showsResearchButton = lastSearched != viewport
         return .none
     }
 

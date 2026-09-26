@@ -15,29 +15,21 @@ extension MapFeature {
         state: inout State
     ) -> Effect<Action> {
         state.path = StackState<Path.State>()
-        state.activeDiagnosisID = diagnosisID
-        state.listingSource = .diagnosis
+        // 새 진단은 항상 빈 진단 데이터로 시작한다. 이전 모드(또는 이전 진단)의 데이터는 여기서 함께 사라진다.
+        state.searchMode = .diagnosis(MapDiagnosisSearchState(diagnosisID: diagnosisID))
         state.clearSelectedListing()
         state.isFilterPresented = false
         state.appliedFilterSource = .diagnosis
         state.appliedFilter = filter
         state.editingFilter = filter
-        state.pendingViewportSearchTarget = nil
         state.selectedPlaceSearchTitle = nil
         state.isDiagnosisButtonExpanded = false
         state.isDiagnosisMatchesButtonExpanded = true
         state.showsResearchButton = false
-        state.lastSearchedViewport = nil
+        state.viewportSearchTrigger = .onFirstIdle
         state.markers = []
-        state.listings = []
-        state.listingSearchResults = []
-        clearDiagnosisRecommendationState(state: &state)
-        state.isListingSearchLoading = false
         state.isDiagnosisDetailLoading = state.userType != nil
         state.isRecommendationsLoading = true
-        state.listingSearchErrorMessage = nil
-        state.diagnosisErrorMessage = nil
-        state.recommendationsErrorMessage = nil
 
         let diagnosisClient = diagnosisClient
         var effects: [Effect<Action>] = [
@@ -84,7 +76,10 @@ extension MapFeature {
     ) -> Effect<Action> {
         switch result {
         case let .success(detail):
-            guard state.activeDiagnosisID == detail.diagnosisID else { return .none }
+            // 모드를 떠났거나(위치 검색 전환) 다른 진단으로 바뀐 뒤 늦게 도착한 응답은 버린다.
+            guard state.listingSource == .diagnosis,
+                  state.activeDiagnosisID == detail.diagnosisID
+            else { return .none }
             let filter = MapFilterState(diagnosisDetail: detail)
             let shouldReloadSelectedCard = state.appliedFilter != filter
                 && (state.selectedListing != nil || state.selectedListingRequestID != nil)
@@ -125,7 +120,6 @@ extension MapFeature {
         case let .failure(error):
             state.isRecommendationsLoading = false
             state.recommendationsErrorMessage = error.localizedDescription
-            state.diagnosisRecommendationSuggestions = nil
         }
 
         return .none
@@ -176,7 +170,6 @@ extension MapFeature {
 
         if isFirstPage {
             state.diagnosisRecommendedListings = recommendations.listings
-            state.diagnosisRecommendationSuggestions = recommendations.suggestions
 
             let cameraCoordinate = recommendations.listings.compactMap(\.coordinate).first
             if state.selectedMarkerID == nil {
@@ -185,13 +178,12 @@ extension MapFeature {
                 }
             }
             if cameraCoordinate == nil {
-                state.lastSearchedViewport = state.currentViewport
+                state.viewportSearchTrigger = state.currentViewport.map { .manual(lastSearched: $0) } ?? .onFirstIdle
             }
         } else {
             state.diagnosisRecommendedListings.appendUnique(contentsOf: recommendations.listings)
         }
 
-        rebuildListingItems(to: &state)
     }
 
     func startDiagnosisMapEffect(diagnosisID: Int, state: inout State) -> Effect<Action> {
@@ -229,17 +221,6 @@ extension MapFeature {
             state.diagnosisMapErrorMessage = error.localizedDescription
         }
         return .none
-    }
-
-    func clearDiagnosisRecommendationState(state: inout State) {
-        state.isRecommendationsLoading = false
-        state.recommendationsErrorMessage = nil
-        state.diagnosisRecommendedListings = []
-        state.diagnosisRecommendationSuggestions = nil
-        state.diagnosisRecommendationPageInfo = nil
-        state.diagnosisMapRequestID = nil
-        state.diagnosisMapTotal = nil
-        state.diagnosisMapErrorMessage = nil
     }
 
     func cancelDiagnosisRequestEffects() -> Effect<Action> {

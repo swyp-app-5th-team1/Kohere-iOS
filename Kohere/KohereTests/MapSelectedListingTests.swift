@@ -7,7 +7,8 @@ final class MapSelectedListingTests: XCTestCase {
     func testLoadedMarkerUsesListWithoutFetchingAgain() async {
         let item = ListingItemModel(listing: makeMarkerListing(), language: .english)
         var state = MapFeature.State()
-        state.listings = [item]
+        state.listingSource = .locationSearch
+        state.listingSearchResults = [makeMarkerListing()]
         let store = TestStore(initialState: state) { MapFeature() } withDependencies: {
             $0.listingClient.fetchListings = { _ in
                 XCTFail("목록에 있는 마커는 다시 조회하지 않는다")
@@ -37,7 +38,6 @@ final class MapSelectedListingTests: XCTestCase {
         var state = MapFeature.State()
         state.listingSource = .locationSearch
         state.krwToUSDExchangeRate = rate
-        state.listings = [ListingItemModel(listing: other, language: .english)]
         state.listingSearchResults = [other]
         state.listingPageInfo = pageInfo
         state.appliedFilter.updateMonthlyRentMaximum(50)
@@ -208,7 +208,8 @@ final class MapSelectedListingTests: XCTestCase {
         let requestID = UUID()
         let clock = TestClock()
         var state = MapFeature.State()
-        state.listings = [other]
+        state.listingSource = .locationSearch
+        state.listingSearchResults = [makeMarkerListing(id: "other")]
         let store = TestStore(initialState: state) { MapFeature() } withDependencies: {
             $0.uuid = .constant(requestID)
             $0.listingClient.fetchListings = { _ in
@@ -237,7 +238,8 @@ final class MapSelectedListingTests: XCTestCase {
         state.selectedMarkerID = listing.listingID
         state.selectedListingRequestID = UUID()
         state.sheetMode = .selectedListing
-        state.listings = [ListingItemModel(listing: listing, language: .english)]
+        state.listingSource = .locationSearch
+        state.listingSearchResults = [listing]
         let store = TestStore(initialState: state) { MapFeature() }
         XCTAssertNil(store.state.selectedListingItem)
         await store.send(.selectedListingCardTapped)

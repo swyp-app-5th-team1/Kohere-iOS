@@ -62,18 +62,6 @@ extension MapFeature {
         to state: inout State
     ) {
         state.synchronizeFavoriteStatus(status, for: listingID)
-        rebuildListingItems(to: &state)
-    }
-
-    func applyFavoriteStatusOverrides(
-        to listings: inout [ListingItemModel],
-        statusByID: [String: ListingFavoriteStatus]
-    ) {
-        for index in listings.indices {
-            guard let status = statusByID[listings[index].listingID] else { continue }
-            listings[index].isLiked = status.isFavorited
-            listings[index].favoriteCount = status.favoriteCount
-        }
     }
 }
 
@@ -82,13 +70,7 @@ extension MapFeature.State {
         _ status: ListingFavoriteStatus,
         for listingID: String
     ) {
+        // 카드 목록(listings)은 이 값을 반영해 계산되므로 따로 갱신하지 않는다.
         favoriteStatusesByListingID[listingID] = status
-
-        guard let index = listings.firstIndex(where: { $0.listingID == listingID }) else {
-            return
-        }
-
-        listings[index].isLiked = status.isFavorited
-        listings[index].favoriteCount = status.favoriteCount
     }
 }

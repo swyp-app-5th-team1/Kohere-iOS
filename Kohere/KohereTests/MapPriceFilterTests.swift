@@ -14,7 +14,7 @@ final class MapPriceFilterTests: XCTestCase {
 
         await store.send(.initialLocationSearchRequested) {
             $0.listingSource = .locationSearch
-            $0.lastSearchedViewport = self.viewport
+            $0.viewportSearchTrigger = .manual(lastSearched: self.viewport)
             $0.isListingSearchLoading = true
         }
         await receiveSearch(store, clock)
@@ -59,7 +59,7 @@ final class MapPriceFilterTests: XCTestCase {
             $0.appliedFilter = self.boundedFilter
             $0.isFilterPresented = false
             $0.listingSource = .locationSearch
-            $0.lastSearchedViewport = self.viewport
+            $0.viewportSearchTrigger = .manual(lastSearched: self.viewport)
             $0.isListingSearchLoading = true
         }
         await receiveSearch(store, clock)
@@ -94,7 +94,7 @@ final class MapPriceFilterTests: XCTestCase {
         await store.send(.filterApplyButtonTapped) {
             $0.isFilterPresented = false
             $0.listingSource = .locationSearch
-            $0.lastSearchedViewport = self.viewport
+            $0.viewportSearchTrigger = .manual(lastSearched: self.viewport)
             $0.isListingSearchLoading = true
         }
         await receiveSearch(store, clock)
@@ -137,7 +137,7 @@ final class MapPriceFilterTests: XCTestCase {
         await store.send(.filterApplyButtonTapped) {
             $0.appliedFilter = MapFilterState()
             $0.isFilterPresented = false
-            $0.lastSearchedViewport = self.viewport
+            $0.viewportSearchTrigger = .manual(lastSearched: self.viewport)
             $0.isListingSearchLoading = true
         }
         await receiveSearch(store, clock)
@@ -244,11 +244,13 @@ final class MapPriceFilterTests: XCTestCase {
         var state = MapFeature.State()
         state.appliedFilter = boundedFilter
         state.listingSource = .locationSearch
-        state.lastSearchedViewport = viewport
+        state.viewportSearchTrigger = .manual(lastSearched: viewport)
         state.listingPageInfo = PageInfo(number: 0, size: 10, totalElements: 11, totalPages: 2, hasNext: true)
-        state.listings = [ListingItemModel(
-            id: "last-listing", formattedPrice: "", formattedUsdPrice: "", detailsDescription: "",
-            locationDescription: "", typeTag: "", period: "", isLiked: false
+        state.listingSearchResults = [Listing(
+            listingID: "last-listing", title: "", type: "", minMonthlyRent: nil, maxMonthlyRent: nil,
+            minDeposit: nil, maxDeposit: nil, minMaintenanceFee: nil, maxMaintenanceFee: nil,
+            minStayMonths: nil, maxStayMonths: nil, thumbnailURL: nil, coordinate: nil, address: nil,
+            nearestTransit: nil, distanceMeters: nil, isFavorited: false, favoriteCount: nil
         )]
         let store = TestStore(initialState: state) { MapFeature() } withDependencies: {
             $0.listingClient.fetchListings = { @MainActor input in
@@ -260,7 +262,6 @@ final class MapPriceFilterTests: XCTestCase {
         await store.receive(\.listingSearchResponse) {
             $0.isListingSearchLoading = false
             $0.listingPageInfo = nil
-            $0.listings = []
         }
         XCTAssertEqual(requests.value.count, 1)
         for input in requests.value {

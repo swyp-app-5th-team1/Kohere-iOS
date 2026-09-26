@@ -34,7 +34,6 @@ extension MapFeature {
         case .researchCurrentViewport:
             guard let viewport = state.currentViewport else { return .none }
             prepareLocationSearchMode(state: &state)
-            state.pendingViewportSearchTarget = nil
             state.selectedPlaceSearchTitle = nil
             state.clearSelectedListing()
             return .merge(
@@ -44,7 +43,6 @@ extension MapFeature {
 
         case .filterApplied:
             prepareLocationSearchMode(state: &state)
-            state.pendingViewportSearchTarget = nil
             let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
             guard let viewport = state.currentViewport else { return cancelDiagnosisRequests }
             return .merge(
@@ -59,7 +57,6 @@ extension MapFeature {
                 state.editingFilter = MapFilterState()
             }
             state.appliedFilterSource = .manual
-            state.pendingViewportSearchTarget = nil
             state.selectedPlaceSearchTitle = nil
             state.clearSelectedListing()
             let cancelDiagnosisRequests = cancelDiagnosisRequestEffects()
@@ -72,9 +69,7 @@ extension MapFeature {
         case let .placeResult(placeResult):
             prepareLocationSearchMode(state: &state)
             state.appliedFilterSource = .manual
-            state.pendingViewportSearchTarget = MapPendingViewportSearchTarget(
-                coordinate: placeResult.coordinate
-            )
+            state.viewportSearchTrigger = .onArrival(at: placeResult.coordinate)
             state.selectedPlaceSearchTitle = placeResult.title
             state.cameraMoveRequest = MapCameraMoveRequest(
                 coordinate: placeResult.coordinate,
@@ -83,12 +78,10 @@ extension MapFeature {
             state.clearSelectedListing()
             state.isFilterPresented = false
             state.showsResearchButton = false
-            state.lastSearchedViewport = nil
             state.listingPageInfo = nil
             state.isListingSearchLoading = false
             state.listingSearchErrorMessage = nil
             state.listingSearchResults = []
-            state.listings = []
             state.markers = []
             return .merge(
                 .cancel(id: MapEffectID.listingSearch),
@@ -100,7 +93,7 @@ extension MapFeature {
             prepareLocationSearchMode(state: &state)
             state.path.removeAll()
             state.appliedFilterSource = .manual
-            state.pendingViewportSearchTarget = MapPendingViewportSearchTarget(coordinate: coordinate)
+            state.viewportSearchTrigger = .onArrival(at: coordinate)
             state.selectedPlaceSearchTitle = nil
             state.cameraMoveRequest = MapCameraMoveRequest(
                 coordinate: coordinate,
@@ -109,7 +102,6 @@ extension MapFeature {
             state.clearSelectedListing()
             state.isFilterPresented = false
             state.showsResearchButton = false
-            state.lastSearchedViewport = nil
             state.listingPageInfo = nil
             state.isListingSearchLoading = false
             state.listingSearchErrorMessage = nil
@@ -121,12 +113,10 @@ extension MapFeature {
         }
     }
 
+    /// 위치 검색 모드로 바꾼다. 진단 모드였다면 진단 데이터는 모드 전환과 함께 사라진다.
+    /// 이미 위치 검색 모드면 기존 결과를 유지한다. (새 결과가 올 때까지 화면이 비지 않도록)
     private func prepareLocationSearchMode(state: inout State) {
         state.listingSource = .locationSearch
-        state.activeDiagnosisID = nil
-        state.isDiagnosisDetailLoading = false
-        state.diagnosisErrorMessage = nil
-        clearDiagnosisRecommendationState(state: &state)
     }
 
     // MARK: - Request / Response
@@ -135,7 +125,7 @@ extension MapFeature {
         state: inout State,
         viewport: MapViewport
     ) -> Effect<Action> {
-        state.lastSearchedViewport = viewport
+        state.viewportSearchTrigger = .manual(lastSearched: viewport)
         state.showsResearchButton = false
         state.clearSelectedListing()
         state.isListingSearchLoading = true
@@ -237,7 +227,7 @@ extension MapFeature {
               !state.isListingSearchLoading,
               state.listingSource == .locationSearch,
               state.listingPageInfo?.hasNext == true,
-              let lastSearchedViewport = state.lastSearchedViewport
+              let lastSearchedViewport = state.viewportSearchTrigger.lastSearchedViewport
         else { return .none }
 
         let nextPage = (state.listingPageInfo?.number ?? 0) + 1
@@ -277,69 +267,9 @@ extension MapFeature {
             state.listingSearchResults.appendUnique(contentsOf: page.content)
         }
 
-        rebuildListingItems(to: &state)
-
         if let selectedMarkerID = state.selectedMarkerID,
            !state.markers.contains(where: { $0.id == selectedMarkerID }) {
             state.clearSelectedListing()
         }
-    }
-
-    // MARK: - Shared Listing Presentation
-
-    func listingItemModels(
-        from listings: [Listing],
-        exchangeRate: KRWToUSDExchangeRate?,
-        language: AppLanguage
-    ) -> [ListingItemModel] {
-        listings.map {
-            ListingItemModel(
-                listing: $0,
-                exchangeRate: exchangeRate,
-                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
-                language: language
-            )
-        }
-    }
-
-    func listingItemModels(
-        from recommendations: [DiagnosisRecommendedListing],
-        exchangeRate: KRWToUSDExchangeRate?,
-        language: AppLanguage
-    ) -> [ListingItemModel] {
-        recommendations.map {
-            ListingItemModel(
-                recommendation: $0,
-                exchangeRate: exchangeRate,
-                convertMonthlyRentCurrencyUseCase: convertMonthlyRentCurrencyUseCase,
-                language: language
-            )
-        }
-    }
-
-    func rebuildListingItems(to state: inout State) {
-        switch state.listingSource {
-        case .locationSearch:
-            state.listings = listingItemModels(
-                from: state.listingSearchResults,
-                exchangeRate: state.krwToUSDExchangeRate,
-                language: state.appLanguage
-            )
-
-        case .diagnosis:
-            state.listings = listingItemModels(
-                from: state.diagnosisRecommendedListings,
-                exchangeRate: state.krwToUSDExchangeRate,
-                language: state.appLanguage
-            )
-
-        case .idle:
-            return
-        }
-
-        applyFavoriteStatusOverrides(
-            to: &state.listings,
-            statusByID: state.favoriteStatusesByListingID
-        )
     }
 }

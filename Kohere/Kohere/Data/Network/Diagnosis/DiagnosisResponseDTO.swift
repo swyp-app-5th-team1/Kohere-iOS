@@ -53,7 +53,8 @@ struct DiagnosisDetailResponseDTO: Decodable {
 struct DiagnosisRecommendationsResponseDTO: Decodable {
     let content: [DiagnosisRecommendedListingResponseDTO]?
     let page: PageResponseDTO?
-    let suggestions: DiagnosisSuggestionsResponseDTO?
+    // 서버는 `suggestions`(조건 변경 제안)도 내려주지만,
+    // 현재 서비스에서 노출하지 않아 별도로 선언하지 않았다. 필요해지면 여기부터 추가한다.
 }
 
 struct DiagnosisRecommendationMapResponseDTO: Decodable {
@@ -86,15 +87,4 @@ struct DiagnosisRecommendedListingResponseDTO: Decodable {
     let lng: Double?
     // 일반 매물 조회와 같은 구조. 서버 반영 전 누락/null 응답도 허용한다.
     let nearestTransit: ListingNearestTransitResponseDTO?
-}
-
-struct DiagnosisSuggestionsResponseDTO: Decodable {
-    let reason: String?
-    let message: String?
-    let actions: [DiagnosisSuggestionActionResponseDTO]?
-}
-
-struct DiagnosisSuggestionActionResponseDTO: Decodable {
-    let type: String?
-    let detail: String?
 }

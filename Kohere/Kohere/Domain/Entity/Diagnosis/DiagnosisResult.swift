@@ -64,7 +64,6 @@ nonisolated struct DiagnosisRecommendationSort: Equatable {
 struct DiagnosisRecommendations: Equatable {
     let listings: [DiagnosisRecommendedListing]
     let page: PageInfo?
-    let suggestions: DiagnosisRecommendationSuggestions?
 }
 
 struct DiagnosisRecommendationMap: Equatable {
@@ -86,15 +85,4 @@ struct DiagnosisRecommendedListing: Equatable, Identifiable {
     let thumbnailURL: String?
     let coordinate: MapCoordinate?
     let nearestTransit: ListingNearestTransit?
-}
-
-struct DiagnosisRecommendationSuggestions: Equatable {
-    let reason: String?
-    let message: String?
-    let actions: [DiagnosisRecommendationSuggestionAction]
-}
-
-struct DiagnosisRecommendationSuggestionAction: Equatable {
-    let type: String?
-    let detail: String?
 }

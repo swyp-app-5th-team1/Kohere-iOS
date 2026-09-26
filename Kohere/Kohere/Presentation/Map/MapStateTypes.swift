@@ -5,15 +5,76 @@
 //  Created by Codex on 7/5/26.
 //
 
+import Foundation
+
 enum MapSheetMode: Equatable {
     case listingList
     case selectedListing
 }
 
+/// 목록과 마커를 어느 API 결과로 채우는지. appliedFilterSource와의 관계는 MapFeature.State 참고.
 enum MapListingSource: Equatable {
     case idle
     case locationSearch
     case diagnosis
+}
+
+/// 지도 목록의 검색 모드와, 그 모드에서만 의미 있는 데이터.
+/// 데이터를 연관값으로 들고 있어 모드를 바꾸면 이전 모드의 데이터가 함께 사라진다.
+enum MapSearchMode: Equatable {
+    case idle
+    case locationSearch(MapLocationSearchState)
+    case diagnosis(MapDiagnosisSearchState)
+}
+
+/// 위치 기반 일반 검색 모드의 데이터.
+struct MapLocationSearchState: Equatable {
+    /// 서버 원본. 화면용 `listings`는 이 값으로 계산한다.
+    var results: [Listing] = []
+    var pageInfo: PageInfo?
+    var isLoading = false
+    var errorMessage: String?
+}
+
+/// 진단 추천 모드의 데이터.
+struct MapDiagnosisSearchState: Equatable {
+    /// 지금 기다리는 진단. 늦게 도착한 다른 진단의 응답을 거르는 기준이다.
+    var diagnosisID: Int?
+    /// 서버 원본. 화면용 `listings`는 이 값으로 계산한다.
+    var recommendations: [DiagnosisRecommendedListing] = []
+    var pageInfo: PageInfo?
+    var isRecommendationsLoading = false
+    var recommendationsErrorMessage: String?
+    /// 진단 마커 요청 추적. 지도 이탈 후 재진입 시 누락된 마커를 다시 조회하는 판단에 쓴다.
+    var mapRequestID: UUID?
+    var mapTotal: Int?
+    var mapErrorMessage: String?
+    var isDetailLoading = false
+    var detailErrorMessage: String?
+}
+
+/// 적용된 필터가 진단 조건인지. 표시용이며 목록 데이터 출처와는 별개다.
+enum MapFilterApplicationSource: Equatable {
+    case manual
+    case diagnosis
+}
+
+/// 카메라가 멈췄을 때(viewport 변경) 무엇을 할지 정한다. 진입 경로가 알맞은 case를 넣어 두고, `MapFeature+Viewport`가 이 값만 보고 판단한다.
+enum MapViewportSearchTrigger: Equatable {
+    /// 아직 검색 기준 영역이 없다. 위치 검색은 첫 멈춤에 바로 검색하고, 진단은 첫 멈춤 영역을 재검색 기준으로 기록만 한다.
+    /// 예: 지도 탭 첫 진입, 지도가 그려지기 전의 매물 둘러보기, 진단 진입
+    case onFirstIdle
+    /// 앱이 카메라를 옮겼다. 목표 좌표가 화면에 들어온 멈춤에서만 검색하고, 그 전 멈춤(초기 카메라 등)은 무시한다.
+    /// 예: 장소 검색 결과 선택, 매물 상세의 지도 보기
+    case onArrival(at: MapCoordinate)
+    /// 한 번이라도 검색한 뒤의 평소 상태. 영역이 기준과 달라지면 재검색 버튼만 띄운다.
+    /// 예: 사용자가 손으로 지도를 끌었을 때
+    case manual(lastSearched: MapViewport)
+
+    /// 마지막으로 검색한 영역. 아직 검색 전이면 nil이다.
+    var lastSearchedViewport: MapViewport? {
+        if case let .manual(viewport) = self { viewport } else { nil }
+    }
 }
 
 struct MapCameraMoveRequest: Equatable {

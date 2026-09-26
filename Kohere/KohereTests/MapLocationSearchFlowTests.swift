@@ -12,10 +12,9 @@ import XCTest
 @MainActor
 final class MapLocationSearchFlowTests: XCTestCase {
     func testMapDismissedStopsListingSearchLoadingWithoutClearingResults() async {
-        let listing = makeListingItem()
         var initialState = MapFeature.State()
         initialState.listingSource = .locationSearch
-        initialState.listings = [listing]
+        initialState.listingSearchResults = [makeListing()]
         initialState.listingSearchErrorMessage = "이전 검색 오류"
         initialState.isListingSearchLoading = true
 
@@ -28,14 +27,14 @@ final class MapLocationSearchFlowTests: XCTestCase {
         }
 
         XCTAssertEqual(store.state.listingSource, .locationSearch)
-        XCTAssertEqual(store.state.listings, [listing])
+        XCTAssertEqual(store.state.listings.map(\.listingID), ["listing-1"])
         XCTAssertEqual(store.state.listingSearchErrorMessage, "이전 검색 오류")
     }
 
-    func testBrowseListingsLeavesDiagnosisModeWithoutClearingVisibleResults() async {
+    // 진단 카드(목록)는 모드 전환과 함께 사라지고, 마커는 새 결과가 올 때까지 남는다.
+    func testBrowseListingsLeavesDiagnosisModeKeepingMarkersUntilNewResults() async {
         let coordinate = MapCoordinate(latitude: 37.5559, longitude: 126.9250)
         let marker = MapMarkerItem(id: "listing-1", coordinate: coordinate)
-        let listing = makeListingItem()
         var previousFilter = MapFilterState()
         previousFilter.selectedOptions = [.englishSupport]
         var initialState = MapFeature.State()
@@ -47,7 +46,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
         initialState.selectedMarkerID = marker.id
         initialState.sheetMode = .selectedListing
         initialState.markers = [marker]
-        initialState.listings = [listing]
+        initialState.diagnosisRecommendedListings = [makeRecommendation()]
         initialState.isDiagnosisDetailLoading = true
         initialState.diagnosisErrorMessage = "이전 진단 오류"
         initialState.isRecommendationsLoading = true
@@ -72,7 +71,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
         }
 
         XCTAssertEqual(store.state.markers, [marker])
-        XCTAssertEqual(store.state.listings, [listing])
+        XCTAssertTrue(store.state.listings.isEmpty)
     }
 
     func testPlaceResultWaitsForTargetViewportAndClearsVisibleResults() async {
@@ -89,7 +88,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
         initialState.activeDiagnosisID = 1
         initialState.appliedFilterSource = .diagnosis
         initialState.markers = [MapMarkerItem(id: "listing-1", coordinate: coordinate)]
-        initialState.listings = [makeListingItem()]
+        initialState.diagnosisRecommendedListings = [makeRecommendation()]
         initialState.isListingSearchLoading = true
 
         let store = TestStore(initialState: initialState) {
@@ -100,14 +99,13 @@ final class MapLocationSearchFlowTests: XCTestCase {
             $0.listingSource = .locationSearch
             $0.activeDiagnosisID = nil
             $0.appliedFilterSource = .manual
-            $0.pendingViewportSearchTarget = MapPendingViewportSearchTarget(coordinate: coordinate)
+            $0.viewportSearchTrigger = .onArrival(at: coordinate)
             $0.selectedPlaceSearchTitle = placeResult.title
             $0.cameraMoveRequest = MapCameraMoveRequest(
                 coordinate: coordinate,
                 targetPosition: .center
             )
             $0.isListingSearchLoading = false
-            $0.listings = []
             $0.markers = []
         }
     }
@@ -126,7 +124,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
         )
         var initialState = MapFeature.State()
         initialState.listingSource = .locationSearch
-        initialState.pendingViewportSearchTarget = MapPendingViewportSearchTarget(coordinate: target)
+        initialState.viewportSearchTrigger = .onArrival(at: target)
 
         let store = TestStore(initialState: initialState) {
             MapFeature()
@@ -143,8 +141,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
 
         await store.send(.viewportChanged(targetViewport)) {
             $0.currentViewport = targetViewport
-            $0.pendingViewportSearchTarget = nil
-            $0.lastSearchedViewport = targetViewport
+            $0.viewportSearchTrigger = .manual(lastSearched: targetViewport)
             $0.isListingSearchLoading = true
         }
         await store.receive {
@@ -182,7 +179,7 @@ final class MapLocationSearchFlowTests: XCTestCase {
         var initialState = MapFeature.State()
         initialState.listingSource = .locationSearch
         initialState.currentViewport = previousViewport
-        initialState.lastSearchedViewport = previousViewport
+        initialState.viewportSearchTrigger = .manual(lastSearched: previousViewport)
 
         let store = TestStore(initialState: initialState) {
             MapFeature()
@@ -194,16 +191,21 @@ final class MapLocationSearchFlowTests: XCTestCase {
         }
     }
 
-    private func makeListingItem() -> ListingItemModel {
-        ListingItemModel(
-            id: "listing-1",
-            formattedPrice: "₩500,000 / month",
-            formattedUsdPrice: "$360 / month",
-            detailsDescription: "Studio",
-            locationDescription: "Seoul",
-            typeTag: "Apartment",
-            period: "6 months",
-            isLiked: false
+    private func makeListing() -> Listing {
+        Listing(
+            listingID: "listing-1", title: "Listing", type: "Apartment",
+            minMonthlyRent: 500_000, maxMonthlyRent: 500_000, minDeposit: 0, maxDeposit: 0,
+            minMaintenanceFee: nil, maxMaintenanceFee: nil, minStayMonths: 6, maxStayMonths: nil,
+            thumbnailURL: nil, coordinate: nil, address: "Seoul", nearestTransit: nil,
+            distanceMeters: nil, isFavorited: false, favoriteCount: nil
+        )
+    }
+
+    private func makeRecommendation() -> DiagnosisRecommendedListing {
+        DiagnosisRecommendedListing(
+            listingID: "listing-1", title: "Listing", type: "Apartment",
+            minMonthlyRent: 500_000, maxMonthlyRent: 500_000, minDeposit: 0, maxDeposit: 0,
+            thumbnailURL: nil, coordinate: nil, nearestTransit: nil
         )
     }
 
