@@ -54,18 +54,6 @@ final class DiagnosisRepository: DiagnosisInterface {
         return try responseDTO.toEntity()
     }
 
-    func fetchQuestion(step: Int) async throws -> Diagnosis {
-        let environment = try environmentProvider()
-        let responseDTO: DiagnosisQuestionResponseDTO = try await networkService.request(
-            DiagnosisRouter.question(
-                step: step,
-                environment: environment
-            )
-        )
-
-        return responseDTO.toEntity()
-    }
-
 	func fetchDetail(diagnosisID: Int) async throws -> DiagnosisDetail {
         let environment = try environmentProvider()
         let responseDTO: DiagnosisDetailResponseDTO = try await networkService.request(
@@ -74,29 +62,6 @@ final class DiagnosisRepository: DiagnosisInterface {
 
 		return responseDTO.toEntity()
 	}
-
-    func saveAnswer(_ answer: DiagnosisAnswer) async throws {
-        let environment = try environmentProvider()
-        let requestDTO = DiagnosisAnswerRequestDTO(answer)
-
-        try await networkService.requestVoid(
-            DiagnosisRouter.saveAnswer(
-                requestDTO,
-                environment: environment
-            )
-        )
-    }
-
-    func submit() async throws -> DiagnosisSubmission {
-        let environment = try environmentProvider()
-        let responseDTO: DiagnosisSubmissionResponseDTO = try await networkService.request(
-            DiagnosisRouter.submit(
-                environment: environment
-            )
-        )
-
-        return responseDTO.toEntity()
-    }
 
 	func fetchRecommendations(input: DiagnosisRecommendationsInput) async throws -> DiagnosisRecommendations {
         let environment = try environmentProvider()
@@ -195,7 +160,7 @@ private extension DiagnosisFlowResponseDTO {
 
         case "COMPLETED":
             guard let diagnosisId else { throw DataError.decodingFailed }
-            return .completed(diagnosisID: String(diagnosisId))
+            return .completed(diagnosisID: diagnosisId)
 
         default:
             throw DataError.decodingFailed
@@ -221,16 +186,6 @@ private extension String {
         default:
             .single
         }
-    }
-}
-
-private extension DiagnosisSubmissionResponseDTO {
-    func toEntity() -> DiagnosisSubmission {
-        DiagnosisSubmission(
-            diagnosisID: String(diagnosisId),
-            status: status,
-            submittedAt: submittedAt
-        )
     }
 }
 
