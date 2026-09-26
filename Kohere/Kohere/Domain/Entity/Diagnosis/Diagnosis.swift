@@ -29,5 +29,5 @@ enum DiagnosisFlowResult: Equatable, Sendable {
     case nextQuestion(Diagnosis)
     case restart
     case terminated
-    case completed(diagnosisID: String)
+    case completed(diagnosisID: Int)
 }

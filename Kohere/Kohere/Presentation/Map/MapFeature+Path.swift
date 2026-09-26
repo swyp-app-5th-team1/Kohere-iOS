@@ -88,9 +88,20 @@ extension MapFeature {
             _ = state.path.popLast()
             return .none
 
-        case .element(id: _, action: .chatBot(.backButtonTapped)):
+        case .element(id: _, action: .chatBot(.delegate(.dismissRequested))):
             _ = state.path.popLast()
             return .none
+
+        case let .element(id: _, action: .chatBot(.delegate(.mapRequested(request)))):
+            state.path.removeAll()
+
+            switch request {
+            case .browseListings:
+                return .send(.browseListingsRequested)
+
+            case let .diagnosis(id, filter):
+                return .send(.diagnosisResultRequested(diagnosisID: id, filter: filter))
+            }
 
         case .element(id: _, action: .search(.backButtonTapped)):
             _ = state.path.popLast()

@@ -247,11 +247,12 @@ struct ChatFeature {
                 _ = state.path.popLast()
                 return fetchChatRooms(page: 0, state: &state)
 
-            case .path(.element(id: _, action: .chatBot(.backButtonTapped))):
+            case .path(.element(id: _, action: .chatBot(.delegate(.dismissRequested)))):
                 _ = state.path.popLast()
                 return .none
 
-            case let .path(.element(id: _, action: .chatBot(.mapRequested(request)))):
+            case let .path(.element(id: _, action: .chatBot(.delegate(.mapRequested(request))))):
+                _ = state.path.popLast()
                 return .send(.mapRequested(request))
 
             case let .path(.element(id: _, action: .chatDetail(.delegate(.listingDetailRequested(listingID, isApplicationDisabled))))):

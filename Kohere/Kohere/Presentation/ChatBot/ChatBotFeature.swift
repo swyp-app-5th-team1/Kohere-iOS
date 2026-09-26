@@ -7,6 +7,12 @@ struct ChatBotFeature {
     var startDiagnosisFlowUseCase
     @Dependency(\.advanceDiagnosisFlowUseCase)
     var advanceDiagnosisFlowUseCase
+    @Dependency(\.uuid)
+    var uuid
+
+    private nonisolated enum EffectID {
+        case diagnosisFlow
+    }
 
     enum ChatItem: Equatable, Identifiable {
         case bot(id: UUID, text: String, isFirst: Bool)
@@ -18,34 +24,33 @@ struct ChatBotFeature {
             case .user(let id, _): return id
             }
         }
+
+        var isBot: Bool {
+            if case .bot = self { return true }
+            return false
+        }
     }
     
     // MARK: - State
     
     @ObservableState
     struct State: Equatable {
-        var currentStep: Int = 1
         var history: [ChatItem] = []
         var currentQuestion: Diagnosis?
         var selectedOptionCodes: Set<String> = []
         var budgetRange = Self.defaultBudgetRange
         var diagnosisFilter = MapFilterState()
-        var completedDiagnosisID: String?
-        var isQuestionLoading = false
-        var isAnswerSaving = false
-        
-        var currentDiagnosis: Diagnosis? {
-            currentQuestion
-        }
+        var completedDiagnosisID: Int?
+        var isSubmittingAnswer = false
         
         var isConfirmButtonEnabled: Bool {
-            guard let maxCount = currentDiagnosis?.maxSelectCount else { return false }
+            guard let maxCount = currentQuestion?.maxSelectCount else { return false }
             return !selectedOptionCodes.isEmpty && selectedOptionCodes.count <= maxCount
         }
 
         var disabledMultiSelectOptionCodes: Set<String> {
-            guard let diagnosis = currentDiagnosis else { return [] }
-            if isAnswerSaving { return Set(diagnosis.options.map(\.id)) }
+            guard let diagnosis = currentQuestion else { return [] }
+            if isSubmittingAnswer { return Set(diagnosis.options.map(\.id)) }
             guard selectedOptionCodes.count >= diagnosis.maxSelectCount else { return [] }
             return Set(diagnosis.options.map(\.id)).subtracting(selectedOptionCodes)
         }
@@ -68,22 +73,20 @@ struct ChatBotFeature {
             maximum: 50,
             bounds: MapFilterPriceRange.monthlyRent
         )
-
-        static func budgetPriceText(_ value: Int) -> String {
-            if value >= 100, value % 100 == 0 {
-                return "₩\(value / 100)M"
-            }
-
-            return "₩\(value * 10)K"
-        }
     }
     
     // MARK: - Action
     
-    enum Action {
+    @CasePathable
+    enum Delegate: Equatable {
+        case dismissRequested
+        case mapRequested(MapEntryRequest)
+    }
+
+    enum Action: Equatable {
         case backButtonTapped
         case onAppear
-        case flowResponse(Result<DiagnosisFlowResult, Error>)
+        case flowResponse(Result<DiagnosisFlowResult, DataError>)
         case optionTapped(DiagnosisOption)
         case confirmButtonTapped
         case budgetMinimumChanged(Int)
@@ -91,7 +94,7 @@ struct ChatBotFeature {
         case budgetConfirmButtonTapped(AppLanguage)
         case findButtonTapped
         case resetButtonTapped
-        case mapRequested(MapEntryRequest)
+        case delegate(Delegate)
     }
     
     // MARK: - Reducer Body
@@ -100,28 +103,20 @@ struct ChatBotFeature {
         Reduce { state, action in
             switch action {
             case .backButtonTapped:
-                return .none
+                return .send(.delegate(.dismissRequested))
                 
             case .onAppear:
                 guard state.history.isEmpty else { return .none }
 
-                state.history.append(.bot(id: UUID(), text: "Welcome 👋", isFirst: true))
-                state.isQuestionLoading = true
-
-                return .run { send in
-                    await send(.flowResponse(Result {
-                        try await startDiagnosisFlowUseCase.execute()
-                    }))
-                }
+                state.history.append(.bot(id: uuid(), text: "Welcome 👋", isFirst: true))
+                return startDiagnosisFlow()
 
             case let .flowResponse(.success(.nextQuestion(question))):
-                state.isQuestionLoading = false
-                state.isAnswerSaving = false
+                state.isSubmittingAnswer = false
                 state.selectedOptionCodes.removeAll()
-                state.currentStep = question.step
                 state.currentQuestion = question
                 state.history.append(.bot(
-                    id: UUID(),
+                    id: uuid(),
                     text: question.question,
                     isFirst: state.isNextBotMessageFirst
                 ))
@@ -132,22 +127,18 @@ struct ChatBotFeature {
                 return .send(.onAppear)
 
             case .flowResponse(.success(.terminated)):
-                state.isQuestionLoading = false
-                state.isAnswerSaving = false
-                return .send(.backButtonTapped)
+                state.isSubmittingAnswer = false
+                return .send(.delegate(.dismissRequested))
 
             case let .flowResponse(.success(.completed(diagnosisID))):
-                state.isQuestionLoading = false
-                state.isAnswerSaving = false
+                state.isSubmittingAnswer = false
                 state.selectedOptionCodes.removeAll()
                 state.currentQuestion = nil
-                state.currentStep = 7
                 state.completedDiagnosisID = diagnosisID
                 return .none
 
             case let .flowResponse(.failure(error)):
-                state.isQuestionLoading = false
-                state.isAnswerSaving = false
+                state.isSubmittingAnswer = false
 
                 if case let DataError.serverError(code, _) = error,
                    code == "DIAGNOSIS_SESSION_NOT_FOUND" {
@@ -158,23 +149,18 @@ struct ChatBotFeature {
                 return .none
                 
             case let .optionTapped(option):
-                guard let diagnosis = state.currentDiagnosis, !state.isAnswerSaving else { return .none }
+                guard let diagnosis = state.currentQuestion, !state.isSubmittingAnswer else { return .none }
                 
                 if diagnosis.selectType == .single {
-                    state.history.append(.user(id: UUID(), text: option.title))
+                    state.history.append(.user(id: uuid(), text: option.title))
 
                     if let condition = RoomCondition(conditionCode: option.id) {
                         state.diagnosisFilter.selectedOptions.insert(condition)
                     }
 
-                    state.isAnswerSaving = true
+                    state.isSubmittingAnswer = true
                     let answer = DiagnosisAnswer.single(field: diagnosis.field, code: option.id)
-
-                    return .run { send in
-                        await send(.flowResponse(Result {
-                            try await advanceDiagnosisFlowUseCase.execute(answer)
-                        }))
-                    }
+                    return advanceDiagnosisFlow(with: answer)
                 }
                 
                 if diagnosis.selectType == .multi {
@@ -189,17 +175,17 @@ struct ChatBotFeature {
                 return .none
                 
             case .confirmButtonTapped:
-                guard let diagnosis = state.currentDiagnosis,
+                guard let diagnosis = state.currentQuestion,
                       diagnosis.selectType == .multi,
                       state.isConfirmButtonEnabled,
-                      !state.isAnswerSaving else { return .none }
+                      !state.isSubmittingAnswer else { return .none }
                 
                 let userText = diagnosis.options
                     .filter { state.selectedOptionCodes.contains($0.id) }
                     .map(\.title)
                     .joined(separator: ", ")
                 
-                state.history.append(.user(id: UUID(), text: userText))
+                state.history.append(.user(id: uuid(), text: userText))
 
                 let selectedCodes = diagnosis.options
                     .map(\.id)
@@ -210,12 +196,8 @@ struct ChatBotFeature {
                     selectedCodes.compactMap(RoomCondition.init(conditionCode:))
                 )
 
-                state.isAnswerSaving = true
-                return .run { send in
-                    await send(.flowResponse(Result {
-                        try await advanceDiagnosisFlowUseCase.execute(answer)
-                    }))
-                }
+                state.isSubmittingAnswer = true
+                return advanceDiagnosisFlow(with: answer)
 
             case let .budgetMinimumChanged(minimum):
                 state.budgetRange.updateMinimum(minimum, bounds: MapFilterPriceRange.monthlyRent)
@@ -226,15 +208,15 @@ struct ChatBotFeature {
                 return .none
 
             case let .budgetConfirmButtonTapped(language):
-                guard let diagnosis = state.currentDiagnosis,
+                guard let diagnosis = state.currentQuestion,
                       diagnosis.selectType == .slider,
-                      !state.isAnswerSaving else { return .none }
+                      !state.isSubmittingAnswer else { return .none }
 
                 state.history.append(.user(
-                    id: UUID(),
+                    id: uuid(),
                     text: state.budgetAnswerText(language: language)
                 ))
-                state.isAnswerSaving = true
+                state.isSubmittingAnswer = true
                 state.diagnosisFilter.monthlyRentRange = state.budgetRange
 
                 let answer = DiagnosisAnswer.monthlyRent(
@@ -242,24 +224,18 @@ struct ChatBotFeature {
                     min: state.budgetRange.minimum * 10_000,
                     max: state.budgetRange.maximum * 10_000
                 )
-                return .run { send in
-                    await send(.flowResponse(Result {
-                        try await advanceDiagnosisFlowUseCase.execute(answer)
-                    }))
-                }
+                return advanceDiagnosisFlow(with: answer)
                 
             case .findButtonTapped:
                 guard let diagnosisID = state.completedDiagnosisID else { return .none }
-                let request = Int(diagnosisID).map {
-                    MapEntryRequest.diagnosis(id: $0, filter: state.diagnosisFilter)
-                } ?? .browseListings
-                return .send(.mapRequested(request))
+                let request = MapEntryRequest.diagnosis(id: diagnosisID, filter: state.diagnosisFilter)
+                return .send(.delegate(.mapRequested(request)))
                 
             case .resetButtonTapped:
                 state.resetConversation()
                 return .send(.onAppear)
 
-            case .mapRequested:
+            case .delegate:
                 return .none
             }
         }
@@ -278,14 +254,36 @@ private extension ChatBotFeature.State {
     }
 
     mutating func resetConversation() {
-        currentStep = 1
         history.removeAll()
         currentQuestion = nil
         selectedOptionCodes.removeAll()
         budgetRange = Self.defaultBudgetRange
         diagnosisFilter = MapFilterState()
         completedDiagnosisID = nil
-        isQuestionLoading = false
-        isAnswerSaving = false
+        isSubmittingAnswer = false
+    }
+}
+
+private extension ChatBotFeature {
+    func startDiagnosisFlow() -> Effect<Action> {
+        .run { [startDiagnosisFlowUseCase] send in
+            do {
+                await send(.flowResponse(.success(try await startDiagnosisFlowUseCase.execute())))
+            } catch {
+                await send(.flowResponse(.failure(.from(error))))
+            }
+        }
+        .cancellable(id: EffectID.diagnosisFlow, cancelInFlight: true)
+    }
+
+    func advanceDiagnosisFlow(with answer: DiagnosisAnswer) -> Effect<Action> {
+        .run { [advanceDiagnosisFlowUseCase] send in
+            do {
+                await send(.flowResponse(.success(try await advanceDiagnosisFlowUseCase.execute(answer))))
+            } catch {
+                await send(.flowResponse(.failure(.from(error))))
+            }
+        }
+        .cancellable(id: EffectID.diagnosisFlow, cancelInFlight: true)
     }
 }

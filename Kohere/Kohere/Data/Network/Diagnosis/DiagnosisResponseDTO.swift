@@ -30,12 +30,6 @@ struct DiagnosisOptionResponseDTO: Decodable {
     let label: String
 }
 
-struct DiagnosisSubmissionResponseDTO: Decodable {
-    let diagnosisId: Int
-    let status: String
-    let submittedAt: String?
-}
-
 struct DiagnosisDetailResponseDTO: Decodable {
     let diagnosisId: Int
     let region: String

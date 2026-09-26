@@ -54,7 +54,7 @@ extension ChatBotOptionsView {
                         _ = store.send(.optionTapped(option))
                     }
                 }
-                .disabled(store.isAnswerSaving)
+                .disabled(store.isSubmittingAnswer)
             }
         }
     }
@@ -67,7 +67,7 @@ extension ChatBotOptionsView {
                         _ = store.send(.optionTapped(option))
                     }
                 }
-                .disabled(store.isAnswerSaving)
+                .disabled(store.isSubmittingAnswer)
             }
         }
     }
@@ -157,7 +157,7 @@ extension ChatBotOptionsView {
                     .foregroundColor(.statusRed50)
                     .padding(.trailing, 2)
             }
-            .disabled(store.isAnswerSaving)
+            .disabled(store.isSubmittingAnswer)
         }
     }
 
@@ -201,6 +201,6 @@ extension ChatBotOptionsView {
                 .foregroundColor(store.isConfirmButtonEnabled ? .statusRed50 : .neutral20)
                 .padding(.trailing, 2)
         }
-        .disabled(!store.isConfirmButtonEnabled || store.isAnswerSaving)
+        .disabled(!store.isConfirmButtonEnabled || store.isSubmittingAnswer)
     }
 }
