@@ -777,8 +777,7 @@ final class MapDiagnosisRecommendationTests: XCTestCase {
                 totalElements: 2,
                 totalPages: 2,
                 hasNext: pageNumber == 0
-            ),
-            suggestions: nil
+            )
         )
     }
 

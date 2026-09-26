@@ -256,8 +256,7 @@ private extension DiagnosisRecommendationsResponseDTO {
     func toEntity() -> DiagnosisRecommendations {
         return DiagnosisRecommendations(
             listings: (content ?? []).map { $0.toEntity() },
-            page: page?.toEntity(),
-            suggestions: suggestions?.toEntity()
+            page: page?.toEntity()
         )
     }
 }
@@ -290,24 +289,5 @@ extension DiagnosisRecommendedListingResponseDTO {
     private var nonEmptyThumbnailURL: String? {
         let trimmedURL = thumbnailUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmedURL?.isEmpty == false ? trimmedURL : nil
-    }
-}
-
-private extension DiagnosisSuggestionsResponseDTO {
-    func toEntity() -> DiagnosisRecommendationSuggestions {
-        DiagnosisRecommendationSuggestions(
-            reason: reason,
-            message: message,
-            actions: (actions ?? []).map { $0.toEntity() }
-        )
-    }
-}
-
-private extension DiagnosisSuggestionActionResponseDTO {
-    func toEntity() -> DiagnosisRecommendationSuggestionAction {
-        DiagnosisRecommendationSuggestionAction(
-            type: type,
-            detail: detail
-        )
     }
 }

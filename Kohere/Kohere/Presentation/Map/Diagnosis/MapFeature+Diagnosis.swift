@@ -125,7 +125,6 @@ extension MapFeature {
         case let .failure(error):
             state.isRecommendationsLoading = false
             state.recommendationsErrorMessage = error.localizedDescription
-            state.diagnosisRecommendationSuggestions = nil
         }
 
         return .none
@@ -176,7 +175,6 @@ extension MapFeature {
 
         if isFirstPage {
             state.diagnosisRecommendedListings = recommendations.listings
-            state.diagnosisRecommendationSuggestions = recommendations.suggestions
 
             let cameraCoordinate = recommendations.listings.compactMap(\.coordinate).first
             if state.selectedMarkerID == nil {
@@ -235,7 +233,6 @@ extension MapFeature {
         state.isRecommendationsLoading = false
         state.recommendationsErrorMessage = nil
         state.diagnosisRecommendedListings = []
-        state.diagnosisRecommendationSuggestions = nil
         state.diagnosisRecommendationPageInfo = nil
         state.diagnosisMapRequestID = nil
         state.diagnosisMapTotal = nil

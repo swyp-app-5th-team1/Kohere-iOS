@@ -200,7 +200,7 @@ final class DiagnosisMapTests: XCTestCase {
             minMonthlyRent: 300_000, maxMonthlyRent: 500_000,
             minDeposit: 0, maxDeposit: 100_000, thumbnailURL: nil,
             coordinate: .init(latitude: 37.55, longitude: 126.92), nearestTransit: nil
-        )], page: .init(number: 0, size: 1, totalElements: 137, totalPages: 137, hasNext: true), suggestions: nil)
+        )], page: .init(number: 0, size: 1, totalElements: 137, totalPages: 137, hasNext: true))
     }
 }
 

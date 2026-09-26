@@ -44,7 +44,6 @@ extension MapFeature {
         // 진단 추천 검색
         var activeDiagnosisID: Int?
         var diagnosisRecommendedListings: [DiagnosisRecommendedListing] = []
-        var diagnosisRecommendationSuggestions: DiagnosisRecommendationSuggestions?
         var diagnosisRecommendationPageInfo: PageInfo?
         var diagnosisMapRequestID: UUID?
         var diagnosisMapTotal: Int?
