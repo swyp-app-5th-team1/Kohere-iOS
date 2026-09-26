@@ -244,7 +244,7 @@ final class ListingDetailValueFormatterLocalizationTests: XCTestCase {
 
 final class ChatApplicationCardFormatterTests: XCTestCase {
     func testChatRoomDetailDoesNotFabricateMissingApplicantDetails() {
-        let model = makeChatRoomModel(deposit: 0)
+        let model = makeApplicationCard(deposit: 0)
 
         XCTAssertEqual(model.applicantGenderCode, "")
         XCTAssertEqual(model.applicantCountryCode, "")
@@ -255,20 +255,19 @@ final class ChatApplicationCardFormatterTests: XCTestCase {
 
     func testZeroDepositIsDisplayedAsValidAmount() {
         let formatter = ChatApplicationCardFormatter(
-            item: makeChatRoomModel(deposit: 0),
+            item: makeApplicationCard(deposit: 0),
             language: .english
         )
 
         XCTAssertEqual(formatter.deposit, "₩ 0")
     }
 
-    private func makeChatRoomModel(deposit: Int) -> ChatRoomModel {
-        return ChatRoomModel(
-            roomID: 1,
+    private func makeApplicationCard(deposit: Int) -> ChatApplicationCard {
+        return ChatApplicationCard(
             listingID: "listing-1",
             listingName: "Listing",
             location: "Seoul",
-            createdAt: Date(timeIntervalSince1970: 0),
+            sentAt: Date(timeIntervalSince1970: 0),
             applicantName: "Applicant",
             roomType: "N/A",
             moveInDate: Date(timeIntervalSince1970: 0),
