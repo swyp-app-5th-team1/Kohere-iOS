@@ -17,7 +17,7 @@ struct MoveInApplicationCardView: View {
     
     // MARK: - Properties
     
-    let item: ChatRoomModel
+    let item: ChatApplicationCard
     var mode: MoveInApplicationCardMode = .tenant
 
     @Environment(\.locale)

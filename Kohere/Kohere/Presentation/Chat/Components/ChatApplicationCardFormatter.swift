@@ -8,7 +8,7 @@
 import Foundation
 
 struct ChatApplicationCardFormatter {
-    let item: ChatRoomModel
+    let item: ChatApplicationCard
     let language: AppLanguage
 
     var applicantName: String {
