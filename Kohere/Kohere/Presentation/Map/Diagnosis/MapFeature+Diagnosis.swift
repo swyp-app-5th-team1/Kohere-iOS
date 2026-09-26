@@ -30,9 +30,6 @@ extension MapFeature {
         state.markers = []
         state.isDiagnosisDetailLoading = state.userType != nil
         state.isRecommendationsLoading = true
-        state.listingSearchErrorMessage = nil
-        state.diagnosisErrorMessage = nil
-        state.recommendationsErrorMessage = nil
 
         let diagnosisClient = diagnosisClient
         var effects: [Effect<Action>] = [
