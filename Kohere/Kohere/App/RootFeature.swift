@@ -202,11 +202,11 @@ struct RootFeature {
                 synchronizeFavoriteStatus(status, for: listingID, state: &state)
                 return .none
 
-            case let .chat(.mapRequested(request)):
+            case let .chat(.delegate(.mapRequested(request))):
                 state.chat.path.removeAll()
                 return openMap(request: request, state: &state)
 
-            case let .chat(.popupRequested(popup)):
+            case let .chat(.delegate(.popupRequested(popup))):
                 state.popup = popup
                 return .none
 

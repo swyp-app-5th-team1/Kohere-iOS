@@ -16,8 +16,7 @@ extension RootFeature {
         state.chat.participantRole = .tenant
         state.chat.hasLoadedInitialPage = false
         state.chat.path.removeAll()
-        state.chat.path.append(.chatDetail(ChatDetailFeature.State(chatRoom: room, participantRole: .tenant,
-                                                                   hasSubmittedApplication: false,
+        state.chat.path.append(.chatDetail(ChatDetailFeature.State(chatRoom: room, hasSubmittedApplication: false,
                                                                    showsInquiryCard: true)))
         return .none
     }
