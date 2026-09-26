@@ -84,7 +84,10 @@ extension MapFeature {
     ) -> Effect<Action> {
         switch result {
         case let .success(detail):
-            guard state.activeDiagnosisID == detail.diagnosisID else { return .none }
+            // 모드를 떠났거나(위치 검색 전환) 다른 진단으로 바뀐 뒤 늦게 도착한 응답은 버린다.
+            guard state.listingSource == .diagnosis,
+                  state.activeDiagnosisID == detail.diagnosisID
+            else { return .none }
             let filter = MapFilterState(diagnosisDetail: detail)
             let shouldReloadSelectedCard = state.appliedFilter != filter
                 && (state.selectedListing != nil || state.selectedListingRequestID != nil)
